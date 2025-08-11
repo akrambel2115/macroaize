@@ -33,6 +33,14 @@ class MainController extends GetxController{
     isLogin = await SharedPref.readBool(SharePrefKey.isLogin) ?? false;
     scanLimit = await SharedPref.readInt(SharePrefKey.scanLimit) ??
         scanLimit;
+    // Gender migration: remove legacy third gender option
+    final storedGender = await SharedPref.readString(SharePrefKey.gender);
+    if(storedGender != null && storedGender.isNotEmpty){
+      final lower = storedGender.toLowerCase();
+      if(lower != 'male' && lower != 'female'){
+        await SharedPref.saveString(SharePrefKey.gender, '');
+      }
+    }
     update();
   }
 }

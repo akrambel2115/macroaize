@@ -77,35 +77,7 @@ class GenderUpdate extends GetView<PersonalDetailsController> {
               },
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              controller.onChangeGender("Other");
-            },
-            child: GetBuilder<PersonalDetailsController>(
-              builder: (controller) {
-                return Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color:
-                    controller.selectedGender == "Other"
-                        ? context.theme.focusColor
-                        : context.theme.cardColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: ListTile(
-                    title: Text(
-                      "Other".tr,
-                      style: context.theme.textTheme.titleMedium,
-                    ),
-                    trailing: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Image.asset(AppAssets.other),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+          // Removed legacy 'Other' gender option (policy update Aug 2025).
           Spacer(),
           GetBuilder<PersonalDetailsController>(
             builder: (controller) {

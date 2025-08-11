@@ -18,6 +18,8 @@ import '../LanguageJson/turkish.dart';
 class LocalString extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
+    // Arabic first (default + fallback)
+    'ar_AR': arabic,
     'en_US':  english,
     'japa_JAPA': japanese,
     'turk_TURK': turkish,
@@ -26,7 +28,6 @@ class LocalString extends Translations {
     'dutch_DUTCH': dutch,
     'indo_INDO': indonesia,
     'por_PORTU': portugal,
-    'ar_AR': arabic,
     'hi_IN': hindi,
     'russ_RUSS': russian,
     'ch_CH': chinese,

@@ -21,7 +21,6 @@ class AppAssets {
   static String clickPhoto = "${basePathIcons}clickPhoto.png";
   static String maleIcon = "${basePathIcons}man.png";
   static String female = "${basePathIcons}woman.png";
-  static String other = "${basePathIcons}sex.png";
   static String breakfast = "${basePathIcons}breakfast.png";
   static String lunch = "${basePathIcons}lunch.png";
   static String snacks = "${basePathIcons}snacks.png";
