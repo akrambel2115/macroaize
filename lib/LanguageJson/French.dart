@@ -240,7 +240,6 @@ const Map<String, String> french = {
   "November": "Novembre",
   "December": "Décembre",
   "Update Your Gender": "Mettre à jour votre genre",
-  "Other": "Autre",
   "Adjust Goals": "Ajuster les objectifs",
   "How many workout do you per week?": "Combien de séances d'entraînement par semaine ?",
   "This will used to calibrate your custom plan": "Cela sera utilisé pour calibrer votre plan personnalisé",

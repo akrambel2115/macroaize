@@ -240,7 +240,6 @@ const Map<String, String> arabic = {
   "November": "نوفمبر",
   "December": "ديسمبر",
   "Update Your Gender": "تحديث جنسك",
-  "Other": "آخر",
   "Adjust Goals": "تعديل الأهداف",
   "How many workout do you per week?": "كم عدد التمارين التي تقوم بها في الأسبوع؟",
   "This will used to calibrate your custom plan": "سيتم استخدام هذا لمعايرة خطتك المخصصة",
