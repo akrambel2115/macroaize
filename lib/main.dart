@@ -41,20 +41,24 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    MainController controller = Get.put(MainController());
+  Get.put(MainController());
     Get.put(PremiumController());
 
-    // Arabic made the default + fallback locale (migration Aug 2025)
-    return GetMaterialApp(
-      translations: LocalString(),
-      locale: const Locale('ar','AR'),
-      fallbackLocale: const Locale('ar','AR'),
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: themeController.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      debugShowCheckedModeBanner: false,
-      initialRoute: controller.isLogin ? AppPages.home : AppPages.initial,
-      getPages: AppPages.routes,
+    return GetBuilder<MainController>(
+      builder: (mc) {
+        final current = Locale(mc.languageCode.isNotEmpty ? mc.languageCode : 'en', mc.countryCode.isNotEmpty ? mc.countryCode : 'US');
+        return GetMaterialApp(
+          translations: LocalString(),
+          locale: current,
+          fallbackLocale: const Locale('en','US'),
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: themeController.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          debugShowCheckedModeBanner: false,
+          initialRoute: mc.isLogin ? AppPages.home : AppPages.initial,
+          getPages: AppPages.routes,
+        );
+      },
     );
   }
 }
