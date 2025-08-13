@@ -200,13 +200,13 @@ const Map<String, String> arabic = {
 
   "3 pieces": "3 قطع",
   "2 chillas + salad": "2 تشيلا + سلطة",
-  "Cal": "كال",
+  "Cal": "سعرة",
   "Cropper": "كروبير",
-  "Calorie Tracker": "متعقب السعرات الحرارية",
+  "Calorie Tracker": "متتبّع السعرات الحرارية",
   "Add Calorie": "إضافة سعرات حرارية",
   "Quantity": "الكمية",
   "Ask With Open AI": "اسأل مع Open AI",
-  "This picture not available Calorie,Protein,Carbs and Fats,": "هذه الصورة غير متوفرة للسعرات الحرارية والبروتين والكربوهيدرات والدهون.",
+  "This picture not available Calorie,Protein,Carbs and Fats,": "لا تتوفر في هذه الصورة معلومات عن السعرات الحرارية أو البروتين أو الكربوهيدرات أو الدهون.",
   "Ask Botanist": "اسأل عالم النبات",
   "Write your message": "اكتب رسالتك",
   "Confirm Reset": "تأكيد إعادة تعيين",
@@ -386,21 +386,21 @@ const Map<String, String> arabic = {
   "Restore": "استرجاع",
   "Get Premium": "احصل على المزايا المميزة",
   "Get All The New Exciting Features": "احصل على جميع الميزات الجديدة المثيرة",
-  "Unlock Food Scanner": "افتح ماسح الطعام",
-  "Unlock Food Calorie": "افتح سعرات الطعام",
+  "Unlock Food Scanner": "فتح ماسح الطعام",
+  "Unlock Food Calorie": "فتح تقدير سعرات الطعام",
   "Unlock Unlimited Chat with Ai": "افتح الدردشة غير المحدودة مع الذكاء الاصطناعي",
-  "Unlimited Food Scanner To Calorie": "ماسح طعام غير محدود لتحليل السعرات",
+  "Unlimited Food Scanner To Calorie": "ماسح طعام غير محدود لتقدير السعرات",
   "Most Popular": "الأكثر شهرة",
   "Subscription": "الاشتراك",
   "BUY NOW": "اشتر الآن",
   "Terms of Condition": "شروط الاستخدام",
   "Welcome": "أهلاً وسهلاً",
-  "Calorie tracking made easy": "تتبع السعرات أصبح سهلاً",
-  "Just snap a quick photo of your meal and we''ll do the rest": "التقط صورة سريعة لوجبتك وسنفعل البقية",
-  "In-depth nutrition analyses": "تحليلات غذائية متعمقة",
-  "We will keep your informed about your food choicer and their nutritional content": "سنبقيك على اطلاع بخياراتك الغذائية ومحتواها الغذائي",
+  "Calorie tracking made easy": "تتبع السعرات بات أسهل",
+  "Just snap a quick photo of your meal and we''ll do the rest": "التقط صورة سريعة لوجبتك وسنتولّى الباقي",
+  "In-depth nutrition analyses": "تحليلات غذائية معمّقة",
+  "We will keep your informed about your food choicer and their nutritional content": "نُبقيك على اطلاع بخياراتك الغذائية ومحتواها التغذوي",
   "Transform your body": "حوّل جسدك",
-  "Today is best time to start working toward your dream body": "اليوم هو أفضل وقت للبدء في العمل نحو جسمك المثالي",
+  "Today is best time to start working toward your dream body": "اليوم هو أفضل وقت للبدء بالعمل نحو جسمك المنشود",
   "Where were you born?": "أين وُلدت؟",
   "This Will be used to calibrate your custom plan": "سيتم استخدام هذا لمعايرة خطتك المخصصة",
   "What's stopping you from reaching your goals?": "ما الذي يمنعك من تحقيق أهدافك؟",
@@ -411,6 +411,14 @@ const Map<String, String> arabic = {
   "Lack of meal inspiration": "نقص الإلهام للوجبات",
   "We're setting": "نقوم بإعداد",
   "everything up for you": "كل شيء من أجلك",
-  "Customizing health plan....": "جارٍ تخصيص خطة صحية..."
+  "Customizing health plan....": "جارٍ تخصيص الخطة الصحية...",
+
+  // Scan result description
+  "meal_description": "هذه الوجبة تحتوي على {cal} سعرة حرارية، و{protein} غ بروتين، و{carbs} غ كربوهيدرات، و{fat} غ دهون.",
+
+  // Units and labels
+  "kcal_unit": "سعرة",
+  "gram_unit": "غ",
+  "meal_label": "الوجبة"
 
 };

@@ -411,5 +411,11 @@ const Map<String, String> french = {
   "Lack of meal inspiration": "Manque d'inspiration pour les repas",
   "We're setting": "Nous préparons",
   "everything up for you": "tout pour vous",
-  "Customizing health plan....": "Personnalisation du plan de santé...."
+  "Customizing health plan....": "Personnalisation du plan de santé....",
+  // Scan result description
+  "meal_description": "Ce repas contient {cal} kcal, {protein} g de protéines, {carbs} g de glucides et {fat} g de lipides.",
+  // Units and labels
+  "kcal_unit": "kcal",
+  "gram_unit": "g",
+  "meal_label": "Repas"
 };

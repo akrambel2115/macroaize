@@ -413,5 +413,13 @@ const Map<String, String> english = {
   "everything up for you" : "everything up for you",
   "Customizing health plan...." : "Customizing health plan....",
 
+  // Scan result description
+  "meal_description": "This meal contains {cal} kcal, {protein}g protein, {carbs}g carbs, and {fat}g fat.",
+
+  // Units and labels
+  "kcal_unit": "kcal",
+  "gram_unit": "g",
+  "meal_label": "Meal",
+
 
 };
