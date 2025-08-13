@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/Appkey.dart';
-import 'package:foodcalorietracker/constant/FontFamily.dart';
 import 'package:foodcalorietracker/routes/app_routes.dart';
 import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
 import 'package:get/get.dart';
@@ -20,7 +19,7 @@ class HomeView extends GetView<HomeController> {
         scrolledUnderElevation: 0,
         backgroundColor: context.theme.scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
-        title: Text(appName, style: context.theme.textTheme.headlineMedium),
+  title: Text(appName.tr, style: context.theme.textTheme.headlineMedium),
         actions: [
           GestureDetector(
             onTap: () {
@@ -100,19 +99,12 @@ class HomeView extends GetView<HomeController> {
                                 SizedBox(height: 5),
                                 Text(
                                   controller.dates[index].day.toString(),
-                                  style: TextStyle(
+                                  style: context.textTheme.titleSmall?.copyWith(
                                     fontSize: 16,
-                                    fontFamily: poppins,
-                                    fontWeight:
-                                        isToday
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                    color:
-                                        isToday
-                                            ? context
-                                                .theme
-                                                .scaffoldBackgroundColor
-                                            : context.theme.primaryColor,
+                                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                    color: isToday
+                                        ? context.theme.scaffoldBackgroundColor
+                                        : context.theme.primaryColor,
                                   ),
                                 ),
                               ],
@@ -162,9 +154,8 @@ class HomeView extends GetView<HomeController> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "${controller.consumedKcal} kcal",
-                                    style:
-                                        context.theme.textTheme.headlineMedium,
+                                    "${controller.consumedKcal} " + 'kcal_unit'.tr,
+                                    style: context.theme.textTheme.headlineMedium,
                                   ),
                                   Text(
                                     "Consumed".tr,
@@ -220,9 +211,8 @@ class HomeView extends GetView<HomeController> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "${controller.remainingKcal} kcal",
-                                    style:
-                                        context.theme.textTheme.headlineMedium,
+                                    "${controller.remainingKcal} " + 'kcal_unit'.tr,
+                                    style: context.theme.textTheme.headlineMedium,
                                   ),
                                   Text(
                                     "Remaining".tr,
@@ -286,10 +276,9 @@ class HomeView extends GetView<HomeController> {
                     },
                     child: Text(
                       "View All".tr,
-                      style: TextStyle(
+                      style: context.textTheme.titleSmall?.copyWith(
                         color: context.theme.focusColor,
                         fontWeight: FontWeight.bold,
-                        fontFamily: poppins,
                       ),
                     ),
                   ),
@@ -411,11 +400,10 @@ class HomeView extends GetView<HomeController> {
             children: [
               Text(
                 'Which meal would you like to track?'.tr,
-                style: TextStyle(
+                style: context.textTheme.titleMedium?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: context.theme.focusColor,
-                  fontFamily: poppins,
                 ),
               ).paddingOnly(top: 10),
               const SizedBox(height: 12),
@@ -466,10 +454,9 @@ class NutrientProgress extends StatelessWidget {
       children: [
         Text(
           name,
-          style: TextStyle(
+          style: context.textTheme.titleSmall?.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            fontFamily: poppins,
             color: context.theme.primaryColor,
           ),
         ),
@@ -497,11 +484,10 @@ class NutrientProgress extends StatelessWidget {
 
         SizedBox(height: 4),
         Text(
-          "$value / $maxValue g",
-          style: TextStyle(
+          "$value / $maxValue ${'gram_unit'.tr}",
+          style: context.textTheme.titleSmall?.copyWith(
             fontSize: 12,
             color: context.theme.primaryColor,
-            fontFamily: poppins,
           ),
         ),
       ],
