@@ -412,10 +412,21 @@ const Map<String, String> french = {
   "We're setting": "Nous préparons",
   "everything up for you": "tout pour vous",
   "Customizing health plan....": "Personnalisation du plan de santé....",
-  // Scan result description
-  "meal_description": "Ce repas contient {cal} kcal, {protein} g de protéines, {carbs} g de glucides et {fat} g de lipides.",
+  // Dynamic meal description components
+  "meal_contains": "Ce repas contient",
+  "conjunction_and": "et",
+  
   // Units and labels
   "kcal_unit": "kcal",
   "gram_unit": "g",
+  "protein_unit": "g",
+  "carbs_unit": "g",
+  "fat_unit": "g", 
   "meal_label": "Repas"
+  ,
+  // Abbreviations for compact badges
+  "cals": "cals",
+  "prot": "prot",
+  "carbs": "gluc",
+  "fats": "lip",
 };

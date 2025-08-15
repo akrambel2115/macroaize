@@ -21,6 +21,23 @@ const Map<String, String> arabic = {
   "Too far": "بعيد جداً",
   "Multi-species": "متعدد الأنواع",
   "Continue": "متابعة",
+  "Gallery": "المعرض",
+  "Tips": "نصائح",
+  "Perfect Shot": "لقطة مثالية",
+  "Well-lit, centered food": "طعام مضاء جيداً ومتوسط",
+  "Move camera back": "ابعد الكاميرا",
+  "Move camera closer": "قرب الكاميرا",
+  "Center food in the frame and tap to scan": "ضع الطعام في وسط الإطار واضغط للمسح",
+  "Analyzing food...": "تحليل الطعام...",
+  "No History Yet": "لا يوجد تاريخ بعد",
+  "Start tracking your meals to see your nutrition history here": "ابدأ بتتبع وجباتك لرؤية تاريخ التغذية هنا",
+  "Local Food": "الطعام المحلي",
+  "Search Food": "البحث عن الطعام",
+  "No Food Found": "لم يتم العثور على طعام",
+  "Try searching with different keywords or browse our local food database": "جرب البحث بكلمات مفتاحية مختلفة أو تصفح قاعدة بيانات الطعام المحلي",
+  "Clear Search": "مسح البحث",
+  "Premium Features": "الميزات المميزة",
+  "Choose Your Plan": "اختر خطتك",
   "OverView": "نظرة عامة",
   "Weight Goal": "الهدف من الوزن",
   "Update": "تحديث",
@@ -413,12 +430,27 @@ const Map<String, String> arabic = {
   "everything up for you": "كل شيء من أجلك",
   "Customizing health plan....": "جارٍ تخصيص الخطة الصحية...",
 
-  // Scan result description
-  "meal_description": "هذه الوجبة تحتوي على {cal} سعرة حرارية، و{protein} غ بروتين، و{carbs} غ كربوهيدرات، و{fat} غ دهون.",
-
+  // Dynamic meal description components
+  "meal_contains": "هذه الوجبة تحتوي على",
+  "conjunction_and": "و",
+  
   // Units and labels
-  "kcal_unit": "سعرة",
+  "kcal_unit": "سعرة حرارية",
   "gram_unit": "غ",
-  "meal_label": "الوجبة"
+  "protein_unit": "غ",
+  "carbs_unit": "غ", 
+  "fat_unit": "غ",
+  "meal_label": "الوجبة",
+
+  // Abbreviations for compact badges
+  "cals": "سعرة",
+  "prot": "بروتين",
+  "carbs": "كربوهيدرات",
+  "fats": "دهون",
+
+  // Modern UI labels
+  "track_subtitle": "تتبع تغذيتك اليومية",
+  "goal_label": "الهدف",
+  "Analyzing nutrition...": "تحليل التغذية..."
 
 };

@@ -21,6 +21,23 @@ const Map<String, String> english = {
   "Too far": "Too far",
   "Multi-species": "Multi-species",
   "Continue": "Continue",
+  "Gallery": "Gallery",
+  "Tips": "Tips",
+  "Perfect Shot": "Perfect Shot",
+  "Well-lit, centered food": "Well-lit, centered food",
+  "Move camera back": "Move camera back",
+  "Move camera closer": "Move camera closer",
+  "Center food in the frame and tap to scan": "Center food in the frame and tap to scan",
+  "Analyzing food...": "Analyzing food...",
+  "No History Yet": "No History Yet",
+  "Start tracking your meals to see your nutrition history here": "Start tracking your meals to see your nutrition history here",
+  "Local Food": "Local Food",
+  "Search Food": "Search Food",
+  "No Food Found": "No Food Found",
+  "Try searching with different keywords or browse our local food database": "Try searching with different keywords or browse our local food database",
+  "Clear Search": "Clear Search",
+  "Premium Features": "Premium Features",
+  "Choose Your Plan": "Choose Your Plan",
   "OverView": "OverView",
   "Weight Goal": "Weight Goal",
   "Update": "Update",
@@ -413,13 +430,27 @@ const Map<String, String> english = {
   "everything up for you" : "everything up for you",
   "Customizing health plan...." : "Customizing health plan....",
 
-  // Scan result description
-  "meal_description": "This meal contains {cal} kcal, {protein}g protein, {carbs}g carbs, and {fat}g fat.",
-
+  // Dynamic meal description components
+  "meal_contains": "This meal contains",
+  "conjunction_and": "and",
+  
   // Units and labels
   "kcal_unit": "kcal",
-  "gram_unit": "g",
+  "gram_unit": "g", 
+  "protein_unit": "g",
+  "carbs_unit": "g",
+  "fat_unit": "g",
   "meal_label": "Meal",
+  // Abbreviations used in compact history badges
+  "cals": "cals",
+  "prot": "prot",
+  "carbs": "carbs",
+  "fats": "fats",
+
+  // Modern UI labels
+  "track_subtitle": "Track your daily nutrition",
+  "goal_label": "Goal",
+  "Analyzing nutrition...": "Analyzing nutrition...",
 
 
 };
