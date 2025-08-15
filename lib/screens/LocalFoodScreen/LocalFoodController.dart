@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,9 @@ class LocalFoodController extends GetxController {
   Map<String,dynamic> argument = Get.arguments;
   TextEditingController textController = TextEditingController();
   List<FoodItem> filteredItems = [];
+  Timer? _searchDebounce;
+  static const Duration _debounceDuration = Duration(milliseconds: 300);
+  bool isFiltering = false;
   final dbHelper = DatabaseHelper();
   List<FoodItem> breakfastFoods = [
     FoodItem(name: 'Boiled Egg', calories: 78, carbs: 1, protein: 6, fats: 5, quantity: '1 egg'),
@@ -246,22 +250,56 @@ class LocalFoodController extends GetxController {
     }
   }
 
-  searchFilter(String query)
-  {
-    if(type == "Breakfast")
-    {
-      filteredItems = breakfastFoods.where((user) => user.name.toLowerCase().contains(query.toLowerCase())).toList();
-    }else if(type == "Lunch")
-    {
-      filteredItems = lunchFoods.where((user) => user.name.toLowerCase().contains(query.toLowerCase())).toList();
-    }else if(type == "snack(s)")
-    {
-      filteredItems = snackFoods.where((user) => user.name.toLowerCase().contains(query.toLowerCase())).toList();
-    }else{
-      filteredItems = dinnerFoods;
+  /// Filters the local food list. Debounces rapid calls by default.
+  ///
+  /// Use `immediate: true` to perform the filter instantly (for submit/clear actions).
+  void searchFilter(String query, {bool immediate = false}) {
+    // cancel any pending debounce
+    if (_searchDebounce?.isActive ?? false) {
+      _searchDebounce!.cancel();
     }
 
+    final runFilter = () {
+      final q = query.trim().toLowerCase();
+      if (q.isEmpty) {
+        // reset to full list depending on type
+        if (type == "Breakfast" || type == "BreakFast") {
+          filteredItems = breakfastFoods;
+        } else if (type == "Lunch") {
+          filteredItems = lunchFoods;
+        } else if (type == "snack(s)") {
+          filteredItems = snackFoods;
+        } else {
+          filteredItems = dinnerFoods;
+        }
+      } else {
+        if (type == "Breakfast" || type == "BreakFast") {
+          filteredItems = breakfastFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+        } else if (type == "Lunch") {
+          filteredItems = lunchFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+        } else if (type == "snack(s)") {
+          filteredItems = snackFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+        } else {
+          filteredItems = dinnerFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+        }
+      }
+
+      // filter completed
+      isFiltering = false;
+      update();
+    };
+
+    if (immediate) {
+      isFiltering = true;
+      update();
+      runFilter();
+      return;
+    }
+
+    // show filtering indicator and debounce
+    isFiltering = true;
     update();
+    _searchDebounce = Timer(_debounceDuration, runFilter);
   }
 
   addSqlData(String type,FoodItem item) async {
