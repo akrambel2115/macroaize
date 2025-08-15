@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  font_awesome_flutter: ^10.7.0
   flutter:
     sdk: flutter
 
@@ -100,6 +101,12 @@ flutter:
     - family: PoppinsSemiBold
       fonts:
         - asset: assets/fonts/Poppins-SemiBold.ttf
+    - family: NotoSansArabic
+      fonts:
+        - asset: assets/fonts/NotoSansArabic-Regular.ttf
+    - family: NotoSansArabicSemiBold
+      fonts:
+        - asset: assets/fonts/NotoSansArabic-SemiBold.ttf
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
