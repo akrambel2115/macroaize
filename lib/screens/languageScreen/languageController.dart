@@ -24,11 +24,18 @@ class LanguageController extends GetxController {
 
   void getCurrentLanguage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Prefer stored languageCode/countryCode to compute selected index
     String currentLanguage = prefs.getString(SharePrefKey.language) ?? "English";
-    
-    int index = languageList.indexOf(currentLanguage);
-    if (index != -1) {
-      selectedIndex.value = index;
+    String code = prefs.getString(SharePrefKey.languageCode) ?? '';
+    // If stored code exists, honor it; else fallback to display name
+    final byCode = code.isNotEmpty ? languageCode.indexOf(code) : -1;
+    if (byCode != -1) {
+      selectedIndex.value = byCode;
+    } else {
+      int index = languageList.indexOf(currentLanguage);
+      if (index != -1) {
+        selectedIndex.value = index;
+      }
     }
     update();
   }
@@ -55,5 +62,7 @@ class LanguageController extends GetxController {
   void storeLanguage(int index) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(SharePrefKey.language, languageList[index]);
+  await prefs.setString(SharePrefKey.languageCode, languageCode[index]);
+  await prefs.setString(SharePrefKey.countryCode, countryCode[index]);
   }
 }
