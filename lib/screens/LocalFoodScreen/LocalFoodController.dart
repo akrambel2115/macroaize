@@ -232,7 +232,7 @@ class LocalFoodController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     type = argument['value'];
-    if(type == "Breakfast")
+  if(type == "Breakfast" || type == "BreakFast")
       {
         filteredItems = breakfastFoods;
       }else if(type == "Lunch")
