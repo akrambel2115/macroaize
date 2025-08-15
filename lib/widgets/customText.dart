@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import '../constant/FontFamily.dart';
 
 class CustomText extends StatelessWidget {
   const CustomText({
@@ -13,6 +14,7 @@ class CustomText extends StatelessWidget {
     this.maxLines,
     this.overflow,
     this.fontFamily,
+    this.forceArabicFont = false,
   });
   final String text;
   final double? fontSize;
@@ -24,9 +26,11 @@ class CustomText extends StatelessWidget {
   final TextAlign? textAlign;
   final TextOverflow? overflow;
   final String? fontFamily;
+  final bool forceArabicFont;
 
   @override
   Widget build(BuildContext context) {
+  final isArabic = forceArabicFont || (Get.locale?.languageCode.toLowerCase() == 'ar');
     return Text(
       text.tr,
       textAlign: textAlign,
@@ -38,7 +42,8 @@ class CustomText extends StatelessWidget {
         fontWeight: fontWeight,
         fontStyle: fontStyle,
         height: height,
-        fontFamily: fontFamily,
+    fontFamily: fontFamily ?? (isArabic ? notoSansArabic : null),
+    fontFamilyFallback: fontFamily == null && isArabic ? const [notoSansArabic] : null,
       ),
     );
   }
