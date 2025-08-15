@@ -1,4 +1,5 @@
 class AppAssets {
+
   static String basePathImages = "assets/images/";
   static String basePathIcons = "assets/icons/";
   static String basePathLottie= "assets/lottie/";
@@ -27,6 +28,9 @@ class AppAssets {
   static String dinner = "${basePathIcons}dinner.png";
   static String moreIcon = "${basePathIcons}more.png";
   static String thumbsDown = "${basePathIcons}thumbs-down.png";
+  static String protein = "${basePathIcons}protein.png";
+  static String carb = "${basePathIcons}carb.png";
+  static String fat = "${basePathIcons}fat.png";
 
 
   ///App lottie
