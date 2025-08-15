@@ -39,23 +39,26 @@ class ModernCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = context.theme.brightness == Brightness.dark;
     
-    final defaultBorderRadius = BorderRadius.circular(16);
-    final defaultPadding = const EdgeInsets.all(16);
-    final defaultMargin = const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+  // New default styling to match the modern rounded card from the mockups.
+  // Kept compact and theme-aware so changes propagate app-wide while remaining
+  // easy to override per-use with the existing constructor parameters.
+  final defaultBorderRadius = BorderRadius.circular(18);
+  final defaultPadding = const EdgeInsets.all(16);
+  final defaultMargin = const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
 
     Widget cardContent = Container(
       margin: margin ?? defaultMargin,
       decoration: BoxDecoration(
-        color: color ?? (enableGradient 
-          ? null 
-          : (isDark ? AppColor.darkCard : AppColor.neutralWhite)),
-        gradient: enableGradient 
-          ? (gradient ?? (isDark ? AppColor.darkCardGradient : AppColor.cardGradient))
-          : gradient,
+        color: color ?? (enableGradient
+            ? null
+            : (isDark ? AppColor.darkCard : AppColor.neutralWhite)),
+        gradient: enableGradient
+            ? (gradient ?? (isDark ? AppColor.darkCardGradient : AppColor.cardGradient))
+            : gradient,
         borderRadius: borderRadius ?? defaultBorderRadius,
         border: border ?? Border.all(
-          color: isDark ? AppColor.darkBorder : AppColor.neutralGrey200,
-          width: 0.5,
+          color: isDark ? AppColor.darkBorder : AppColor.neutralGrey100.withOpacity(0.9),
+          width: 0.6,
         ),
         boxShadow: boxShadow ?? _getDefaultShadow(isDark),
       ),
@@ -83,27 +86,32 @@ class ModernCard extends StatelessWidget {
 
   List<BoxShadow> _getDefaultShadow(bool isDark) {
     if (isDark) {
+      // Dark theme: subtle deep shadow for separation without glow
       return [
         BoxShadow(
-          color: Colors.black.withOpacity(0.3),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ];
-    } else {
-      return [
-        BoxShadow(
-          color: AppColor.lightShadow,
-          blurRadius: 12,
+          color: Colors.black.withOpacity(0.5),
+          blurRadius: 10,
           offset: const Offset(0, 4),
-        ),
-        BoxShadow(
-          color: AppColor.mediumShadow,
-          blurRadius: 6,
-          offset: const Offset(0, 2),
         ),
       ];
     }
+
+    // Light theme: gentle double-layer shadow with a very soft warm tint to
+    // mimic the modern card in the attachment (soft orange halo + neutral shadow).
+    return [
+      BoxShadow(
+        // warm halo (very subtle)
+        color: AppColor.primaryOrange.withOpacity(0.06),
+        blurRadius: 20,
+        offset: const Offset(0, 8),
+      ),
+      BoxShadow(
+        // soft neutral shadow for depth
+        color: Colors.black.withOpacity(0.04),
+        blurRadius: 8,
+        offset: const Offset(0, 3),
+      ),
+    ];
   }
 }
 
@@ -130,7 +138,7 @@ class ModernGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = context.theme.brightness == Brightness.dark;
-    final defaultBorderRadius = BorderRadius.circular(16);
+  final defaultBorderRadius = BorderRadius.circular(18);
     
     Widget glassContent = Container(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
