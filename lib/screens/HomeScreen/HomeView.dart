@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:foodcalorietracker/widgets/AnimatedCounter.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/constant/Appkey.dart';
 import 'package:foodcalorietracker/routes/app_routes.dart';
 import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
+import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
+import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class HomeView extends GetView<HomeController> {
+  // Centralized spacing for meal cards in the history section.
+  // Keep this configurable for easy future tweaks.
+  // Spacing between meal history cards. Set to a small value to provide a 2px gap.
+  // Centralized control makes future adjustments or responsiveness easy.
+  static const double _kMealCardSpacing = 2.0;
   const HomeView({super.key});
 
   @override
@@ -15,370 +25,679 @@ class HomeView extends GetView<HomeController> {
     Get.lazyPut(() => HomeController());
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: context.theme.scaffoldBackgroundColor,
-        automaticallyImplyLeading: false,
-  title: Text(appName.tr, style: context.theme.textTheme.headlineMedium),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Get.toNamed(Routes.premiumView);
-            },
-            child: Image.asset(AppAssets.crownIcon, height: 35, width: 60),
+      appBar: _buildModernAppBar(context),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await controller.getSqlCalorie();
+          controller.getAllData();
+        },
+        color: AppColor.primaryOrange,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          // Slightly reduce horizontal padding to give cards more room without affecting overall layout
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20), // Consistent spacing using multiples of 8dp
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date selector
+              _buildDateSelector(context),
+              
+              const SizedBox(height: 24), // Consistent spacing
+              
+              // Calorie tracking card
+              _buildCalorieTrackingCard(context),
+              
+              const SizedBox(height: 24),
+              
+              // Nutrition progress
+              _buildNutritionProgress(context),
+              
+              const SizedBox(height: 32), // Increased spacing for better hierarchy
+              
+              // History section
+              _buildHistorySection(context),
+              
+              const SizedBox(height: 24),
+              
+              // Meal cards
+              _buildMealCards(context),
+              
+              const SizedBox(height: 24), // Bottom padding for FAB
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: _buildModernFAB(context),
+    );
+  }
+
+  PreferredSizeWidget _buildModernAppBar(BuildContext context) {
+    return AppBar(
+      scrolledUnderElevation: 0,
+      backgroundColor: context.theme.scaffoldBackgroundColor,
+      automaticallyImplyLeading: false,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            appName.tr,
+            style: context.theme.textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            'track_subtitle'.tr.isNotEmpty 
+              ? 'track_subtitle'.tr 
+              : 'Track your daily nutrition',
+            style: context.theme.textTheme.bodyMedium?.copyWith(
+              color: AppColor.neutralGrey600,
+            ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 90,
-                child: GetBuilder<HomeController>(
-                  builder: (controller) {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      controller: controller.scrollController,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: controller.dates.length,
-                      itemBuilder: (context, index) {
-                        bool isToday =
-                            controller.dates[index].day == controller.today.day;
-                        return GestureDetector(
-                          onTap: () {
-                            controller.dateFilter(index);
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(left: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color:
-                                  isToday
-                                      ? context.theme.focusColor
-                                      : context.theme.cardColor,
-                            ),
-                            padding: EdgeInsets.all(8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 35,
-                                  height: 35,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color:
-                                          isToday ? Colors.black : Colors.grey,
-                                      style: BorderStyle.solid,
-                                      width: isToday ? 2 : 1,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: ModernButton(
+            text: '',
+            style: ModernButtonStyle.ghost,
+            size: ModernButtonSize.small,
+            onPressed: () {
+              Get.toNamed(Routes.premiumView);
+            },
+            icon: Image.asset(
+              AppAssets.crownIcon,
+              height: 24,
+              width: 24,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateSelector(BuildContext context) {
+    return ModernFadeSlideTransition(
+      child: SizedBox(
+        height: 90,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final itemWidth = 70.0;
+            final itemSpacing = 12.0;
+            final visibleCount = 4;
+            final totalItemWidth = itemWidth + itemSpacing;
+            final totalWidth = constraints.maxWidth;
+            final sidePadding = (totalWidth - (visibleCount * totalItemWidth) + itemSpacing) / 2;
+            return GetBuilder<HomeController>(
+              builder: (controller) {
+                return ListView.builder(
+                  controller: controller.scrollController,
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: sidePadding > 0 ? sidePadding : 0),
+                  itemCount: controller.dates.length,
+                  itemBuilder: (context, index) {
+                    bool isToday = controller.dates[index].day == controller.today.day;
+                    return Padding(
+                      padding: EdgeInsets.only(right: index == controller.dates.length - 1 ? 0 : itemSpacing),
+                      child: ModernScaleTransition(
+                        child: GestureDetector(
+                          onTap: () => controller.dateFilter(index),
+                          child: SizedBox(
+                            width: itemWidth,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: isToday ? AppColor.primaryGradient : null,
+                                color: isToday ? null : context.theme.cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isToday
+                                      ? Colors.transparent
+                                      : AppColor.neutralGrey200,
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  if (isToday)
+                                    BoxShadow(
+                                      color: AppColor.primaryOrange.withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
                                     ),
-                                    // Dotted effect simulation
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    DateFormat('E')
+                                        .format(controller.dates[index])
+                                        .substring(0, 3)
+                                        .toUpperCase(),
+                                    style: context.textTheme.labelSmall?.copyWith(
+                                      color: isToday
+                                          ? Colors.white
+                                          : AppColor.neutralGrey600,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      DateFormat('E')
-                                          .format(controller.dates[index])
-                                          .substring(0, 1),
-                                      // First letter of weekday
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color:
-                                            isToday
-                                                ? context
-                                                    .theme
-                                                    .scaffoldBackgroundColor
-                                                : context.theme.primaryColor,
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: isToday
+                                          ? Colors.white
+                                          : Colors.transparent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        controller.dates[index].day.toString(),
+                                        style: context.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: isToday
+                                              ? AppColor.primaryOrange
+                                              : context.theme.primaryColor,
+                                        ),
                                       ),
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalorieTrackingCard(BuildContext context) {
+    return GetBuilder<HomeController>(
+      builder: (controller) {
+        double progress = controller.isLoading 
+          ? 0.0 
+          : (controller.consumedKcal / ConstantUserMaster.calorieGoal).clamp(0.0, 1.0);
+        
+        return ModernFadeSlideTransition(
+          beginOffset: const Offset(0, 0.2),
+          child: ModernCard(
+            enableGradient: true,
+            child: Column(
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColor.primaryOrange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.local_fire_department,
+                        color: AppColor.primaryOrange,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "Track Food".tr,
+                      style: context.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Plus button moved below goal calories for better UX
+                  ],
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Calorie circle and stats
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Consumed
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedCounter(
+                            value: controller.consumedKcal,
+                            style: context.textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                          Text(
+                            'kcal_unit'.tr,
+                            style: context.textTheme.labelMedium?.copyWith(
+                              color: AppColor.neutralGrey600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Consumed progress bar
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: LinearProgressIndicator(
+                                value: controller.consumedKcal / ConstantUserMaster.calorieGoal,
+                                minHeight: 7,
+                                backgroundColor: AppColor.neutralGrey200,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Consumed".tr,
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Circular progress
+                    Container(
+                      width: 120,
+                      height: 120,
+                      child: Stack(
+                        children: [
+                          // Background circle with thin border
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColor.neutralGrey200,
+                                width: 3,
+                              ),
+                              color: Colors.transparent, // No background
+                            ),
+                          ),
+                          // Progress circle
+                          Center(
+                            child: SizedBox(
+                              width: 100,
+                              height: 100,
+                              child: CircularProgressIndicator(
+                                value: progress,
+                                strokeWidth: 8,
+                                backgroundColor: Colors.transparent,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColor.primaryOrange,
                                 ),
-                                SizedBox(height: 5),
+                                strokeCap: StrokeCap.round,
+                              ),
+                            ),
+                          ),
+                          // Goal text (removed pulse animation for static display)
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AnimatedCounter(
+                                  value: ConstantUserMaster.calorieGoal,
+                                  style: context.textTheme.headlineLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColor.primaryOrange,
+                                  ),
+                                ),
                                 Text(
-                                  controller.dates[index].day.toString(),
-                                  style: context.textTheme.titleSmall?.copyWith(
-                                    fontSize: 16,
-                                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                                    color: isToday
-                                        ? context.theme.scaffoldBackgroundColor
-                                        : context.theme.primaryColor,
+                                  'goal_label'.tr.isNotEmpty 
+                                    ? 'goal_label'.tr 
+                                    : 'Goal',
+                                  style: context.textTheme.labelSmall?.copyWith(
+                                    color: AppColor.neutralGrey600,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: context.theme.cardColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.all(10),
-                child: GetBuilder<HomeController>(
-                  builder: (controller) {
-                    return Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              "Track Food".tr,
-                              style: context.textTheme.headlineMedium,
+                        ],
+                      ),
+                    ),
+                    
+                    // Remaining
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedCounter(
+                            value: controller.remainingKcal,
+                            style: context.textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColor.secondary,
                             ),
-                            Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                showMealSelectionSheet(context);
-                              },
-                              child: Image.asset(
-                                AppAssets.moreIcon,
-                                height: 30,
-                                color: context.theme.focusColor,
+                          ),
+                          Text(
+                            'kcal_unit'.tr,
+                            style: context.textTheme.labelMedium?.copyWith(
+                              color: AppColor.neutralGrey600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Remaining progress bar
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: LinearProgressIndicator(
+                                value: controller.remainingKcal / ConstantUserMaster.calorieGoal,
+                                minHeight: 7,
+                                backgroundColor: AppColor.neutralGrey200,
+                                valueColor: AlwaysStoppedAnimation<Color>(AppColor.secondary),
                               ),
                             ),
-                          ],
+                          ),
+                          Text(
+                            "Remaining".tr,
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Modern, compact add button below goal calories
+                Center(
+                  child: Material(
+                    color: AppColor.neutralGrey800,
+                    shape: const CircleBorder(),
+                    elevation: 4,
+                    shadowColor: Colors.black.withOpacity(0.25),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => showMealSelectionSheet(context),
+                      splashColor: Colors.white.withOpacity(0.08),
+                      highlightColor: Colors.white.withOpacity(0.12),
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Center(
+                          child: Icon(
+                            Icons.add,
+                            size: 28,
+                            color: Colors.white,
+                          ),
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${controller.consumedKcal} " + 'kcal_unit'.tr,
-                                    style: context.theme.textTheme.headlineMedium,
-                                  ),
-                                  Text(
-                                    "Consumed".tr,
-                                    style: context.theme.textTheme.titleSmall,
-                                  ),
-                                ],
-                              ).paddingOnly(right: 5),
-                            ),
-                            Expanded(
-                              child: SizedBox(
-                                height: 120,
-                                child: Stack(
-                                  children: [
-                                    Center(
-                                      child: CircularProgressIndicator(
-                                        strokeAlign: 7,
-                                        backgroundColor:
-                                            context
-                                                .theme
-                                                .scaffoldBackgroundColor,
-                                        value:
-                                            controller.isLoading
-                                                ? 0.0
-                                                : controller.consumedKcal /
-                                                    ConstantUserMaster
-                                                        .calorieGoal,
-
-                                        strokeWidth: 10,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              context.theme.focusColor,
-                                            ),
-                                      ),
-                                    ),
-                                    Center(
-                                      child: Text(
-                                        ConstantUserMaster.calorieGoal
-                                            .toString(),
-                                        style:
-                                            context
-                                                .theme
-                                                .textTheme
-                                                .headlineLarge,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${controller.remainingKcal} " + 'kcal_unit'.tr,
-                                    style: context.theme.textTheme.headlineMedium,
-                                  ),
-                                  Text(
-                                    "Remaining".tr,
-                                    style: context.theme.textTheme.titleSmall,
-                                  ),
-                                ],
-                              ).paddingOnly(left: 5),
-                            ),
-                          ],
-                        ),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(
-                              child: NutrientProgress(
-                                name: "Protein".tr,
-                                value: controller.consumedProtein.toDouble(),
-                                maxValue:
-                                    ConstantUserMaster.proteinGoal.toDouble(),
-                                color: Colors.pink,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: NutrientProgress(
-                                name: "Carbs".tr,
-                                value: controller.consumedCarbs.toDouble(),
-                                maxValue:
-                                    ConstantUserMaster.carbGoal.toDouble(),
-                                color: Colors.green,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: NutrientProgress(
-                                name: "Fats".tr,
-                                value: controller.consumedFats.toDouble(),
-                                maxValue:
-                                    ConstantUserMaster.fatsGoal.toDouble(),
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ).paddingOnly(top: 20, bottom: 10),
-                      ],
-                    );
-                  },
-                ),
-              ).paddingOnly(top: 15, bottom: 15),
-              Row(
-                children: [
-                  Text("History".tr, style: context.textTheme.headlineMedium),
-                  Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      Get.toNamed(
-                        Routes.historyView,
-                        arguments: {"type": "All"},
-                      );
-                    },
-                    child: Text(
-                      "View All".tr,
-                      style: context.textTheme.titleSmall?.copyWith(
-                        color: context.theme.focusColor,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ],
-              ).paddingOnly(left: 5, right: 5),
-              Card(
-                color: context.theme.cardColor,
-                child: ListTile(
-                  onTap: () {
-                    Get.toNamed(
-                      Routes.historyView,
-                      arguments: {"type": "BreakFast"},
-                    );
-                  },
-                  minTileHeight: 70,
-                  leading: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.theme.scaffoldBackgroundColor,
-                    ),
-                    child: Image.asset(AppAssets.breakfast).paddingAll(10),
-                  ),
-                  title: Text(
-                    "BreakFast".tr,
-                    style: context.theme.textTheme.headlineSmall,
-                  ),
                 ),
-              ).paddingOnly(top: 10),
-              Card(
-                color: context.theme.cardColor,
-                child: ListTile(
-                  onTap: () {
-                    Get.toNamed(
-                      Routes.historyView,
-                      arguments: {"type": "Lunch"},
-                    );
-                  },
-                  minTileHeight: 70,
-                  leading: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.theme.scaffoldBackgroundColor,
-                    ),
-                    child: Image.asset(AppAssets.lunch).paddingAll(10),
-                  ),
-                  title: Text(
-                    "Lunch".tr,
-                    style: context.theme.textTheme.headlineSmall,
-                  ),
-                ),
-              ).paddingOnly(top: 1),
-              Card(
-                color: context.theme.cardColor,
-                child: ListTile(
-                  onTap: () {
-                    Get.toNamed(
-                      Routes.historyView,
-                      arguments: {"type": "snack(s)"},
-                    );
-                  },
-                  minTileHeight: 70,
-                  leading: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.theme.scaffoldBackgroundColor,
-                    ),
-                    child: Image.asset(AppAssets.snacks).paddingAll(10),
-                  ),
-                  title: Text(
-                    "snack(s)".tr,
-                    style: context.theme.textTheme.headlineSmall,
-                  ),
-                ),
-              ).paddingOnly(top: 1),
-              Card(
-                color: context.theme.cardColor,
-                child: ListTile(
-                  onTap: () {
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-                    Get.toNamed(
-                      Routes.historyView,
-                      arguments: {"type": "Dinner"},
-                    );
-                  },
-                  minTileHeight: 70,
-                  leading: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.theme.scaffoldBackgroundColor,
+  Widget _buildNutritionProgress(BuildContext context) {
+    return GetBuilder<HomeController>(
+      builder: (controller) {
+        return ModernFadeSlideTransition(
+          beginOffset: const Offset(0, 0.3),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ModernNutrientCard(
+                  label: "Protein".tr,
+                  value: controller.consumedProtein.toString(),
+                  goal: ConstantUserMaster.proteinGoal.toString(),
+                  unit: 'protein_unit'.tr,
+                  color: AppColor.primaryOrange,
+                  icon: null,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColor.primaryOrange.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(
+                        AppAssets.protein,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: AppColor.primaryOrange,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
                     ),
-                    child: Image.asset(AppAssets.dinner).paddingAll(10),
                   ),
-                  title: Text(
-                    "Dinner".tr,
-                    style: context.theme.textTheme.headlineSmall,
-                  ),
+                  progress: (controller.consumedProtein / ConstantUserMaster.proteinGoal).clamp(0.0, 1.0),
                 ),
-              ).paddingOnly(top: 1),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                flex: 1,
+                child: ModernNutrientCard(
+                  label: "Carbs".tr,
+                  value: controller.consumedCarbs.toString(),
+                  goal: ConstantUserMaster.carbGoal.toString(),
+                  unit: 'carbs_unit'.tr,
+                  color: AppColor.primaryOrange,
+                  icon: null,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColor.primaryOrange.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(
+                        AppAssets.carb,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: AppColor.primaryOrange,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  progress: (controller.consumedCarbs / ConstantUserMaster.carbGoal).clamp(0.0, 1.0),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                flex: 1,
+                child: ModernNutrientCard(
+                  label: "Fats".tr,
+                  value: controller.consumedFats.toString(),
+                  goal: ConstantUserMaster.fatsGoal.toString(),
+                  unit: 'fat_unit'.tr,
+                  color: AppColor.primaryOrange,
+                  icon: null,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColor.primaryOrange.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(
+                        AppAssets.fat,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        color: AppColor.primaryOrange,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  progress: (controller.consumedFats / ConstantUserMaster.fatsGoal).clamp(0.0, 1.0),
+                ),
+              ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHistorySection(BuildContext context) {
+    return ModernFadeSlideTransition(
+      beginOffset: const Offset(0, 0.4),
+      child: Row(
+        children: [
+          Text(
+            "History".tr,
+            style: context.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Spacer(),
+          ModernButton(
+            text: "View All".tr,
+            style: ModernButtonStyle.ghost,
+            size: ModernButtonSize.small,
+            onPressed: () {
+              Get.toNamed(
+                Routes.historyView,
+                arguments: {"type": "All"},
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealCards(BuildContext context) {
+    final meals = [
+      {
+        'name': 'BreakFast',
+        'icon': AppAssets.breakfast,
+        'color': AppColor.tertiary,
+      },
+      {
+        'name': 'Lunch',
+        'icon': AppAssets.lunch,
+        'color': AppColor.tertiary,
+      },
+      {
+        'name': 'snack(s)',
+        'icon': AppAssets.snacks,
+        'color': AppColor.tertiary,
+      },
+      {
+        'name': 'Dinner',
+        'icon': AppAssets.dinner,
+        'color': AppColor.tertiary,
+      },
+    ];
+
+    return Column(
+      children: meals.asMap().entries.map((entry) {
+        int index = entry.key;
+        Map<String, dynamic> meal = entry.value;
+        
+        return ModernFadeSlideTransition(
+          beginOffset: Offset(0, 0.5 + (index * 0.1)),
+          child: ModernCard(
+            // Keep horizontal gutters but remove vertical gap so cards touch.
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, _kMealCardSpacing),
+            // Slightly reduce internal padding for denser layout while preserving touch targets.
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+            // Reduce shadow intensity to avoid overlapping glow when cards touch.
+            boxShadow: [
+              BoxShadow(
+                color: AppColor.primaryOrange.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            onTap: () {
+              Get.toNamed(
+                Routes.historyView,
+                arguments: {"type": meal['name']},
+              );
+            },
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColor.primaryOrange.withOpacity(0.1),
+                        AppColor.primaryOrange.withOpacity(0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Image.asset(
+                      meal['icon'],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    (meal['name'] as String).tr,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: AppColor.neutralGrey400,
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildModernFAB(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () => showMealSelectionSheet(context),
+      backgroundColor: AppColor.primaryOrange,
+      shape: const CircleBorder(),
+      elevation: 8,
+      child: Container(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: AppColor.primaryGradient,
+        ),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 28,
         ),
       ),
     );
@@ -387,110 +706,117 @@ class HomeView extends GetView<HomeController> {
   void showMealSelectionSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      backgroundColor: context.theme.cardColor,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
+        return Container(
+          decoration: BoxDecoration(
+            color: context.theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColor.neutralGrey300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Title
               Text(
                 'Which meal would you like to track?'.tr,
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: context.theme.focusColor,
+                style: context.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-              ).paddingOnly(top: 10),
-              const SizedBox(height: 12),
-              ...['BreakFast', 'Lunch', 'snack(s)', 'Dinner'].map((meal) {
-                return ListTile(
-                  title: Text(meal.tr, style: context.textTheme.titleMedium),
-                  trailing: Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: context.theme.scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(10),
+              ),
+              const SizedBox(height: 20),
+              
+              // Meal options
+              ...['BreakFast', 'Lunch', 'snack(s)', 'Dinner'].asMap().entries.map((entry) {
+                int index = entry.key;
+                String meal = entry.value;
+                final colors = List<Color>.filled(4, AppColor.primaryOrange);
+                final icons = [AppAssets.breakfast, AppAssets.lunch, AppAssets.snacks, AppAssets.dinner];
+                
+                return ModernFadeSlideTransition(
+                  beginOffset: Offset(0, 0.3 + (index * 0.1)),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ModernCard(
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.toNamed(Routes.localFoodView, arguments: {"value": meal});
+                      },
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  colors[index].withOpacity(0.1),
+                                  colors[index].withOpacity(0.05),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Image.asset(
+                                icons[index],
+                                // Keep original icon color for clarity and maintainability
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              meal.tr,
+                              style: context.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colors[index].withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.add,
+                              color: colors[index],
+                              size: 16,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Icon(Icons.add, color: context.theme.focusColor),
                   ),
-                  onTap: () {
-                    Navigator.pop(context); // close bottom sheet
-                    Get.toNamed(Routes.localFoodView,arguments: {"value" : meal});
-                  },
                 );
               }),
+              
+              const SizedBox(height: 20),
             ],
           ),
         );
       },
-    );
-  }
-}
-
-class NutrientProgress extends StatelessWidget {
-  final String name;
-  final double value;
-  final double maxValue;
-  final Color color;
-
-  const NutrientProgress({
-    super.key,
-    required this.name,
-    required this.value,
-    required this.maxValue,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: context.textTheme.titleSmall?.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: context.theme.primaryColor,
-          ),
-        ),
-        SizedBox(height: 4),
-        Stack(
-          children: [
-            Container(
-              height: 10,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            Container(
-              height: 10,
-              width: (value / maxValue) * 100,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ],
-        ),
-
-        SizedBox(height: 4),
-        Text(
-          "$value / $maxValue ${'gram_unit'.tr}",
-          style: context.textTheme.titleSmall?.copyWith(
-            fontSize: 12,
-            color: context.theme.primaryColor,
-          ),
-        ),
-      ],
     );
   }
 }
