@@ -27,16 +27,34 @@ class HomeController extends GetxController{
 
   @override
   Future<void> onInit() async {
-    // TODO: implement onInit
     super.onInit();
     getAllData();
     await getSqlCalorie();
-   dates =  getPreviousDays();
+    dates = getPreviousDays();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      scrollToEnd();
+      scrollToTodayCentered();
     });
     isLoading = false;
     update();
+  }
+
+  void scrollToTodayCentered() {
+    if (scrollController.hasClients && dates.isNotEmpty) {
+      int todayIndex = dates.indexWhere((date) =>
+        date.day == today.day &&
+        date.month == today.month &&
+        date.year == today.year
+      );
+      if (todayIndex != -1) {
+        // Each item is 70px + 12px margin except last
+        double itemWidth = 70.0 + 12.0;
+        double screenWidth = Get.context?.size?.width ?? 360;
+        double visibleWidth = screenWidth - 40; // 20px padding each side
+        double offset = (todayIndex * itemWidth) - (visibleWidth - itemWidth) / 2;
+        offset = offset.clamp(0.0, scrollController.position.maxScrollExtent);
+        scrollController.jumpTo(offset);
+      }
+    }
   }
   dateFilter(int index)
   {
