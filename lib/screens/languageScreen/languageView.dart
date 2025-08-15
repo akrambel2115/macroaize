@@ -44,7 +44,7 @@ class LanguageView extends GetView<LanguageController> {
                       ),
                       tileColor: context.theme.cardColor,
                       title: Text(controller.languageList[index].tr,style: context.textTheme.titleSmall,),
-                      trailing: controller.selectedIndex == index
+                      trailing: controller.selectedIndex.value == index
                           ? Icon(Icons.check, color: context.theme.focusColor,)
                           : null,
                     ),
