@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/LocalFoodScreen/LocalFoodController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
@@ -71,9 +70,8 @@ class LocalFoodView extends GetView<LocalFoodController> {
   }
 
   Widget _buildSearchSection(BuildContext context, LocalFoodController controller) {
-    return ModernCard(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -84,73 +82,93 @@ class LocalFoodView extends GetView<LocalFoodController> {
               color: AppColor.neutralGrey900,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           _buildSearchField(context, controller),
+          const SizedBox(height: 16),
+          if (controller.isFiltering) ...[
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                minHeight: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColor.primaryOrange),
+                backgroundColor: AppColor.neutralGrey200.withOpacity(0.3),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildSearchField(BuildContext context, LocalFoodController controller) {
+    // Simple, flat search bar for clean UI
     return Container(
       decoration: BoxDecoration(
-        color: AppColor.neutralGrey50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColor.neutralGrey200,
-          width: 1,
-        ),
+        color: context.theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColor.neutralGrey200.withOpacity(0.6), width: 1),
       ),
-      child: TextField(
-        controller: controller.textController,
-        onTapOutside: (event) => FocusScope.of(context).unfocus(),
-        onChanged: (value) {
-          controller.textController.text = value;
-          controller.searchFilter(controller.textController.text);
-          controller.update();
-        },
-        style: context.textTheme.bodyLarge?.copyWith(
-          color: AppColor.neutralGrey900,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          prefixIcon: Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: AppColor.primaryGradient,
-              borderRadius: BorderRadius.circular(8),
-            ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Row(
+        children: [
+          // simple prefix icon
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Icon(
               Icons.search_rounded,
-              color: Colors.white,
+              color: AppColor.neutralGrey500,
               size: 20,
             ),
           ),
-          hintText: 'Search by Food Name/Dish'.tr,
-          hintStyle: context.textTheme.bodyLarge?.copyWith(
-            color: AppColor.neutralGrey500,
-            fontWeight: FontWeight.w500,
+
+          // input
+          Expanded(
+            child: TextField(
+              controller: controller.textController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (value) {
+                FocusScope.of(context).unfocus();
+                controller.searchFilter(value, immediate: true);
+              },
+              onTapOutside: (event) => FocusScope.of(context).unfocus(),
+              onChanged: (value) {
+                controller.searchFilter(value);
+              },
+              style: context.textTheme.bodyLarge?.copyWith(
+                color: AppColor.neutralGrey900,
+                fontWeight: FontWeight.w500,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Search by Food Name/Dish'.tr,
+                hintStyle: context.textTheme.bodyLarge?.copyWith(
+                  color: AppColor.neutralGrey500,
+                  fontWeight: FontWeight.w500,
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-          suffixIcon: controller.textController.text.isNotEmpty
-              ? IconButton(
-                  onPressed: () {
-                    controller.textController.clear();
-                    controller.searchFilter('');
-                    controller.update();
-                  },
-                  icon: Icon(
-                    Icons.clear_rounded,
-                    color: AppColor.neutralGrey500,
-                  ),
-                )
-              : null,
-        ),
+
+          // clear button (simple)
+          if (controller.textController.text.isNotEmpty)
+            IconButton(
+              onPressed: () {
+                controller.textController.clear();
+                controller.searchFilter('', immediate: true);
+              },
+              icon: Icon(
+                Icons.clear_rounded,
+                color: AppColor.neutralGrey500,
+                size: 20,
+              ),
+            ),
+
+          // spacing reserved where action button used to be
+          const SizedBox(width: 8),
+        ],
       ),
     );
   }
@@ -198,82 +216,93 @@ class LocalFoodView extends GetView<LocalFoodController> {
 
   Widget _buildFoodItem(BuildContext context, LocalFoodController controller, int index) {
     final food = controller.filteredItems[index];
-    
     return ModernCard(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
-          // Food icon
+          // Food icon (rounded square) - soft orange background, slightly smaller
           Container(
-            width: 56,
-            height: 56,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              gradient: AppColor.primaryGradient,
-              borderRadius: BorderRadius.circular(14),
+              color: AppColor.primaryOrange.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              Icons.restaurant_rounded,
-              color: Colors.white,
-              size: 24,
+            child: Center(
+              child: Icon(
+                Icons.restaurant_rounded,
+                color: AppColor.primaryOrange,
+                size: 16,
+              ),
             ),
           ),
-          
-          const SizedBox(width: 16),
-          
-          // Food details
+
+          const SizedBox(width: 14),
+
+          // Food title + meta (quantity + calories)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   food.name,
                   style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: AppColor.neutralGrey900,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  food.quantity,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: AppColor.neutralGrey600,
-                  ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        food.quantity,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: AppColor.neutralGrey700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // calories chip
+                    _buildCalorieChip(context, food.calories),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                _buildCalorieChip(context, food.calories),
               ],
             ),
           ),
-          
-          const SizedBox(width: 16),
-          
-          // Add button
+
+          const SizedBox(width: 12),
+
+          // 'Log' pill button (no plus icon)
           ModernScaleTransition(
             child: GestureDetector(
-              onTap: () {
-                controller.onAddButton(context, food);
-              },
+              onTap: () => controller.onAddButton(context, food),
               child: Container(
-                width: 40,
-                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: AppColor.primaryGradient,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColor.primaryGreen.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: AppColor.primaryOrange.withOpacity(0.18),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: Icon(
-                  Icons.add_rounded,
-                  color: Colors.white,
-                  size: 20,
+                child: Center(
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
               ),
             ),
@@ -316,64 +345,90 @@ class LocalFoodView extends GetView<LocalFoodController> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: ModernFadeSlideTransition(
-        child: Padding(
-          padding: const EdgeInsets.all(40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  gradient: AppColor.primaryGradient,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.search_off_rounded,
-                  size: 60,
-                  color: Colors.white,
+    // Make the empty state scrollable and constrained to available height
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: ModernFadeSlideTransition(
+                child: Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          gradient: AppColor.primaryGradient,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.search_off_rounded,
+                          size: 60,
+                          color: Colors.white,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      Text(
+                        'No Food Found'.tr,
+                        style: context.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColor.neutralGrey800,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 12),
+                      
+                      Text(
+                        'Try searching with different keywords or browse our local food database'.tr,
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: AppColor.neutralGrey600,
+                          height: 1.5,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Clear search: soft orange circular background (no outline)
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColor.primaryOrange.withOpacity(0.12),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            final controller = Get.find<LocalFoodController>();
+                            controller.textController.clear();
+                            controller.searchFilter('', immediate: true);
+                          },
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: AppColor.primaryOrange,
+                            size: 20,
+                          ),
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          tooltip: 'Clear'.tr,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              
-              const SizedBox(height: 32),
-              
-              Text(
-                'No Food Found'.tr,
-                style: context.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColor.neutralGrey800,
-                ),
-              ),
-              
-              const SizedBox(height: 12),
-              
-              Text(
-                'Try searching with different keywords or browse our local food database'.tr,
-                textAlign: TextAlign.center,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: AppColor.neutralGrey600,
-                  height: 1.5,
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              ModernButton(
-                text: 'Clear Search'.tr,
-                style: ModernButtonStyle.outline,
-                size: ModernButtonSize.medium,
-                onPressed: () {
-                  Get.find<LocalFoodController>().textController.clear();
-                  Get.find<LocalFoodController>().searchFilter('');
-                  Get.find<LocalFoodController>().update();
-                },
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
