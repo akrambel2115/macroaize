@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../widgets/CropperUiSettings.dart';
 
 import '../../SharePrefHelper/SharePref.dart';
 import '../../SharePrefHelper/SharePrefKey.dart';
@@ -16,7 +17,8 @@ import '../../routes/app_routes.dart';
 
 class ScanFoodController extends GetxController {
   late CameraController cameraController;
-  String isIdentify = "BreakFast";
+  // Default to snack(s) so the picker focuses on Snack by default
+  String isIdentify = "snack(s)";
   File? imagePath;
   bool isLoading = false;
   final ImagePicker _picker = ImagePicker();
@@ -90,16 +92,7 @@ class ScanFoodController extends GetxController {
         sourcePath: image.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 100,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Cropper'.tr,
-            toolbarColor: context.theme.focusColor,
-            toolbarWidgetColor: context.theme.hintColor,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false,
-          ),
-          IOSUiSettings(title: 'Cropper'.tr),
-        ],
+        uiSettings: cropperUiSettings(context),
       );
       if (croppedFile != null) {
         File image = File(croppedFile.path);
