@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/widgets/AnimatedCounter.dart';
+import 'dart:math' as math;
+// ...existing code...
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
@@ -260,156 +261,143 @@ class HomeView extends GetView<HomeController> {
                 
                 const SizedBox(height: 24),
                 
-                // Calorie circle and stats
+                // Redesigned calorie block: left shows goal + nutrient bars, right shows
+                // circular 'cal left' indicator — layout mirrors the provided mockup.
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Consumed
+                    // Left column: Calorie goal + small nutrient progress rows
                     Expanded(
+                      flex: 2,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AnimatedCounter(
-                            value: controller.consumedKcal,
-                            style: context.textTheme.headlineLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
                           Text(
-                            'kcal_unit'.tr,
-                            style: context.textTheme.labelMedium?.copyWith(
+                            'Calorie goal'.tr,
+                            style: context.textTheme.labelSmall?.copyWith(
                               color: AppColor.neutralGrey600,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          // Consumed progress bar
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: LinearProgressIndicator(
-                                value: controller.consumedKcal / ConstantUserMaster.calorieGoal,
-                                minHeight: 7,
-                                backgroundColor: AppColor.neutralGrey200,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                              ),
-                            ),
+                          const SizedBox(height: 6),
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: ConstantUserMaster.calorieGoal.toDouble()),
+                            duration: const Duration(milliseconds: 900),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, animatedValue, _) {
+                              return Text(
+                                NumberFormat.decimalPattern().format(animatedValue.round()),
+                                style: context.textTheme.headlineLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
                           ),
-                          Text(
-                            "Consumed".tr,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          const SizedBox(height: 16),
+
+                          // Small nutrient rows
+                          _buildMiniNutrientRow(
+                            context,
+                            label: 'PROTEIN'.tr,
+                            value: controller.consumedProtein,
+                            goal: ConstantUserMaster.proteinGoal,
+                            color: AppColor.primaryOrange,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildMiniNutrientRow(
+                            context,
+                            label: 'CARBS'.tr,
+                            value: controller.consumedCarbs,
+                            goal: ConstantUserMaster.carbGoal,
+                            color: AppColor.primaryOrange,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildMiniNutrientRow(
+                            context,
+                            label: 'FAT'.tr,
+                            value: controller.consumedFats,
+                            goal: ConstantUserMaster.fatsGoal,
+                            color: AppColor.primaryOrange,
                           ),
                         ],
                       ),
                     ),
-                    
-                    // Circular progress
-                    Container(
-                      width: 120,
-                      height: 120,
-                      child: Stack(
-                        children: [
-                          // Background circle with thin border
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColor.neutralGrey200,
-                                width: 3,
-                              ),
-                              color: Colors.transparent, // No background
-                            ),
-                          ),
-                          // Progress circle
-                          Center(
-                            child: SizedBox(
-                              width: 100,
-                              height: 100,
-                              child: CircularProgressIndicator(
-                                value: progress,
-                                strokeWidth: 8,
-                                backgroundColor: Colors.transparent,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColor.primaryOrange,
-                                ),
-                                strokeCap: StrokeCap.round,
-                              ),
-                            ),
-                          ),
-                          // Goal text (removed pulse animation for static display)
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                AnimatedCounter(
-                                  value: ConstantUserMaster.calorieGoal,
-                                  style: context.textTheme.headlineLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColor.primaryOrange,
-                                  ),
-                                ),
-                                Text(
-                                  'goal_label'.tr.isNotEmpty 
-                                    ? 'goal_label'.tr 
-                                    : 'Goal',
-                                  style: context.textTheme.labelSmall?.copyWith(
-                                    color: AppColor.neutralGrey600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    // Remaining
+
+                    const SizedBox(width: 16),
+
+                    // Right column: Circular remaining calories — give more room for a larger radius
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AnimatedCounter(
-                            value: controller.remainingKcal,
-                            style: context.textTheme.headlineLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColor.secondary,
-                            ),
+                      flex: 2,
+                      child: Center(
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final size = math.min(constraints.maxWidth, constraints.maxHeight);
+                              // Circle scale: larger visual radius within the expanded column
+                              final circleSize = size * 1.12;
+                              // Stroke width: scale up slightly to match larger radius
+                              final stroke = math.max(8.0, size * 0.12);
+                              return Center(
+                                child: SizedBox(
+                                  width: circleSize,
+                                  height: circleSize,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: circleSize,
+                                        height: circleSize,
+                                        child: TweenAnimationBuilder<double>(
+                                          tween: Tween(begin: 0.0, end: progress),
+                                          duration: const Duration(milliseconds: 450),
+                                          builder: (context, animatedProgress, _) {
+                                            return CustomPaint(
+                                              painter: _RoundedArcPainter(
+                                                progress: animatedProgress,
+                                                strokeWidth: stroke,
+                                                backgroundColor: AppColor.neutralGrey200,
+                                                progressColor: AppColor.primaryOrange,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          TweenAnimationBuilder<double>(
+                                            tween: Tween(begin: 0.0, end: controller.remainingKcal.toDouble()),
+                                            duration: const Duration(milliseconds: 700),
+                                            curve: Curves.easeOut,
+                                            builder: (context, animatedValue, _) {
+                                              return Text(
+                                                animatedValue.round().toString(),
+                                                style: context.textTheme.headlineLarge?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  // Fixed numeric size so increasing the circle doesn't scale the number
+                                                  fontSize: 22,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          Text(
+                                            'cal left'.tr,
+                                            style: context.textTheme.labelSmall?.copyWith(
+                                              color: AppColor.neutralGrey600,
+                                              // Slightly reduced from previous to avoid overpowering the number
+                                              fontSize: size * 0.095,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          Text(
-                            'kcal_unit'.tr,
-                            style: context.textTheme.labelMedium?.copyWith(
-                              color: AppColor.neutralGrey600,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          // Remaining progress bar
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: LinearProgressIndicator(
-                                value: controller.remainingKcal / ConstantUserMaster.calorieGoal,
-                                minHeight: 7,
-                                backgroundColor: AppColor.neutralGrey200,
-                                valueColor: AlwaysStoppedAnimation<Color>(AppColor.secondary),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "Remaining".tr,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
@@ -703,6 +691,64 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // Small, reusable nutrient row used by the redesigned Track Food card.
+  Widget _buildMiniNutrientRow(BuildContext context, {
+    required String label,
+    required int value,
+    required int goal,
+    required Color color,
+  }) {
+    final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: AppColor.neutralGrey600,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Stack(
+                children: [
+                  Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: AppColor.neutralGrey200,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: progress,
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          '${value.toString()}/${goal.toString()}',
+          style: context.textTheme.labelSmall?.copyWith(
+            color: AppColor.neutralGrey600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
   void showMealSelectionSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -818,5 +864,62 @@ class HomeView extends GetView<HomeController> {
         );
       },
     );
+  }
+}
+
+// Custom painter that draws a rounded-cap progress arc (so ends are rounded instead of flat).
+class _RoundedArcPainter extends CustomPainter {
+  final double progress; // 0.0 - 1.0
+  final double strokeWidth;
+  final Color backgroundColor;
+  final Color progressColor;
+
+  _RoundedArcPainter({
+    required this.progress,
+    required this.strokeWidth,
+    required this.backgroundColor,
+    required this.progressColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final center = rect.center;
+    final radius = math.min(size.width, size.height) / 2;
+
+    // Background circle
+    final bgPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius - strokeWidth / 2, bgPaint);
+
+    // Progress arc
+    final progressPaint = Paint()
+      ..color = progressColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true;
+
+    final startAngle = -math.pi / 2; // start at top
+    final sweepAngle = 2 * math.pi * progress;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
+      startAngle,
+      sweepAngle,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RoundedArcPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.backgroundColor != backgroundColor ||
+        oldDelegate.progressColor != progressColor;
   }
 }
