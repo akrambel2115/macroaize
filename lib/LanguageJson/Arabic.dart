@@ -222,7 +222,7 @@ const Map<String, String> arabic = {
   "Calorie Tracker": "متتبّع السعرات الحرارية",
   "Add Calorie": "إضافة سعرات حرارية",
   "Quantity": "الكمية",
-  "Ask With Open AI": "اسأل مع Open AI",
+  "Ask With AI": "اسأل الذكاء الاصطناعي",
   "This picture not available Calorie,Protein,Carbs and Fats,": "لا تتوفر في هذه الصورة معلومات عن السعرات الحرارية أو البروتين أو الكربوهيدرات أو الدهون.",
   "Ask Botanist": "اسأل عالم النبات",
   "Write your message": "اكتب رسالتك",

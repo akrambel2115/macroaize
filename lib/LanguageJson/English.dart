@@ -222,7 +222,7 @@ const Map<String, String> english = {
   "Calorie Tracker" : "Calorie Tracker",
   "Add Calorie" : "Add Calorie",
   "Quantity" : "Quantity",
-  "Ask With Open AI" : "Ask With Open AI",
+  "Ask With AI" : "Ask With AI",
   "This picture not available Calorie,Protein,Carbs and Fats," : "This picture not available Calorie,Protein,Carbs and Fats,",
   "Ask Botanist" : "Ask Botanist",
   "Write your message" : "Write your message",

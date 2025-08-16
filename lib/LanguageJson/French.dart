@@ -205,7 +205,7 @@ const Map<String, String> french = {
   "Calorie Tracker": "Suivi des calories",
   "Add Calorie": "Ajouter des calories",
   "Quantity": "Quantité",
-  "Ask With Open AI": "Demandez avec Open AI",
+  "Ask With AI": "Demandez avec AI",
   "This picture not available Calorie,Protein,Carbs and Fats,": "Cette image n'est pas disponible pour les calories, protéines, glucides et graisses.",
   "Ask Botanist": "Demandez au botaniste",
   "Write your message": "Écrivez votre message",
