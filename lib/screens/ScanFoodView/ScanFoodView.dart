@@ -1,10 +1,15 @@
+import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodController.dart';
+import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
+import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:foodcalorietracker/widgets/ScannerOverlay.dart';
+import 'package:foodcalorietracker/widgets/BottomModePicker.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../constant/AppAssets.dart';
-import '../../constant/FontFamily.dart';
 
 class ScanFoodView extends GetView<ScanFoodController> {
   const ScanFoodView({super.key});
@@ -14,225 +19,50 @@ class ScanFoodView extends GetView<ScanFoodController> {
     Get.lazyPut(() => ScanFoodController());
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.black,
         body: GetBuilder<ScanFoodController>(
           builder: (controller) {
+            final meals = ['BreakFast', 'Lunch', 'snack(s)', 'Dinner'];
+
             return Stack(
               children: [
+                // Camera preview
                 Positioned.fill(
                   child: CameraPreview(controller.cameraController),
                 ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(70),
-                    child: Image.asset(AppAssets.scanIcon, color: Colors.white),
-                  ),
-                ),
-                Positioned(
-                  bottom: 100,
-                  left: 10,
-                  right: 10,
-                  child: Container(
-                    padding: const EdgeInsets.all(7),
-                    height: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white),
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(40),
-                      color: Colors.black,
-                    ),
-                    child: Row(
+
+                // Overlay with scanning frame (rounded)
+                const ScannerOverlay(width: 300, height: 260, borderRadius: 36),
+
+                // Combined controls + picker placed at the bottom. The picker
+                // appears under the central capture button.
+                if (!controller.isLoading)
+                  Positioned(
+                    bottom: 12,
+                    left: 0,
+                    right: 0,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => controller.onChangeIdentify("BreakFast"),
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(40),
-                                color:
-                                    controller.isIdentify == "BreakFast"
-                                        ? context.theme.focusColor
-                                        : Colors.transparent,
-                              ),
-                              child: Text(
-                                'BreakFast'.tr,
-                                style: TextStyle(
-                                  color:
-                                      controller.isIdentify == "BreakFast"
-                                          ? Colors.black
-                                          : Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: poppins,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => controller.onChangeIdentify("Lunch"),
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(40),
-                                color:
-                                    controller.isIdentify == "Lunch"
-                                        ? context.theme.focusColor
-                                        : Colors.transparent,
-                              ),
-                              child: Text(
-                                'Lunch'.tr,
-                                style: TextStyle(
-                                  color:
-                                      controller.isIdentify == "Lunch"
-                                          ? Colors.black
-                                          : Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: poppins,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => controller.onChangeIdentify("snack(s)"),
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(40),
-                                color:
-                                controller.isIdentify == "snack(s)"
-                                    ? context.theme.focusColor
-                                    : Colors.transparent,
-                              ),
-                              child: Text(
-                                'snack(s)'.tr,
-                                style: TextStyle(
-                                  color:
-                                  controller.isIdentify == "snack(s)"
-                                      ? Colors.black
-                                      : Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: poppins,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => controller.onChangeIdentify("Dinner"),
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(40),
-                                color:
-                                controller.isIdentify == "Dinner"
-                                    ? context.theme.focusColor
-                                    : Colors.transparent,
-                              ),
-                              child: Text(
-                                'Dinner'.tr,
-                                style: TextStyle(
-                                  color:
-                                  controller.isIdentify == "Dinner"
-                                      ? Colors.black
-                                      : Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: poppins,
-                                ),
-                              ),
-                            ),
+                        // control buttons row (gallery, capture, tips)
+                        _buildControlButtons(context, controller),
+                        const SizedBox(height: 6),
+                        // picker under the snap button
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: BottomModePicker(
+                            items: meals,
+                            currentIndex: meals.indexOf(controller.isIdentify),
+                            onChanged: (idx) => controller.onChangeIdentify(meals[idx]),
+                            height: 42,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 30,
-                  bottom: 20,
-                  child: InkWell(
-                    onTap: () {
-                      controller.takeImage(ImageSource.gallery, context);
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          fit: BoxFit.fill,
-                          image: AssetImage(AppAssets.galleryIcon,),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 80,
-                  bottom: 20,
-                  child: InkWell(
-                    onTap: () {
-                      showInfo(context);
-                    },
-                    child: Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: context.theme.cardColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.info, color: Colors.white),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: MediaQuery.of(context).size.width / 2.4,
-                  bottom: 15,
-                  child: InkWell(
-                    onTap: () async {
-                      // final image = await controller.cameraController.takePicture();
-                      controller.onTackImageCamera(context);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(15),
-                      height: 70,
-                      width: 70,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Image.asset(AppAssets.clickPhoto),
-                    ),
-                  ),
-                ),
 
-
-                controller.isLoading
-                    ? Opacity(
-                      opacity: 0.8,
-                      child: ModalBarrier(
-                        dismissible: false,
-                        color: Colors.black,
-                      ),
-                    )
-                    : Container(),
-                controller.isLoading
-                    ? Center(
-                      child: CircularProgressIndicator(
-                        color: context.theme.focusColor,
-                      ),
-                    )
-                    : Container(),
+                // Loading overlay
+                if (controller.isLoading) _buildLoadingOverlay(context),
               ],
             );
           },
@@ -240,273 +70,290 @@ class ScanFoodView extends GetView<ScanFoodController> {
       ),
     );
   }
-  showInfo(BuildContext context) {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      builder: (context) {
-        return SafeArea(
+
+  Widget _buildControlButtons(BuildContext context, ScanFoodController controller) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // Gallery icon-only button (left)
+        _buildIconControlButton(
+          context,
+          icon: Icons.photo_library_outlined,
+          onTap: () => controller.takeImage(ImageSource.gallery, context),
+        ),
+
+        // Minimal capture button
+        GestureDetector(
+          onTap: () => controller.onTackImageCamera(context),
           child: Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(color: Colors.black),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 200,
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              gradient: AppColor.primaryGradient,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColor.primaryOrange.withOpacity(0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
                 ),
-                Text(
-                  'Snap Tips'.tr,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: poppins),
+              ],
+            ),
+            child: Container(
+              margin: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ),
+
+        // Tips icon-only button (right)
+        _buildIconControlButton(
+          context,
+          icon: Icons.lightbulb_outline,
+          onTap: () => showInfo(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIconControlButton(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback onTap,
+    double size = 56,
+    double iconSize = 24,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.35),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withOpacity(0.14),
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: iconSize,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingOverlay(BuildContext context) {
+    return Container(
+      color: Colors.black.withOpacity(0.8),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ModernLoadingIndicator(
+                size: 48,
+                color: AppColor.primaryOrange,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Analyzing food...',
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                Container(
-                  height: 150,
-                  width: 150,
-                  padding: const EdgeInsets.all(10),
-                  child: Stack(
-                    children: [
-                      Container(
-                        height: 120,
-                        width: 120,
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: context.theme.focusColor),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  image: AssetImage(AppAssets.scanComplete),
-                                  fit: BoxFit.cover),
-                              shape: BoxShape.circle),
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: Container(
-                          height: 40,
-                          width: 40,
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                              color: context.theme.focusColor.withOpacity(0.9),
-                              shape: BoxShape.circle),
-                          child: Container(
-                              height: 35,
-                              width: 35,
-                              decoration: BoxDecoration(
-                                  color: context.theme.focusColor,
-                                  shape: BoxShape.circle),
-                              child: const Icon(
-                                Icons.done,
-                                color: Colors.white,
-                              )),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 150,
-                              padding: const EdgeInsets.all(10),
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    height: 120,
-                                    width: 120,
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: const BoxDecoration(
-                                        shape: BoxShape.circle, color: Colors.red),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                              image: AssetImage(AppAssets.soClose),
-                                              fit: BoxFit.cover),
-                                          shape: BoxShape.circle),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Container(
-                                      height: 40,
-                                      width: 40,
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          color: Colors.red.withOpacity(0.9),
-                                          shape: BoxShape.circle),
-                                      child: Container(
-                                          height: 35,
-                                          width: 35,
-                                          decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle),
-                                          child: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                          )),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            Text(
-                              'Too close'.tr,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: poppins,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          ],
-                        )),
-                    Expanded(
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 150,
-                              padding: const EdgeInsets.all(10),
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    height: 120,
-                                    width: 120,
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: const BoxDecoration(
-                                        shape: BoxShape.circle, color: Colors.red),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                              image: AssetImage(AppAssets.soFar),
-                                              fit: BoxFit.cover),
-                                          shape: BoxShape.circle),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Container(
-                                      height: 40,
-                                      width: 40,
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          color: Colors.red.withOpacity(0.9),
-                                          shape: BoxShape.circle),
-                                      child: Container(
-                                          height: 35,
-                                          width: 35,
-                                          decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle),
-                                          child: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                          )),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            Text(
-                              'Too far'.tr,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: poppins,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          ],
-                        )),
-                    Expanded(
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 150,
-                              padding: const EdgeInsets.all(10),
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    height: 120,
-                                    width: 120,
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: const BoxDecoration(
-                                        shape: BoxShape.circle, color: Colors.red),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                              image: AssetImage(
-                                                  AppAssets.scanComplete),
-                                              fit: BoxFit.cover),
-                                          shape: BoxShape.circle),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Container(
-                                      height: 40,
-                                      width: 40,
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          color: Colors.red.withOpacity(0.9),
-                                          shape: BoxShape.circle),
-                                      child: Container(
-                                          height: 35,
-                                          width: 35,
-                                          decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle),
-                                          child: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                          )),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            Text(
-                              'Multi-species'.tr,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: poppins,
-                                  fontWeight: FontWeight.bold),
-                            )
-                          ],
-                        )),
-                  ],
-                ),
-                Spacer(),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: InkWell(
-                    onTap: () {
-                      Get.back();
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: 60,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          color: context.theme.focusColor,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Text(
-                        'Continue'.tr,
-                        style: context.textTheme.headlineMedium,
-                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void showInfo(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black,
+                Colors.grey[900]!,
+              ],
+            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  // Handle
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                )
-              ],
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Title
+                  Text(
+                    'Snap Tips'.tr,
+                    style: context.textTheme.headlineLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Good example
+                  _buildTipExample(
+                    context,
+                    AppAssets.scanComplete,
+                    'Perfect Shot',
+                    'Well-lit, centered food',
+                    AppColor.success,
+                    Icons.check_circle,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Bad examples
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTipExample(
+                          context,
+                          AppAssets.soClose,
+                          'Too close'.tr,
+                          'Move camera back',
+                          AppColor.error,
+                          Icons.cancel,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTipExample(
+                          context,
+                          AppAssets.soFar,
+                          'Too far'.tr,
+                          'Move camera closer',
+                          AppColor.error,
+                          Icons.cancel,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const Spacer(),
+                  
+                  // Continue button
+                  ModernButton(
+                    text: 'Continue'.tr,
+                    style: ModernButtonStyle.gradient,
+                    size: ModernButtonSize.large,
+                    width: double.infinity,
+                    onPressed: () => Get.back(),
+                  ),
+                ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTipExample(
+    BuildContext context,
+    String imagePath,
+    String title,
+    String subtitle,
+    Color color,
+    IconData statusIcon,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  imagePath,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    statusIcon,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: context.textTheme.titleSmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: Colors.white.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
