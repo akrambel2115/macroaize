@@ -256,15 +256,22 @@ class ModernNutrientCard extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Flexible(
-                child: Text(
-                  value,
-                  style: context.textTheme.headlineMedium?.copyWith(
-                    color: isDark ? AppColor.darkText : AppColor.neutralGrey900,
-                    fontWeight: FontWeight.bold,
-                    height: 1.0,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(opacity: animation, child: ScaleTransition(scale: animation, child: child));
+                  },
+                  child: Text(
+                    value,
+                    key: ValueKey<String>(value),
+                    style: context.textTheme.headlineMedium?.copyWith(
+                      color: isDark ? AppColor.darkText : AppColor.neutralGrey900,
+                      fontWeight: FontWeight.bold,
+                      height: 1.0,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 4),
