@@ -26,13 +26,57 @@ class ScanFoodView extends GetView<ScanFoodController> {
 
             return Stack(
               children: [
-                // Camera preview
-                Positioned.fill(
-                  child: CameraPreview(controller.cameraController),
-                ),
+                // Camera preview (only when initialized)
+                if (controller.cameraController?.value.isInitialized == true)
+                  Positioned.fill(
+                    child: CameraPreview(controller.cameraController!),
+                  ),
 
-                // Overlay with scanning frame (rounded)
-                const ScannerOverlay(width: 300, height: 260, borderRadius: 36),
+                // Overlay with scanning frame (rounded). Make it tappable when
+                // the camera is not initialized so the user can trigger the
+                // permission prompt on-demand. A localized message is shown
+                // inside the scanning square when camera access isn't granted.
+                Positioned.fill(
+                  child: Center(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        // If camera isn't initialized, try to activate it which
+                        // will trigger the native permission dialog.
+                        if (controller.cameraController?.value.isInitialized != true) {
+                          controller.ensureCameraActive();
+                        }
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ScannerOverlay(width: 300, height: 260, borderRadius: 36),
+                          if (controller.cameraController?.value.isInitialized != true)
+                            Container(
+                              width: 300,
+                              height: 260,
+                              alignment: Alignment.center,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.photo_camera_outlined, color: Colors.white70, size: 36),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'grant_camera_access_in_scanner'.tr,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
 
                 // Combined controls + picker placed at the bottom. The picker
                 // appears under the central capture button.
