@@ -82,6 +82,7 @@ const Map<String, String> english = {
   "Adjust goals" : "Adjust goals",
   "Calories,carbs,fat and protein" : "Calories,carbs,fat and protein",
   "Chat history" : "Chat history",
+  "The coach does not memorize chat history. Each interaction is independent.": "The coach does not memorize chat history. Each interaction is independent.",
   "Legal" : "Legal",
   "Terms and Condition" : "Terms and Condition",
   "Privacy Policy" : "Privacy Policy",
@@ -92,7 +93,7 @@ const Map<String, String> english = {
   "Are you sure you want to delete this item?" : "Are you sure you want to delete this item?",
   "Delete" : "Delete",
   "Search by Food Name/Dish" : "Search by Food Name/Dish",
-  "🎯 Calorie Goal Reached" : "🎯 Calorie Goal Reached",
+  "Calorie Goal Reached" : "Calorie Goal Reached",
   "You've completed your calorie goal for today. Would you like to add more?" : "You've completed your calorie goal for today. Would you like to add more?",
   "Done" : "Done",
   "Add More Calories" : "Add More Calories",
@@ -224,7 +225,7 @@ const Map<String, String> english = {
   "Quantity" : "Quantity",
   "Ask With AI" : "Ask With AI",
   "This picture not available Calorie,Protein,Carbs and Fats," : "This picture not available Calorie,Protein,Carbs and Fats,",
-  "Ask Botanist" : "Ask Botanist",
+  "Ask Coach" : "Ask Coach",
   "Write your message" : "Write your message",
   "Confirm Reset" : "Confirm Reset",
   "Are you sure you want to Reset Data?" : "Are you sure you want to Reset Data?",
@@ -451,6 +452,11 @@ const Map<String, String> english = {
   "track_subtitle": "Track your daily nutrition",
   "goal_label": "Goal",
   "Analyzing nutrition...": "Analyzing nutrition...",
+  // Permission UI
+  "grant_camera_access_in_scanner": "Tap the frame to grant camera access",
+  "camera_permission_denied_title": "Camera permission required",
+  "camera_permission_denied_message": "Camera access was denied. Please enable camera permission in your device settings to use the scanner.",
+  "ok": "OK",
 
 
 };

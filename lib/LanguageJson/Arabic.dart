@@ -82,6 +82,7 @@ const Map<String, String> arabic = {
   "Adjust goals": "تعديل الأهداف",
   "Calories,carbs,fat and protein": "السعرات، الكربوهيدرات، الدهون والبروتين",
   "Chat history": "سجل المحادثات",
+  "The coach does not memorize chat history. Each interaction is independent.": "لا يقوم المدرب بتذكر سجل المحادثة. كل تفاعل مستقل.",
   "Legal": "قانوني",
   "Terms and Condition": "الشروط والأحكام",
   "Privacy Policy": "سياسة الخصوصية",
@@ -92,7 +93,7 @@ const Map<String, String> arabic = {
   "Are you sure you want to delete this item?": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
   "Delete": "حذف",
   "Search by Food Name/Dish": "ابحث باسم الطعام / الطبق",
-  "🎯 Calorie Goal Reached": "🎯 تم الوصول إلى هدف السعرات",
+  "Calorie Goal Reached": "تم الوصول إلى هدف السعرات",
   "You've completed your calorie goal for today. Would you like to add more?": "لقد أكملت هدف السعرات الحرارية لهذا اليوم. هل ترغب في إضافة المزيد؟",
   "Done": "تم",
   "Add More Calories": "أضف المزيد من السعرات",
@@ -224,7 +225,7 @@ const Map<String, String> arabic = {
   "Quantity": "الكمية",
   "Ask With AI": "اسأل الذكاء الاصطناعي",
   "This picture not available Calorie,Protein,Carbs and Fats,": "لا تتوفر في هذه الصورة معلومات عن السعرات الحرارية أو البروتين أو الكربوهيدرات أو الدهون.",
-  "Ask Botanist": "اسأل عالم النبات",
+  "Ask Coach": "اسأل المدرب",
   "Write your message": "اكتب رسالتك",
   "Confirm Reset": "تأكيد إعادة تعيين",
   "Are you sure you want to Reset Data?": "هل أنت متأكد أنك تريد إعادة تعيين الحساب؟",
@@ -452,5 +453,12 @@ const Map<String, String> arabic = {
   "track_subtitle": "تتبع تغذيتك اليومية",
   "goal_label": "الهدف",
   "Analyzing nutrition...": "تحليل التغذية..."
+
+  ,
+  // Permission UI
+  "grant_camera_access_in_scanner": "اضغط على الإطار لمنح إذن الوصول إلى الكاميرا",
+  "camera_permission_denied_title": "مطلوب إذن الكاميرا",
+  "camera_permission_denied_message": "تم رفض الوصول إلى الكاميرا. الرجاء تمكين إذن الكاميرا من إعدادات الجهاز لاستخدام الماسح.",
+  "ok": "حسناً",
 
 };
