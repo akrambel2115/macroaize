@@ -18,10 +18,14 @@ import '../../Model/ChatModel.dart';
 import '../../Model/openAIModel.dart';
 import '../../constant/Appkey.dart';
 import '../../constant/FontFamily.dart';
+import '../../widgets/CropperUiSettings.dart';
 
 class ChatController extends GetxController {
   Map<String,dynamic>? argument = Get.arguments;
   bool recording = false;
+  double soundLevel = 0.0;
+  bool _lastResultIsFinal = false;
+  bool _heardSpeech = false;
   TextEditingController controller = TextEditingController();
   ScrollController scrollController = ScrollController();
   TextEditingController feedController = TextEditingController();
@@ -73,8 +77,6 @@ class ChatController extends GetxController {
 
     // TODO: implement onInit
 
-    _initSpeech();
-
     super.onInit();
     if(argument != null)
     {
@@ -98,9 +100,13 @@ class ChatController extends GetxController {
     update();
   }
 
-  void _initSpeech() async {
-
-    speechEnabled = await speech.initialize();
+  Future<void> _initSpeech() async {
+    // Initialize speech only on demand to avoid permission prompt at app start
+    try {
+      speechEnabled = await speech.initialize();
+    } catch (_) {
+      speechEnabled = false;
+    }
     update();
   }
 
@@ -340,16 +346,7 @@ class ChatController extends GetxController {
         sourcePath: image.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 100,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Cropper'.tr,
-            toolbarColor: context.theme.focusColor,
-            toolbarWidgetColor: context.theme.hintColor,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false,
-          ),
-          IOSUiSettings(title: 'Cropper'.tr),
-        ],
+        uiSettings: cropperUiSettings(context),
       );
       if (croppedFile != null) {
         imagePath = File(croppedFile.path);
@@ -369,20 +366,69 @@ class ChatController extends GetxController {
   }
 
   void startListening() async {
-    await speech.listen(onResult: _onSpeechResult);
-    recording = true;
-    update();
+  // Prepare a fresh listening session: clear previous transcript and flags
+  if (!speechEnabled) {
+    await _initSpeech();
+    if (!speechEnabled) return; // can't start if init failed/denied
+  }
+  speechToText = "";
+  _heardSpeech = false;
+  _lastResultIsFinal = false;
+  await speech.listen(onResult: _onSpeechResult, onSoundLevelChange: _onSoundLevelChange);
+  recording = true;
+  update();
   }
 
   void stopListening(BuildContext context) async {
     await speech.stop();
+    // Give the speech recognizer a short moment to deliver any final result.
+    // Some devices or engines deliver the final chunk slightly after stop().
+    int tries = 0;
+    while (!_lastResultIsFinal && tries < 8) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      tries++;
+    }
+
     recording = false;
-    sendMsg(text: speechToText);
-    update();
+    soundLevel = 0.0;
+    // reset the final flag for next session
+    _lastResultIsFinal = false;
+
+    // Only send if this listening session actually captured speech. This avoids
+    // re-sending the previous message when the user starts/stops without speaking.
+    if (_heardSpeech && speechToText.trim().isNotEmpty) {
+      final textToSend = speechToText.trim();
+      // clear buffer so it won't be reused accidentally
+      speechToText = "";
+      _heardSpeech = false;
+      sendMsg(text: textToSend);
+    } else {
+      // No new speech captured; update UI but do not send.
+      update();
+    }
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
     speechToText = result.recognizedWords;
+    // mark that we heard something in this session
+    try {
+      if (result.recognizedWords.trim().isNotEmpty) {
+        _heardSpeech = true;
+      }
+    } catch (_) {}
+    // record whether this result was the final chunk so stopListening can wait
+    try {
+      _lastResultIsFinal = result.finalResult;
+    } catch (_) {
+      // some implementations may not expose finalResult; ignore
+    }
+    update();
+  }
+
+  void _onSoundLevelChange(double level) {
+  // speech_to_text provides a sound level in a device-dependent range; normalize to 0..1
+  final normalized = (level / 10.0).clamp(0.0, 1.0);
+  soundLevel = normalized;
     update();
   }
 
