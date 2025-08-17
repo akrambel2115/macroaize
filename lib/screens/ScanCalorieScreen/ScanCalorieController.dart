@@ -490,7 +490,7 @@ class ScanCalorieController extends GetxController {
         return AlertDialog(
           backgroundColor: context.theme.cardColor,
           title: Text(
-            "🎯 Calorie Goal Reached",
+            "Calorie Goal Reached",
             style: context.textTheme.headlineMedium,
           ),
           content: Text(

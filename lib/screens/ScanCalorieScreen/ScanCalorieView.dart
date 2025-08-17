@@ -698,7 +698,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
             ),
             const SizedBox(height: 20),
             ModernButton(
-              text: "Ask Botanist".tr,
+              text: "Ask Coach".tr,
               style: ModernButtonStyle.secondary,
               size: ModernButtonSize.medium,
               onPressed: () {

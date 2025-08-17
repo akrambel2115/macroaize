@@ -402,7 +402,7 @@ class LocalFoodController extends GetxController {
         return AlertDialog(
           backgroundColor: context.theme.cardColor,
           title: Text(
-            "🎯 Calorie Goal Reached".tr,
+            "Calorie Goal Reached".tr,
             style: context.textTheme.headlineMedium,
           ),
           content: Text(
