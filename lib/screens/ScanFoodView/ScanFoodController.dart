@@ -12,29 +12,37 @@ import '../../widgets/CropperUiSettings.dart';
 
 import '../../SharePrefHelper/SharePref.dart';
 import '../../SharePrefHelper/SharePrefKey.dart';
-import '../../main.dart';
 import '../../routes/app_routes.dart';
 
-class ScanFoodController extends GetxController {
-  late CameraController cameraController;
+class ScanFoodController extends GetxController with WidgetsBindingObserver {
+  CameraController? cameraController;
   // Default to snack(s) so the picker focuses on Snack by default
   String isIdentify = "snack(s)";
   File? imagePath;
   bool isLoading = false;
   final ImagePicker _picker = ImagePicker();
+  bool _permissionDialogShown = false;
 
   @override
   Future<void> onInit() async {
     // TODO: implement onInit
     super.onInit();
+  WidgetsBinding.instance.addObserver(this);
+  await _ensureCameraReady();
+  }
 
-    cameraController = CameraController(cameras[0], ResolutionPreset.max);
-
+  Future<void> _ensureCameraReady() async {
     try {
-      await cameraController.initialize(); // Wait for initialization
-      await cameraController.lockCaptureOrientation(
-        DeviceOrientation.portraitUp,
-      ); // Now it's safe
+      final cams = await availableCameras();
+      if (cams.isEmpty) {
+        if (kDebugMode) print('No cameras available');
+        update();
+        return;
+      }
+
+      cameraController = CameraController(cams[0], ResolutionPreset.max);
+      await cameraController!.initialize();
+      await cameraController!.lockCaptureOrientation(DeviceOrientation.portraitUp);
       update();
     } catch (e) {
       if (e is CameraException) {
@@ -42,28 +50,83 @@ class ScanFoodController extends GetxController {
           print("Camera error: ${e.description}");
           print("Error code: ${e.code}");
         }
-
-        if (e.code == 'CameraAccessDenied') {
-          // Handle permission denial
-        } else {
-          // Handle other errors
+        // If permission was denied, show a localized alert directing the
+        // user to grant camera access from the device/app settings. Avoid
+        // showing the same dialog repeatedly.
+        if (e.code == 'CameraAccessDenied' && !_permissionDialogShown) {
+          _permissionDialogShown = true;
+          try {
+            Get.dialog(
+              AlertDialog(
+                backgroundColor: Colors.black,
+                title: Text(
+                  'camera_permission_denied_title'.tr,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                content: Text(
+                  'camera_permission_denied_message'.tr,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      _permissionDialogShown = false;
+                      Get.back();
+                    },
+                    child: Text('ok'.tr),
+                  ),
+                ],
+              ),
+              barrierDismissible: true,
+            );
+          } catch (_) {
+            // Ignore any dialog errors
+          }
         }
       }
+      // Swallow errors to avoid forcing permission at startup
+      update();
     }
+  }
+
+  // Public: ensure camera is initialized when scanner becomes visible again
+  Future<void> ensureCameraActive() async {
+    if (cameraController == null || cameraController!.value.isInitialized == false) {
+      await _ensureCameraReady();
+    }
+  }
+
+  // Public: release camera resources when scanner is not visible
+  void releaseCamera() {
+    try {
+      cameraController?.dispose();
+    } catch (_) {}
+    cameraController = null;
+    update();
   }
 
   @override
   void onClose() {
     // TODO: implement onClose
     super.onClose();
-    cameraController.dispose();
+  WidgetsBinding.instance.removeObserver(this);
+  cameraController?.dispose();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    cameraController.dispose();
+  cameraController?.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      // Release camera when app goes to background or becomes inactive
+      releaseCamera();
+    }
+    // On resume: we keep it lazy; it will be ensured when scanner becomes visible again
   }
 
   takeImage(ImageSource source, BuildContext context) async {
@@ -78,7 +141,16 @@ class ScanFoodController extends GetxController {
   onTackImageCamera(BuildContext context) async {
     isLoading = true;
     update();
-    XFile imageFile = await cameraController.takePicture();
+    // ensure camera is initialized before taking a picture
+    if (cameraController == null || cameraController!.value.isInitialized == false) {
+      await _ensureCameraReady();
+      if (cameraController == null || cameraController!.value.isInitialized == false) {
+        isLoading = false;
+        update();
+        return;
+      }
+    }
+    XFile imageFile = await cameraController!.takePicture();
     File originalFile = File(imageFile.path);
     cropImage(originalFile, context);
   }
@@ -97,23 +169,27 @@ class ScanFoodController extends GetxController {
       if (croppedFile != null) {
         File image = File(croppedFile.path);
         if(devBypassPremium){
+          releaseCamera();
           // Development mode: ignore premium & limits
           Get.toNamed(
             Routes.scanCalorieView,
             arguments: {'image': image, 'type': isIdentify},
           );
         } else if(Get.find<PremiumController>().isPremium){
+          releaseCamera();
           Get.toNamed(
             Routes.scanCalorieView,
             arguments: {'image': image, 'type': isIdentify},
           );
         } else {
           if(scanLimit==0){
+            releaseCamera();
             Get.toNamed(Routes.premiumView);
           } else {
             scanLimit--;
             update();
             storeScanLimit();
+            releaseCamera();
             Get.toNamed(
               Routes.scanCalorieView,
               arguments: {'image': image, 'type': isIdentify},
