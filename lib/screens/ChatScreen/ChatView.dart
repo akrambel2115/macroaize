@@ -1,16 +1,29 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/constant/FontFamily.dart';
 import 'package:foodcalorietracker/screens/ChatScreen/ChatController.dart';
 import 'package:foodcalorietracker/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:lottie/lottie.dart';
+import '../../widgets/VoiceVisualizer.dart';
 import '../../widgets/ChatWidget.dart';
+import '../../SharePrefHelper/SharePref.dart';
+import '../../SharePrefHelper/SharePrefKey.dart';
 
-class ChatView extends GetView<ChatController> {
+class ChatView extends StatefulWidget {
   const ChatView({super.key});
+
+  @override
+  State<ChatView> createState() => _ChatViewState();
+}
+
+class _ChatViewState extends State<ChatView> {
+  OverlayEntry? _chatNoticeEntry;
+  late final ChatController controller = Get.find();
+  static const double _kActionGap = 6.0;
+  static const double _kActionButtonSize = 44.0;
+  static const double _kGallerySize = _kActionButtonSize + (_kActionGap * 2);
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +34,59 @@ class ChatView extends GetView<ChatController> {
           Get.back();
         }),
         backgroundColor: context.theme.scaffoldBackgroundColor,
-        title: Text("Ask Botanist".tr, style: context.textTheme.headlineMedium),
+        title: Text("Ask Coach".tr, style: context.textTheme.headlineMedium),
+        actions: [
+          // Persistent lamp icon to indicate/ toggle the chat-history notice
+          IconButton(
+            tooltip: 'Show chat notice'.tr,
+            onPressed: () async {
+              // Always remove existing entry first to avoid duplicates
+              if (_chatNoticeEntry != null) {
+                AppWidgets.hideTopNotification(_chatNoticeEntry);
+                _chatNoticeEntry = null;
+              }
+              // mark as seen so first-time auto-show won't re-trigger
+              await SharedPref.saveBool(SharePrefKey.hasSeenChatHistoryNotice, true);
+              _chatNoticeEntry = AppWidgets.showTopNotification(
+                context,
+                'The coach does not memorize chat history. Each interaction is independent.'.tr,
+                duration: const Duration(seconds: 10),
+                autoDismissAfter: const Duration(seconds: 10),
+                persistent: true,
+                onDismissed: () {
+                  // clear local reference so next click immediately shows a new banner
+                  _chatNoticeEntry = null;
+                  if (mounted) setState(() {});
+                },
+              );
+              if (mounted) setState(() {});
+            },
+            icon: Icon(Icons.lightbulb_outline, color: context.theme.primaryColor),
+          ),
+        ],
       ),
       body: GetBuilder<ChatController>(
-        builder: (controller) {
+        builder: (_) {
+          // One-time chat history notice: show top notification the first time user opens chat
+          Future.microtask(() async {
+            final seen = await SharedPref.readBool(SharePrefKey.hasSeenChatHistoryNotice) ?? false;
+            if (!seen) {
+              SharedPref.saveBool(SharePrefKey.hasSeenChatHistoryNotice, true);
+              // show and keep a reference so the lamp can toggle it
+              _chatNoticeEntry = AppWidgets.showTopNotification(
+                context,
+                'The coach does not memorize chat history. Each interaction is independent.'.tr,
+                duration: const Duration(seconds: 10),
+                autoDismissAfter: const Duration(seconds: 10),
+                persistent: true,
+                onDismissed: () {
+                  _chatNoticeEntry = null;
+                  if (mounted) setState(() {});
+                },
+              );
+              setState(() {});
+            }
+          });
           return Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).padding.bottom,
@@ -92,138 +154,138 @@ class ChatView extends GetView<ChatController> {
                     ),
                   ),
 
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        controller.takeImage(ImageSource.gallery, context);
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                            color: context.theme.primaryColor,
-                            shape: BoxShape.circle
-                        ),
-                        child: Icon(Icons.add,color: context.theme.scaffoldBackgroundColor,size: 30,),
-                      ),
-                    ),
-                    if(controller.recording == false)
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: TextField(
-                            style: TextStyle(
-                              color: context.theme.scaffoldBackgroundColor,
-                              fontFamily: poppins,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            onTapOutside: (event) {
-                              FocusScope.of(context).unfocus();
-                            },
-                            controller: controller.controller,
-                            onChanged: (value) {
-                              controller.controller.text = value;
-                              controller.update();
-                            },
-                            onSubmitted:
-                                (value) => controller.sendMsg(
-                              text: controller.controller.text,
-                            ),
-                            minLines: 1,
-                            maxLines: 4,
-                            keyboardType: TextInputType.multiline,
-                            decoration: InputDecoration(
-                              fillColor: context.theme.primaryColor,
-                              filled: true,
-                              hintText: 'Write your message'.tr,
-                              constraints: const BoxConstraints(
-                                minHeight: 30,
-                                maxWidth: double.infinity,
-                              ),
-                              hintStyle: TextStyle(
-                                color: context.theme.scaffoldBackgroundColor,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.withOpacity(0.3),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.withOpacity(0.3),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.withOpacity(0.3),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(color: context.theme.primaryColor,borderRadius: BorderRadius.circular(10)),
-                                child: Lottie.asset(AppAssets.voiceWave,
-                                    width: double.infinity,
-                                    fit: BoxFit.fill,
-                                    height: 50)),
-                          )),
-
-                    if (controller.controller.text.isNotEmpty || controller.recording)
-                      Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                            color: context.theme.primaryColor,
-                            shape: BoxShape.circle
-                        ),
-                        child: IconButton(
-                          onPressed: () {
-                            if (controller.recording) {
-                              controller.stopListening(context);
-                            } else {
-                              controller.sendMsg(text: controller.controller.text,);
-                            }
-                          },
-                          icon: Icon(Icons.arrow_upward, color: context.theme.scaffoldBackgroundColor,size: 30,),
-                        ),
-                      ),
-                    if (controller.recording == false && controller.controller.text.isEmpty)
+                // New rounded input bar matching the attached design
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
+                  child: Row(
+                    children: [
+                      // Gallery / add button (small)
+                      // Gallery icon (rounded square, subtle border)
                       GestureDetector(
                         onTap: () {
                           if (controller.recording) {
+                            // When recording, this button acts as a close/stop control
                             controller.stopListening(context);
                           } else {
-                            controller.startListening();
+                            controller.takeImage(ImageSource.gallery, context);
                           }
                         },
-                        child: Container(
-                          alignment: Alignment.center,
-
-                          height: 50,
-                          width: 50,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          width: _kGallerySize,
+                          height: _kGallerySize,
+                          margin: const EdgeInsets.only(right: _kActionGap),
                           decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: context.theme.primaryColor),
-                          child: Icon(
-                            Icons.mic,
-                            color: context.theme.scaffoldBackgroundColor,
+                            // change color smoothly when toggling recording
+                            color: controller.recording
+                                ? Colors.red.withOpacity(0.12)
+                                : AppColor.primaryOrange.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 250),
+                              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: FadeTransition(opacity: anim, child: child)),
+                              child: Icon(
+                                controller.recording ? Icons.close : Icons.photo_library_outlined,
+                                color: controller.recording ? Colors.red : AppColor.primaryOrange,
+                                size: 20,
+                                key: ValueKey(controller.recording),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                  ],
+
+                      // Centered rounded input container matching the image
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.only(left: 10, right: _kActionGap, top: _kActionGap, bottom: _kActionGap),
+                          decoration: BoxDecoration(
+                            color: AppColor.neutralWhite,
+                            borderRadius: BorderRadius.circular(28),
+                            border: Border.all(color: AppColor.neutralGrey200),
+                          ),
+                          child: Row(
+                            children: [
+                              // Input field (no avatar inside)
+                              Expanded(
+                                child: controller.recording == false
+                                    ? TextField(
+                                        controller: controller.controller,
+                                        onChanged: (value) => controller.update(),
+                                        onSubmitted: (_) => controller.sendMsg(text: controller.controller.text),
+                                        minLines: 1,
+                                        maxLines: 4,
+                                        style: TextStyle(
+                                          color: AppColor.neutralGrey900,
+                                          fontFamily: poppins,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16,
+                                        ),
+                                        decoration: InputDecoration(
+                                          isCollapsed: true,
+                                          hintText: 'Ask anything'.tr,
+                                          hintStyle: TextStyle(
+                                            color: AppColor.neutralGrey500,
+                                            fontSize: 15,
+                                          ),
+                                          border: InputBorder.none,
+                                          contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                                        ),
+                                      )
+                                    : SizedBox(
+                                        height: 40,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                          child: VoiceVisualizer(
+                                            level: controller.soundLevel,
+                                            width: 40,
+                                            height: 40,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+
+                              // removed internal mic icon per request
+
+                              // Circular send / mic button (black) on the right - no outer padding; container provides the gap
+                              GestureDetector(
+                                onTap: () {
+                                  if (controller.recording) {
+                                    controller.stopListening(context);
+                                  } else if (controller.controller.text.isNotEmpty) {
+                                    controller.sendMsg(text: controller.controller.text);
+                                  } else {
+                                    controller.startListening();
+                                  }
+                                },
+                                child: Container(
+                                  height: 44,
+                                  width: 44,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: Icon(
+                                      controller.controller.text.isNotEmpty || controller.recording
+                                          ? Icons.arrow_upward
+                                          : Icons.multitrack_audio,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
