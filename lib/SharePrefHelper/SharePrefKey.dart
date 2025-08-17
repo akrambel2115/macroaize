@@ -30,4 +30,5 @@ class SharePrefKey {
   static String countryCode = 'countryCode';
   static String languageCode = 'languageCode';
   static String language = 'language';
+  static String hasSeenChatHistoryNotice = 'hasSeenChatHistoryNotice';
 }
