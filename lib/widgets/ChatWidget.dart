@@ -25,89 +25,102 @@ class ChatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment:
-      isUser == true ? CrossAxisAlignment.start : CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0),
-          child: Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(vertical: 0),
-            decoration: BoxDecoration(
-              color:
-              isUser == true
-                  ? Colors.transparent
-                  : context.theme.primaryColor.withOpacity(0.05),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+  const double _kTypingIndicatorSize = 16.0;
+    // Right-aligned for user messages, left-aligned for AI messages
+    final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    final bgColor = isUser
+        ? context.theme.primaryColor
+        : context.theme.cardColor;
+    final textColor = isUser ? Colors.white : context.textTheme.bodyLarge?.color;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!isUser) ...[
+            // avatar for AI
+            Image.asset(AppAssets.aiIcon, height: 28, width: 28),
+            const SizedBox(width: 10),
+          ],
+
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isUser ? 16 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 16),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: align,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  isUser
-                      ? Icon(Icons.account_circle_rounded, size: 25)
-                      : Image.asset(AppAssets.aiIcon,height: 25,width: 25,),
-                  const SizedBox(width: 10),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth:
-                          MediaQuery.of(context).size.width *
-                              0.8, // Adjust max width
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (file != null && isUser)
-                              Container(
-                                height: 180,
-                                width: 180,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  image: DecorationImage(
-                                    image: FileImage(File(file!)),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ).paddingOnly(top: 10, bottom: 10),
-                            if (msg.toString().isNotEmpty)
-                              Text(
-                                msg,
-                                style: context.textTheme.titleMedium,
-                                softWrap: true,
-                                // Allow text wrapping
-                                overflow:
-                                TextOverflow
-                                    .clip, // Handle text overflow gracefully
-                              )
-                            else
-                              Lottie.asset(AppAssets.loadingChat).paddingOnly(left: 10),
-                            if(isUser == false && msg.isNotEmpty)
-                              Row(children: [
-                                IconButton(onPressed: ()  {
-                                  Get.find<ChatController>().showFeedbackSheet(context,index);
-                                }, icon: Image.asset(AppAssets.thumbsDown,height: 30,width: 30,color: Colors.grey,)),
-                                IconButton(onPressed: () {
-                                  Clipboard.setData(ClipboardData(text: msg));
-                                  Fluttertoast.showToast(msg: 'Copy'.tr);
-                                }, icon: const Icon(Icons.copy,color: Colors.grey,))
-                              ],)
-                          ],
+                  if (file != null && isUser)
+                    Container(
+                      height: 180,
+                      width: 180,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image: FileImage(File(file!)),
+                          fit: BoxFit.cover,
                         ),
                       ),
-                    ],
-                  ),
+                    ).paddingOnly(top: 6, bottom: 8),
+
+                  if (msg.toString().isNotEmpty)
+                    Text(
+                      msg,
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        color: textColor,
+                        fontSize: 15,
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Lottie.asset(
+                        AppAssets.loadingChat,
+                        width: _kTypingIndicatorSize,
+                        height: _kTypingIndicatorSize,
+                      ),
+                    ),
+
+                  if (!isUser && msg.isNotEmpty)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            Get.find<ChatController>().showFeedbackSheet(context, index);
+                          },
+                          icon: Image.asset(AppAssets.thumbsDown, height: 26, width: 26, color: Colors.grey),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: msg));
+                            Fluttertoast.showToast(msg: 'Copy'.tr);
+                          },
+                          icon: const Icon(Icons.copy, color: Colors.grey),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
           ),
-        ),
-      ],
+
+          if (isUser) ...[
+            const SizedBox(width: 10),
+            Icon(Icons.account_circle_rounded, size: 28),
+          ],
+        ],
+      ),
     );
   }
 }
