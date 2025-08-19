@@ -97,7 +97,10 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                           height: 150,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: context.theme.primaryColor,
+                            // match CurrentWeightUpdate theme-aware background
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade900
+                                : context.theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: CupertinoPicker(
@@ -111,6 +114,7 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                                 controller.selectedFeet = inches ~/ 12;
                                 controller.selectedInches = inches % 12;
                               }
+                              controller.setHasChanges(true);
                               controller.update();
                             },
                             children:
@@ -121,10 +125,9 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                                           "${minCm + index} ${"cm".tr}",
                                           style: TextStyle(
                                             fontSize: 18,
-                                            color:
-                                                context
-                                                    .theme
-                                                    .scaffoldBackgroundColor,
+                                            color: Theme.of(context).brightness == Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black,
                                             fontFamily: poppins,
                                           ),
                                         ),
@@ -139,10 +142,9 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                                           "$ft${"ft".tr} $inch${"in".tr}",
                                           style: TextStyle(
                                             fontSize: 18,
-                                            color:
-                                                context
-                                                    .theme
-                                                    .scaffoldBackgroundColor,
+                                            color: Theme.of(context).brightness == Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black,
                                             fontFamily: poppins,
                                           ),
                                         ),
@@ -157,27 +159,7 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
               ).marginOnly(left: 10, right: 10);
             },
           ),
-          Spacer(),
-          GestureDetector(
-            onTap: () {
-              controller.updateHeight();
-              controller.onChangeSelectedView(0);
-            },
-            child: Container(
-              alignment: Alignment.center,
-              height: 50,
-              margin: EdgeInsets.only(left: 8, right: 8),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: context.theme.focusColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                "Update".tr,
-                style: context.theme.textTheme.titleMedium,
-              ),
-            ),
-          ),
+          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );
