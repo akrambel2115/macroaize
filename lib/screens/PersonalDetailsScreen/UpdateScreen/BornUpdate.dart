@@ -48,7 +48,9 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
-                    color: context.theme.primaryColor,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade900
+                        : context.theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: GetBuilder<PersonalDetailsController>(
@@ -61,11 +63,21 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                         onSelectedItemChanged: (index) {
                           controller.selectedMonth = index;
                           controller.updateDaysInMonth(); // update day list if month changes
+                          controller.setHasChanges(true);
                           controller.update();
                         },
                         children: controller.months.map((month) {
-                          final isSelected = controller.months.indexOf(month) == controller.selectedMonth;
-                          return pickerText(month, isSelected, context);
+                          return Center(
+                            child: Text(
+                              month,
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          );
                         }).toList(),
                       );
                     },
@@ -79,7 +91,9 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
-                    color: context.theme.primaryColor,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade900
+                        : context.theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: GetBuilder<PersonalDetailsController>(
@@ -91,11 +105,21 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                         ),
                         onSelectedItemChanged: (index) {
                           controller.selectedDay = index + 1;
+                          controller.setHasChanges(true);
                           controller.update();
                         },
                         children: controller.days.map((day) {
-                          final isSelected = controller.selectedDay == day;
-                          return pickerText(day.toString(), isSelected, context);
+                          return Center(
+                            child: Text(
+                              day.toString(),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          );
                         }).toList(),
                       );
                     },
@@ -109,7 +133,9 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
-                    color: context.theme.primaryColor,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade900
+                        : context.theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: GetBuilder<PersonalDetailsController>(
@@ -122,11 +148,21 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                         onSelectedItemChanged: (index) {
                           controller.selectedYear = controller.years[index];
                           controller.updateDaysInMonth(); // in case Feb/Leap year
+                          controller.setHasChanges(true);
                           controller.update();
                         },
                         children: controller.years.map((year) {
-                          final isSelected = controller.selectedYear == year;
-                          return pickerText(year.toString(), isSelected, context);
+                          return Center(
+                            child: Text(
+                              year.toString(),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          );
                         }).toList(),
                       );
                     },
@@ -138,26 +174,7 @@ class BornUpdate extends GetView<PersonalDetailsController> {
         },),
 
 
-        Spacer(),
-          GestureDetector(
-            onTap: () {
-              controller.updateBornDay();
-              controller.onChangeSelectedView(0);
-            },
-            child: Container(
-              alignment: Alignment.center,
-              height: 50,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: context.theme.focusColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                "Update".tr,
-                style: context.theme.textTheme.titleMedium,
-              ),
-            ).paddingOnly(top: 30),
-          ),
+          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );
