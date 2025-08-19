@@ -2,6 +2,8 @@ import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 
@@ -68,9 +70,17 @@ class PersonalDetailsController extends GetxController{
     50,(index) => 1975 + index,
   ); //
 
+  // tracks whether current edit view has unsaved changes
+  bool hasChanges = false;
+
+  void setHasChanges(bool v) {
+    hasChanges = v;
+    update();
+  }
+
   onChangeDesiredWeight(int value) {
     selectedDesiredWeight = value;
-    update();
+  setHasChanges(true);
   }
   onChangeSelectedView(int value)
   {
@@ -81,7 +91,7 @@ class PersonalDetailsController extends GetxController{
     isMetric = value;
     selectedWeightKg = ConstantUserMaster.weight;
     selectedWeightLb = (selectedWeightKg * 2.20462).round();
-    update();
+  setHasChanges(true);
   }
 
   updateWeight()
@@ -90,13 +100,13 @@ class PersonalDetailsController extends GetxController{
       {
         ConstantUserMaster.weight = selectedWeightKg;
         SharedPref.saveInt(SharePrefKey.weight, ConstantUserMaster.weight);
-        update();
+    update();
       }else{
       // selectedCm = ((selectedFeet * 30.48) + (selectedInches * 2.54)).toInt();
       selectedWeightKg = (selectedWeightLb * 0.453592).toInt();
       ConstantUserMaster.weight = selectedWeightKg;
       SharedPref.saveInt(SharePrefKey.weight, ConstantUserMaster.weight);
-      update();
+  update();
     }
   }
   updateHeight()
@@ -134,6 +144,106 @@ class PersonalDetailsController extends GetxController{
     SharedPref.saveString(SharePrefKey.gender, ConstantUserMaster.gender);
     update();
   }
+
+  /// Save currently edited view and reset change state
+  void saveCurrentView() {
+    switch (selectedView) {
+      case 1: // Goal
+        ConstantUserMaster.desiredGoal = selectedDesiredWeight;
+        SharedPref.saveInt(SharePrefKey.desiredWeight, ConstantUserMaster.desiredGoal);
+        break;
+      case 2:
+        updateWeight();
+        break;
+      case 3:
+        updateHeight();
+        break;
+      case 4:
+        updateBornDay();
+        break;
+      case 5:
+        updateGender();
+        break;
+    }
+    setHasChanges(false);
+    // Recalculate daily calorie/macros when weight or goal changed to match Overview behavior
+    if (selectedView == 2 || selectedView == 1) {
+      // estimate BMR and activity using same helpers as AnalyticsView
+      final bmr = _estimateBMR(ConstantUserMaster.height, ConstantUserMaster.weight, ConstantUserMaster.age, ConstantUserMaster.gender);
+      final activity = _getActivityFactor(ConstantUserMaster.workOutDay);
+      final tdee = bmr * activity;
+      final adjustedCalories = _adjustCaloriesForGoal(tdee, ConstantUserMaster.weight, ConstantUserMaster.desiredGoal);
+      final macros = calculateMacrosFromTDEE(adjustedCalories.toDouble(), ConstantUserMaster.weight);
+      // persist
+      SharedPref.saveInt(SharePrefKey.calorie, macros['calories']!);
+      SharedPref.saveInt(SharePrefKey.protein, macros['protein']!);
+      SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']!);
+      SharedPref.saveInt(SharePrefKey.fat, macros['fat']!);
+      ConstantUserMaster.calorieGoal = macros['calories']!;
+      ConstantUserMaster.proteinGoal = macros['protein']!;
+      ConstantUserMaster.carbGoal = macros['carbs']!;
+      ConstantUserMaster.fatsGoal = macros['fat']!;
+      // Refresh Home screen data if HomeController is available so UI updates immediately
+      try {
+        Get.find<HomeController>().getAllData();
+      } catch (_) {
+        // HomeController not registered; nothing to do. Home will pick up values on next load.
+      }
+    }
+
+    // show a success notification then return to main view
+    try {
+      Get.snackbar(
+        'Success'.tr,
+        'Saved successfully'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.9),
+        colorText: Colors.white,
+      );
+    } catch (_) {
+      // fall back to simple snackbar without styling if anything fails
+      Get.snackbar('Success'.tr, 'Saved successfully'.tr, snackPosition: SnackPosition.BOTTOM);
+    }
+
+    onChangeSelectedView(0);
+  }
+
+  // Helper: estimate BMR (same formula used in AnalyticsView)
+  double _estimateBMR(int heightCm, int weightKg, int age, String gender) {
+    if (gender.toLowerCase() == 'male') {
+      return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+    }
+    return (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+  }
+
+  // Helper: activity factor based on stored workout frequency
+  double _getActivityFactor(String workOutDays) {
+    switch (workOutDays) {
+      case '0-2':
+        return 1.2;
+      case '3-5':
+        return 1.55;
+      case '6+':
+        return 1.725;
+      default:
+        return 1.2;
+    }
+  }
+
+  // Helper: adjust calories based on goal (deficit or surplus)
+  double _adjustCaloriesForGoal(double tdee, int currentWeight, int desiredGoal) {
+    if (desiredGoal < currentWeight) {
+      final diff = (currentWeight - desiredGoal).abs();
+      final pct = (diff >= 10) ? 0.20 : 0.15;
+      return (tdee * (1 - pct)).clamp(1200, double.infinity);
+    }
+    if (desiredGoal > currentWeight) {
+      final diff = (desiredGoal - currentWeight).abs();
+      final pct = (diff >= 10) ? 0.20 : 0.10;
+      return (tdee * (1 + pct));
+    }
+    return tdee;
+  }
   void updateDaysInMonth() {
     int daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
 
@@ -145,8 +255,9 @@ class PersonalDetailsController extends GetxController{
     }
   }
   onChangeGender(String value) {
-    selectedGender = value;
-    update();
+  selectedGender = value;
+  setHasChanges(true);
+  update();
   }
   int getDaysInMonth(int month, int year) {
     if (month == 1) {
