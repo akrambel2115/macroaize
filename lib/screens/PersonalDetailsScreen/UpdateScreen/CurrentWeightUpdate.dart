@@ -59,15 +59,21 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
           // Height and Weight Pickers
           GetBuilder<PersonalDetailsController>(
             builder: (controller) {
-              int minKg = 51;
-              int minLb = 100;
+              const int minKg = 51;
+              const int maxKg = 150; // cap at 150kg
+              const int minLb = 100; // imperial fallback (unchanged)
+
+              final int kgCount = (maxKg - minKg + 1);
+
+              final int initialItem = controller.isMetric
+                  ? (controller.selectedWeightKg < minKg
+                      ? 0
+                      : (controller.selectedWeightKg > maxKg ? kgCount - 1 : controller.selectedWeightKg - minKg))
+                  : (controller.selectedWeightLb - minLb);
 
               final FixedExtentScrollController scrollController = FixedExtentScrollController(
-                initialItem: controller.isMetric
-                    ? controller.selectedWeightKg - minKg
-                    : controller.selectedWeightLb - minLb,
+                initialItem: initialItem,
               );
-
 
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -89,7 +95,10 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
                           height: 150,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: context.theme.primaryColor,
+                            // adapt wheel background to current theme (dark/light)
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade900
+                                : context.theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: CupertinoPicker(
@@ -101,33 +110,39 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
                               } else {
                                 controller.selectedWeightLb = minLb + index;
                               }
+                              controller.setHasChanges(true);
                               controller.update();
                             },
                             children: controller.isMetric
-                                ? List.generate(150, (index) {
-                              return Center(
-                                child: Text(
-                                  "${minKg + index}${"kg".tr}",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: context.theme.scaffoldBackgroundColor,
-                                    fontFamily: poppins,
-                                  ),
-                                ),
-                              );
-                            })
+                                ? List.generate(kgCount, (index) {
+                                    final value = minKg + index;
+                                    return Center(
+                                      child: Text(
+                                        "${value}${"kg".tr}",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                        color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                                          fontFamily: poppins,
+                                        ),
+                                      ),
+                                    );
+                                  })
                                 : List.generate(150, (index) {
-                              return Center(
-                                child: Text(
-                                  "${minLb + index}${"lb".tr}",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: context.theme.scaffoldBackgroundColor,
-                                    fontFamily: poppins,
-                                  ),
-                                ),
-                              );
-                            }),
+                                    return Center(
+                                      child: Text(
+                                        "${minLb + index}${"lb".tr}",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: Theme.of(context).brightness == Brightness.dark
+                                              ? context.theme.scaffoldBackgroundColor
+                                              : Colors.black,
+                                          fontFamily: poppins,
+                                        ),
+                                      ),
+                                    );
+                                  }),
                           ),
                         ),
                       ],
@@ -138,27 +153,7 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
             },
           ),
 
-          Spacer(),
-          GestureDetector(
-            onTap: () {
-              controller.updateWeight();
-              controller.onChangeSelectedView(0);
-            },
-            child: Container(
-              margin: EdgeInsets.only(left: 8,right: 8),
-              alignment: Alignment.center,
-              height: 50,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color:context.theme.focusColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                "Update".tr,
-                style: context.theme.textTheme.titleMedium,
-              ),
-            ),
-          )
+          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );
