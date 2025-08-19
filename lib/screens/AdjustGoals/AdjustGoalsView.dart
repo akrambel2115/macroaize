@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
 import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsController.dart';
 import 'package:foodcalorietracker/screens/AdjustGoals/AutoGenerateGoal/AutoGoalView.dart';
 import 'package:foodcalorietracker/screens/AdjustGoals/AutoGenerateGoal/AutoHeightWidthView.dart';
@@ -22,11 +20,12 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        if(controller.isAutoGenerate == false)
-        {
-          Get.find<SettingController>().update();
+        if (controller.isAutoGenerate == false) {
+          if (Get.isRegistered<SettingController>()) {
+            Get.find<SettingController>().update();
+          }
           Get.back();
-        }else{
+        } else {
           controller.onChangeAutoGenerate(false);
         }
         return Future(() => true,);
@@ -35,11 +34,12 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
         backgroundColor: context.theme.scaffoldBackgroundColor,
         appBar: AppBar(
           leading: AppWidgets.backButton(context, () {
-            if(controller.isAutoGenerate == false)
-            {
-              Get.find<SettingController>().update();
+            if (controller.isAutoGenerate == false) {
+              if (Get.isRegistered<SettingController>()) {
+                Get.find<SettingController>().update();
+              }
               Get.back();
-            }else{
+            } else {
               controller.onChangeAutoGenerate(false);
             }
           }),
@@ -48,6 +48,8 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
             "Adjust Goals".tr,
             style: context.theme.textTheme.headlineMedium,
           ),
+          // No Save button in AppBar; saving occurs in each edit dialog
+          actions: const [],
         ),
         body: GetBuilder<AdjustGoalsController>(builder: (controller) {
           if(controller.isAutoGenerate)
@@ -77,12 +79,9 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                         ListTile(
                           onTap: () {
                             showUpdateGoalDialog(
-                              ConstantUserMaster.calorieGoal, (p0) {
-                                if (kDebugMode) {
-                                  ConstantUserMaster.calorieGoal = p0;
-                                  SharedPref.saveInt(SharePrefKey.calorie,ConstantUserMaster.calorieGoal);
-                                  controller.update();
-                                }
+                              ConstantUserMaster.calorieGoal,
+                                  (p0) {
+                                controller.updateCalorieGoal(p0);
                               },
                               context,
                               "Update Calorie Goal".tr,
@@ -96,14 +95,14 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                 ConstantUserMaster.calorieGoal.toString(),
-                                style: context.theme.textTheme.headlineMedium,
+                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
                               );
                             },
                           ),
                           trailing: Container(
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -112,17 +111,13 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             ),
                           ),
                         ),
-                        Divider(color: AppColor.grey).paddingAll(5),
+                        Center(child: FractionallySizedBox(widthFactor: 0.92, child: Divider(color: AppColor.neutralGrey200))),
                         ListTile(
                           onTap: () {
                             showUpdateGoalDialog(
                               ConstantUserMaster.proteinGoal,
                                   (p0) {
-                                if (kDebugMode) {
-                                  ConstantUserMaster.proteinGoal = p0;
-                                  SharedPref.saveInt(SharePrefKey.protein, ConstantUserMaster.proteinGoal);
-                                  controller.update();
-                                }
+                                controller.updateProteinGoal(p0);
                               },
                               context,
                               "Update Protein Goal".tr,
@@ -136,14 +131,14 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                  ConstantUserMaster.proteinGoal.toString(),
-                                style: context.theme.textTheme.headlineMedium,
+                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
                               );
                             },
                           ),
                           trailing: Container(
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -152,17 +147,13 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             ),
                           ),
                         ),
-                        Divider(color: AppColor.grey).paddingAll(5),
+                        Center(child: FractionallySizedBox(widthFactor: 0.92, child: Divider(color: AppColor.neutralGrey200))),
                         ListTile(
                           onTap: () {
                             showUpdateGoalDialog(
                               ConstantUserMaster.carbGoal,
                                   (p0) {
-                                if (kDebugMode) {
-                                  ConstantUserMaster.carbGoal = p0;
-                                  SharedPref.saveInt(SharePrefKey.carbs, ConstantUserMaster.carbGoal);
-                                  controller.update();
-                                }
+                                controller.updateCarbGoal(p0);
                               },
                               context,
                               "Update Carb Goal".tr,
@@ -176,14 +167,14 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                 ConstantUserMaster.carbGoal.toString(),
-                                style: context.theme.textTheme.headlineMedium,
+                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
                               );
                             },
                           ),
                           trailing: Container(
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -192,17 +183,13 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             ),
                           ),
                         ),
-                        Divider(color: AppColor.grey).paddingAll(5),
+                        Center(child: FractionallySizedBox(widthFactor: 0.92, child: Divider(color: AppColor.neutralGrey200))),
                         ListTile(
                           onTap: () {
                             showUpdateGoalDialog(
                               ConstantUserMaster.fatsGoal,
                                   (p0) {
-                                if (kDebugMode) {
-                                  ConstantUserMaster.fatsGoal = p0;
-                                  SharedPref.saveInt(SharePrefKey.fat,ConstantUserMaster.fatsGoal);
-                                  controller.update();
-                                }
+                                controller.updateFatGoal(p0);
                               },
                               context,
                               "Update Fat Goal".tr,
@@ -216,14 +203,14 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                 ConstantUserMaster.fatsGoal.toString(),
-                                style: context.theme.textTheme.headlineMedium,
+                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
                               );
                             },
                           ),
                           trailing: Container(
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -237,7 +224,7 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                   ).paddingOnly(bottom: 10),
                   CustomButtom(
                     backgroundcolor: context.theme.focusColor,
-                    btncolor: context.theme.primaryColor,
+                    btncolor: context.theme.brightness == Brightness.light ? Colors.white : context.theme.primaryColor,
                     btntext: "Auto Generate Goal".tr,
                     ontap: () {
                       controller.onChangeAutoGenerate(true);
