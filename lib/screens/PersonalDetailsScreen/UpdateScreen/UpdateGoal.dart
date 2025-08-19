@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
+// ...existing imports kept; removed unused SharePref imports
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
 import 'package:get/get.dart';
 
@@ -27,10 +27,16 @@ class GoalUpdate extends GetView<PersonalDetailsController> {
 
         GetBuilder<PersonalDetailsController>(
           builder: (controller) {
-            int minWeight = 50;
+            const int minWeight = 50;
+            const int maxWeight = 150; // set cap at 150kg
+            final int count = maxWeight - minWeight + 1;
+
+            final int initialItem = ConstantUserMaster.desiredGoal < minWeight
+                ? 0
+                : (ConstantUserMaster.desiredGoal > maxWeight ? count - 1 : ConstantUserMaster.desiredGoal - minWeight);
 
             FixedExtentScrollController weightController = FixedExtentScrollController(
-              initialItem: ConstantUserMaster.desiredGoal - minWeight,
+              initialItem: initialItem,
             );
 
             return Container(
@@ -38,7 +44,9 @@ class GoalUpdate extends GetView<PersonalDetailsController> {
               height: 150,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: context.theme.primaryColor,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey.shade900
+                    : context.theme.scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: CupertinoPicker(
@@ -46,14 +54,17 @@ class GoalUpdate extends GetView<PersonalDetailsController> {
                 itemExtent: 40,
                 onSelectedItemChanged: (index) {
                   controller.onChangeDesiredWeight(minWeight + index);
+                  controller.setHasChanges(true);
                 },
-                children: List.generate(40, (index) {
+                children: List.generate(count, (index) {
                   return Center(
                     child: Text(
                       "${minWeight + index}${"kg".tr}",
                       style: TextStyle(
                         fontSize: 18,
-                        color: context.theme.scaffoldBackgroundColor,
+            color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,
                         fontFamily: poppins,
                       ),
                     ),
@@ -63,32 +74,7 @@ class GoalUpdate extends GetView<PersonalDetailsController> {
             );
           },
         ),
-          Spacer(),
-          GetBuilder<PersonalDetailsController>(
-            builder: (controller) {
-              return GestureDetector(
-                onTap: () {
-                  ConstantUserMaster.desiredGoal = controller.selectedDesiredWeight;
-                  SharedPref.saveInt(SharePrefKey.desiredWeight,ConstantUserMaster.desiredGoal);
-                  controller.onChangeSelectedView(0);
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  height: 50,
-                  margin: EdgeInsets.only(left: 8,right: 8),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.theme.focusColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    "Update".tr,
-                    style: context.theme.textTheme.titleMedium,
-                  ),
-                ).paddingOnly(top: 30),
-              );
-            },
-          ),
+          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );
