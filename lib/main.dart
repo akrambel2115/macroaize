@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,13 +18,10 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-late List<CameraDescription> cameras;
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
   Get.put(MainController());
-  cameras = await availableCameras();
   final dBHelper = DatabaseHelper();
   dBHelper.initDatabase();
   runApp(const MyApp());
