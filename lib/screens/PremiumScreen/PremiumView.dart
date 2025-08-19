@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/PremiumScreen/PremiumController.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
-import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 
 class PremiumView extends GetView<PremiumController> {
@@ -12,191 +9,247 @@ class PremiumView extends GetView<PremiumController> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+  // Increased header height multiplier so the "Go Premium" wrapper is taller
+  final headerHeight = media.size.height * 0.55;
+  final overlap = headerHeight * 0.18;
+
     return Scaffold(
-      backgroundColor: AppColor.neutralGrey50,
+      backgroundColor: AppColor.darkBackground,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildHeroSection(context),
-                    _buildFeaturesList(context),
-                    _buildPricingCards(context),
-                    _buildPurchaseButton(context),
-                    _buildFooter(context),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+        child: Stack(
+          children: <Widget>[
+            _PremiumHeader(height: headerHeight),
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  SizedBox(height: headerHeight - overlap),
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                    // Features
+                    _FeatureRow(
+                      iconWidget: Image.asset(
+                        'assets/icons/scan.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                      title: 'feature_ai_scan_title'.tr,
+                      subtitle: 'feature_ai_scan_subtitle'.tr,
+                      color: AppColor.info,
+                    ),
+                    const SizedBox(height: 16),
+                    _FeatureRow(
+                      iconWidget: Image.asset(
+                        'assets/icons/chatbot.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                      title: 'feature_chatbot_title'.tr,
+                      subtitle: 'feature_chatbot_subtitle'.tr,
+                      color: AppColor.warning,
+                    ),
+                    const SizedBox(height: 16),
+                    _FeatureRow(
+                      iconWidget: Image.asset(
+                        'assets/icons/cook.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                      title: 'feature_recipes_title'.tr,
+                      subtitle: 'feature_recipes_subtitle'.tr,
+                      color: AppColor.accent,
+                    ),
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColor.lightShadow,
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_rounded,
-                color: AppColor.neutralGrey700,
-              ),
-              onPressed: () => Get.back(),
-            ),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: AppColor.primaryGradient,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.diamond_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => controller.inAppPurchase.restorePurchases(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColor.info.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: AppColor.info.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                "Restore".tr,
-                style: context.textTheme.labelMedium?.copyWith(
-                  color: AppColor.info,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                    const SizedBox(height: 24),
 
-  Widget _buildHeroSection(BuildContext context) {
-    return ModernFadeSlideTransition(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: AppColor.primaryGradient,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                "PREMIUM",
-                style: context.textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            Text(
-              "Get Premium".tr,
-              style: context.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColor.neutralGrey900,
-              ),
-            ),
-            
-            const SizedBox(height: 8),
-            
-            Text(
-              "Get All The New Exciting Features".tr,
-              style: context.textTheme.bodyLarge?.copyWith(
-                color: AppColor.neutralGrey600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // Hero image with gradient overlay
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: AppColor.primaryGradient,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColor.primaryGreen.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+                    // Plans
+                    GetBuilder<PremiumController>(
+                      id: 'plan_selection', // Add specific ID for this builder
+                      builder: (c) {
+                        final products = c.products;
+
+                        int indexOfKeyword(List<String> kws) {
+                          final lowerKws = kws.map((e) => e.toLowerCase()).toList();
+                          int idx = products.indexWhere((p) {
+                            final id = p.id.toLowerCase();
+                            final title = p.title.toLowerCase();
+                            return lowerKws.any((k) => id.contains(k) || title.contains(k));
+                          });
+                          return idx;
+                        }
+
+                        int yearlyIndex = indexOfKeyword(['year', 'annual']);
+                        int monthlyIndex = indexOfKeyword(['month']);
+
+                        // Graceful fallbacks if not found
+                        if (yearlyIndex < 0 && products.isNotEmpty) {
+                          yearlyIndex = products.length - 1; // often last
+                        }
+                        if (monthlyIndex < 0 && products.length > 1) {
+                          monthlyIndex = 0; // often first
+                        }
+
+                        final hasData = products.isNotEmpty && (monthlyIndex >= 0 || yearlyIndex >= 0);
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (hasData) ...[
+                              _PlanCard(
+                                title: 'months_12'.tr,
+                                subtitle: 'billed_annually'.tr,
+                                // Format: "originalPrice discountedPrice" for crossed out display
+                                // Show prices in DZD as requested: old price 4200 DZD, actual 3500 DZD
+                                originalPrice: '4200 DZD',
+                                discountedPrice: '3500 DZD',
+                                perMonthText: 'per_month'.tr,
+                                chipText: 'best_value'.tr,
+                                saveText: 'save_percent'.trParams({'percent': '41'}),
+                                isSelected: yearlyIndex >= 0 && c.selected == yearlyIndex,
+                                highlighted: true,
+                                onTap: () {
+                                  if (yearlyIndex >= 0) c.onChangeSelectedIndex(yearlyIndex);
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              _PlanCard(
+                                title: 'month_1'.tr,
+                                subtitle: 'billed_monthly'.tr,
+                                // Show 1-month price as 350 DZD per request
+                                priceText: '350 DZD',
+                                perMonthText: 'per_month'.tr,
+                                isSelected: monthlyIndex >= 0 && c.selected == monthlyIndex,
+                                highlighted: false,
+                                onTap: () {
+                                  if (monthlyIndex >= 0) c.onChangeSelectedIndex(monthlyIndex);
+                                },
+                              ),
+                            ] else ...[
+                              // Loading/placeholder cards - show 12-month as selected by default
+                              _PlanCard(
+                                title: 'months_12'.tr,
+                                subtitle: 'billed_annually'.tr,
+                                originalPrice: '4200 DZD',
+                                discountedPrice: '3500 DZD',
+                                perMonthText: 'per_month'.tr,
+                                chipText: 'best_value'.tr,
+                                saveText: 'save_percent'.trParams({'percent': '17'}),
+                                // Show as selected in placeholder state (c.selected defaults to 0)
+                                isSelected: c.selected == 0, // Assume yearly is at index 0 in placeholder
+                                highlighted: true,
+                                onTap: () {
+                                  // Set to index 0 for yearly in placeholder
+                                  c.onChangeSelectedIndex(0);
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              _PlanCard(
+                                title: 'month_1'.tr,
+                                subtitle: 'billed_monthly'.tr,
+                                priceText: '350 DZD',
+                                perMonthText: 'per_month'.tr,
+                                isSelected: c.selected == 1, // Assume monthly is at index 1 in placeholder
+                                highlighted: false,
+                                onTap: () {
+                                  // Set to index 1 for monthly in placeholder
+                                  c.onChangeSelectedIndex(1);
+                                },
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Continue CTA
+                    ModernButton(
+                      text: 'continue_cta'.tr,
+                      style: ModernButtonStyle.gradient,
+                      size: ModernButtonSize.large,
+                      width: double.infinity,
+                      onPressed: () => controller.buy(),
+                    ),
+
+                    const SizedBox(height: 16),
+                    // Legal links
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () => controller.openPrivacy(),
+                            child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              'Privacy Policy'.tr,
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: AppColor.neutralGrey600,
+                                decoration: TextDecoration.underline,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 12,
+                          color: AppColor.neutralGrey300,
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        InkWell(
+                          onTap: () => controller.openTerms(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              'Terms of Condition'.tr,
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: AppColor.neutralGrey600,
+                                decoration: TextDecoration.underline,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Image.asset(
-                        AppAssets.oneBodyImage,
-                        fit: BoxFit.cover,
-                      ),
+            ),
+            // Top-level close button positioned above the header/scroll content so taps are reliable
+            Positioned(
+              top: 12,
+              right: 12,
+              child: Semantics(
+                label: 'close',
+                button: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => Get.back(),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white10 : Colors.white24,
+                      shape: BoxShape.circle,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            AppColor.primaryGreen.withOpacity(0.8),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                      child: Text(
-                        "Unlock your health potential",
-                        style: context.textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.close_rounded, color: Colors.white),
+                  ),
                 ),
               ),
             ),
@@ -205,292 +258,452 @@ class PremiumView extends GetView<PremiumController> {
       ),
     );
   }
+}
 
-  Widget _buildFeaturesList(BuildContext context) {
-    final features = [
-      {
-        'title': 'Unlock Food Scanner'.tr,
-        'icon': Icons.camera_alt_rounded,
-        'color': AppColor.primaryOrange,
-      },
-      {
-        'title': 'Unlock Food Calorie'.tr,
-        'icon': Icons.local_fire_department_rounded,
-        'color': AppColor.calorieColor,
-      },
-      {
-        'title': 'Unlock Unlimited Chat with Ai'.tr,
-        'icon': Icons.smart_toy_rounded,
-        'color': AppColor.info,
-      },
-      {
-        'title': 'Unlimited Food Scanner To Calorie'.tr,
-        'icon': Icons.all_inclusive_rounded,
-        'color': AppColor.accent,
-      },
-    ];
+// Header with dark background, decorative circles and close button
+class _PremiumHeader extends StatelessWidget {
+  const _PremiumHeader({required this.height});
+  final double height;
 
-    return ModernCard(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Premium Features",
-            style: context.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColor.neutralGrey900,
-            ),
+  @override
+  Widget build(BuildContext context) {
+  return Container(
+      height: height,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColor.darkBackground, AppColor.darkSurface],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(height: 20),
-          ...features.asMap().entries.map((entry) {
-            int index = entry.key;
-            Map<String, dynamic> feature = entry.value;
-            
-            return ModernFadeSlideTransition(
-              child: Container(
-                margin: EdgeInsets.only(bottom: index < features.length - 1 ? 16 : 0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: feature['color'].withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: feature['color'].withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Icon(
-                        feature['icon'],
-                        color: feature['color'],
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        feature['title'],
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColor.neutralGrey800,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.check_circle_rounded,
-                      color: AppColor.success,
-                      size: 20,
-                    ),
-                  ],
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Decorative images (replacing previous blur circles)
+          Positioned(
+            top: 16,
+            left: -30,
+            child: Semantics(
+              label: 'cook icon',
+              image: true,
+              child: SizedBox(
+                width: 120,
+                height: 120,
+                child: Opacity(
+                  opacity: 0.55,
+                  child: Image.asset(
+                    'assets/icons/cook.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            );
-          }).toList(),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: -24,
+            child: Semantics(
+              label: 'scan icon',
+              image: true,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Opacity(
+                  opacity: 0.55,
+                  child: Image.asset(
+                    'assets/icons/scan.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 64,
+            left: 40,
+            child: Semantics(
+              label: 'chatbot icon',
+              image: true,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Opacity(
+                  opacity: 0.55,
+                  child: Image.asset(
+                    'assets/icons/chatbot.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Symmetric decorative icon to the chatbot on the bottom-right
+          Positioned(
+            bottom: 64,
+            right: 40,
+            child: Semantics(
+              label: 'unlimited icon',
+              image: true,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Opacity(
+                  opacity: 0.55,
+                  child: Image.asset(
+                    'assets/icons/unlimited.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Close button removed from header to keep it above scroll content in parent Stack.
+
+          // Center content
+          Align(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      gradient: AppColor.accentGradient,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      'premium_badge'.tr,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'go_premium_title'.tr,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppColor.darkText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'go_premium_subtitle'.tr,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColor.darkTextSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPricingCards(BuildContext context) {
-    return GetBuilder<PremiumController>(
-      builder: (controller) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+  // ... decorative blur helper removed; images are used instead
+}
+
+class _FeatureRow extends StatelessWidget {
+  const _FeatureRow({
+    this.icon,
+    this.iconWidget,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+  }) : assert(icon != null || iconWidget != null, 'Either icon or iconWidget must be provided');
+
+  final IconData? icon;
+  final Widget? iconWidget;
+  final String title;
+  final String subtitle;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Center(
+            child: iconWidget ?? Icon(icon, color: color),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+                    Text(
+                      title,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.neutralWhite,
+                      ),
+                    ),
+              const SizedBox(height: 2),
               Text(
-                "Choose Your Plan",
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColor.neutralGrey900,
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 180,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: controller.products.length,
-                  itemBuilder: (context, index) {
-                    return ModernScaleTransition(
-                      child: _buildPricingCard(context, controller, index),
-                    );
-                  },
+                subtitle,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColor.darkTextSecondary,
                 ),
               ),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPricingCard(BuildContext context, PremiumController controller, int index) {
-    final isSelected = controller.selected == index;
-    final product = controller.products[index];
-    
-    final planTypes = ["Week".tr, "Month".tr, "Most Popular".tr];
-    final planColors = [AppColor.warning, AppColor.primaryGreen, AppColor.accent];
-    
-    return GestureDetector(
-      onTap: () => controller.onChangeSelectedIndex(index),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.75,
-        margin: EdgeInsets.only(right: 12, bottom: isSelected ? 0 : 8, top: isSelected ? 0 : 8),
-        decoration: BoxDecoration(
-          gradient: isSelected 
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.white, AppColor.neutralGrey50],
-                )
-              : AppColor.cardGradient,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? planColors[index] : AppColor.neutralGrey200,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: planColors[index].withOpacity(0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ] : [
-            BoxShadow(
-              color: AppColor.lightShadow,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
-        child: Column(
-          children: [
-            // Plan type header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [planColors[index], planColors[index].withOpacity(0.8)],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
+      ],
+    );
+  }
+}
+
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    required this.title,
+    required this.subtitle,
+    this.priceText = '',
+    required this.perMonthText,
+    required this.isSelected,
+    required this.onTap,
+  this.chipText,
+  this.saveText,
+  this.highlighted = false,
+  this.originalPrice,
+  this.discountedPrice,
+  });
+
+  final String title;
+  final String subtitle;
+  final String priceText;
+  final String perMonthText;
+  final bool isSelected;
+  final bool highlighted;
+  final VoidCallback onTap;
+  final String? chipText;
+  final String? saveText;
+  final String? originalPrice;
+  final String? discountedPrice;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    
+    return Semantics(
+      container: true,
+      button: true,
+  // Announce selection state for accessibility
+  selected: isSelected,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1C1C1E), // Dark card background to match reference
+            borderRadius: BorderRadius.circular(12),
+    // Orange outline only when the card is selected
+    border: isSelected
+        ? Border.all(color: AppColor.primaryOrange, width: 2)
+        : Border.all(color: const Color(0xFF2C2C2E), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
-              child: Text(
-                planTypes[index],
-                style: context.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row: title and chip
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (chipText != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColor.primaryOrange,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        chipText!,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
-            
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      product.title,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColor.neutralGrey800,
-                      ),
-                      textAlign: TextAlign.center,
+              
+              const SizedBox(height: 16),
+              
+              // Price section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Left side: prices
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // For annual plan, prefer explicit originalPrice/discountedPrice fields
+                        if (highlighted && originalPrice != null && discountedPrice != null) ...[
+                          Text(
+                            originalPrice!, // Original price crossed out
+                            style: textTheme.titleMedium?.copyWith(
+                              color: Colors.white.withOpacity(0.6),
+                              decoration: TextDecoration.lineThrough,
+                              decorationColor: Colors.white.withOpacity(0.6),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            discountedPrice!, // Discounted price
+                            style: textTheme.headlineMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 28,
+                            ),
+                          ),
+                        ] else ...[
+                          // For monthly plan, just show the priceText
+                          Text(
+                            priceText,
+                            style: textTheme.headlineMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 28,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Subscription".tr,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: AppColor.neutralGrey600,
+                  ),
+                  
+                  // Right side: per month info (only show for highlighted annual plan)
+                  if (highlighted)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          // For annual plan, show monthly breakdown (3500 DZD / 12 ≈ 292 DZD)
+                          Text(
+                            '≈ 292 DZD',
+                            style: textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            'Per month',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      product.price,
-                      style: context.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: planColors[index],
-                      ),
-                    ),
-                    if (isSelected) ...[
-                      const SizedBox(height: 8),
-                      Icon(
-                        Icons.check_circle_rounded,
-                        color: AppColor.success,
-                        size: 24,
-                      ),
-                    ],
-                  ],
-                ),
+                ],
               ),
-            ),
-          ],
+              
+              // Save strip for annual plan: show dynamic discount amount when original+discounted provided
+              if ((originalPrice != null && discountedPrice != null) || saveText != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColor.primaryOrange,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Builder(
+                    builder: (_) {
+                      // Helper to parse numeric value from strings like '4200 DZD' or '4,200.00 DZD'
+                      double? parseAmount(String s) {
+                        final match = RegExp(r'[\d.,]+').stringMatch(s);
+                        if (match == null) return null;
+                        final cleaned = match.replaceAll(',', '');
+                        return double.tryParse(cleaned);
+                      }
+
+                      String display;
+                      final o = originalPrice != null ? parseAmount(originalPrice!) : null;
+                      final d = discountedPrice != null ? parseAmount(discountedPrice!) : null;
+                      if (o != null && d != null && o > 0) {
+                        final percent = ((o - d) / o * 100);
+                        final rounded = percent.round();
+                        display = 'Save $rounded%';
+                      } else {
+                        display = saveText ?? '';
+                      }
+
+                      return Text(
+                        display,
+                        textAlign: TextAlign.center,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPurchaseButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: ModernButton(
-        text: "BUY NOW".tr,
-        style: ModernButtonStyle.gradient,
-        size: ModernButtonSize.large,
-        width: double.infinity,
-        onPressed: () => controller.buy(),
-      ),
-    );
-  }
-
-  Widget _buildFooter(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => controller.openPrivacy(),
-              child: Text(
-                "Privacy Policy".tr,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: AppColor.neutralGrey600,
-                  decoration: TextDecoration.underline,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 16,
-            color: AppColor.neutralGrey300,
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => controller.openTerms(),
-              child: Text(
-                "Terms of Condition".tr,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: AppColor.neutralGrey600,
-                  decoration: TextDecoration.underline,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
