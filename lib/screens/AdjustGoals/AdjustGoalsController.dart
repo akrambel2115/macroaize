@@ -1,4 +1,5 @@
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:get/get.dart';
 import '../../SharePrefHelper/SharePref.dart';
 import '../../SharePrefHelper/SharePrefKey.dart';
@@ -16,11 +17,56 @@ class AdjustGoalsController extends GetxController{
   int selectedWeightKg = 51;
   String selectedWGoal = "";
   int selectedDesiredWeight = 51;
+  bool hasChanges = false;
+
+  void setHasChanges(bool v) {
+    hasChanges = v;
+    update();
+  }
+
+  void showSaveNotification() {
+    Get.snackbar(
+      "Success".tr,
+      "Goal updated successfully".tr,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: AppColor.success,
+      colorText: AppColor.neutralWhite,
+    );
+  }
+
+  // Immediate save helpers for manual edits
+  void updateCalorieGoal(int value) async {
+    ConstantUserMaster.calorieGoal = value;
+    await SharedPref.saveInt(SharePrefKey.calorie, ConstantUserMaster.calorieGoal);
+    showSaveNotification();
+    update();
+  }
+
+  void updateProteinGoal(int value) async {
+    ConstantUserMaster.proteinGoal = value;
+    await SharedPref.saveInt(SharePrefKey.protein, ConstantUserMaster.proteinGoal);
+    showSaveNotification();
+    update();
+  }
+
+  void updateCarbGoal(int value) async {
+    ConstantUserMaster.carbGoal = value;
+    await SharedPref.saveInt(SharePrefKey.carbs, ConstantUserMaster.carbGoal);
+    showSaveNotification();
+    update();
+  }
+
+  void updateFatGoal(int value) async {
+    ConstantUserMaster.fatsGoal = value;
+    await SharedPref.saveInt(SharePrefKey.fat, ConstantUserMaster.fatsGoal);
+    showSaveNotification();
+    update();
+  }
 
 
   onChangeWorkout(String value) {
     selectedWorkOut = value;
-    update();
+  setHasChanges(true);
   }
   onChangeAutoGenerate(bool value)
   {
@@ -36,50 +82,63 @@ class AdjustGoalsController extends GetxController{
 
   onChangeMetric(bool value) {
     isMetric = value;
-    update();
+  setHasChanges(true);
   }
   onChangeGoal(String value) {
     selectedWGoal = value;
-    update();
+  setHasChanges(true);
   }
   onChangeDesiredWeight(int value) {
     selectedDesiredWeight = value;
-    update();
+  setHasChanges(true);
   }
 
   saveOnSql() {
+    if (isAutoGenerate) {
+      // Auto-generate flow: recalculate all macros based on user parameters
+      if (!isMetric) {
+        selectedCm = ((selectedFeet * 30.48) + (selectedInches * 2.54)).toInt();
+        selectedWeightKg = (selectedWeightLb * 0.453592).toInt();
+      }
 
-    if (!isMetric) {
-      selectedCm = ((selectedFeet * 30.48) + (selectedInches * 2.54)).toInt();
-      selectedWeightKg = (selectedWeightLb * 0.453592).toInt();
+      SharedPref.saveString(SharePrefKey.workOutDay, selectedWorkOut);
+      SharedPref.saveInt(SharePrefKey.height, selectedCm);
+      SharedPref.saveInt(SharePrefKey.weight, selectedWeightKg);
+      SharedPref.saveString(SharePrefKey.goalWeight, selectedWGoal);
+      SharedPref.saveInt(SharePrefKey.desiredWeight,selectedDesiredWeight);
+
+      double bmr = calculateBMR(selectedCm, selectedWeightKg, ConstantUserMaster.age, ConstantUserMaster.gender);
+      double activityFactor = getActivityFactor(selectedWorkOut);
+      double tdee = bmr * activityFactor;
+      Map<String, int> macros = calculateMacros(tdee, selectedWeightKg);
+      SharedPref.saveInt(SharePrefKey.calorie, macros["calories"]);
+      SharedPref.saveInt(SharePrefKey.protein, macros["protein"]);
+      SharedPref.saveInt(SharePrefKey.carbs, macros["carbs"]);
+      SharedPref.saveInt(SharePrefKey.fat, macros["fat"]);
+      ConstantUserMaster.calorieGoal = macros['calories']!;
+      ConstantUserMaster.proteinGoal = macros['protein']!;
+      ConstantUserMaster.carbGoal = macros['carbs']!;
+      ConstantUserMaster.fatsGoal = macros['fat']!;
+      ConstantUserMaster.workOutDay = selectedWorkOut;
+      ConstantUserMaster.height = selectedCm;
+      ConstantUserMaster.weight = selectedWeightKg;
+      ConstantUserMaster.goalWeight = selectedWGoal;
+      ConstantUserMaster.desiredGoal = selectedDesiredWeight;
+      selectedUpdateGoalView = 1;
+      
+      onChangeAutoGenerate(false);
+    } else {
+      // Manual edit flow: just save the current goal values
+      SharedPref.saveInt(SharePrefKey.calorie, ConstantUserMaster.calorieGoal);
+      SharedPref.saveInt(SharePrefKey.protein, ConstantUserMaster.proteinGoal);
+      SharedPref.saveInt(SharePrefKey.carbs, ConstantUserMaster.carbGoal);
+      SharedPref.saveInt(SharePrefKey.fat, ConstantUserMaster.fatsGoal);
     }
 
-    SharedPref.saveString(SharePrefKey.workOutDay, selectedWorkOut);
-    SharedPref.saveInt(SharePrefKey.height, selectedCm);
-    SharedPref.saveInt(SharePrefKey.weight, selectedWeightKg);
-    SharedPref.saveString(SharePrefKey.goalWeight, selectedWGoal);
-    SharedPref.saveInt(SharePrefKey.desiredWeight,selectedDesiredWeight);
-
-    double bmr = calculateBMR(selectedCm, selectedWeightKg, ConstantUserMaster.age, ConstantUserMaster.gender);
-    double activityFactor = getActivityFactor(selectedWorkOut);
-    double tdee = bmr * activityFactor;
-    Map<String, int> macros = calculateMacros(tdee, selectedWeightKg);
-    SharedPref.saveInt(SharePrefKey.calorie, macros["calories"]);
-    SharedPref.saveInt(SharePrefKey.protein, macros["protein"]);
-    SharedPref.saveInt(SharePrefKey.carbs, macros["carbs"]);
-    SharedPref.saveInt(SharePrefKey.fat, macros["fat"]);
-    ConstantUserMaster.calorieGoal = macros['calories']!;
-    ConstantUserMaster.proteinGoal = macros['protein']!;
-    ConstantUserMaster.carbGoal = macros['carbs']!;
-    ConstantUserMaster.fatsGoal = macros['fat']!;
-    ConstantUserMaster.workOutDay = selectedWorkOut;
-    ConstantUserMaster.height = selectedCm;
-    ConstantUserMaster.weight = selectedWeightKg;
-    ConstantUserMaster.goalWeight = selectedWGoal;
-    ConstantUserMaster.desiredGoal = selectedDesiredWeight;
-    selectedUpdateGoalView = 1;
+    // Show success notification and reset changes flag
+    showSaveNotification();
+    setHasChanges(false);
     update();
-    onChangeAutoGenerate(false);
   }
 
   double calculateBMR(int heightCm, int weightKg, int age, String gender) {
