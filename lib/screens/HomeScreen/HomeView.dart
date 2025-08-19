@@ -10,6 +10,7 @@ import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
+import 'package:foodcalorietracker/widgets/EnergyOrbs.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -442,99 +443,17 @@ class HomeView extends GetView<HomeController> {
       builder: (controller) {
         return ModernFadeSlideTransition(
           beginOffset: const Offset(0, 0.3),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                flex: 1,
-                child: ModernNutrientCard(
-                  label: "Protein".tr,
-                  value: controller.consumedProtein.toString(),
-                  goal: ConstantUserMaster.proteinGoal.toString(),
-                  unit: 'protein_unit'.tr,
-                  color: AppColor.primaryOrange,
-                  icon: null,
-                  leading: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColor.primaryOrange.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Image.asset(
-                        AppAssets.protein,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color: AppColor.primaryOrange,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  progress: (controller.consumedProtein / ConstantUserMaster.proteinGoal).clamp(0.0, 1.0),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                flex: 1,
-                child: ModernNutrientCard(
-                  label: "Carbs".tr,
-                  value: controller.consumedCarbs.toString(),
-                  goal: ConstantUserMaster.carbGoal.toString(),
-                  unit: 'carbs_unit'.tr,
-                  color: AppColor.primaryOrange,
-                  icon: null,
-                  leading: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColor.primaryOrange.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Image.asset(
-                        AppAssets.carb,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color: AppColor.primaryOrange,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  progress: (controller.consumedCarbs / ConstantUserMaster.carbGoal).clamp(0.0, 1.0),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                flex: 1,
-                child: ModernNutrientCard(
-                  label: "Fats".tr,
-                  value: controller.consumedFats.toString(),
-                  goal: ConstantUserMaster.fatsGoal.toString(),
-                  unit: 'fat_unit'.tr,
-                  color: AppColor.primaryOrange,
-                  icon: null,
-                  leading: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColor.primaryOrange.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Image.asset(
-                        AppAssets.fat,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.contain,
-                        color: AppColor.primaryOrange,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  progress: (controller.consumedFats / ConstantUserMaster.fatsGoal).clamp(0.0, 1.0),
-                ),
+              // Energy Orbs (rendered directly, no surrounding card)
+              EnergyOrbs(
+                proteinConsumed: controller.consumedProtein,
+                carbsConsumed: controller.consumedCarbs,
+                fatsConsumed: controller.consumedFats,
+                proteinGoal: ConstantUserMaster.proteinGoal,
+                carbsGoal: ConstantUserMaster.carbGoal,
+                fatsGoal: ConstantUserMaster.fatsGoal,
               ),
             ],
           ),
@@ -923,3 +842,5 @@ class _RoundedArcPainter extends CustomPainter {
         oldDelegate.progressColor != progressColor;
   }
 }
+
+// Legend widget removed — energy orbs are the sole macro visualization now.
