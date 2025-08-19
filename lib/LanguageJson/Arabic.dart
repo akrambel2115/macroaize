@@ -261,6 +261,8 @@ const Map<String, String> arabic = {
   "Adjust Goals": "تعديل الأهداف",
   "How many workout do you per week?": "كم عدد التمارين التي تقوم بها في الأسبوع؟",
   "This will used to calibrate your custom plan": "سيتم استخدام هذا لمعايرة خطتك المخصصة",
+  "Choose your height and weight": "اختر طولك ووزنك",
+  "Select your height and weight to calibrate your custom plan": "حدد طولك ووزنك لمعايرة خطتك المخصصة",
   "Workout Now and then": "تمارين الآن ثم",
   "A few workout per week": "بعض التمارين في الأسبوع",
   "Dedicated athlete": "رياضي مكرس",
@@ -460,5 +462,51 @@ const Map<String, String> arabic = {
   "camera_permission_denied_title": "مطلوب إذن الكاميرا",
   "camera_permission_denied_message": "تم رفض الوصول إلى الكاميرا. الرجاء تمكين إذن الكاميرا من إعدادات الجهاز لاستخدام الماسح.",
   "ok": "حسناً",
+
+  // Premium paywall (modern)
+  'premium_badge': 'المميّز',
+  'go_premium_title': 'احصل على المميّز',
+  'go_premium_subtitle': 'التجربة الكاملة لأفضل برنامج غذائي',
+  'feature_ai_scan_title': 'أدر وزنك وتناول طعامًا أفضل',
+  'feature_ai_scan_subtitle': 'مع مسح الوجبات بالذكاء الاصطناعي وملاحظات يومية',
+  'feature_results_title': 'حقق نتائج طويلة الأمد',
+  'feature_results_subtitle': 'مع الطيار الآلي وتتبع الماكروز',
+    'feature_chatbot_title': 'الدردشة الذكية "المدرب"',
+  'feature_chatbot_subtitle': 'إرشاد تغذوي فوري',
+  'feature_recipes_title': 'وصفات وأنظمة مميزة',
+  'feature_recipes_subtitle': 'ترشدك نحو النجاح',
+  'best_value': 'أفضل قيمة',
+  'save_percent': 'وفّر {percent}%*',
+  'months_12': '12 شهرًا',
+  'month_1': 'شهر واحد',
+  'billed_annually': 'يتم الفوترة سنويًا',
+  'billed_monthly': 'يتم الفوترة شهريًا',
+  'per_month': 'شهريًا',
+  'continue_cta': 'متابعة',
+  'compared_to_monthly': '*مقارنة بالدفع الشهري',
+  'currency_dzd': 'د.ج',
+
+  // Weight tracking UI
+  "Target Weight": "الوزن المستهدف",
+  "to go": "للوصول",
+  "Try to update once a week to help us adjust your plan": "حاول التحديث مرة أسبوعياً لمساعدتنا في تعديل خطتك",
+  "Weight Overview": "نظرة عامة على الوزن",
+  "Current": "الحالي",
+  "Goal": "الهدف",
+  "invalid_number": "يرجى إدخال رقم صحيح",
+  "weight_out_of_range": "يرجى إدخال وزن بين 20 و 300 كغ",
+
+  // Celebration strip messages
+  "goal_achieved_message": "تم تحقيق الهدف! استمر في التألق.",
+  "on_a_roll_message": "أنت في تقدّم رائع — كل خطوة تُحسب!",
+  "keep_momentum_message": "أحرزت تقدّمًا — حافظ على الزخم!",
+
+  // Notifications
+  "update_targets_title": "تم تحديث الأهداف",
+  "update_targets_body": "أعدنا حساب أهدافك اليومية من السعرات والماكروز لتتماشى مع وزنك الجديد.",
+
+  // Donut chart center texts
+  "daily_macros": "الماكروز اليومية",
+  "daily_macros_reached": "تم إنجاز ماكروز اليوم 🎉",
 
 };

@@ -244,6 +244,8 @@ const Map<String, String> french = {
   "Adjust Goals": "Ajuster les objectifs",
   "How many workout do you per week?": "Combien de séances d'entraînement par semaine ?",
   "This will used to calibrate your custom plan": "Cela sera utilisé pour calibrer votre plan personnalisé",
+  "Choose your height and weight": "Choisissez votre taille et votre poids",
+  "Select your height and weight to calibrate your custom plan": "Sélectionnez votre taille et votre poids pour calibrer votre plan personnalisé",
   "Workout Now and then": "S'entraîner de temps en temps",
   "A few workout per week": "Quelques entraînements par semaine",
   "Dedicated athlete": "Athlète dédié",
@@ -435,4 +437,50 @@ const Map<String, String> french = {
   "camera_permission_denied_title": "Permission de la caméra requise",
   "camera_permission_denied_message": "L'accès à la caméra a été refusé. Veuillez activer la permission de la caméra dans les paramètres de votre appareil pour utiliser le scanner.",
   "ok": "OK",
+  
+  // Premium paywall (modern)
+  'premium_badge': 'PREMIUM',
+  'go_premium_title': 'Passez en Premium',
+  'go_premium_subtitle': 'L’expérience complète du meilleur programme diététique',
+  'feature_ai_scan_title': 'Gérez votre poids et mangez mieux',
+  'feature_ai_scan_subtitle': 'avec le Scan de repas IA, retours quotidiens',
+  'feature_results_title': 'Obtenez des résultats durables',
+  'feature_results_subtitle': 'avec Autopilot et le suivi des macros',
+    'feature_chatbot_title': 'Chatbot IA "Coach"',
+  'feature_chatbot_subtitle': 'Guidance nutritionnelle instantanée',
+  'feature_recipes_title': 'Des recettes et régimes premium',
+  'feature_recipes_subtitle': 'vous guideront vers la réussite',
+  'best_value': 'MEILLEUR CHOIX',
+  'save_percent': 'ÉCONOMISEZ {percent}%*',
+  'months_12': '12 mois',
+  'month_1': '1 mois',
+  'billed_annually': 'Facturé annuellement',
+  'billed_monthly': 'Facturé mensuellement',
+  'per_month': 'Par mois',
+  'continue_cta': 'Continuer',
+  'compared_to_monthly': '*Comparé aux paiements mensuels',
+  'currency_dzd': 'DZD',
+
+  // Weight tracking UI
+  "Target Weight": "Poids cible",
+  "to go": "à atteindre",
+  "Try to update once a week to help us adjust your plan": "Essayez de mettre à jour une fois par semaine pour nous aider à ajuster votre plan",
+  "Weight Overview": "Aperçu du poids",
+  "Current": "Actuel",
+  "Goal": "Objectif",
+  "invalid_number": "Veuillez entrer un nombre entier valide",
+  "weight_out_of_range": "Veuillez entrer un poids entre 20 et 300 kg",
+  
+  // Celebration strip messages
+  "goal_achieved_message": "Objectif atteint ! Continuez à briller.",
+  "on_a_roll_message": "Super lancée — chaque pas compte !",
+  "keep_momentum_message": "Des progrès réalisés — gardez l'élan !",
+  
+  // Notifications
+  "update_targets_title": "Cibles mises à jour",
+  "update_targets_body": "Nous avons recalculé vos objectifs quotidiens de calories et de macronutriments en fonction de votre nouveau poids.",
+
+  // Donut chart center texts
+  "daily_macros": "Macros quotidiennes",
+  "daily_macros_reached": "Macros quotidiennes atteintes 🎉",
 };

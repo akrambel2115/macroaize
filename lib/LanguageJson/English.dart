@@ -261,6 +261,8 @@ const Map<String, String> english = {
   "Adjust Goals" : "Adjust Goals",
   "How many workout do you per week?" : "How many workout do you per week?",
   "This will used to calibrate your custom plan" : "This will used to calibrate your custom plan",
+  "Choose your height and weight": "Choose your height and weight",
+  "Select your height and weight to calibrate your custom plan": "Select your height and weight to calibrate your custom plan",
   "Workout Now and then" : "Workout Now and then",
   "A few workout per week" : "A few workout per week",
   "Dedicated athlete" : "Dedicated athlete",
@@ -457,6 +459,52 @@ const Map<String, String> english = {
   "camera_permission_denied_title": "Camera permission required",
   "camera_permission_denied_message": "Camera access was denied. Please enable camera permission in your device settings to use the scanner.",
   "ok": "OK",
+
+  // Premium paywall (modern)
+  'premium_badge': 'PREMIUM',
+  'go_premium_title': 'Go Premium',
+  'go_premium_subtitle': 'The full experience of the best diet program',
+  'feature_ai_scan_title': 'Manage your weight and eat better',
+  'feature_ai_scan_subtitle': 'with AI Meal Scan, daily feedback',
+  'feature_results_title': 'Achieve long lasting results',
+  'feature_results_subtitle': 'with Autopilot and macros tracking',
+  'feature_chatbot_title': 'AI chatbot "Coach"',
+  'feature_chatbot_subtitle': 'Nutrition guidance with instant',
+  'feature_recipes_title': 'Premium recipes and diets',
+  'feature_recipes_subtitle': 'will guide you toward success',
+  'best_value': 'BEST VALUE',
+  'save_percent': 'SAVE {percent}%*',
+  'months_12': '12 Months',
+  'month_1': '1 Month',
+  'billed_annually': 'Billed annually',
+  'billed_monthly': 'Billed monthly',
+  'per_month': 'Per month',
+  'continue_cta': 'Continue',
+  'compared_to_monthly': '*Compared to monthly payments',
+  'currency_dzd': 'DZD',
+
+  // Weight tracking UI
+  "Target Weight": "Target Weight",
+  "to go": "to go",
+  "Try to update once a week to help us adjust your plan": "Try to update once a week to help us adjust your plan",
+  "Weight Overview": "Weight Overview",
+  "Current": "Current",
+  "Goal": "Goal",
+  "invalid_number": "Please enter a valid whole number",
+  "weight_out_of_range": "Please enter a weight between 20 and 300 kg",
+
+  // Celebration strip messages
+  "goal_achieved_message": "Goal achieved! Keep shining.",
+  "on_a_roll_message": "You're on a roll—every step counts!",
+  "keep_momentum_message": "Progress made—keep the momentum!",
+
+  // Notifications
+  "update_targets_title": "Targets updated",
+  "update_targets_body": "We recalculated your daily calorie & macro targets to match your new weight.",
+
+  // Donut chart center texts
+  "daily_macros": "Daily Macros",
+  "daily_macros_reached": "Daily Macros Reached 🎉",
 
 
 };
