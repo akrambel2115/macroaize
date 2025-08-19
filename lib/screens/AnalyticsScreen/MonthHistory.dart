@@ -26,20 +26,22 @@ class MonthHistory extends GetView<AnalyticsController> {
                   Row(mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Average Calorie Month :".tr,
-                        style: context.theme.textTheme.headlineSmall,
-                      ).paddingOnly(bottom: 15,right: 5),Text(
-                        "${controller.yourMonthGoal}",
-                        style: context.theme.textTheme.headlineSmall,
-                      ).paddingOnly(bottom: 15),
+                            "Average Calorie Month :".tr,
+                            style: context.theme.textTheme.titleMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
+                          ).paddingOnly(bottom: 15,right: 5),Text(
+                            "${controller.yourMonthGoal}",
+                            style: context.theme.textTheme.titleMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
+                          ).paddingOnly(bottom: 15),
                     ],
                   ),
                   Expanded(child: SfCartesianChart(
                     primaryXAxis: CategoryAxis(
                       majorGridLines: MajorGridLines(width: 0),
+                      labelStyle: context.theme.textTheme.labelSmall?.copyWith(fontSize: 11),
                     ),
                     primaryYAxis: NumericAxis(
                       majorGridLines: MajorGridLines(width: 1),
+                      labelStyle: context.theme.textTheme.labelSmall?.copyWith(fontSize: 11),
                     ),
                     series: [
                       ColumnSeries<SalesData, String>(
@@ -47,8 +49,10 @@ class MonthHistory extends GetView<AnalyticsController> {
                         xValueMapper: (SalesData sales, _) => sales.time,
                         color: context.theme.focusColor,
                         yValueMapper: (SalesData sales, _) => sales.ml,
-                        dataLabelSettings:
-                        DataLabelSettings(isVisible: true),
+                        dataLabelSettings: DataLabelSettings(
+                          isVisible: true,
+                          textStyle: context.theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                        ),
                       )
                     ],
                   ))
