@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
-import '../../../widgets/AppWidgets.dart';
+import 'package:lottie/lottie.dart';
 
 class BornView extends GetView<SignUpController> {
   const BornView({super.key});
@@ -12,9 +12,7 @@ class BornView extends GetView<SignUpController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppWidgets.backButton(context, () {
-          Get.back();
-        }),
+  // Back button moved to the SignUp scaffold to keep layout consistent
         Text(
           "Where were you born?".tr,
           style: context.theme.textTheme.headlineLarge,
@@ -26,12 +24,12 @@ class BornView extends GetView<SignUpController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Month Picker
+    // Month Picker
             Expanded(
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-                  color: context.theme.primaryColor,
+      color: context.theme.brightness == Brightness.light ? Colors.white : Colors.black,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: GetBuilder<SignUpController>(builder: (controller) {
@@ -59,12 +57,12 @@ class BornView extends GetView<SignUpController> {
               ),
             ),
             SizedBox(width: 10),
-            // Day Picker
+    // Day Picker
             Expanded(
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-                  color: context.theme.primaryColor,
+      color: context.theme.brightness == Brightness.light ? Colors.white : Colors.black,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: GetBuilder<SignUpController>(builder: (controller) {
@@ -90,11 +88,11 @@ class BornView extends GetView<SignUpController> {
               ),
             ),
             SizedBox(width: 10),
-            Expanded(
+    Expanded(
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-                  color: context.theme.primaryColor,
+      color: context.theme.brightness == Brightness.light ? Colors.white : Colors.black,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: GetBuilder<SignUpController>(builder: (controller) {
@@ -125,22 +123,62 @@ class BornView extends GetView<SignUpController> {
           ],
         ),
 
-        Spacer(),
-        GestureDetector(
-          onTap: () {
-            controller.onChangeView();
-          },
-          child: Container(
-            alignment: Alignment.center,
-            height: 50,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: context.theme.focusColor,
-              borderRadius: BorderRadius.circular(10),
+        const SizedBox(height: 12),
+        // Birthday Lottie: expand to fill the space between scrollers and footer
+        Expanded(
+          child: Center(
+            child: Lottie.asset(
+              'assets/lottie/birthdate.json',
+              repeat: true,
+              fit: BoxFit.contain,
             ),
-            child: Text("Continue".tr, style: context.theme.textTheme.titleMedium),
-          ).paddingOnly(top: 30),
+          ),
         ),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  // go back to Goal screen
+                  controller.selectedView = 3;
+                  controller.update();
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: context.theme.cardColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'Previous'.tr,
+                    style: context.theme.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  controller.onChangeView();
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: context.theme.focusColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    "Continue".tr,
+                    style: context.theme.textTheme.titleMedium?.copyWith(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ).paddingOnly(top: 30),
       ],
     );
   }
@@ -152,7 +190,9 @@ class BornView extends GetView<SignUpController> {
         style: TextStyle(
           fontSize: 18,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? context.theme.scaffoldBackgroundColor : Colors.grey,
+      color: context.theme.brightness == Brightness.light
+        ? Colors.black
+        : (isSelected ? context.theme.scaffoldBackgroundColor : Colors.grey),
         ),
       ),
     );
