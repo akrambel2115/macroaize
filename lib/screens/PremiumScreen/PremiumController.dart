@@ -70,8 +70,27 @@ class PremiumController extends GetxController {
       if (kDebugMode) {
         print("product length ${products.length}");
       }
-      update();
+      
+      // Set default selection to yearly plan (12 months) if available
+      if (products.isNotEmpty) {
+        int yearlyIndex = _findYearlyPlanIndex();
+        if (yearlyIndex >= 0) {
+          selected = yearlyIndex;
+        }
+      }
+      
+      update(['plan_selection']); // Update specific GetBuilder
     }
+  }
+
+  /// Helper method to find the yearly plan index
+  int _findYearlyPlanIndex() {
+    const yearlyKeywords = ['year', 'annual'];
+    return products.indexWhere((p) {
+      final id = p.id.toLowerCase();
+      final title = p.title.toLowerCase();
+      return yearlyKeywords.any((k) => id.contains(k) || title.contains(k));
+    });
   }
 
   listenToPurchase(List<PurchaseDetails> purchaseDetailsList) {
@@ -149,7 +168,7 @@ class PremiumController extends GetxController {
 
   onChangeSelectedIndex(int index) {
     selected = index;
-    update();
+    update(['plan_selection']); // Update specific GetBuilder
   }
 
   getDate() async {
