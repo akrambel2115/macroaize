@@ -79,35 +79,7 @@ class GenderUpdate extends GetView<PersonalDetailsController> {
           ),
           // Removed legacy 'Other' gender option (policy update Aug 2025).
           Spacer(),
-          GetBuilder<PersonalDetailsController>(
-            builder: (controller) {
-              return GestureDetector(
-                onTap: () {
-                  if(controller.selectedGender.isNotEmpty)
-                  {
-                    controller.updateGender();
-                    controller.onChangeSelectedView(0);
-                  }
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  height: 50,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color:
-                    controller.selectedGender.isNotEmpty
-                        ? context.theme.focusColor
-                        : context.theme.cardColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    "Update".tr,
-                    style: context.theme.textTheme.titleMedium,
-                  ),
-                ),
-              );
-            },
-          ),
+          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );
