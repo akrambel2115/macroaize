@@ -20,7 +20,9 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
     return WillPopScope(
       onWillPop: () async {
         if (controller.selectedView == 0) {
-          Get.find<SettingController>().update();
+          if (Get.isRegistered<SettingController>()) {
+            Get.find<SettingController>().update();
+          }
           Get.back();
         } else {
           controller.onChangeSelectedView(0);
@@ -35,15 +37,30 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
             "Personal Details".tr,
             style: context.theme.textTheme.headlineMedium,
           ),
+          actions: [
+            GetBuilder<PersonalDetailsController>(builder: (ctrl) {
+              if (ctrl.selectedView == 0) return SizedBox.shrink();
+              return TextButton(
+                onPressed: ctrl.hasChanges ? () => ctrl.saveCurrentView() : null,
+                child: Text(
+                  'Save'.tr,
+                  style: TextStyle(
+                    color: ctrl.hasChanges ? AppColor.primaryOrange : AppColor.neutralGrey200,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            }),
+          ],
           leading: AppWidgets.backButton(context, () {
-            if(controller.selectedView == 0)
-              {
+            if(controller.selectedView == 0) {
+              if (Get.isRegistered<SettingController>()) {
                 Get.find<SettingController>().update();
-                Get.back();
-              }else{
+              }
+              Get.back();
+            } else {
               controller.onChangeSelectedView(0);
             }
-
           }),
         ),
         body: GetBuilder<PersonalDetailsController>(builder: (controller) {
@@ -52,6 +69,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
+                  // Grouped personal details container
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -60,6 +78,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                     ),
                     child: Column(
                       children: [
+                        // Goal Weight
                         ListTile(
                           title: Text(
                             "Goal Weight".tr,
@@ -67,16 +86,18 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                           subtitle: Text(
                             ConstantUserMaster.desiredGoal.toString(),
-                            style: context.theme.textTheme.headlineMedium,
+                            style: context.theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: GestureDetector(
                             onTap: () {
                               controller.onChangeSelectedView(1);
                             },
                             child: Container(
-                              padding: EdgeInsets.all(5),
+                              padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: context.theme.primaryColor,
+                                color: AppColor.primaryOrange,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Icon(
@@ -86,17 +107,14 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ).paddingOnly(bottom: 10),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: context.theme.cardColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
+                        Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.92,
+                            child: Divider(color: AppColor.neutralGrey200),
+                          ),
+                        ),
+
+                        // Current Weight
                         ListTile(
                           onTap: () {
                             controller.onChangeSelectedView(2);
@@ -107,12 +125,14 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                           subtitle: Text(
                             "${ConstantUserMaster.weight}${"kg".tr}",
-                            style: context.theme.textTheme.headlineMedium,
+                            style: context.theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: Container(
-                            padding: EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -121,7 +141,14 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                           ),
                         ),
-                        Divider(color: AppColor.grey,),
+                          Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.92,
+                            child: Divider(color: AppColor.neutralGrey200),
+                          ),
+                        ),
+
+                        // Height
                         ListTile(
                           onTap: () {
                             controller.onChangeSelectedView(3);
@@ -132,12 +159,14 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                           subtitle: Text(
                             "${ConstantUserMaster.height}${"cm".tr}",
-                            style: context.theme.textTheme.headlineMedium,
+                            style: context.theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: Container(
-                            padding: EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -146,7 +175,14 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                           ),
                         ),
-                        Divider(color: AppColor.grey,),
+                          Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.92,
+                            child: Divider(color: AppColor.neutralGrey200),
+                          ),
+                        ),
+
+                        // Date of Birth
                         ListTile(
                           onTap: () {
                             controller.onChangeSelectedView(4);
@@ -157,12 +193,14 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                           subtitle: Text(
                             ConstantUserMaster.bornDay,
-                            style: context.theme.textTheme.headlineMedium,
+                            style: context.theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: Container(
-                            padding: EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
@@ -170,7 +208,15 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                               color: context.theme.scaffoldBackgroundColor,
                             ),
                           ),
-                        ),     Divider(color: AppColor.grey,),
+                        ),
+                          Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.92,
+                            child: Divider(color: AppColor.neutralGrey200),
+                          ),
+                        ),
+
+                        // Gender
                         ListTile(
                           onTap: () {
                             controller.onChangeSelectedView(5);
@@ -181,12 +227,14 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                           subtitle: Text(
                             ConstantUserMaster.gender,
-                            style: context.theme.textTheme.headlineMedium,
+                            style: context.theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: Container(
-                            padding: EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: context.theme.primaryColor,
+                              color: AppColor.primaryOrange,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Icon(
