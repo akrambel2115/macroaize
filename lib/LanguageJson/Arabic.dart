@@ -223,7 +223,7 @@ const Map<String, String> arabic = {
   "Calorie Tracker": "متتبّع السعرات الحرارية",
   "Add Calorie": "إضافة سعرات حرارية",
   "Quantity": "الكمية",
-  "Ask With AI": "اسأل الذكاء الاصطناعي",
+  "Ask The Coach": "اسأل الكوتش",
   "This picture not available Calorie,Protein,Carbs and Fats,": "لا تتوفر في هذه الصورة معلومات عن السعرات الحرارية أو البروتين أو الكربوهيدرات أو الدهون.",
   "Ask Coach": "اسأل المدرب",
   "Write your message": "اكتب رسالتك",
@@ -508,5 +508,15 @@ const Map<String, String> arabic = {
   // Donut chart center texts
   "daily_macros": "الماكروز اليومية",
   "daily_macros_reached": "تم إنجاز ماكروز اليوم 🎉",
+
+  // Recipes Section
+  "recipes_title": "الوصفات",
+  "top_recipes": "أفضل الوصفات",
+  "all_recipes": "جميع الوصفات",
+  "top_recipes_subtitle": "اكتشف وصفات صحية ولذيذة مصممة لأهدافك",
+  "no_recipes_available": "لا توجد وصفات متاحة",
+  "min": "دقيقة",
+  "cal": "سعرة",
+  "close": "إغلاق",
 
 };

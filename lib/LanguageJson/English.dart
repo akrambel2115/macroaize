@@ -223,7 +223,7 @@ const Map<String, String> english = {
   "Calorie Tracker" : "Calorie Tracker",
   "Add Calorie" : "Add Calorie",
   "Quantity" : "Quantity",
-  "Ask With AI" : "Ask With AI",
+  "Ask The Coach" : "Ask The Coach",
   "This picture not available Calorie,Protein,Carbs and Fats," : "This picture not available Calorie,Protein,Carbs and Fats,",
   "Ask Coach" : "Ask Coach",
   "Write your message" : "Write your message",
@@ -506,5 +506,14 @@ const Map<String, String> english = {
   "daily_macros": "Daily Macros",
   "daily_macros_reached": "Daily Macros Reached 🎉",
 
+  // Recipes Section
+  "recipes_title": "Recipes",
+  "top_recipes": "Top Recipes", 
+  "all_recipes": "All Recipes",
+  "top_recipes_subtitle": "Discover healthy and delicious recipes crafted for your goals",
+  "no_recipes_available": "No recipes available",
+  "min": "min",
+  "cal": "Cal",
+  "close": "Close",
 
 };

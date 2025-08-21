@@ -206,7 +206,7 @@ const Map<String, String> french = {
   "Calorie Tracker": "Suivi des calories",
   "Add Calorie": "Ajouter des calories",
   "Quantity": "Quantité",
-  "Ask With AI": "Demandez avec AI",
+  "Ask The Coach": "Demandez au Coach",
   "This picture not available Calorie,Protein,Carbs and Fats,": "Cette image n'est pas disponible pour les calories, protéines, glucides et graisses.",
   "Ask Coach": "Demandez au Coach",
   "Write your message": "Écrivez votre message",
@@ -483,4 +483,14 @@ const Map<String, String> french = {
   // Donut chart center texts
   "daily_macros": "Macros quotidiennes",
   "daily_macros_reached": "Macros quotidiennes atteintes 🎉",
+
+  // Recipes Section
+  "recipes_title": "Recettes",
+  "top_recipes": "Meilleures recettes",
+  "all_recipes": "Toutes les recettes", 
+  "top_recipes_subtitle": "Découvrez des recettes saines et délicieuses conçues pour vos objectifs",
+  "no_recipes_available": "Aucune recette disponible",
+  "min": "min",
+  "cal": "Cal",
+  "close": "Fermer",
 };
