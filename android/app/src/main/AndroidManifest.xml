@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>>
     <application
-        android:label="Cal AI Pulse"
+        android:label="macroAize"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
