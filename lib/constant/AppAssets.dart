@@ -15,7 +15,9 @@ class AppAssets {
   ///App Icon
   static String scanIcon = "${basePathIcons}scanning.png";
   static String ai = "${basePathIcons}ai.png";
-  static String aiIcon = "${basePathIcons}artificial-intelligence.png";
+   // ai.png exists in assets/icons; point aiIcon to that file to avoid missing asset errors
+   static String aiIcon = "${basePathIcons}ai.png";
+   static String coachIcon = "${basePathIcons}coach.png";
   static String crownIcon = "${basePathIcons}crown.png";
   static String scanHomeIcon = "${basePathIcons}scan.png";
   static String galleryIcon = "${basePathIcons}gallery.png";
@@ -37,6 +39,10 @@ class AppAssets {
   static String loadingChat = "${basePathLottie}dot.json";
   static String voiceWave = "${basePathLottie}VoiceWave.json";
   static String scanFood = "${basePathLottie}scanImage.json";
+  static String capsule = "${basePathLottie}capsule.json";
+  static String mascot = "${basePathLottie}mascot.json";
+  static String diet = "${basePathLottie}diet.json";
+   static String transition = "${basePathLottie}transition.json";
 
 
 
