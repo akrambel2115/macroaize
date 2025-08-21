@@ -15,7 +15,7 @@
     <key>NSSpeechRecognitionUsageDescription</key>
     <string>This app uses speech recognition to convert your speech to text.</string>
 	<key>CFBundleDisplayName</key>
-	<string>Cal AI Pulse</string>
+	<string>macroAize</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
