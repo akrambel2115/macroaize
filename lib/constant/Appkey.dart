@@ -4,6 +4,9 @@ const appName = 'macroAize';
 
 ///OpenRouter API key (for Qwen qwen2.5-vl-72b-instruct:free access)
 String apiKey = "REDACTED_OPENROUTER_API_KEY";
+
+/// USDA FoodData Central API Key placeholder
+const String usdaApiKey = 'REDACTED_USDA_API_KEY';
 /// SHARE URL ANDROID
 const shareAppsAndroid = "Enter Android Share URL here";
 
