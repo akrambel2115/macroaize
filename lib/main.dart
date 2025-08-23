@@ -42,14 +42,29 @@ class MyApp extends StatelessWidget {
 
     return GetBuilder<MainController>(
       builder: (mc) {
-        final current = Locale(mc.languageCode.isNotEmpty ? mc.languageCode : 'en', mc.countryCode.isNotEmpty ? mc.countryCode : 'US');
-        return GetMaterialApp(
+  return GetMaterialApp(
           translations: LocalString(),
-          locale: current,
-          fallbackLocale: const Locale('en','US'),
+          // Default to Arabic for first-time users if MainController hasn't loaded a saved locale yet
+          locale: Locale(mc.languageCode.isNotEmpty ? mc.languageCode : 'ar', mc.countryCode.isNotEmpty ? mc.countryCode : 'SA'),
+          fallbackLocale: const Locale('ar','SA'),
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: themeController.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          // apply a global system UI overlay that follows the current theme
+          builder: (context, child) {
+            final isDark = themeController.isDarkMode;
+            final bg = isDark ? AppTheme.dark.scaffoldBackgroundColor : AppTheme.light.scaffoldBackgroundColor;
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: bg,
+                statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+                systemNavigationBarColor: bg,
+                systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+              ),
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
           debugShowCheckedModeBanner: false,
           initialRoute: mc.isLogin ? AppPages.home : AppPages.initial,
           getPages: AppPages.routes,
