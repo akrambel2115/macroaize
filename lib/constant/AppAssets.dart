@@ -43,6 +43,7 @@ class AppAssets {
   static String mascot = "${basePathLottie}mascot.json";
   static String diet = "${basePathLottie}diet.json";
    static String transition = "${basePathLottie}transition.json";
+      static String loadingClock = "${basePathLottie}loadingClock.json";
 
 
 
