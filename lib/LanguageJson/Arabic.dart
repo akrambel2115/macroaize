@@ -21,6 +21,7 @@ const Map<String, String> arabic = {
   "Too far": "بعيد جداً",
   "Multi-species": "متعدد الأنواع",
   "Continue": "متابعة",
+  "Previous": "السابق",
   "Gallery": "المعرض",
   "Tips": "نصائح",
   "Perfect Shot": "لقطة مثالية",
@@ -47,11 +48,12 @@ const Map<String, String> arabic = {
   "Update Weight": "تحديث الوزن",
   "Week": "أسبوع",
   "Month": "شهر",
+  "Profile": "الملف الشخصي",
   "Year": "سنة",
   "Update Weight Goal": "تحديث هدف الوزن",
   "Enter new weight (kg)": "أدخل الوزن الجديد (كغ)",
   "Cancel": "إلغاء",
-  "Calorie Your Week :": "سعرات أسبوعك:",
+  "Calorie Your Week :": "السعرات الأسبوعية : ",
   "Sun": "الأحد",
   "Mon": "الاثنين",
   "Tue": "الثلاثاء",
@@ -81,6 +83,8 @@ const Map<String, String> arabic = {
   "Personal details": "المعلومات الشخصية",
   "Adjust goals": "تعديل الأهداف",
   "Calories,carbs,fat and protein": "السعرات، الكربوهيدرات، الدهون والبروتين",
+  // Subtitle for Adjust Goals in Settings
+  "adjust_goals_subtitle": "السعرات، الكربوهيدرات، الدهون والبروتين",
   "Chat history": "سجل المحادثات",
   "The coach does not memorize chat history. Each interaction is independent.": "لا يقوم المدرب بتذكر سجل المحادثة. كل تفاعل مستقل.",
   "Legal": "قانوني",
@@ -223,6 +227,7 @@ const Map<String, String> arabic = {
   "Calorie Tracker": "متتبّع السعرات الحرارية",
   "Add Calorie": "إضافة سعرات حرارية",
   "Quantity": "الكمية",
+  "Ask anything": "اسأل أي شيء",
   "Ask The Coach": "اسأل الكوتش",
   "This picture not available Calorie,Protein,Carbs and Fats,": "لا تتوفر في هذه الصورة معلومات عن السعرات الحرارية أو البروتين أو الكربوهيدرات أو الدهون.",
   "Ask Coach": "اسأل المدرب",
@@ -271,6 +276,7 @@ const Map<String, String> arabic = {
   "Gain Weight": "زيادة الوزن",
   "Lose Weight": "فقدان الوزن",
   "Update Calorie Goal": "تحديث هدف السعرات الحرارية",
+  "Calorie goal": "هدف السعرات",
   "Save": "حفظ",
   "Calorie Goal": "هدف السعرات الحرارية",
   "Update Protein Goal": "تحديث هدف البروتين",
@@ -415,6 +421,7 @@ const Map<String, String> arabic = {
   "BUY NOW": "اشتر الآن",
   "Terms of Condition": "شروط الاستخدام",
   "Welcome": "أهلاً وسهلاً",
+  "Choose Your Gender": "اختر جنسك",
   "Calorie tracking made easy": "تتبع السعرات بات أسهل",
   "Just snap a quick photo of your meal and we''ll do the rest": "التقط صورة سريعة لوجبتك وسنتولّى الباقي",
   "In-depth nutrition analyses": "تحليلات غذائية معمّقة",
@@ -432,6 +439,11 @@ const Map<String, String> arabic = {
   "We're setting": "نقوم بإعداد",
   "everything up for you": "كل شيء من أجلك",
   "Customizing health plan....": "جارٍ تخصيص الخطة الصحية...",
+  "welcome_hi": "مرحباً!",
+  "welcome_subtitle_prefix": "أهلاً بك في مدربك الشخصي ",
+  "welcome_subtitle_highlight": "مدرب التغذية",
+  "plan_intro_title": "لنبدأ ببعض الأسئلة",
+  "plan_intro_subtitle": "سيساعدنا هذا في تخصيص خطتك",
 
   // Dynamic meal description components
   "meal_contains": "هذه الوجبة تحتوي على",
@@ -440,9 +452,11 @@ const Map<String, String> arabic = {
   // Units and labels
   "kcal_unit": "سعرة حرارية",
   "gram_unit": "غ",
+  "unit_piece": "قطعة",
   "protein_unit": "غ",
   "carbs_unit": "غ", 
   "fat_unit": "غ",
+  "Cal Left": "سعرات متبقية",
   "meal_label": "الوجبة",
 
   // Abbreviations for compact badges
@@ -454,6 +468,10 @@ const Map<String, String> arabic = {
   // Modern UI labels
   "track_subtitle": "تتبع تغذيتك اليومية",
   "goal_label": "الهدف",
+  // Localized language display names
+  "language_english": "English",
+  "language_french": "Français",
+  "language_arabic": "العربية",
   "Analyzing nutrition...": "تحليل التغذية..."
 
   ,
@@ -515,8 +533,22 @@ const Map<String, String> arabic = {
   "all_recipes": "جميع الوصفات",
   "top_recipes_subtitle": "اكتشف وصفات صحية ولذيذة مصممة لأهدافك",
   "no_recipes_available": "لا توجد وصفات متاحة",
+  "Search recipes by name or ingredient": "ابحث عن وصفات بالاسم أو المكوّنات",
   "min": "دقيقة",
   "cal": "سعرة",
   "close": "إغلاق",
 
+  "food items found": "أكلة متوفرة",
+  
+  // Meal Breakdown
+  "meal_breakdown": "تفصيل الوجبة",
+  "tap_to_edit_portions": "اضغط لتعديل الكميات",
+  "items": "عناصر",
+  "verified": "مُتحقق",
+  "estimated": "تقديرية",
+  // Nutrient short labels
+  "nut_prt": "بروتين",
+  "nut_carb": "كارب",
+  "nut_cal": "سعرات",
+  "nut_fat": "دهون",
 };

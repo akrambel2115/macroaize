@@ -21,6 +21,7 @@ const Map<String, String> french = {
   "Too far": "Trop loin",
   "Multi-species": "Multi-espèces",
   "Continue": "Continuer",
+  "Previous": "Précédent",
   "OverView": "Vue d'ensemble",
   "Weight Goal": "Objectif de poids",
   "Update": "Mettre à jour",
@@ -30,6 +31,7 @@ const Map<String, String> french = {
   "Update Weight": "Mettre à jour le poids",
   "Week": "Semaine",
   "Month": "Mois",
+  "Profile": "Profil",
   "Year": "Année",
   "Update Weight Goal": "Mettre à jour l'objectif de poids",
   "Enter new weight (kg)": "Entrez le nouveau poids (kg)",
@@ -64,6 +66,8 @@ const Map<String, String> french = {
   "Personal details": "Détails personnels",
   "Adjust goals": "Ajuster les objectifs",
   "Calories,carbs,fat and protein": "Calories, glucides, lipides et protéines",
+  // Subtitle for Adjust Goals in Settings
+  "adjust_goals_subtitle": "Calories, glucides, lipides et protéines",
   "Chat history": "Historique de chat",
   "The coach does not memorize chat history. Each interaction is independent.": "Le coach ne mémorise pas l'historique des discussions. Chaque interaction est indépendante.",
   "Legal": "Mentions légales",
@@ -206,6 +210,7 @@ const Map<String, String> french = {
   "Calorie Tracker": "Suivi des calories",
   "Add Calorie": "Ajouter des calories",
   "Quantity": "Quantité",
+  "Ask anything": "Posez une question",
   "Ask The Coach": "Demandez au Coach",
   "This picture not available Calorie,Protein,Carbs and Fats,": "Cette image n'est pas disponible pour les calories, protéines, glucides et graisses.",
   "Ask Coach": "Demandez au Coach",
@@ -254,6 +259,7 @@ const Map<String, String> french = {
   "Gain Weight": "Prendre du poids",
   "Lose Weight": "Perdre du poids",
   "Update Calorie Goal": "Mettre à jour l'objectif calorique",
+  "Calorie goal": "Objectif calorique",
   "Save": "Sauvegarder",
   "Calorie Goal": "Objectif calorique",
   "Update Protein Goal": "Mettre à jour l'objectif en protéines",
@@ -398,6 +404,10 @@ const Map<String, String> french = {
   "BUY NOW": "ACHETEZ MAINTENANT",
   "Terms of Condition": "Conditions d'utilisation",
   "Welcome": "Bienvenue",
+  "Choose Your Gender": "Choisissez votre genre",
+  "welcome_hi": "Salut !",
+  "welcome_subtitle_prefix": "Bienvenue dans votre ",
+  "welcome_subtitle_highlight": "coach nutritionnel",
   "Calorie tracking made easy": "Suivi des calories simplifié",
   "Just snap a quick photo of your meal and we''ll do the rest": "Prenez une photo rapide de votre repas et nous ferons le reste",
   "In-depth nutrition analyses": "Analyses nutritionnelles approfondies",
@@ -415,6 +425,8 @@ const Map<String, String> french = {
   "We're setting": "Nous préparons",
   "everything up for you": "tout pour vous",
   "Customizing health plan....": "Personnalisation du plan de santé....",
+  "plan_intro_title": "Commençons par quelques questions",
+  "plan_intro_subtitle": "Cela nous aidera à personnaliser votre plan",
   // Dynamic meal description components
   "meal_contains": "Ce repas contient",
   "conjunction_and": "et",
@@ -422,9 +434,15 @@ const Map<String, String> french = {
   // Units and labels
   "kcal_unit": "kcal",
   "gram_unit": "g",
+  "unit_piece": "pièce",
   "protein_unit": "g",
   "carbs_unit": "g",
   "fat_unit": "g", 
+  // Localized language display names
+  "language_english": "English",
+  "language_french": "Français",
+  "language_arabic": "العربية",
+  "Cal Left": "cal restants",
   "meal_label": "Repas"
   ,
   // Abbreviations for compact badges
@@ -432,6 +450,11 @@ const Map<String, String> french = {
   "prot": "prot",
   "carbs": "gluc",
   "fats": "lip",
+  // Short nutrient labels (used in compact UI)
+  "nut_prt": "prt",
+  "nut_carb": "carb",
+  "nut_cal": "cal",
+  "nut_fat": "fat",
   // Permission UI
   "grant_camera_access_in_scanner": "Appuyez sur le cadre pour autoriser l'accès à la caméra",
   "camera_permission_denied_title": "Permission de la caméra requise",
@@ -490,7 +513,17 @@ const Map<String, String> french = {
   "all_recipes": "Toutes les recettes", 
   "top_recipes_subtitle": "Découvrez des recettes saines et délicieuses conçues pour vos objectifs",
   "no_recipes_available": "Aucune recette disponible",
+  "Search recipes by name or ingredient": "Recherchez des recettes par nom ou ingrédient",
   "min": "min",
   "cal": "Cal",
   "close": "Fermer",
+
+  "food items found": "articles de nourriture trouvés",
+  
+  // Meal Breakdown
+  "meal_breakdown": "Répartition du Repas",
+  "tap_to_edit_portions": "Appuyez pour modifier les portions",
+  "items": "éléments",
+  "verified": "Vérifié",
+  "estimated": "Estimé",
 };
