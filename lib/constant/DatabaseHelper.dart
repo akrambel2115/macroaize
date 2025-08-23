@@ -27,7 +27,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'my_database.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (Database db, int version) async {
         await db.execute('''
           CREATE TABLE IF NOT EXISTS $calorie (
@@ -58,7 +58,8 @@ class DatabaseHelper {
         carbs INTEGER,
         fats INTEGER,
         type TEXT,
-        image BLOB
+        image BLOB,
+        fdcId INTEGER
              )
         ''');
         await db.execute('''
@@ -79,6 +80,16 @@ class DatabaseHelper {
             image TEXT
              )
              ''');
+      },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        if (oldVersion < 2) {
+          // Add fdcId column if not exists
+          try {
+            await db.execute('ALTER TABLE $history ADD COLUMN fdcId INTEGER');
+          } catch (_) {
+            // ignore if already exists
+          }
+        }
       },
     );
   }
