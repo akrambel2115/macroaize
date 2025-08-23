@@ -35,7 +35,7 @@ class GoalUpdate extends GetView<PersonalDetailsController> {
                 ? 0
                 : (ConstantUserMaster.desiredGoal > maxWeight ? count - 1 : ConstantUserMaster.desiredGoal - minWeight);
 
-            FixedExtentScrollController weightController = FixedExtentScrollController(
+            final FixedExtentScrollController weightController = FixedExtentScrollController(
               initialItem: initialItem,
             );
 
@@ -57,14 +57,13 @@ class GoalUpdate extends GetView<PersonalDetailsController> {
                   controller.setHasChanges(true);
                 },
                 children: List.generate(count, (index) {
+                  final value = minWeight + index;
                   return Center(
                     child: Text(
-                      "${minWeight + index}${"kg".tr}",
+                      "$value${"kg".tr}",
                       style: TextStyle(
                         fontSize: 18,
-            color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white
-              : Colors.black,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                         fontFamily: poppins,
                       ),
                     ),

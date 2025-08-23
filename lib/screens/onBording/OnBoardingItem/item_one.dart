@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
+// AppAssets removed as legacy images are no longer used
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:get/get.dart';
 
@@ -88,23 +88,14 @@ class OnBoardingOne extends StatelessWidget {
                       fontColor: Colors.white,
                     ),
                   ),
-                  Opacity(
-                    opacity: 0.9,
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: 300,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: AssetImage(AppAssets.oneBodyImage),
-                        ),
-                      ),
-                      child: Image.asset(
-                        AppAssets.scanIcon,
+                  // Legacy illustration removed; using neutral placeholder
+                  SizedBox(
+                    height: 300,
+                    child: Center(
+                      child: Icon(
+                        Icons.restaurant_menu,
+                        size: 120,
                         color: AppColor.white,
-                        height: 250,
-                        width: 250,
                       ),
                     ),
                   ),

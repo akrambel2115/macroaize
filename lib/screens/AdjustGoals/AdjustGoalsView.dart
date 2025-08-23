@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsController.dart';
@@ -95,7 +94,7 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                 ConstantUserMaster.calorieGoal.toString(),
-                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                               );
                             },
                           ),
@@ -131,7 +130,7 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                  ConstantUserMaster.proteinGoal.toString(),
-                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                               );
                             },
                           ),
@@ -167,7 +166,7 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                 ConstantUserMaster.carbGoal.toString(),
-                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                               );
                             },
                           ),
@@ -203,7 +202,7 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             builder: (controller) {
                               return Text(
                                 ConstantUserMaster.fatsGoal.toString(),
-                                style: context.theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                               );
                             },
                           ),

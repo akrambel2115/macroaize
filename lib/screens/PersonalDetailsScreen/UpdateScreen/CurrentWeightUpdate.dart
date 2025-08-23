@@ -15,61 +15,22 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GetBuilder<PersonalDetailsController>(
-            builder: (controller) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    "Imperial".tr,
-                    style: TextStyle(
-                      fontSize: 18,
-
-                      fontWeight:
-                      controller.isMetric
-                          ? FontWeight.normal
-                          : FontWeight.bold,
-                      color: controller.isMetric ? Colors.grey : context.theme.primaryColor,
-                    ),
-                  ),
-                  Switch(
-                    activeColor: context.theme.focusColor,
-                    value: controller.isMetric,
-                    onChanged: (value) {
-                      controller.onChangeMetric(value);
-                    },
-                  ),
-                  Text(
-                    "Metric".tr,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                      controller.isMetric
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: controller.isMetric ? context.theme.primaryColor : Colors.grey,
-                    ),
-                  ),
-                ],
-              ).paddingOnly(top: 35);
-            },
-          ),
-          const SizedBox(height: 20),
+          Text(
+            "What's your current weight?".tr,
+            style: context.theme.textTheme.headlineLarge,
+          ).paddingOnly(top: 20, bottom: 10, left: 10),
 
           // Height and Weight Pickers
           GetBuilder<PersonalDetailsController>(
             builder: (controller) {
               const int minKg = 51;
               const int maxKg = 150; // cap at 150kg
-              const int minLb = 100; // imperial fallback (unchanged)
 
               final int kgCount = (maxKg - minKg + 1);
 
-              final int initialItem = controller.isMetric
-                  ? (controller.selectedWeightKg < minKg
-                      ? 0
-                      : (controller.selectedWeightKg > maxKg ? kgCount - 1 : controller.selectedWeightKg - minKg))
-                  : (controller.selectedWeightLb - minLb);
+              final int initialItem = controller.selectedWeightKg < minKg
+                  ? 0
+                  : (controller.selectedWeightKg > maxKg ? kgCount - 1 : controller.selectedWeightKg - minKg);
 
               final FixedExtentScrollController scrollController = FixedExtentScrollController(
                 initialItem: initialItem,
@@ -81,16 +42,7 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
                   Expanded(
                     child: Column(
                       children: [
-                        Text(
-                          "Weight".tr,
-                          style: TextStyle(
-                            color: context.theme.primaryColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: poppins,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
+                        // Subtitle removed — headline provides the title now
                         Container(
                           height: 150,
                           width: double.infinity,
@@ -105,38 +57,19 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
                             scrollController: scrollController, // 👈 important
                             itemExtent: 40,
                             onSelectedItemChanged: (index) {
-                              if (controller.isMetric) {
-                                controller.selectedWeightKg = minKg + index;
-                              } else {
-                                controller.selectedWeightLb = minLb + index;
-                              }
+                              controller.selectedWeightKg = minKg + index;
                               controller.setHasChanges(true);
                               controller.update();
                             },
-                            children: controller.isMetric
-                                ? List.generate(kgCount, (index) {
+                            children: List.generate(kgCount, (index) {
                                     final value = minKg + index;
                                     return Center(
                                       child: Text(
-                                        "${value}${"kg".tr}",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                        color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                                          fontFamily: poppins,
-                                        ),
-                                      ),
-                                    );
-                                  })
-                                : List.generate(150, (index) {
-                                    return Center(
-                                      child: Text(
-                                        "${minLb + index}${"lb".tr}",
+                                        "$value${"kg".tr}",
                                         style: TextStyle(
                                           fontSize: 18,
                                           color: Theme.of(context).brightness == Brightness.dark
-                                              ? context.theme.scaffoldBackgroundColor
+                                              ? Colors.white
                                               : Colors.black,
                                           fontFamily: poppins,
                                         ),

@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:foodcalorietracker/widgets/ModernButton.dart';
 
 class GenderView extends GetView<SignUpController> {
   const GenderView({super.key});
@@ -58,29 +59,15 @@ class GenderView extends GetView<SignUpController> {
         Spacer(),
         GetBuilder<SignUpController>(
           builder: (controller) {
-            return GestureDetector(
-              onTap: () {
-                if(controller.selectedGender.isNotEmpty)
-                  {
-                    controller.onChangeView();
-                  }
-              },
-              child: Container(
-                alignment: Alignment.center,
-                height: 50,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color:
-                      controller.selectedGender.isNotEmpty
-                          ? context.theme.focusColor
-                          : context.theme.cardColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "Continue".tr,
-                  style: context.theme.textTheme.titleMedium?.copyWith(color: Colors.white),
-                ),
-              ),
+            return ModernButton(
+              text: "Continue".tr,
+              onPressed: controller.selectedGender.isNotEmpty ? controller.onChangeView : null,
+              style: ModernButtonStyle.primary,
+              size: ModernButtonSize.medium,
+              borderRadius: BorderRadius.circular(30),
+              icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+              height: 50,
+              width: double.infinity,
             );
           },
         ),

@@ -3,6 +3,7 @@ import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:foodcalorietracker/widgets/ModernButton.dart';
 
 class StoppingGoalView extends GetView<SignUpController> {
   const StoppingGoalView({super.key});
@@ -115,31 +116,39 @@ class StoppingGoalView extends GetView<SignUpController> {
           // Removed Spacer() so Expanded Lottie area can occupy available space
         GetBuilder<SignUpController>(
           builder: (controller) {
-            return GestureDetector(
-              onTap: () {
-                if (controller.selectedStoppingGoal.isNotEmpty) {
-                  controller.onChangeView();
-                }
-              },
-              child: Container(
-                alignment: Alignment.center,
-                height: 50,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color:
-                      controller.selectedStoppingGoal.isNotEmpty
-                          ? context.theme.focusColor
-                          : context.theme.cardColor,
-                  borderRadius: BorderRadius.circular(10),
+            final enabled = controller.selectedStoppingGoal.isNotEmpty;
+            return Row(
+              children: [
+                Expanded(
+                  child: ModernButton(
+                    text: 'Previous'.tr,
+                    onPressed: () {
+                      controller.selectedView = 4;
+                      controller.update();
+                    },
+                    style: ModernButtonStyle.secondary,
+                    size: ModernButtonSize.medium,
+                    borderRadius: BorderRadius.circular(30),
+                    height: 50,
+                  ),
                 ),
-                child: Text(
-                  "Continue".tr,
-                  style: context.theme.textTheme.titleMedium,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ModernButton(
+                    text: 'Continue'.tr,
+                    onPressed: enabled ? controller.onChangeView : null,
+                    style: ModernButtonStyle.primary,
+                    size: ModernButtonSize.medium,
+                    borderRadius: BorderRadius.circular(30),
+                    icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                    height: 50,
+                  ),
                 ),
-              ).paddingOnly(top: 30),
-            );
+              ],
+            ).paddingOnly(top: 30);
           },
         ),
+        const SizedBox(height: 20),
       ],
     );
   }

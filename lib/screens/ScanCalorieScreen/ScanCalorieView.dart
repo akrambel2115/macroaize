@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
@@ -7,9 +8,12 @@ import 'package:foodcalorietracker/screens/ScanCalorieScreen/ScanCalorieControll
 import 'package:foodcalorietracker/widgets/AppWidgets.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:foodcalorietracker/widgets/customButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:foodcalorietracker/widgets/CapsuleMacroGrid.dart';
+import 'package:foodcalorietracker/widgets/UsdaBadge.dart';
 
 class ScanCalorieView extends GetView<ScanCalorieController> {
   const ScanCalorieView({super.key});
@@ -46,6 +50,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
           fontWeight: FontWeight.w600,
         ),
       ),
+  actions: [],
       elevation: 0,
       scrolledUnderElevation: 0,
     );
@@ -72,16 +77,15 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 ),
               ],
             ),
-            child: ModernFadeSlideTransition(
-              child: ModernButton(
-                text: "Add Calorie".tr,
-                style: ModernButtonStyle.gradient,
-                size: ModernButtonSize.large,
-                width: double.infinity,
-                onPressed: () async {
+              child: ModernFadeSlideTransition(
+              child: CustomButtom(
+                backgroundcolor: context.theme.focusColor,
+                btncolor: Colors.white,
+                btntext: "Add Calorie".tr,
+                ontap: () async {
                   await controller.onAddButton(context);
                 },
-                icon: const Icon(
+                sufixicon: const Icon(
                   Icons.add_circle_outline,
                   color: Colors.white,
                   size: 20,
@@ -224,13 +228,23 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 
                 const SizedBox(height: 16),
                 
-                // Quantity selector
-                if (controller.calorie != 0) _buildQuantitySelector(context, controller),
+                // Meal Breakdown (if available)
+                if (controller.hasBreakdown) _buildMealBreakdown(context, controller),
+
+                // Quantity selector (fallback for single item mode)
+                if (!controller.hasBreakdown && controller.calorie != 0)
+                  _buildQuantitySelector(context, controller),
                 
                 const SizedBox(height: 20),
                 
-                // Nutrition cards
-                if (controller.calorie != 0) _buildNutritionCards(context, controller),
+                // Capsule macro grid (animated) — uses totals either from items or single
+                if (controller.calorie != 0)
+                  CapsuleMacroGrid(
+                    calories: controller.calorieQuantity,
+                    protein: controller.proteinQuantity,
+                    carbs: controller.carbsQuantity,
+                    fats: controller.fatsQuantity,
+                  ),
                 
                 const SizedBox(height: 20),
                 
@@ -291,6 +305,19 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 ),
               ),
             ),
+            // USDA Badge - Top Left
+            if (controller.calorie != 0)
+              Positioned(
+                top: 16,
+                left: 16,
+                child: ModernFadeSlideTransition(
+                  beginOffset: const Offset(-0.3, 0),
+                  child: UsdaBadge(
+                    verified: controller.usdaVerified,
+                    filled: true, // Use filled background for better visibility over image
+                  ),
+                ),
+              ),
             // Content overlay
             if (controller.calorie != 0)
               Positioned(
@@ -503,141 +530,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-  Widget _buildNutritionCards(BuildContext context, ScanCalorieController controller) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: ModernFadeSlideTransition(
-                beginOffset: const Offset(-0.2, 0.2),
-                child: GetBuilder<ScanCalorieController>(
-                  builder: (controller) {
-                    return ModernNutrientCard(
-                      label: "Calorie".tr,
-                      value: controller.calorieQuantity.toString(),
-                      unit: 'kcal_unit'.tr,
-                      color: AppColor.calorieColor,
-                      icon: Icons.local_fire_department,
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: ModernFadeSlideTransition(
-                beginOffset: const Offset(0.2, 0.2),
-                  child: GetBuilder<ScanCalorieController>(
-                  builder: (controller) {
-                    return ModernNutrientCard(
-                      label: "Protein".tr,
-                      value: controller.proteinQuantity.toString(),
-                      unit: 'protein_unit'.tr,
-                      color: AppColor.proteinColor,
-                      icon: null,
-                      leading: Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColor.proteinColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Image.asset(
-                            AppAssets.protein,
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
-                            color: AppColor.proteinColor,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: ModernFadeSlideTransition(
-                beginOffset: const Offset(-0.2, 0.3),
-                  child: GetBuilder<ScanCalorieController>(
-                  builder: (controller) {
-                    return ModernNutrientCard(
-                      label: "Carbs".tr,
-                      value: controller.carbsQuantity.toString(),
-                      unit: 'carbs_unit'.tr,
-                      color: AppColor.carbsColor,
-                      icon: null,
-                      leading: Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColor.carbsColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Image.asset(
-                            AppAssets.carb,
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
-                            color: AppColor.carbsColor,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: ModernFadeSlideTransition(
-                beginOffset: const Offset(0.2, 0.3),
-                  child: GetBuilder<ScanCalorieController>(
-                  builder: (controller) {
-                    return ModernNutrientCard(
-                      label: "Fats".tr,
-                      value: controller.fatsQuantity.toString(),
-                      unit: 'fat_unit'.tr,
-                      color: AppColor.fatsColor,
-                      icon: null,
-                      leading: Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColor.fatsColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Image.asset(
-                            AppAssets.fat,
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
-                            color: AppColor.fatsColor,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildAIChatButton(BuildContext context, ScanCalorieController controller) {
     return ModernFadeSlideTransition(
@@ -648,7 +540,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: ModernButton(
-          text: "Ask with AI".tr,
+          text: "Ask The Coach".tr,
           style: ModernButtonStyle.ghost,
           size: ModernButtonSize.large,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -663,6 +555,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
             AppAssets.ai,
             height: 24,
             width: 24,
+            color: AppColor.primaryOrange,
           ),
         ),
       ),
@@ -717,4 +610,403 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
       ),
     );
   }
+
+  Widget _buildMealBreakdown(BuildContext context, ScanCalorieController controller) {
+    return ModernFadeSlideTransition(
+      beginOffset: const Offset(0, 0.2),
+      child: ModernCard(
+        enableGradient: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Enhanced header with better spacing and visual hierarchy
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColor.primaryGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.fastfood, // different icon from the meal info section
+                      color: AppColor.primaryGreen,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'meal_breakdown'.tr,
+                          // match meal name title style
+                          style: context.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'tap_to_edit_portions'.tr,
+                          // match meal info small label style
+                          style: context.textTheme.titleSmall?.copyWith(
+                            // keep a slightly muted tone to mirror meal info label
+                            color: context.theme.textTheme.titleSmall?.color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColor.primaryGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${controller.items.length} ${'items'.tr}',
+                      style: context.textTheme.labelMedium?.copyWith(
+                        color: AppColor.primaryGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Enhanced scrollable item list with improved design
+            Container(
+              decoration: BoxDecoration(
+                color: context.theme.cardColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColor.neutralGrey200.withOpacity(0.5),
+                  width: 1,
+                ),
+              ),
+              child: SizedBox(
+                height: math.min(itemsHeight(controller.items.length), 320),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(12),
+                  itemCount: controller.items.length,
+                  separatorBuilder: (ctx, idx) => Container(
+                    height: 1,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          AppColor.neutralGrey200.withOpacity(0.3),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                  itemBuilder: (ctx, idx) {
+                    final it = controller.items[idx];
+                    final units = const ['piece', 'g']; // Limited to only piece and g
+                    String currentUnit = it.unit;
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.theme.scaffoldBackgroundColor.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColor.lightShadow.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Item header with name and badge
+                          Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: it.usdaVerified 
+                                    ? AppColor.success 
+                                    : AppColor.warning,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  it.name,
+                                  style: context.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: -0.2,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: it.usdaVerified 
+                                    ? AppColor.success.withOpacity(0.1)
+                                    : AppColor.warning.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: it.usdaVerified 
+                                      ? AppColor.success.withOpacity(0.3)
+                                      : AppColor.warning.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      it.usdaVerified ? Icons.verified : Icons.info_outline,
+                                      size: 14,
+                                      color: it.usdaVerified 
+                                        ? AppColor.success 
+                                        : AppColor.warning,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      it.usdaVerified ? 'verified'.tr : 'estimated'.tr,
+                                      style: context.textTheme.labelSmall?.copyWith(
+                                        color: it.usdaVerified 
+                                          ? AppColor.success 
+                                          : AppColor.warning,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // Controls row (amount input and unit selector)
+                          Row(
+                            children: [
+                              // Amount input with modern styling
+                              Container(
+                                width: 80,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: context.theme.cardColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: AppColor.neutralGrey300.withOpacity(0.5),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: TextFormField(
+                                  initialValue: it.amount.toStringAsFixed(
+                                    it.amount == it.amount.truncateToDouble() ? 0 : 1
+                                  ),
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                                    isDense: true,
+                                  ),
+                                  onFieldSubmitted: (v) {
+                                    final val = double.tryParse(v) ?? it.amount;
+                                    controller.updateItemAmount(idx, val, currentUnit);
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              
+                              // Unit selector with enhanced styling
+                              StatefulBuilder(
+                                builder: (ctx2, setState) {
+                                  // Ensure currentUnit is valid, fallback to 'g' if invalid
+                                  if (!['piece', 'g'].contains(currentUnit)) {
+                                    currentUnit = 'g';
+                                  }
+                                  return Container(
+                                    height: 44,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: context.theme.cardColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: AppColor.neutralGrey300.withOpacity(0.5),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: DropdownButton<String>(
+                                      value: currentUnit,
+                                      isDense: true,
+                                      underline: const SizedBox.shrink(),
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_down,
+                                        color: AppColor.neutralGrey500,
+                                        size: 18,
+                                      ),
+                                      items: units.map((u) {
+                                        final label = u == 'g' ? 'gram_unit'.tr : 'unit_piece'.tr;
+                                        return DropdownMenuItem(
+                                          value: u,
+                                          child: Text(
+                                            label,
+                                            style: context.textTheme.bodyMedium?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (u) {
+                                        if (u == null) return;
+                                        setState(() => currentUnit = u);
+                                        controller.updateItemAmount(idx, it.amount, currentUnit);
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          
+                          const SizedBox(height: 12),
+                          
+                          // Nutrition info with full width display
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColor.primaryGreen.withOpacity(0.05),
+                                  AppColor.primaryGreen.withOpacity(0.02),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: AppColor.primaryGreen.withOpacity(0.1),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Left column: Protein (top) and Fat (bottom)
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.fitness_center, size: 14, color: AppColor.primaryOrange),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              '${'nut_prt'.tr}: ${it.protein.round()}${'gram_unit'.tr}',
+                                              style: context.textTheme.bodySmall?.copyWith(
+                                                color: AppColor.primaryOrange,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.opacity, size: 14, color: AppColor.primaryOrange),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              '${'nut_fat'.tr}: ${it.fat.round()}${'gram_unit'.tr}',
+                                              style: context.textTheme.bodySmall?.copyWith(
+                                                color: AppColor.primaryOrange,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+
+                                    // Right column: Calories (top) and Carbs (bottom)
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${'nut_cal'.tr}: ${it.kcal.round()}',
+                                              style: context.textTheme.bodySmall?.copyWith(
+                                                color: AppColor.primaryOrange,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Icon(Icons.local_fire_department, size: 14, color: AppColor.primaryOrange),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${'nut_carb'.tr}: ${it.carbs.round()}${'gram_unit'.tr}',
+                                              style: context.textTheme.bodySmall?.copyWith(
+                                                color: AppColor.primaryOrange,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Icon(Icons.grain, size: 14, color: AppColor.primaryOrange),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // totals are shown in the capsule macro grid above; removed duplicate totals box
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Approximate height for N items (each row ~90 px + padding)
+  double itemsHeight(int count) {
+    final per = 100.0; // rough per-item height
+    return count * per + 20.0; // extra padding
+  }
+
+  // _buildTotalMacro removed — totals are displayed by the capsule macro grid above.
 }

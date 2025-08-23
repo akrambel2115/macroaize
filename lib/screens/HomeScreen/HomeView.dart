@@ -56,6 +56,11 @@ class HomeView extends GetView<HomeController> {
               
               const SizedBox(height: 32), // Increased spacing for better hierarchy
               
+              // Recipes section
+              _buildRecipesSection(context),
+              
+              const SizedBox(height: 32),
+              
               // History section
               _buildHistorySection(context),
               
@@ -98,15 +103,15 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
       actions: [
+        /* Premium button commented out per request.
         Padding(
           padding: const EdgeInsets.all(8),
           child: ModernButton(
             text: '',
             style: ModernButtonStyle.ghost,
             size: ModernButtonSize.small,
-            onPressed: () {
-              Get.toNamed(Routes.premiumView);
-            },
+            // Premium navigation temporarily disabled per request.
+            onPressed: () {},
             icon: Image.asset(
               AppAssets.crownIcon,
               height: 24,
@@ -114,6 +119,7 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
         ),
+        */
       ],
     );
   }
@@ -140,7 +146,8 @@ class HomeView extends GetView<HomeController> {
                   itemBuilder: (context, index) {
                     bool isToday = controller.dates[index].day == controller.today.day;
                     return Padding(
-                      padding: EdgeInsets.only(right: index == controller.dates.length - 1 ? 0 : itemSpacing),
+                      // Use directional padding so horizontal gaps respect TextDirection (RTL/LTR)
+                      padding: EdgeInsetsDirectional.only(end: index == controller.dates.length - 1 ? 0 : itemSpacing),
                       child: ModernScaleTransition(
                         child: GestureDetector(
                           onTap: () => controller.dateFilter(index),
@@ -170,10 +177,16 @@ class HomeView extends GetView<HomeController> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    DateFormat('E')
-                                        .format(controller.dates[index])
-                                        .substring(0, 3)
-                                        .toUpperCase(),
+                                    // Use translation keys for weekdays so the labels come from language JSON
+                                    // Keys used: 'Mon','Tue','Wed','Thu','Fri','Sat','Sun'
+                                    (() {
+                                      final weekdayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                                      final lang = Get.locale?.languageCode ?? Get.deviceLocale?.languageCode ?? 'en';
+                                      final key = weekdayKeys[controller.dates[index].weekday - 1];
+                                      final label = key.tr;
+                                      // keep English in uppercase as previous design used uppercase short day names
+                                      return lang == 'en' ? label.toUpperCase() : label;
+                                    })(),
                                     style: context.textTheme.labelSmall?.copyWith(
                                       color: isToday
                                           ? Colors.white
@@ -229,9 +242,12 @@ class HomeView extends GetView<HomeController> {
         
         return ModernFadeSlideTransition(
           beginOffset: const Offset(0, 0.2),
-          child: ModernCard(
-            enableGradient: true,
-            child: Column(
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ModernCard(
+                enableGradient: true,
+                child: Column(
               children: [
                 // Header
                 Row(
@@ -256,7 +272,10 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
                     const Spacer(),
-                    // Plus button moved below goal calories for better UX
+                        // Minimal inline edit icon aligned with title
+                        _InlineEditIcon(
+                          onTap: () => Get.toNamed(Routes.adjustGoalsView),
+                        ),
                   ],
                 ),
                 
@@ -298,7 +317,8 @@ class HomeView extends GetView<HomeController> {
                           // Small nutrient rows
                           _buildMiniNutrientRow(
                             context,
-                            label: 'PROTEIN'.tr,
+                            // use existing translation keys (already present in language files)
+                            label: 'Protein'.tr,
                             value: controller.consumedProtein,
                             goal: ConstantUserMaster.proteinGoal,
                             color: AppColor.primaryOrange,
@@ -306,7 +326,7 @@ class HomeView extends GetView<HomeController> {
                           const SizedBox(height: 8),
                           _buildMiniNutrientRow(
                             context,
-                            label: 'CARBS'.tr,
+                            label: 'Carbs'.tr,
                             value: controller.consumedCarbs,
                             goal: ConstantUserMaster.carbGoal,
                             color: AppColor.primaryOrange,
@@ -314,7 +334,7 @@ class HomeView extends GetView<HomeController> {
                           const SizedBox(height: 8),
                           _buildMiniNutrientRow(
                             context,
-                            label: 'FAT'.tr,
+                            label: 'Fats'.tr,
                             value: controller.consumedFats,
                             goal: ConstantUserMaster.fatsGoal,
                             color: AppColor.primaryOrange,
@@ -382,7 +402,7 @@ class HomeView extends GetView<HomeController> {
                                             },
                                           ),
                                           Text(
-                                            'cal left'.tr,
+                                            'Cal Left'.tr,
                                             style: context.textTheme.labelSmall?.copyWith(
                                               color: AppColor.neutralGrey600,
                                               // Slightly reduced from previous to avoid overpowering the number
@@ -432,6 +452,8 @@ class HomeView extends GetView<HomeController> {
                 ),
               ],
             ),
+              ),
+            ],
           ),
         );
       },
@@ -784,6 +806,225 @@ class HomeView extends GetView<HomeController> {
       },
     );
   }
+
+  Widget _buildRecipesSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Make the left column flexible so the subtitle can wrap/ellipsis
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'top_recipes'.tr,
+                    style: context.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'top_recipes_subtitle'.tr,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: AppColor.neutralGrey600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () => Get.toNamed(Routes.recipesView, arguments: {'showBack': true}),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "View All".tr,
+                    style: TextStyle(
+                      color: AppColor.primaryOrange,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppColor.primaryOrange,
+                    size: 14,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 200,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            children: _getMockRecipes().map((recipe) {
+              return Container(
+                width: 160,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  // Keep card background consistent with theme so title area doesn't show a contrasting band
+                  color: context.theme.cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                // Render image as background and overlay title on top so there's no separate info strip
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Background image covers whole card
+                      recipe['imageUrl'] != null
+                          ? Image.network(
+                              recipe['imageUrl']!,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              color: context.theme.cardColor,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.restaurant_rounded,
+                                  size: 32,
+                                  color: AppColor.neutralGrey500,
+                                ),
+                              ),
+                            ),
+                      // Dim overlay (optional for readability) - keep fully transparent if you want no overlay
+                      Positioned.fill(
+                        child: Container(
+                          // Transparent overlay to remove any visible band — change to Colors.black.withOpacity(0.25) if you want subtle readabilty
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      // Badges
+                      Positioned(
+                        bottom: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.access_time_rounded,
+                                size: 10,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '${recipe['duration']} ${'min'.tr}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColor.primaryOrange.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${recipe['calories']} ${'cal'.tr}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Title overlay (no background)
+                      Positioned(
+                        left: 12,
+                        right: 12,
+                        bottom: 36,
+                        child: Text(
+                          recipe['title']!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            height: 1.2,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.6),
+                                offset: const Offset(0, 1),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Map<String, dynamic>> _getMockRecipes() {
+    return [
+      {
+        'title': 'Blueberry Almond Smoothie',
+        'imageUrl': 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=300&h=200&fit=crop',
+        'duration': 10,
+        'calories': 400,
+      },
+      {
+        'title': 'Chicken & Quinoa Stuffed Peppers',
+        'imageUrl': 'https://images.unsplash.com/photo-1604909052743-94e838986d24?w=300&h=200&fit=crop',
+        'duration': 40,
+        'calories': 700,
+      },
+      {
+        'title': 'Peanut Butter Banana Toast',
+        'imageUrl': 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=300&h=200&fit=crop',
+        'duration': 10,
+        'calories': 350,
+      },
+      {
+        'title': 'Veggie & Turkey Stir-Fry',
+        'imageUrl': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=300&h=200&fit=crop',
+        'duration': 30,
+        'calories': 750,
+      },
+    ];
+  }
 }
 
 // Custom painter that draws a rounded-cap progress arc (so ends are rounded instead of flat).
@@ -844,3 +1085,77 @@ class _RoundedArcPainter extends CustomPainter {
 }
 
 // Legend widget removed — energy orbs are the sole macro visualization now.
+
+// Minimal inline edit icon used in the Track Food header.
+class _InlineEditIcon extends StatefulWidget {
+  final VoidCallback onTap;
+  const _InlineEditIcon({required this.onTap});
+
+  @override
+  State<_InlineEditIcon> createState() => _InlineEditIconState();
+}
+
+class _InlineEditIconState extends State<_InlineEditIcon> {
+  bool _hovered = false;
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+  final Color iconColor = AppColor.primaryOrange;
+  final Color bgColor = AppColor.primaryOrange
+    .withOpacity(_pressed ? 0.25 : (_hovered ? 0.18 : 0.12));
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.9 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: widget.onTap,
+            onHighlightChanged: (v) => setState(() => _pressed = v),
+            splashColor: AppColor.primaryOrange.withOpacity(0.15),
+            highlightColor: AppColor.primaryOrange.withOpacity(0.08),
+            child: IconTheme(
+              data: IconThemeData(color: iconColor),
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 120),
+                    curve: Curves.easeOut,
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(child: _EditIcon()),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EditIcon extends StatelessWidget {
+  const _EditIcon();
+  @override
+  Widget build(BuildContext context) {
+    // Resolve color from parent IconTheme to allow smooth updates
+    return Icon(
+      Icons.edit_outlined,
+      size: 18,
+      color: IconTheme.of(context).color ?? AppColor.neutralGrey500,
+    );
+  }
+}

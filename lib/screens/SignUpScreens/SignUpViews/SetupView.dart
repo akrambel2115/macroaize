@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class SetupView extends GetView<SignUpController> {
   const SetupView({super.key});
@@ -31,9 +32,12 @@ class SetupView extends GetView<SignUpController> {
         textAlign: TextAlign.center,
         style: context.theme.textTheme.titleSmall,
       ).paddingOnly(top: 15),
-        CircularProgressIndicator(
-          backgroundColor: context.theme.cardColor,
-          color: context.theme.focusColor,
+        // Use Lottie loader animation
+        Lottie.asset(
+          'assets/lottie/loader.json',
+          width: 80,
+          height: 80,
+          fit: BoxFit.contain,
         ).paddingOnly(top: 15)
     ],);
   }

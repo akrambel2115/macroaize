@@ -19,3 +19,16 @@ class ConstantUserMaster{
   static String stoppedGoal = "";
 
 }
+
+// Helper to calculate macros from TDEE and weight (used when weight/goal change)
+Map<String, int> calculateMacrosFromTDEE(double tdee, int weightKg) {
+  final protein = (weightKg * 2.0).toInt();
+  final fat = ((tdee * 0.25) / 9).toInt();
+  final carbs = ((tdee - ((protein * 4) + (fat * 9))) / 4).toInt();
+  return {
+    'calories': tdee.toInt(),
+    'protein': protein,
+    'fat': fat,
+    'carbs': carbs,
+  };
+}

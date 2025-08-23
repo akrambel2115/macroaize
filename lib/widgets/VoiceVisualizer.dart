@@ -6,7 +6,7 @@ class VoiceVisualizer extends StatefulWidget {
   final double height;
   final Color color;
 
-  const VoiceVisualizer({Key? key, required this.level, this.width = 40, this.height = 40, this.color = Colors.black}) : super(key: key);
+  const VoiceVisualizer({super.key, required this.level, this.width = 40, this.height = 40, this.color = Colors.black});
 
   @override
   State<VoiceVisualizer> createState() => _VoiceVisualizerState();

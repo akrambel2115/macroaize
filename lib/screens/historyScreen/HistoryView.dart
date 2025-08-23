@@ -151,80 +151,74 @@ class HistoryView extends GetView<HistoryController> {
           // Food image centered on top and single-line nutrition row below
           Center(child: _buildFoodImage(historyItem.image, size: 110)),
           const SizedBox(height: 16),
-          Column(
+          // Render nutrition items inline in a single row without scrolling.
+          // Use Expanded so each badge shares available space and reduce gaps to avoid overflow.
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: NutritionBadge(
-                      label: "Calorie".tr,
-                      value: historyItem.calorie.toString(),
-                      iconWidget: Icon(
-                        Icons.local_fire_department_rounded,
-                        color: AppColor.historyAccent,
-                        size: 28,
-                      ),
-                      accentColor: AppColor.historyAccent,
-                      iconSize: 28,
-                      unit: 'kcal_unit'.tr,
-                    ),
+              Expanded(
+                child: NutritionBadge(
+                  label: "Calorie".tr,
+                  value: historyItem.calorie.toString(),
+                  iconWidget: Icon(
+                    Icons.local_fire_department_rounded,
+                    color: AppColor.historyAccent,
+                    size: 28,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: NutritionBadge(
-                      label: "Protein".tr,
-                      value: historyItem.protein.toString(),
-                      iconWidget: Image.asset(
-                        AppAssets.protein,
-                        width: 28,
-                        height: 28,
-                        color: AppColor.historyAccent,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                      accentColor: AppColor.historyAccent,
-                      iconSize: 28,
-                      unit: 'protein_unit'.tr,
-                    ),
-                  ),
-                ],
+                  accentColor: AppColor.historyAccent,
+                  iconSize: 28,
+                  unit: 'kcal_unit'.tr,
+                ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: NutritionBadge(
-                      label: "Carbs".tr,
-                      value: historyItem.carbs.toString(),
-                      iconWidget: Image.asset(
-                        AppAssets.carb,
-                        width: 28,
-                        height: 28,
-                        color: AppColor.historyAccent,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                      accentColor: AppColor.historyAccent,
-                      iconSize: 28,
-                      unit: 'carbs_unit'.tr,
-                    ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: NutritionBadge(
+                  label: "Protein".tr,
+                  value: historyItem.protein.toString(),
+                  iconWidget: Image.asset(
+                    AppAssets.protein,
+                    width: 28,
+                    height: 28,
+                    color: AppColor.historyAccent,
+                    colorBlendMode: BlendMode.srcIn,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: NutritionBadge(
-                      label: "Fats".tr,
-                      value: historyItem.fats.toString(),
-                      iconWidget: Image.asset(
-                        AppAssets.fat,
-                        width: 28,
-                        height: 28,
-                        color: AppColor.historyAccent,
-                        colorBlendMode: BlendMode.srcIn,
-                      ),
-                      accentColor: AppColor.historyAccent,
-                      iconSize: 28,
-                      unit: 'fat_unit'.tr,
-                    ),
+                  accentColor: AppColor.historyAccent,
+                  iconSize: 28,
+                  unit: 'protein_unit'.tr,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: NutritionBadge(
+                  label: "Carbs".tr,
+                  value: historyItem.carbs.toString(),
+                  iconWidget: Image.asset(
+                    AppAssets.carb,
+                    width: 28,
+                    height: 28,
+                    color: AppColor.historyAccent,
+                    colorBlendMode: BlendMode.srcIn,
                   ),
-                ],
+                  accentColor: AppColor.historyAccent,
+                  iconSize: 28,
+                  unit: 'carbs_unit'.tr,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: NutritionBadge(
+                  label: "Fats".tr,
+                  value: historyItem.fats.toString(),
+                  iconWidget: Image.asset(
+                    AppAssets.fat,
+                    width: 28,
+                    height: 28,
+                    color: AppColor.historyAccent,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+                  accentColor: AppColor.historyAccent,
+                  iconSize: 28,
+                  unit: 'fat_unit'.tr,
+                ),
               ),
             ],
           ),

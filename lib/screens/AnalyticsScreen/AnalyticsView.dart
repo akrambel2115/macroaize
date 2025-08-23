@@ -112,7 +112,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      "${difference}kg ${"to go".tr}",
+                      "$difference${'kg'.tr} ${'to go'.tr}",
                       style: context.theme.textTheme.labelMedium?.copyWith(
                         color: isLosing ? AppColor.accent : AppColor.success,
                         fontWeight: FontWeight.w600,
@@ -125,6 +125,18 @@ class AnalyticsView extends GetView<AnalyticsController> {
           ),
 
           const SizedBox(height: 16),
+
+          // Celebration strip (animated banner)
+          CelebrationStrip(
+            message: difference == 0
+                ? "goal_achieved_message".tr
+                : ((ConstantUserMaster.weight > ConstantUserMaster.desiredGoal)
+                    ? "on_a_roll_message".tr
+                    : "keep_momentum_message".tr),
+            height: 46,
+          ),
+
+          const SizedBox(height: 0),
 
           // Journey path visualization replacing the two cards and progress bar
           WeightJourney(
@@ -216,16 +228,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
           ),
 
           const SizedBox(height: 4),
-
-          // Celebration strip (animated banner)
-          CelebrationStrip(
-            message: difference == 0
-                ? "goal_achieved_message".tr
-                : ((ConstantUserMaster.weight > ConstantUserMaster.desiredGoal)
-                    ? "on_a_roll_message".tr
-                    : "keep_momentum_message".tr),
-            height: 46,
-          ),
         ],
       ),
     );

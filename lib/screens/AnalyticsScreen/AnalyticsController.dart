@@ -57,8 +57,19 @@ class AnalyticsController extends GetxController {
 
     for (var dayData in filteredData) {
       DateTime dataDate = DateFormat('dd-MM-yyyy').parse(dayData.date);
-      String dayName = DateFormat('EE').format(dataDate);
-      print(dayName);
+      // Use weekday integer to pick a stable English key regardless of locale.
+      // DateTime.weekday: 1 = Monday, ..., 7 = Sunday
+      const dowMap = {
+        1: 'Mon',
+        2: 'Tue',
+        3: 'Wed',
+        4: 'Thu',
+        5: 'Fri',
+        6: 'Sat',
+        7: 'Sun',
+      };
+      final int wd = dataDate.weekday;
+      final String dayName = dowMap[wd]!;
       if (weeklyConsumption.containsKey(dayName)) {
         weeklyConsumption[dayName] = dayData.calorie;
       }

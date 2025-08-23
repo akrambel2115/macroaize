@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 import 'package:foodcalorietracker/screens/PremiumScreen/PremiumController.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
 import 'package:get/get.dart';
@@ -14,9 +16,15 @@ class PremiumView extends GetView<PremiumController> {
   final headerHeight = media.size.height * 0.55;
   final overlap = headerHeight * 0.18;
 
-    return Scaffold(
-      backgroundColor: AppColor.darkBackground,
-      body: SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: AppColor.darkBackground,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColor.darkBackground,
+        body: SafeArea(
         child: Stack(
           children: <Widget>[
             _PremiumHeader(height: headerHeight),
@@ -39,10 +47,12 @@ class PremiumView extends GetView<PremiumController> {
                       children: <Widget>[
                     // Features
                     _FeatureRow(
-                      iconWidget: Image.asset(
-                        'assets/icons/scan.png',
-                        width: 24,
-                        height: 24,
+                      iconWidget: Lottie.asset(
+                        'assets/lottie/scan.json',
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.contain,
+                        repeat: true,
                       ),
                       title: 'feature_ai_scan_title'.tr,
                       subtitle: 'feature_ai_scan_subtitle'.tr,
@@ -50,10 +60,12 @@ class PremiumView extends GetView<PremiumController> {
                     ),
                     const SizedBox(height: 16),
                     _FeatureRow(
-                      iconWidget: Image.asset(
-                        'assets/icons/chatbot.png',
-                        width: 24,
-                        height: 24,
+                      iconWidget: Lottie.asset(
+                        'assets/lottie/chatbot.json',
+                        width: 28,
+                        height: 28,
+                        fit: BoxFit.contain,
+                        repeat: true,
                       ),
                       title: 'feature_chatbot_title'.tr,
                       subtitle: 'feature_chatbot_subtitle'.tr,
@@ -61,10 +73,12 @@ class PremiumView extends GetView<PremiumController> {
                     ),
                     const SizedBox(height: 16),
                     _FeatureRow(
-                      iconWidget: Image.asset(
-                        'assets/icons/cook.png',
-                        width: 24,
-                        height: 24,
+                      iconWidget: Lottie.asset(
+                        'assets/lottie/recipes.json',
+                        width: 28,
+                        height: 28,
+                        fit: BoxFit.contain,
+                        repeat: true,
                       ),
                       title: 'feature_recipes_title'.tr,
                       subtitle: 'feature_recipes_subtitle'.tr,
@@ -256,7 +270,8 @@ class PremiumView extends GetView<PremiumController> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -291,27 +306,24 @@ class _PremiumHeader extends StatelessWidget {
         children: [
           // Decorative images (replacing previous blur circles)
           Positioned(
-            top: 16,
-            left: -30,
+            top: 40,
+            left: 14,
             child: Semantics(
               label: 'cook icon',
               image: true,
-              child: SizedBox(
-                width: 120,
-                height: 120,
+                child: SizedBox(
+                width: 96,
+                height: 96,
                 child: Opacity(
                   opacity: 0.55,
-                  child: Image.asset(
-                    'assets/icons/cook.png',
-                    fit: BoxFit.contain,
-                  ),
+                  child: Lottie.asset('assets/lottie/recipes.json', fit: BoxFit.contain, repeat: true),
                 ),
               ),
             ),
           ),
           Positioned(
             top: 40,
-            right: -24,
+            right: 16,
             child: Semantics(
               label: 'scan icon',
               image: true,
@@ -320,10 +332,7 @@ class _PremiumHeader extends StatelessWidget {
                 height: 100,
                 child: Opacity(
                   opacity: 0.55,
-                  child: Image.asset(
-                    'assets/icons/scan.png',
-                    fit: BoxFit.contain,
-                  ),
+                  child: Lottie.asset('assets/lottie/scan.json', fit: BoxFit.contain, repeat: true),
                 ),
               ),
             ),
@@ -335,35 +344,26 @@ class _PremiumHeader extends StatelessWidget {
               label: 'chatbot icon',
               image: true,
               child: SizedBox(
-                width: 100,
-                height: 100,
-                child: Opacity(
-                  opacity: 0.55,
-                  child: Image.asset(
-                    'assets/icons/chatbot.png',
-                    fit: BoxFit.contain,
+                  width: 140,
+                  height: 140,
+                  child: Opacity(
+                    opacity: 0.55,
+                    child: Lottie.asset('assets/lottie/chatbot.json', fit: BoxFit.contain, repeat: true),
                   ),
                 ),
-              ),
             ),
           ),
           // Symmetric decorative icon to the chatbot on the bottom-right
           Positioned(
-            bottom: 64,
-            right: 40,
+            bottom: 40,
+            right: 20,
             child: Semantics(
-              label: 'unlimited icon',
+              label: 'dahabia icon',
               image: true,
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: Opacity(
-                  opacity: 0.55,
-                  child: Image.asset(
-                    'assets/icons/unlimited.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
+              child: _AnimatedDahabia(
+                width: 180,
+                height: 180,
+                opacity: 0.55,
               ),
             ),
           ),
@@ -703,6 +703,65 @@ class _PlanCard extends StatelessWidget {
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// A small, subtle floating + scale animation for the dahabia decorative icon so it matches the liveliness of Lottie assets.
+class _AnimatedDahabia extends StatefulWidget {
+  const _AnimatedDahabia({this.width = 140, this.height = 140, this.opacity = 1.0});
+  final double width;
+  final double height;
+  final double opacity;
+
+  @override
+  State<_AnimatedDahabia> createState() => _AnimatedDahabiaState();
+}
+
+class _AnimatedDahabiaState extends State<_AnimatedDahabia> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _translateY;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400))..repeat(reverse: true);
+
+    // Gentle vertical float: -6 -> +6 px
+    _translateY = Tween(begin: -6.0, end: 6.0).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+
+    // Slight scale pulse: 0.985 -> 1.02
+    _scale = Tween(begin: 0.985, end: 1.02).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: AlwaysStoppedAnimation(widget.opacity),
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _translateY.value),
+            child: Transform.scale(
+              scale: _scale.value,
+              child: child,
+            ),
+          );
+        },
+        child: SizedBox(
+          width: widget.width,
+          height: widget.height,
+          child: Image.asset('assets/icons/dahabia.png', fit: BoxFit.contain),
         ),
       ),
     );

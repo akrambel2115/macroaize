@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/MainController.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
 import 'package:foodcalorietracker/routes/app_pages.dart';
@@ -21,7 +20,7 @@ class SettingConfig {
   static const String appVersion = "1.0.0";
   
   // Customization menu items - easily add/remove/modify settings
-  static const List<Map<String, dynamic>> customizationItems = [
+    static const List<Map<String, dynamic>> customizationItems = [
     {
       'title': 'Personal details',
       'icon': Icons.person_outline,
@@ -30,7 +29,7 @@ class SettingConfig {
     },
     {
       'title': 'Adjust goals',
-      'subtitle': 'Calories, carbs, fat and protein',
+      'subtitleKey': 'adjust_goals_subtitle',
       'icon': Icons.track_changes_outlined,
       'color': AppColor.accent,
       'route': Routes.adjustGoalsView,
@@ -126,6 +125,10 @@ class SettingView extends GetView<SettingController> {
   }
 
   Widget _buildPremiumCard(BuildContext context) {
+    // Premium card removed from UI per request. Original card kept commented below for easy revert.
+    return const SizedBox.shrink();
+
+    /*
     return ModernFadeSlideTransition(
       child: Container(
         decoration: BoxDecoration(
@@ -149,7 +152,8 @@ class SettingView extends GetView<SettingController> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => Get.toNamed(Routes.premiumView),
+            // Premium navigation temporarily disabled per request.
+            onTap: () {},
             borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -202,17 +206,20 @@ class SettingView extends GetView<SettingController> {
         ),
       ),
     );
+    */
   }
 
   Widget _buildProfileSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, "Profile", Icons.person_outline),
+  _buildSectionHeader(context, "Profile".tr, Icons.person_outline),
         const SizedBox(height: 12),
         ModernFadeSlideTransition(
           beginOffset: const Offset(0, 0.2),
           child: ModernCard(
+            // Make the entire profile card tappable and navigate to Personal Details
+            onTap: () => Get.toNamed(Routes.personalDetailsView),
             child: Column(
               children: [
                 _buildProfileInfoRow(
@@ -226,7 +233,7 @@ class SettingView extends GetView<SettingController> {
                 _buildProfileInfoRow(
                   context,
                   "Height".tr,
-                  "${ConstantUserMaster.height} cm",
+                  "${ConstantUserMaster.height} ${'cm'.tr}",
                   Icons.height,
                   AppColor.secondary,
                 ),
@@ -234,7 +241,7 @@ class SettingView extends GetView<SettingController> {
                 _buildProfileInfoRow(
                   context,
                   "Current Weight".tr,
-                  "${ConstantUserMaster.weight} kg",
+                  "${ConstantUserMaster.weight} ${'kg'.tr}",
                   Icons.monitor_weight_outlined,
                   AppColor.accent,
                 ),
@@ -265,22 +272,22 @@ class SettingView extends GetView<SettingController> {
                   AppColor.neutralGrey700,
                   trailing: CupertinoSwitch(
                     value: Get.find<ThemeController>().isDarkMode,
-                    activeColor: AppColor.primaryOrange,
+                    activeTrackColor: AppColor.primaryOrange,
                     onChanged: (value) async {
                       await Get.find<ThemeController>().toggleTheme(value);
                     },
                   ),
                 ),
-                Divider(height: 24, color: AppColor.neutralGrey200),
+                Divider(height: 24, color: Theme.of(context).brightness == Brightness.dark ? AppColor.neutralGrey700 : AppColor.neutralGrey200),
                 _buildSettingRow(
                   context,
                   "Language".tr,
-                  Get.find<MainController>().language,
+                  Get.find<MainController>().languageKey.tr,
                   Icons.language_outlined,
                   AppColor.tertiary,
                   onTap: () => Get.toNamed(Routes.languageView),
                 ),
-                Divider(height: 24, color: AppColor.neutralGrey200),
+                Divider(height: 24, color: Theme.of(context).brightness == Brightness.dark ? AppColor.neutralGrey700 : AppColor.neutralGrey200),
                 // Dynamic customization items from config
                 ...SettingConfig.customizationItems.asMap().entries.map((entry) {
                   final item = entry.value;
@@ -291,15 +298,15 @@ class SettingView extends GetView<SettingController> {
                       _buildSettingRow(
                         context,
                         item['title'].toString().tr,
-                        item['subtitle']?.toString().tr,
+                        item.containsKey('subtitleKey') ? item['subtitleKey'].toString().tr : null,
                         item['icon'] as IconData,
                         item['color'] as Color,
                         onTap: () => Get.toNamed(item['route'] as String),
                       ),
-                      if (!isLast) Divider(height: 24, color: AppColor.neutralGrey200),
+                      if (!isLast) Divider(height: 24, color: Theme.of(context).brightness == Brightness.dark ? AppColor.neutralGrey700 : AppColor.neutralGrey200),
                     ],
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -332,7 +339,7 @@ class SettingView extends GetView<SettingController> {
                       AppColor.neutralGrey600,
                       onTap: () => _handleLegalAction(item['action'] as String),
                     ),
-                    if (!isLast) Divider(height: 24, color: AppColor.neutralGrey200),
+                    if (!isLast) Divider(height: 24, color: Theme.of(context).brightness == Brightness.dark ? AppColor.neutralGrey700 : AppColor.neutralGrey200),
                   ],
                 );
               }).toList(),
@@ -361,7 +368,7 @@ class SettingView extends GetView<SettingController> {
                   Icons.code_outlined,
                   AppColor.neutralGrey600,
                 ),
-                Divider(height: 24, color: AppColor.neutralGrey200),
+                Divider(height: 24, color: Theme.of(context).brightness == Brightness.dark ? AppColor.neutralGrey700 : AppColor.neutralGrey200),
                 _buildSettingRow(
                   context,
                   "Reset Data".tr,
@@ -462,7 +469,7 @@ class SettingView extends GetView<SettingController> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         // Use a light gray overlay on press in light mode to avoid black highlight
-        overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
+        overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
           final isLight = Theme.of(context).brightness == Brightness.light;
           if (isLight) return AppColor.neutralGrey100.withOpacity(0.5);
           return AppColor.neutralGrey800.withOpacity(0.12);

@@ -25,7 +25,7 @@ class ChatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  const double _kTypingIndicatorSize = 16.0;
+  const double kTypingIndicatorSize = 16.0;
     // Right-aligned for user messages, left-aligned for AI messages
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final bgColor = isUser
@@ -39,8 +39,8 @@ class ChatWidget extends StatelessWidget {
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            // avatar for AI
-            Image.asset(AppAssets.aiIcon, height: 28, width: 28),
+            // avatar for AI (coach)
+            Image.asset(AppAssets.coachIcon, height: 28, width: 28),
             const SizedBox(width: 10),
           ],
 
@@ -86,8 +86,8 @@ class ChatWidget extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 10),
                       child: Lottie.asset(
                         AppAssets.loadingChat,
-                        width: _kTypingIndicatorSize,
-                        height: _kTypingIndicatorSize,
+                        width: kTypingIndicatorSize,
+                        height: kTypingIndicatorSize,
                       ),
                     ),
 

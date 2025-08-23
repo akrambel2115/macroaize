@@ -7,12 +7,12 @@ class AnimatedCounter extends StatelessWidget {
   final Curve curve;
 
   const AnimatedCounter({
-    Key? key,
+    super.key,
     required this.value,
     this.style,
     this.duration = const Duration(milliseconds: 2000),
     this.curve = Curves.easeOut,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

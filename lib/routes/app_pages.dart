@@ -15,6 +15,8 @@ import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetails
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsView.dart';
 import 'package:foodcalorietracker/screens/PremiumScreen/PremiumBinding.dart';
 import 'package:foodcalorietracker/screens/PremiumScreen/PremiumView.dart';
+import 'package:foodcalorietracker/screens/RecipesScreen/RecipesBinding.dart';
+import 'package:foodcalorietracker/screens/RecipesScreen/RecipesView.dart';
 import 'package:foodcalorietracker/screens/ScanCalorieScreen/ScanCalorieBinding.dart';
 import 'package:foodcalorietracker/screens/ScanCalorieScreen/ScanCalorieView.dart';
 import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodBinding.dart';
@@ -30,18 +32,54 @@ import 'package:foodcalorietracker/screens/languageScreen/languageView.dart';
 import 'package:foodcalorietracker/screens/leadingScreen/LeadingBinding.dart';
 import 'package:foodcalorietracker/screens/leadingScreen/LeadingView.dart';
 import 'package:foodcalorietracker/screens/onBording/OnBoardingBinding.dart';
+import 'package:foodcalorietracker/screens/splash/SplashBinding.dart';
+import 'package:foodcalorietracker/screens/splash/SplashView.dart';
+import 'package:foodcalorietracker/screens/welcome/WelcomeBinding.dart';
+import 'package:foodcalorietracker/screens/welcome/WelcomeView.dart';
+import 'package:foodcalorietracker/screens/planIntro/PlanIntroBinding.dart';
+import 'package:foodcalorietracker/screens/planIntro/PlanIntroView.dart';
+import 'package:foodcalorietracker/screens/transition/TransitionBinding.dart';
+import 'package:foodcalorietracker/screens/transition/TransitionView.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/routes/directional_transition.dart';
 import '../screens/onBording/OnBoardingView.dart';
 import 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const initial = Routes.onBoardingView;
+  static const initial = Routes.splashView;
   static const home = Routes.leadingView;
 
   static final routes = [
-
+    GetPage(
+      name: Paths.splashView,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: Paths.welcomeView,
+      page: () => const WelcomeView(),
+      binding: WelcomeBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+    GetPage(
+      name: Paths.transitionView,
+      page: () => const TransitionView(),
+      binding: TransitionBinding(),
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 350),
+    ),
+    GetPage(
+      name: Paths.planIntroView,
+      page: () => const PlanIntroView(),
+      binding: PlanIntroBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
     GetPage(
       name: Paths.onBoardingView,
       page: () =>  OnBoardingView(),
@@ -51,6 +89,7 @@ class AppPages {
       name: Paths.signUpView,
       page: () =>  SignUpView(),
       binding: SignUpBinding(),
+      customTransition: DirectionalTransition(),
     ),
     GetPage(
       name: Paths.leadingView,
@@ -58,19 +97,22 @@ class AppPages {
       binding: LeadingBinding(),
     ),
     GetPage(
-      name: Paths.homeView,
-      page: () =>  HomeView(),
-      binding: HomeBinding(),
+  name: Paths.homeView,
+  page: () =>  HomeView(),
+  binding: HomeBinding(),
+  customTransition: DirectionalTransition(),
     ),
     GetPage(
-      name: Paths.scanFoodView,
-      page: () =>  ScanFoodView(),
-      binding: ScanFoodBinding(),
+  name: Paths.scanFoodView,
+  page: () =>  ScanFoodView(),
+  binding: ScanFoodBinding(),
+  customTransition: DirectionalTransition(),
     ),
     GetPage(
-      name: Paths.analyticsView,
-      page: () =>  AnalyticsView(),
-      binding: AnalyticsBinding(),
+  name: Paths.analyticsView,
+  page: () =>  AnalyticsView(),
+  binding: AnalyticsBinding(),
+  customTransition: DirectionalTransition(),
     ),
     GetPage(
       name: Paths.settingView,
@@ -91,6 +133,7 @@ class AppPages {
       name: Paths.scanCalorieView,
       page: () =>  ScanCalorieView(),
       binding: ScanCalorieBinding(),
+      customTransition: DirectionalTransition(),
     ),
     GetPage(
       name: Paths.historyView,
@@ -121,6 +164,12 @@ class AppPages {
       name: Paths.languageView,
       page: () => LanguageView(),
       binding: LanguageBinding(),
+    ),
+    GetPage(
+      name: Paths.recipesView,
+      page: () => const RecipesView(),
+      binding: RecipesBinding(),
+      customTransition: DirectionalTransition(),
     ),
   ];
 }

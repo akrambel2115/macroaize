@@ -4,7 +4,7 @@ import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/BornUpdate.dart';
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/CurrentWeightUpdate.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/GenderUpdate.dart';
+import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/GenderView.dart';
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/HeightUpdate.dart';
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/UpdateGoal.dart';
 import 'package:foodcalorietracker/screens/SettingScreen/SettingController.dart';
@@ -85,7 +85,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             style: context.theme.textTheme.titleSmall,
                           ),
                           subtitle: Text(
-                            ConstantUserMaster.desiredGoal.toString(),
+                            "${ConstantUserMaster.desiredGoal}${'kg'.tr}",
                             style: context.theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -209,40 +209,8 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                           ),
                         ),
-                          Center(
-                          child: FractionallySizedBox(
-                            widthFactor: 0.92,
-                            child: Divider(color: AppColor.neutralGrey200),
-                          ),
-                        ),
 
-                        // Gender
-                        ListTile(
-                          onTap: () {
-                            controller.onChangeSelectedView(5);
-                          },
-                          title: Text(
-                            "Gender".tr,
-                            style: context.theme.textTheme.titleSmall,
-                          ),
-                          subtitle: Text(
-                            ConstantUserMaster.gender,
-                            style: context.theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          trailing: Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: AppColor.primaryOrange,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Icon(
-                              Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
-                            ),
-                          ),
-                        ),
+                        // Gender editing removed from Personal Details per request
                       ],
                     ),
                   ).paddingOnly(bottom: 10),
@@ -261,7 +229,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
             {
               return BornUpdate();
             }else{
-              return GenderUpdate();
+              return GenderView();
           }
         },)
       ),

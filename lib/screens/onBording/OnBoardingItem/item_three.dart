@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/FontFamily.dart';
+// ...existing imports...
 import 'package:get/get.dart';
 
-import '../../../constant/AppAssets.dart';
+// AppAssets removed as legacy images are no longer used
 import '../../../constant/AppColor.dart';
 import '../../../constant/Appkey.dart';
 import '../../../widgets/customText.dart';
@@ -89,44 +89,14 @@ class OnBoardingThree extends StatelessWidget {
                       fontColor: Colors.white,
                     ),
                   ),
-                  Opacity(
-                    opacity: 0.9,
-                    child: Container(
-                      alignment: Alignment.bottomRight,
-                      height: 300,
-                      padding: EdgeInsets.all(15),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          fit: BoxFit.fitWidth,
-                          image: AssetImage(AppAssets.manBody),
-                        ),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColor.black.withOpacity(0.5),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CustomText(
-                              text: "Weight Goal".tr,
-                              fontWeight: FontWeight.bold,
-                              fontColor: Colors.white,
-                              fontFamily: poppins,
-                              fontSize: 16,
-                            ),
-                            CustomText(
-                              text: "65 ${"Kg".tr}",
-                              fontWeight: FontWeight.bold,
-                              fontColor: Colors.white,
-                              fontFamily: poppins,
-                              fontSize: 18,
-                            ),
-                          ],
-                        ),
+                  // Replaced legacy illustration with neutral placeholder
+                  SizedBox(
+                    height: 300,
+                    child: Center(
+                      child: Icon(
+                        Icons.fitness_center,
+                        size: 120,
+                        color: AppColor.white,
                       ),
                     ),
                   ),

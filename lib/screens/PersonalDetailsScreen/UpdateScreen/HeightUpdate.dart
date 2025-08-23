@@ -14,52 +14,11 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GetBuilder<PersonalDetailsController>(
-            builder: (controller) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    "Imperial".tr,
-                    style: TextStyle(
-                      fontSize: 18,
+          Text(
+            "What's your height?".tr,
+            style: context.theme.textTheme.headlineLarge,
+          ).paddingOnly(top: 20, bottom: 10, left: 10),
 
-                      fontWeight:
-                          controller.isMetric
-                              ? FontWeight.normal
-                              : FontWeight.bold,
-                      color:
-                          controller.isMetric
-                              ? Colors.grey
-                              : context.theme.primaryColor,
-                    ),
-                  ),
-                  Switch(
-                    activeColor: context.theme.focusColor,
-                    value: controller.isMetric,
-                    onChanged: (value) {
-                      controller.onChangeMetric(value);
-                    },
-                  ),
-                  Text(
-                    "Metric".tr,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                          controller.isMetric
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                      color:
-                          controller.isMetric
-                              ? context.theme.primaryColor
-                              : Colors.grey,
-                    ),
-                  ),
-                ],
-              ).paddingOnly(top: 35);
-            },
-          ),
-          const SizedBox(height: 20),
 
           // Height and Weight Pickers
           GetBuilder<PersonalDetailsController>(
@@ -67,14 +26,8 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
               int minCm = 121; // Range: 121cm to 250cm
               int cmInitialItem = controller.selectedCm - minCm;
 
-              int totalInches =
-                  (controller.selectedFeet * 12) + controller.selectedInches;
-              int minInches = 3 * 12; // 3ft minimum
-              int inchInitialItem = totalInches - minInches;
-
               final scrollController = FixedExtentScrollController(
-                initialItem:
-                    controller.isMetric ? cmInitialItem : inchInitialItem,
+                initialItem: cmInitialItem,
               );
 
               return Row(
@@ -83,16 +36,7 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                   Expanded(
                     child: Column(
                       children: [
-                        Text(
-                          "Height".tr,
-                          style: TextStyle(
-                            color: context.theme.primaryColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: poppins,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
+                        // Subtitle removed — headline provides the title now
                         Container(
                           height: 150,
                           width: double.infinity,
@@ -107,49 +51,24 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                             scrollController: scrollController,
                             itemExtent: 40,
                             onSelectedItemChanged: (index) {
-                              if (controller.isMetric) {
-                                controller.selectedCm = minCm + index;
-                              } else {
-                                int inches = minInches + index;
-                                controller.selectedFeet = inches ~/ 12;
-                                controller.selectedInches = inches % 12;
-                              }
+                              controller.selectedCm = minCm + index;
                               controller.setHasChanges(true);
                               controller.update();
                             },
-                            children:
-                                controller.isMetric
-                                    ? List.generate(130, (index) {
-                                      return Center(
-                                        child: Text(
-                                          "${minCm + index} ${"cm".tr}",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            color: Theme.of(context).brightness == Brightness.dark
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontFamily: poppins,
-                                          ),
-                                        ),
-                                      );
-                                    })
-                                    : List.generate(100, (index) {
-                                      int inches = minInches + index;
-                                      int ft = inches ~/ 12;
-                                      int inch = inches % 12;
-                                      return Center(
-                                        child: Text(
-                                          "$ft${"ft".tr} $inch${"in".tr}",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            color: Theme.of(context).brightness == Brightness.dark
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontFamily: poppins,
-                                          ),
-                                        ),
-                                      );
-                                    }),
+                            children: List.generate(130, (index) {
+                              return Center(
+                                child: Text(
+                                  "${minCm + index} ${"cm".tr}",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontFamily: poppins,
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
                         ),
                       ],

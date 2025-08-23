@@ -3,20 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/FontFamily.dart';
 
 class CustomButtom extends StatelessWidget {
-  var ontap;
-  var btntext;
-  var btncolor;
-  var backgroundcolor;
-  Icon? sufixicon;
-  Icon? prefixicon;
-  CustomButtom(
-      {super.key,
-      required this.backgroundcolor,
-      required this.btncolor,
-      required this.btntext,
-      required this.ontap,
-      this.sufixicon,
-      this.prefixicon});
+  final VoidCallback? ontap;
+  final String btntext;
+  final Color btncolor;
+  final Color backgroundcolor;
+  final Icon? sufixicon;
+  final Icon? prefixicon;
+
+  const CustomButtom({
+    super.key,
+    required this.backgroundcolor,
+    required this.btncolor,
+    required this.btntext,
+    required this.ontap,
+    this.sufixicon,
+    this.prefixicon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +41,14 @@ class CustomButtom extends StatelessWidget {
               ),
               Center(
                   child: Text(
-                btntext,
-                style: TextStyle(
-                  fontFamily: poppins,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: btncolor,
-                ),
-              )),
+                  btntext,
+                  style: TextStyle(
+                    fontFamily: poppins,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: btncolor,
+                  ),
+                )),
               Container(
                 child: sufixicon,
               )

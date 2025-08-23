@@ -10,12 +10,7 @@ class AutoHeightWidth extends GetView<AdjustGoalsController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AdjustGoalsController>(
-      builder: (c) => HeightWeightStep(
-        isMetric: c.isMetric,
-        onChangeMetric: (v) {
-          c.onChangeMetric(v);
-          c.update();
-        },
+  builder: (c) => HeightWeightStep(
         onHeightCmChanged: (cm) {
           c.selectedCm = cm;
           c.update();
@@ -27,10 +22,6 @@ class AutoHeightWidth extends GetView<AdjustGoalsController> {
         },
         onWeightKgChanged: (kg) {
           c.selectedWeightKg = kg;
-          c.update();
-        },
-        onWeightLbChanged: (lb) {
-          c.selectedWeightLb = lb;
           c.update();
         },
         onBack: () => c.onChangeView(1),

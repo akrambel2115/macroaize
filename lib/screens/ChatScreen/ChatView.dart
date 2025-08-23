@@ -122,8 +122,7 @@ class _ChatViewState extends State<ChatView> {
                 ),
                 if (controller.imagePath != null)
                   Container(
-                    margin:
-                    EdgeInsets.only(left: 53, right: 53),
+                    margin: EdgeInsetsDirectional.only(start: 53, end: 53),
                     padding: EdgeInsets.all(10),
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -134,7 +133,7 @@ class _ChatViewState extends State<ChatView> {
                         Container(
                           height: 100,
                           width: 100,
-                          alignment: Alignment.topRight,
+                          alignment: AlignmentDirectional.topEnd,
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               image: DecorationImage(
@@ -174,7 +173,7 @@ class _ChatViewState extends State<ChatView> {
                           duration: const Duration(milliseconds: 250),
                           width: _kGallerySize,
                           height: _kGallerySize,
-                          margin: const EdgeInsets.only(right: _kActionGap),
+                          margin: EdgeInsetsDirectional.only(end: _kActionGap),
                           decoration: BoxDecoration(
                             // change color smoothly when toggling recording
                             color: controller.recording
@@ -198,9 +197,9 @@ class _ChatViewState extends State<ChatView> {
                       ),
 
                       // Centered rounded input container matching the image
-                      Expanded(
+            Expanded(
                         child: Container(
-                          padding: EdgeInsets.only(left: 10, right: _kActionGap, top: _kActionGap, bottom: _kActionGap),
+              padding: EdgeInsetsDirectional.only(start: 10, end: _kActionGap, top: _kActionGap, bottom: _kActionGap),
                           decoration: BoxDecoration(
                             color: AppColor.neutralWhite,
                             borderRadius: BorderRadius.circular(28),

@@ -30,7 +30,7 @@ class ModernButton extends StatefulWidget {
   final BorderRadius? borderRadius;
 
   const ModernButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.style = ModernButtonStyle.primary,
@@ -42,7 +42,7 @@ class ModernButton extends StatefulWidget {
     this.height,
     this.padding,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   @override
   State<ModernButton> createState() => _ModernButtonState();
@@ -239,12 +239,14 @@ class _ModernButtonState extends State<ModernButton>
     }
 
     final children = <Widget>[];
-    
-    if (widget.icon != null) {
+    final textDirection = Directionality.of(context);
+
+    // Place the icon before the text for LTR, and after the text for RTL
+    if (widget.icon != null && textDirection == TextDirection.ltr) {
       children.add(widget.icon!);
       children.add(const SizedBox(width: 8));
     }
-    
+
     children.add(
       Text(
         widget.text,
@@ -252,6 +254,11 @@ class _ModernButtonState extends State<ModernButton>
         textAlign: TextAlign.center,
       ),
     );
+
+    if (widget.icon != null && textDirection == TextDirection.rtl) {
+      children.add(const SizedBox(width: 8));
+      children.add(widget.icon!);
+    }
 
     return Row(
       mainAxisSize: MainAxisSize.min,

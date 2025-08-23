@@ -38,7 +38,13 @@ class WeekHistory extends GetView<AnalyticsController> {
                   Expanded(child: SfCartesianChart(
                     primaryXAxis: CategoryAxis(
                       majorGridLines: MajorGridLines(width: 0),
-                      labelStyle: context.theme.textTheme.labelSmall?.copyWith(fontSize: 11),
+                      // Reduce font size so longer localized weekday names fit better
+                      labelStyle: context.theme.textTheme.labelSmall?.copyWith(fontSize: 9),
+                      // Ensure every category label is attempted to be rendered even
+                      // when localized strings are longer (e.g., Arabic full names).
+                      interval: 1,
+                      // Rotate labels to reduce overlap for longer localized names
+                      labelRotation: -45,
                     ),
                     primaryYAxis: NumericAxis(
                       majorGridLines: MajorGridLines(width: 1),

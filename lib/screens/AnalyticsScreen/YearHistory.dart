@@ -26,7 +26,7 @@ class YearHistory extends GetView<AnalyticsController> {
                   Row(mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                            "Average Calorie Yearly :",
+                            "Average Calorie Yearly :".tr,
                             style: context.theme.textTheme.titleMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
                           ).paddingOnly(bottom: 15,right: 5),
                           Text(

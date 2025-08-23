@@ -56,16 +56,16 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: SafeArea(
-        top: true,
-        child: SlideTransition(
-          position: _animation,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+    // Avoid using Positioned here so the notification can be rendered safely
+    // both inside an Overlay (which provides a Stack) and other contexts.
+    return SafeArea(
+      top: true,
+      child: SlideTransition(
+        position: _animation,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+          child: Align(
+            alignment: Alignment.topCenter,
             child: Material(
               color: Colors.transparent,
               child: Container(

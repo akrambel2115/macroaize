@@ -12,15 +12,12 @@ class HeightWidth extends GetView<SignUpController> {
   Widget build(BuildContext context) {
     return GetBuilder<SignUpController>(
       builder: (c) => HeightWeightStep(
-        isMetric: c.isMetric,
-        onChangeMetric: (v) => c.onChangeMetric(v),
         onHeightCmChanged: (cm) => c.selectedCm = cm,
         onHeightFeetInchesChanged: (feet, inches) {
           c.selectedFeet = feet;
           c.selectedInches = inches;
         },
         onWeightKgChanged: (kg) => c.selectedWeightKg = kg,
-        onWeightLbChanged: (lb) => c.selectedWeightLb = lb,
   onBack: () {
           c.selectedView = 1; // go back to Workout
           c.update();

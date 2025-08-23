@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:foodcalorietracker/widgets/ModernButton.dart';
 
 class BornView extends GetView<SignUpController> {
   const BornView({super.key});
@@ -137,44 +138,28 @@ class BornView extends GetView<SignUpController> {
         Row(
           children: [
             Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  // go back to Goal screen
+              child: ModernButton(
+                text: 'Previous'.tr,
+                onPressed: () {
                   controller.selectedView = 3;
                   controller.update();
                 },
-                child: Container(
-                  alignment: Alignment.center,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: context.theme.cardColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    'Previous'.tr,
-                    style: context.theme.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
-                  ),
-                ),
+                style: ModernButtonStyle.secondary,
+                size: ModernButtonSize.medium,
+                borderRadius: BorderRadius.circular(30),
+                height: 50,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  controller.onChangeView();
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: context.theme.focusColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    "Continue".tr,
-                    style: context.theme.textTheme.titleMedium?.copyWith(color: Colors.white),
-                  ),
-                ),
+              child: ModernButton(
+                text: "Continue".tr,
+                onPressed: controller.onChangeView,
+                style: ModernButtonStyle.primary,
+                size: ModernButtonSize.medium,
+                borderRadius: BorderRadius.circular(30),
+                icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                height: 50,
               ),
             ),
           ],

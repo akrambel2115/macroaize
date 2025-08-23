@@ -9,12 +9,12 @@ class ModernLoadingIndicator extends StatefulWidget {
   final Duration duration;
 
   const ModernLoadingIndicator({
-    Key? key,
+    super.key,
     this.size = 40,
     this.color,
     this.strokeWidth = 3,
     this.duration = const Duration(milliseconds: 1500),
-  }) : super(key: key);
+  });
 
   @override
   State<ModernLoadingIndicator> createState() => _ModernLoadingIndicatorState();
@@ -139,13 +139,13 @@ class ModernShimmerLoading extends StatefulWidget {
   final Duration duration;
 
   const ModernShimmerLoading({
-    Key? key,
+    super.key,
     required this.child,
     required this.isLoading,
     this.baseColor,
     this.highlightColor,
     this.duration = const Duration(milliseconds: 1500),
-  }) : super(key: key);
+  });
 
   @override
   State<ModernShimmerLoading> createState() => _ModernShimmerLoadingState();
@@ -240,13 +240,13 @@ class ModernPulseAnimation extends StatefulWidget {
   final bool repeat;
 
   const ModernPulseAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 1000),
     this.minScale = 0.95,
     this.maxScale = 1.05,
     this.repeat = true,
-  }) : super(key: key);
+  });
 
   @override
   State<ModernPulseAnimation> createState() => _ModernPulseAnimationState();
@@ -307,13 +307,13 @@ class ModernFadeSlideTransition extends StatefulWidget {
   final bool slideIn;
 
   const ModernFadeSlideTransition({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 600),
     this.beginOffset = const Offset(0, 0.3),
     this.endOffset = Offset.zero,
     this.slideIn = true,
-  }) : super(key: key);
+  });
 
   @override
   State<ModernFadeSlideTransition> createState() => _ModernFadeSlideTransitionState();
@@ -383,13 +383,13 @@ class ModernScaleTransition extends StatefulWidget {
   final Curve curve;
 
   const ModernScaleTransition({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 200),
     this.initialScale = 0.8,
     this.finalScale = 1.0,
     this.curve = Curves.easeOutBack,
-  }) : super(key: key);
+  });
 
   @override
   _ModernScaleTransitionState createState() => _ModernScaleTransitionState();
@@ -447,12 +447,12 @@ class ModernSkeletonLoader extends StatelessWidget {
   final bool isCircle;
 
   const ModernSkeletonLoader({
-    Key? key,
+    super.key,
     this.width,
     this.height,
     this.borderRadius,
     this.isCircle = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

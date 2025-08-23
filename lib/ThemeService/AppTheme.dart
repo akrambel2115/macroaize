@@ -7,11 +7,12 @@ class AppTheme {
   static final dark = ThemeData.dark().copyWith(
     scaffoldBackgroundColor: AppColor.darkBackground,
     primaryColor: AppColor.darkText,
-    focusColor: AppColor.primaryOrange,
-    cardColor: AppColor.darkCard,
-    hintColor: AppColor.darkBackground,
-    hoverColor: AppColor.darkBorder,
-    highlightColor: AppColor.darkText,
+  focusColor: AppColor.primaryOrange,
+  cardColor: AppColor.darkCard,
+  hintColor: AppColor.darkBackground,
+  // Subtle dark overlay for interactive states in dark mode
+  hoverColor: AppColor.neutralGrey800.withOpacity(0.12),
+  highlightColor: AppColor.neutralGrey800.withOpacity(0.12),
     dividerColor: AppColor.darkBorder,
     
     // Enhanced color scheme
@@ -19,12 +20,10 @@ class AppTheme {
       primary: AppColor.primaryOrange,
       secondary: AppColor.accentOrange,
       surface: AppColor.darkSurface,
-      background: AppColor.darkBackground,
       error: AppColor.error,
       onPrimary: AppColor.neutralWhite,
       onSecondary: AppColor.neutralWhite,
       onSurface: AppColor.darkText,
-      onBackground: AppColor.darkText,
       onError: AppColor.neutralWhite,
     ),
     
@@ -56,30 +55,31 @@ class AppTheme {
       ),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     ),
+  // Note: global ink overlay handled via splashColor/highlightColor/hoverColor for compatibility
   );
 
   // Enhanced Light Theme with Modern Orange Design
   static final light = ThemeData.light().copyWith(
     scaffoldBackgroundColor: AppColor.neutralWhite,
     primaryColor: AppColor.neutralGrey900,
-    focusColor: AppColor.primaryOrange,
-    hintColor: AppColor.neutralWhite,
-    cardColor: AppColor.neutralGrey50,
-    highlightColor: AppColor.neutralGrey900,
-    hoverColor: AppColor.neutralWhite,
-    dividerColor: AppColor.neutralGrey200,
+  focusColor: AppColor.primaryOrange,
+  hintColor: AppColor.neutralWhite,
+  cardColor: AppColor.neutralGrey50,
+  // Use a very light gray overlay for interactive states in light mode
+  highlightColor: AppColor.neutralGrey100.withOpacity(0.5),
+  hoverColor: AppColor.neutralGrey100.withOpacity(0.3),
+  splashColor: AppColor.neutralGrey100.withOpacity(0.4),
+  dividerColor: AppColor.neutralGrey200,
     
     // Enhanced color scheme
     colorScheme: const ColorScheme.light(
       primary: AppColor.primaryOrange,
       secondary: AppColor.accentOrange,
       surface: AppColor.neutralGrey50,
-      background: AppColor.neutralWhite,
       error: AppColor.error,
       onPrimary: AppColor.neutralWhite,
       onSecondary: AppColor.neutralWhite,
       onSurface: AppColor.neutralGrey900,
-      onBackground: AppColor.neutralGrey900,
       onError: AppColor.neutralWhite,
     ),
     
@@ -111,6 +111,7 @@ class AppTheme {
       ),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     ),
+  // Note: global ink overlay handled via splashColor/highlightColor/hoverColor for compatibility
   );
 
   // Enhanced Typography System with Arabic Support

@@ -1,5 +1,9 @@
 abstract class Routes {
   Routes._();
+  static const splashView = Paths.splashView;
+  static const welcomeView = Paths.welcomeView;
+  static const transitionView = Paths.transitionView;
+  static const planIntroView = Paths.planIntroView;
   static const onBoardingView = Paths.onBoardingView;
   static const signUpView = Paths.signUpView;
   static const leadingView = Paths.leadingView;
@@ -16,10 +20,15 @@ abstract class Routes {
   static const chatHistoryView = Paths.chatHistoryView;
   static const localFoodView = Paths.localFoodView;
   static const languageView = Paths.languageView;
+  static const recipesView = Paths.recipesView;
 }
 
 abstract class Paths {
   Paths._();
+  static const splashView = '/SplashView';
+  static const welcomeView = '/WelcomeView';
+  static const transitionView = '/TransitionView';
+  static const planIntroView = '/PlanIntroView';
   static const onBoardingView = '/OnBoardingView';
   static const signUpView = '/SignUpView';
   static const leadingView = '/LeadingView';
@@ -36,5 +45,5 @@ abstract class Paths {
   static const chatHistoryView = '/ChatHistoryView';
   static const localFoodView = '/LocalFoodView';
   static const languageView = '/LanguageView';
-
+  static const recipesView = '/RecipesView';
 }

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
@@ -276,8 +275,8 @@ class ScanFoodView extends GetView<ScanFoodController> {
                   _buildTipExample(
                     context,
                     AppAssets.scanComplete,
-                    'Perfect Shot',
-                    'Well-lit, centered food',
+                    'Perfect Shot'.tr,
+                    'Well-lit, centered food'.tr,
                     AppColor.success,
                     Icons.check_circle,
                   ),
@@ -292,7 +291,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                           context,
                           AppAssets.soClose,
                           'Too close'.tr,
-                          'Move camera back',
+                          'Move camera back'.tr,
                           AppColor.error,
                           Icons.cancel,
                         ),
@@ -303,7 +302,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                           context,
                           AppAssets.soFar,
                           'Too far'.tr,
-                          'Move camera closer',
+                          'Move camera closer'.tr,
                           AppColor.error,
                           Icons.cancel,
                         ),

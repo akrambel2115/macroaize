@@ -187,7 +187,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
           ),
           const SizedBox(width: 8),
           Text(
-            '${controller.filteredItems.length} food items found',
+            "${controller.filteredItems.length}${"food items found".tr}",
             style: context.textTheme.bodyMedium?.copyWith(
               color: AppColor.neutralGrey600,
               fontWeight: FontWeight.w500,

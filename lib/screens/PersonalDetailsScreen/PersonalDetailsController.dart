@@ -161,9 +161,7 @@ class PersonalDetailsController extends GetxController{
       case 4:
         updateBornDay();
         break;
-      case 5:
-        updateGender();
-        break;
+  // case 5 (Gender) removed — gender editing moved/disabled in Personal Details
     }
     setHasChanges(false);
     // Recalculate daily calorie/macros when weight or goal changed to match Overview behavior

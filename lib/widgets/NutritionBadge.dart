@@ -9,14 +9,14 @@ class NutritionBadge extends StatelessWidget {
   final String? unit;
 
   const NutritionBadge({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.iconWidget,
     this.accentColor,
     this.iconSize = 28,
     this.unit,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

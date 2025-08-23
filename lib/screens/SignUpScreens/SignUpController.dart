@@ -63,6 +63,13 @@ class SignUpController extends GetxController {
     SetupView(),
   ];
 
+  @override
+  void onInit() {
+    super.onInit();
+    // Default the stopping goal to 'Lack of consistency' so it's selected when user reaches the step
+    selectedStoppingGoal = 'Lack of consistency'.tr;
+  }
+
   onChangeGender(String value) {
     selectedGender = value;
     update();
@@ -108,6 +115,8 @@ class SignUpController extends GetxController {
       selectedView = 6;
       saveOnSql();
       Future.delayed(Duration(seconds: 3)).then((value) {
+        // Mark onboarding as completed
+        SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
         Get.toNamed(Routes.leadingView);
       },);
     }

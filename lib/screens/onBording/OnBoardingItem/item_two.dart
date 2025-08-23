@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
+// AppAssets removed as legacy images are no longer used
 import 'package:foodcalorietracker/constant/Appkey.dart';
-import 'package:foodcalorietracker/constant/FontFamily.dart';
 import 'package:foodcalorietracker/screens/onBording/OnBoardingController.dart';
 import 'package:get/get.dart';
 import '../../../constant/AppColor.dart';
@@ -85,175 +84,14 @@ class OnBoardingTwo extends GetView<OnBoardingController> {
                       fontColor: Colors.white,
                     ),
                   ),
-                  Opacity(
-                    opacity: 0.9,
-                    child: Container(
-                      padding: EdgeInsets.all(15),
-                      alignment: Alignment.center,
-                      height: 300,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: AssetImage(AppAssets.oneBodyImage),
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Container(
-                              width: 100,
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColor.black.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CustomText(
-                                    text: "Protein".tr,
-                                    fontWeight: FontWeight.normal,
-                                    fontFamily: poppins,
-                                    fontColor: AppColor.white,
-                                    fontSize: 20,
-                                  ).paddingOnly(bottom: 5),
-
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 60,
-                                        height: 60,
-                                        child: CircularProgressIndicator(
-                                          value: 0.50,
-                                          strokeWidth: 5,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.red,
-                                              ),
-                                          backgroundColor: Colors.grey,
-                                        ),
-                                      ),
-
-                                      Text(
-                                        "35g",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                              width: 100,
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColor.black.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CustomText(
-                                    text: "Carbs".tr,
-                                    fontWeight: FontWeight.normal,
-                                    fontFamily: poppins,
-                                    fontColor: AppColor.white,
-                                    fontSize: 20,
-                                  ).paddingOnly(bottom: 5),
-
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 60,
-                                        height: 60,
-                                        child: CircularProgressIndicator(
-                                          value: 0.50,
-                                          strokeWidth: 5,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.red,
-                                              ),
-                                          backgroundColor: Colors.grey,
-                                        ),
-                                      ),
-
-                                      Text(
-                                        "35g",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Container(
-                              width: 100,
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColor.black.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CustomText(
-                                    text: "Fats".tr,
-                                    fontWeight: FontWeight.normal,
-                                    fontFamily: poppins,
-                                    fontColor: AppColor.white,
-                                    fontSize: 20,
-                                  ).paddingOnly(bottom: 5),
-
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 60,
-                                        height: 60,
-                                        child: CircularProgressIndicator(
-                                          value: 0.50,
-                                          strokeWidth: 5,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.red,
-                                              ),
-                                          backgroundColor: Colors.grey,
-                                        ),
-                                      ),
-
-                                      Text(
-                                        "35g",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                  // Replaced legacy decorated image area with a simple neutral placeholder
+                  SizedBox(
+                    height: 300,
+                    child: Center(
+                      child: Icon(
+                        Icons.insights,
+                        size: 120,
+                        color: AppColor.white,
                       ),
                     ),
                   ),

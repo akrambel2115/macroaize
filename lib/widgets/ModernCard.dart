@@ -19,7 +19,7 @@ class ModernCard extends StatelessWidget {
   final Color? highlightColor;
 
   const ModernCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
@@ -33,7 +33,7 @@ class ModernCard extends StatelessWidget {
     this.enableGradient = false,
     this.splashColor,
     this.highlightColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +125,7 @@ class ModernGlassCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const ModernGlassCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
@@ -133,7 +133,7 @@ class ModernGlassCard extends StatelessWidget {
     this.opacity = 0.1,
     this.blur = 10.0,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -187,9 +187,10 @@ class ModernNutrientCard extends StatelessWidget {
   final IconData? icon;
   final Widget? leading;
   final VoidCallback? onTap;
+  final bool useCard;
 
   const ModernNutrientCard({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.goal,
@@ -199,14 +200,14 @@ class ModernNutrientCard extends StatelessWidget {
     this.icon,
     this.leading,
     this.onTap,
-  }) : super(key: key);
+    this.useCard = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDark = context.theme.brightness == Brightness.dark;
     
-    return ModernCard(
-      onTap: onTap,
+    final content = Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -320,5 +321,15 @@ class ModernNutrientCard extends StatelessWidget {
         ],
       ),
     );
+
+    if (useCard) {
+      return ModernCard(
+        onTap: onTap,
+        padding: const EdgeInsets.all(16),
+        child: content,
+      );
+    }
+
+    return content;
   }
 }
