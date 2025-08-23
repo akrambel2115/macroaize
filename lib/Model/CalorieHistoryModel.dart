@@ -10,6 +10,7 @@ class CalorieHistoryModel {
   final int fats;
   final String type;
    var image;
+  final int? fdcId;
 
   CalorieHistoryModel({
     this.id,
@@ -21,6 +22,7 @@ class CalorieHistoryModel {
     required this.fats,
     required this.type,
     this.image,
+  this.fdcId,
   });
 
   // Convert a History object into a Map object
@@ -35,6 +37,7 @@ class CalorieHistoryModel {
       'fats': fats,
       'type': type,
       'image': image,
+  'fdcId': fdcId,
     };
   }
 
@@ -50,6 +53,7 @@ class CalorieHistoryModel {
       fats: map['fats'],
       type: map['type'],
       image: map['image'],
+  fdcId: map['fdcId'],
     );
   }
 }
