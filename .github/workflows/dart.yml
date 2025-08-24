@@ -25,11 +25,16 @@ jobs:
           ONLY_ACTIVE_ARCH: "NO"
           EXCLUDED_ARCHS: "i386 x86_64"
 
+      - run: flutter build ipa --release --no-codesign
+
+      - name: List build outputs
+        run: ls -R build/ios
+      
       - name: Upload IPA
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/ios/ipa/*.ipa
+          file: build/ios/ipa/Runner.ipa
           tag: v1.0
           overwrite: true
           body: "This is first release"
