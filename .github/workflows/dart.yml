@@ -6,13 +6,13 @@ on:
 jobs:
   build-ios:
     name: 🎉 iOS Build
-    runs-on: macos-14   # use stable Xcode 15.4 (supports iOS 17)
+    runs-on: macos-14 # use stable Xcode 15.4 (supports iOS 17)
     steps:
       - uses: actions/checkout@v3
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: "stable"
           architecture: x64
 
       - run: flutter pub get
@@ -25,17 +25,26 @@ jobs:
           ONLY_ACTIVE_ARCH: "NO"
           EXCLUDED_ARCHS: "i386 x86_64"
 
-      - run: flutter build ipa --release --no-codesign
-
       - name: List build outputs
         run: ls -R build/ios
-      
+
+      - name: Find IPA
+        id: find_ipa
+        run: |
+          ipa=$(find build -type f -name '*.ipa' | head -n 1 || true)
+          echo "Found ipa: $ipa"
+          if [ -z "$ipa" ]; then
+            ls -R build || true
+            echo "No .ipa found" >&2
+            exit 1
+          fi
+          echo "path=$ipa" >> $GITHUB_OUTPUT
+
       - name: Upload IPA
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/ios/ipa/Runner.ipa
+          file: ${{ steps.find_ipa.outputs.path }}
           tag: v1.0
           overwrite: true
           body: "This is first release"
-
