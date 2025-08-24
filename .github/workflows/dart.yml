@@ -6,7 +6,7 @@ on:
 jobs:
   build-ios:
     name: 🎉 iOS Build
-    runs-on: macos-14 # use stable Xcode 15.4 (supports iOS 17)
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v3
 
@@ -20,55 +20,32 @@ jobs:
       - run: pod install --repo-update
         working-directory: ios
 
-      - run: flutter build ipa --release --no-codesign
-        env:
-          ONLY_ACTIVE_ARCH: "NO"
-          EXCLUDED_ARCHS: "i386 x86_64"
-
-      - name: Create ExportOptions.plist
+      # Direct IPA export approach for unsigned build
+      - name: Build unsigned IPA
         run: |
-          cat > ios/ExportOptions.plist << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>development</string>
-            <key>compileBitcode</key>
-            <false/>
-            <key>signingStyle</key>
-            <string>manual</string>
-          </dict>
-          </plist>
-          EOF
+          flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload
+          zip -r app.ipa Payload
+          ls -la app.ipa
+          mkdir -p ../ipa
+          mv app.ipa ../ipa/Runner.ipa
 
-      - name: Export IPA from archive
+      - name: Verify IPA
         run: |
-          mkdir -p build/ios/ipa
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa \
-            -allowProvisioningUpdates || true
-          
-          # Try to find IPA even if export fails
-          find build -name "*.ipa" || true
-
-      - name: List build outputs
-        run: ls -R build/ios
+          find build -name "*.ipa" -exec ls -la {} \;
+          find build -name "*.ipa" -exec file {} \;
 
       - name: Find IPA
         id: find_ipa
         run: |
-          ipa=$(find build -type f -name '*.ipa' | head -n 1 || true)
-          echo "Found ipa: $ipa"
-          if [ -z "$ipa" ]; then
-            echo "::warning::No .ipa found, creating empty IPA for workflow testing"
-            # Create a dummy IPA file for testing workflow
-            mkdir -p build/ios/ipa
-            touch build/ios/ipa/Runner.ipa
-            ipa="build/ios/ipa/Runner.ipa"
+          ipa=$(find build -type f -name '*.ipa' | head -n 1)
+          if [ -z "$ipa" ] || [ ! -s "$ipa" ]; then
+            echo "No valid IPA found"
+            exit 1
           fi
+          echo "Found IPA: $ipa ($(du -h $ipa | cut -f1))"
           echo "path=$ipa" >> $GITHUB_OUTPUT
 
       - name: Upload IPA
