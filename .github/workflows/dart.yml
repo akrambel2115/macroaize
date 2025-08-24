@@ -6,7 +6,7 @@ on:
 jobs:
   build-ios:
     name: 🎉 iOS Build
-    runs-on: macos-latest
+    runs-on: macos-14   # use stable Xcode 15.4 (supports iOS 17)
     steps:
       - uses: actions/checkout@v3
 
@@ -14,10 +14,10 @@ jobs:
         with:
           channel: 'stable'
           architecture: x64
-      - run: flutter pub get
-      
 
-      - run: pod repo update
+      - run: flutter pub get
+
+      - run: pod install --repo-update
         working-directory: ios
 
       - run: flutter build ipa --release --no-codesign
