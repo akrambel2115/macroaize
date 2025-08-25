@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'package:foodcalorietracker/Model/Recipe.dart';
 
 class RecipesController extends GetxController {
@@ -117,10 +118,11 @@ class RecipesController extends GetxController {
       _currentPageIndex(0);
       _loadCurrentPage();
       
-    } catch (e) {
-      // Enhanced error handling
+    } catch (e, st) {
+      // Enhanced error handling with stack trace logging for debugging
       debugPrint('Error loading recipes: $e');
-      _handleLoadingError(e);
+      debugPrint(st.toString());
+      _handleLoadingError(e, st);
     } finally {
       _isLoading(false);
       update(); // Notify GetBuilder widgets
@@ -255,16 +257,17 @@ class RecipesController extends GetxController {
     _topRecipes.assignAll(_cachedTopRecipes!);
   }
 
-  void _handleLoadingError(dynamic error) {
-    // Show user-friendly error message
-    Get.snackbar(
-      'Error',
-      'Failed to load recipes. Please try again.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.withOpacity(0.8),
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
+  void _handleLoadingError(dynamic error, [StackTrace? stackTrace]) {
+    // Detailed debug logging (kept out of user-facing notifications)
+    try {
+      debugPrint('Recipes load failed. Error: $error');
+      if (stackTrace != null) debugPrint('StackTrace: ${stackTrace.toString()}');
+    } catch (_) {
+      // ignore logging failures
+    }
+
+    // Show user-friendly, localized error message
+    NotificationService.showError('failed_to_load_recipes');
   }
 
   Map<String, List<Recipe>> _generateMockData() {
