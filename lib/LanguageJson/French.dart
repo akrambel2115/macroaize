@@ -36,6 +36,7 @@ const Map<String, String> french = {
   "Update Weight Goal": "Mettre à jour l'objectif de poids",
   "Enter new weight (kg)": "Entrez le nouveau poids (kg)",
   "Cancel": "Annuler",
+  "Exit": "Quitter",
   "Calorie Your Week :": "Calories de votre semaine :",
   "Sun": "Dim",
   "Mon": "Lun",
@@ -461,6 +462,14 @@ const Map<String, String> french = {
   "camera_permission_denied_message": "L'accès à la caméra a été refusé. Veuillez activer la permission de la caméra dans les paramètres de votre appareil pour utiliser le scanner.",
   "ok": "OK",
   
+  // Exit confirmation dialog
+  "exit_app_title": "Quitter l'application",
+  "exit_app_message": "Êtes-vous sûr de vouloir quitter l'application ?",
+
+  // Nutrition details dialog
+  "nutrition_details": "Détails nutritionnels",
+  "fats_label": "Lipides",
+  "log": "Journal",
   // Premium paywall (modern)
   'premium_badge': 'PREMIUM',
   'go_premium_title': 'Passez en Premium',
@@ -514,6 +523,7 @@ const Map<String, String> french = {
   "top_recipes_subtitle": "Découvrez des recettes saines et délicieuses conçues pour vos objectifs",
   "no_recipes_available": "Aucune recette disponible",
   "Search recipes by name or ingredient": "Recherchez des recettes par nom ou ingrédient",
+  "failed_to_load_recipes": "Échec du chargement des recettes. Veuillez réessayer.",
   "min": "min",
   "cal": "Cal",
   "close": "Fermer",
@@ -526,4 +536,9 @@ const Map<String, String> french = {
   "items": "éléments",
   "verified": "Vérifié",
   "estimated": "Estimé",
+  // Centralized success messages
+  "success": "Succès",
+  "food_added_success": "Aliment ajouté avec succès",
+  "food_updated_success": "Aliment mis à jour avec succès",
+  "food_deleted_success": "{count} aliment(s) supprimé(s) avec succès",
 };
