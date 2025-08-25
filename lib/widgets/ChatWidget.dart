@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import '../constant/AppAssets.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 import '../screens/ChatScreen/ChatController.dart';
 
 class ChatWidget extends StatelessWidget {
@@ -28,9 +29,11 @@ class ChatWidget extends StatelessWidget {
   const double kTypingIndicatorSize = 16.0;
     // Right-aligned for user messages, left-aligned for AI messages
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final bgColor = isUser
-        ? context.theme.primaryColor
-        : context.theme.cardColor;
+  final bgColor = isUser
+    ? (context.theme.brightness == Brightness.dark
+        ? AppColor.neutralGrey800
+        : AppColor.neutralGrey200)
+    : context.theme.cardColor;
     final textColor = isUser ? Colors.white : context.textTheme.bodyLarge?.color;
 
     return Padding(
