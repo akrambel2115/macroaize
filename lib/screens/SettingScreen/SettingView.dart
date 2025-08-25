@@ -4,6 +4,7 @@ import 'package:foodcalorietracker/MainController.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
 import 'package:foodcalorietracker/routes/app_pages.dart';
 import 'package:foodcalorietracker/routes/app_routes.dart';
@@ -13,6 +14,7 @@ import 'package:foodcalorietracker/widgets/ModernButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 import '../../ThemeService/ThemeController.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
 
 // Configuration class for easy maintenance and updates
 class SettingConfig {
@@ -125,10 +127,6 @@ class SettingView extends GetView<SettingController> {
   }
 
   Widget _buildPremiumCard(BuildContext context) {
-    // Premium card removed from UI per request. Original card kept commented below for easy revert.
-    return const SizedBox.shrink();
-
-    /*
     return ModernFadeSlideTransition(
       child: Container(
         decoration: BoxDecoration(
@@ -152,8 +150,7 @@ class SettingView extends GetView<SettingController> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            // Premium navigation temporarily disabled per request.
-            onTap: () {},
+            onTap: () => Get.toNamed(Routes.premiumView),
             borderRadius: BorderRadius.circular(20),
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -178,7 +175,7 @@ class SettingView extends GetView<SettingController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Upgrade to Premium",
+                          'go_premium_title'.tr,
                           style: context.textTheme.headlineSmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -186,7 +183,7 @@ class SettingView extends GetView<SettingController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Unlock unlimited access",
+                          'go_premium_subtitle'.tr,
                           style: context.textTheme.bodyMedium?.copyWith(
                             color: Colors.white.withOpacity(0.9),
                           ),
@@ -206,7 +203,6 @@ class SettingView extends GetView<SettingController> {
         ),
       ),
     );
-    */
   }
 
   Widget _buildProfileSection(BuildContext context) {
@@ -636,13 +632,7 @@ class SettingView extends GetView<SettingController> {
     await dbHelper.sqlClear();
     SharedPref.clear();
     await Get.find<ThemeController>().toggleTheme(true);
-    Get.snackbar(
-      "Reset".tr,
-      "You have been Reset Account".tr,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColor.success,
-      colorText: Colors.white,
-    );
+  NotificationService.showSuccess("You have been Reset Account");
     Get.offAllNamed(AppPages.initial);
   }
 }
