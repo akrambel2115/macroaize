@@ -11,6 +11,8 @@ import '../../SharePrefHelper/SharePref.dart';
 import '../../SharePrefHelper/SharePrefKey.dart';
 import '../../constant/Appkey.dart';
 import '../../routes/app_routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../features/auth/presentation/auth_modal.dart';
 
 class PremiumController extends GetxController {
   int selected = 0;
@@ -118,7 +120,16 @@ class PremiumController extends GetxController {
     }
   }
 
-  buy() {
+  Future<void> buy() async {
+    // Auth gate: if not logged in, show modal
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      final ok = await AuthModal.show();
+      if (!ok) {
+        Fluttertoast.showToast(msg: 'Please login to continue');
+        return;
+      }
+    }
     DateTime date = DateTime.now();
     DateTime monthLater = DateTime(date.year, date.month + 1, date.day);
     DateTime yearLater = DateTime(date.year + 1, date.month, date.day);
