@@ -2,8 +2,9 @@ import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
-import 'package:flutter/material.dart';
+// ...existing code... (flutter material import removed because unused after refactor)
 import 'package:intl/intl.dart';
 
 
@@ -190,18 +191,8 @@ class PersonalDetailsController extends GetxController{
     }
 
     // show a success notification then return to main view
-    try {
-      Get.snackbar(
-        'Success'.tr,
-        'Saved successfully'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.withOpacity(0.9),
-        colorText: Colors.white,
-      );
-    } catch (_) {
-      // fall back to simple snackbar without styling if anything fails
-      Get.snackbar('Success'.tr, 'Saved successfully'.tr, snackPosition: SnackPosition.BOTTOM);
-    }
+  // Use centralized notification service
+  NotificationService.showSuccess('Saved successfully');
 
     onChangeSelectedView(0);
   }
