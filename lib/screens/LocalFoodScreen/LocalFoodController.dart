@@ -10,6 +10,7 @@ import '../../Model/SqlDailyCalorieModel.dart';
 import '../../SharePrefHelper/ConstantUserMaster.dart';
 import '../../constant/FontFamily.dart';
 import '../../routes/app_routes.dart';
+import '../../shared/services/notification_service.dart';
 
 class LocalFoodController extends GetxController {
   Map<String,dynamic> argument = Get.arguments;
@@ -223,13 +224,11 @@ class LocalFoodController extends GetxController {
   ];
 
 
-
-
   String type = "";
-
-
-
-
+  // Edit mode state and selection tracking
+  bool isEditing = false;
+  // selected indices refer to positions in filteredItems
+  final Set<int> selectedIndices = {};
 
   @override
   void onInit() {
@@ -247,6 +246,133 @@ class LocalFoodController extends GetxController {
           filteredItems = snackFoods;
         }else{
       filteredItems = dinnerFoods;
+    }
+  // Load any persisted modifications (adds/edits/deletes) for this meal type from DB
+  _loadPersistedFoodsFromDb();
+  }
+
+  void toggleEditMode() {
+    isEditing = !isEditing;
+    // clear selection when exiting edit mode
+    if (!isEditing) selectedIndices.clear();
+    update();
+  }
+
+  void toggleSelect(int index) {
+    if (selectedIndices.contains(index)) {
+      selectedIndices.remove(index);
+    } else {
+      selectedIndices.add(index);
+    }
+    update();
+  }
+
+  /// Put the page into edit/config mode and select a single item.
+  /// Clears existing selection and selects [index]. Useful for long-press flow.
+  void selectAndEnterEdit(int index) {
+    // enter edit mode if not already
+    if (!isEditing) isEditing = true;
+    // clear any previous selections and select this index
+    selectedIndices.clear();
+    selectedIndices.add(index);
+    update();
+  }
+
+  void addCustomFood(FoodItem item) {
+    filteredItems.insert(0, item);
+    update();
+  NotificationService.showSuccess('food_added_success');
+  // persist changes to DB
+  _saveCurrentFoodsToDb();
+  }
+
+  void editFoodAt(int index, FoodItem item) {
+    if (index >= 0 && index < filteredItems.length) {
+      filteredItems[index] = item;
+      update();
+  NotificationService.showSuccess('food_updated_success');
+  // persist changes to DB
+  _saveCurrentFoodsToDb();
+    }
+  }
+
+  void deleteSelected(BuildContext context) async {
+    if (selectedIndices.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ctx.theme.cardColor,
+        title: Text('delete_items_title'.tr),
+        content: Text('delete_items_message'.trParams({'count': selectedIndices.length.toString()})),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('delete'.tr, style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      // remove by index descending to avoid reindexing issues
+      final indices = selectedIndices.toList()..sort((a, b) => b.compareTo(a));
+      for (final i in indices) {
+        filteredItems.removeAt(i);
+      }
+      selectedIndices.clear();
+      isEditing = false;
+      update();
+  NotificationService.showSuccess('food_deleted_success', params: {'count': indices.length.toString()});
+      // persist changes to DB
+      _saveCurrentFoodsToDb();
+    }
+  }
+  Future<void> _saveCurrentFoodsToDb() async {
+    try {
+      final t = type;
+      // remove existing rows for this type
+      await dbHelper.deleteLocalFoodsByType(t);
+      // insert current items
+      for (final f in filteredItems) {
+        await dbHelper.insertLocalFood({
+          'name': f.name,
+          'quantity': f.quantity,
+          'calories': f.calories,
+          'carbs': f.carbs,
+          'protein': f.protein,
+          'fats': f.fats,
+          'type': t,
+        });
+      }
+    } catch (_) {
+      // ignore DB errors for now
+    }
+  }
+
+  Future<void> _loadPersistedFoodsFromDb() async {
+    try {
+      final t = type;
+      final rows = await dbHelper.getLocalFoods(t);
+      if (rows.isEmpty) return;
+      final items = rows.map((r) => FoodItem.fromJson(r)).toList();
+      if (type == "Breakfast" || type == "BreakFast") {
+        breakfastFoods = items;
+      } else if (type == "Lunch") {
+        lunchFoods = items;
+      } else if (type == "snack(s)") {
+        snackFoods = items;
+      } else {
+        dinnerFoods = items;
+      }
+      filteredItems = items;
+      update();
+    } catch (_) {
+      // ignore DB read errors
     }
   }
 
@@ -478,4 +604,26 @@ class FoodItem {
     required this.quantity,
     required this.fats,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'quantity': quantity,
+      'calories': calories,
+      'carbs': carbs,
+      'protein': protein,
+      'fats': fats,
+    };
+  }
+
+  factory FoodItem.fromJson(Map<String, dynamic> json) {
+    return FoodItem(
+      name: json['name'] ?? '',
+      calories: (json['calories'] ?? 0) as int,
+      carbs: (json['carbs'] ?? 0) as int,
+      protein: (json['protein'] ?? 0) as int,
+      quantity: json['quantity'] ?? '',
+      fats: (json['fats'] ?? 0) as int,
+    );
+  }
 }
