@@ -8,11 +8,11 @@ void showExitConfirmationDialog({required BuildContext context}) {
     AlertDialog(
       backgroundColor: context.theme.cardColor,
       title: Text(
-        "Exit App".tr,
+        "exit_app_title".tr,
         style: context.textTheme.headlineMedium,
       ),
       content: Text(
-        "Are you sure you want to exit the app?".tr,
+        "exit_app_message".tr,
         style: context.textTheme.titleMedium,
       ),
       actions: [
