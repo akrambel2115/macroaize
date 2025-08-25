@@ -17,9 +17,9 @@ import 'package:intl/intl.dart';
 class HomeView extends GetView<HomeController> {
   // Centralized spacing for meal cards in the history section.
   // Keep this configurable for easy future tweaks.
-  // Spacing between meal history cards. Set to a small value to provide a 2px gap.
+  // Spacing between meal history cards. Increased for better visual separation.
   // Centralized control makes future adjustments or responsiveness easy.
-  static const double _kMealCardSpacing = 2.0;
+  static const double _kMealCardSpacing = 8.0;
   const HomeView({super.key});
 
   @override
@@ -103,15 +103,14 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
       actions: [
-        /* Premium button commented out per request.
         Padding(
           padding: const EdgeInsets.all(8),
           child: ModernButton(
             text: '',
             style: ModernButtonStyle.ghost,
             size: ModernButtonSize.small,
-            // Premium navigation temporarily disabled per request.
-            onPressed: () {},
+            // Open the premium view when the crown button is tapped
+            onPressed: () => Get.toNamed(Routes.premiumView),
             icon: Image.asset(
               AppAssets.crownIcon,
               height: 24,
@@ -119,7 +118,6 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
         ),
-        */
       ],
     );
   }
@@ -159,9 +157,11 @@ class HomeView extends GetView<HomeController> {
                                 color: isToday ? null : context.theme.cardColor,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: isToday
-                                      ? Colors.transparent
-                                      : AppColor.neutralGrey200,
+                  color: isToday
+                    ? Colors.transparent
+                    : (context.theme.brightness == Brightness.dark
+                      ? AppColor.neutralGrey800
+                      : AppColor.neutralGrey200),
                                   width: 1,
                                 ),
                                 boxShadow: [
@@ -376,7 +376,9 @@ class HomeView extends GetView<HomeController> {
                                               painter: _RoundedArcPainter(
                                                 progress: animatedProgress,
                                                 strokeWidth: stroke,
-                                                backgroundColor: AppColor.neutralGrey200,
+                          backgroundColor: context.theme.brightness == Brightness.dark
+                            ? AppColor.neutralGrey800
+                            : AppColor.neutralGrey200,
                                                 progressColor: AppColor.primaryOrange,
                                               ),
                                             );
@@ -659,7 +661,9 @@ class HomeView extends GetView<HomeController> {
                   Container(
                     height: 6,
                     decoration: BoxDecoration(
-                      color: AppColor.neutralGrey200,
+              color: context.theme.brightness == Brightness.dark
+                ? AppColor.neutralGrey800
+                : AppColor.neutralGrey200,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
