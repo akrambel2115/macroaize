@@ -52,6 +52,7 @@ const Map<String, String> english = {
   "Update Weight Goal": "Update Weight Goal",
   "Enter new weight (kg)": "Enter new weight (kg)",
   "Cancel": "Cancel",
+  "Exit": "Exit",
   "Calorie Your Week :": "Calorie Your Week :",
   'Sun': 'Sun',
   'Mon': 'Mon',
@@ -474,6 +475,15 @@ const Map<String, String> english = {
   "camera_permission_denied_message": "Camera access was denied. Please enable camera permission in your device settings to use the scanner.",
   "ok": "OK",
 
+  // Exit confirmation dialog
+  "exit_app_title": "Exit App",
+  "exit_app_message": "Are you sure you want to exit the app?",
+
+  // Nutrition details dialog
+  "nutrition_details": "Nutrition Details",
+  "fats_label": "Fats",
+  "log": "Log",
+
   // Premium paywall (modern)
   'premium_badge': 'PREMIUM',
   'go_premium_title': 'Go Premium',
@@ -548,4 +558,10 @@ const Map<String, String> english = {
   "nut_carb": "carb",
   "nut_cal": "cal",
   "nut_fat": "fat",
+  // Notification messages
+  "success": "Success",
+  "food_added_success": "Food added successfully",
+  "food_updated_success": "Food updated successfully",
+  "food_deleted_success": "{count} food item(s) deleted",
+  "failed_to_load_recipes": "Failed to load recipes. Please try again.",
 };
