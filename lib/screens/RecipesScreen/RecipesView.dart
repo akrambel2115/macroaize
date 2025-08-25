@@ -62,48 +62,51 @@ class _RecipesViewState extends State<RecipesView> {
           body: RefreshIndicator(
             onRefresh: () => controller.refreshRecipes(),
             color: AppColor.primaryOrange,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              cacheExtent: 1000, // prebuild more for smoother scrolling
-              slivers: [
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          sliver: SliverList(
-                            delegate: SliverChildListDelegate([
-                              _buildHeader(context, controller),
-                              const SizedBox(height: 24),
-                              // Hide top recipes while searching (focused or has query)
-                              if (!_isSearching) ...[ 
-                                // Replace top recipes grid with efficient horizontal list
-                                _buildTopRecipesHorizontal(context, controller),
-                                const SizedBox(height: 24),
-                              ],
-                              Text(
-                                'all_recipes'.tr,
-                                style: context.theme.textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                            ]),
+            child: Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom + 64),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                cacheExtent: 1000, // prebuild more for smoother scrolling
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _buildHeader(context, controller),
+                        const SizedBox(height: 24),
+                        // Hide top recipes while searching (focused or has query)
+                        if (!_isSearching) ...[
+                          // Replace top recipes grid with efficient horizontal list
+                          _buildTopRecipesHorizontal(context, controller),
+                          const SizedBox(height: 24),
+                        ],
+                        Text(
+                          'all_recipes'.tr,
+                          style: context.theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                // All recipes sliver grid with page-based loading
-                if (controller.isLoading && controller.allRecipes.isEmpty)
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: _buildLoadingSliverGrid(),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: _buildRecipeSliverGrid(controller.allRecipes, controller, context),
+                        const SizedBox(height: 16),
+                      ]),
+                    ),
                   ),
-                // Page navigation controls
-                SliverToBoxAdapter(
-                  child: _buildPaginationControls(context, controller),
-                ),
-              ],
+                  // All recipes sliver grid with page-based loading
+                  if (controller.isLoading && controller.allRecipes.isEmpty)
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: _buildLoadingSliverGrid(),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: _buildRecipeSliverGrid(controller.allRecipes, controller, context),
+                    ),
+                  // Page navigation controls
+                  SliverToBoxAdapter(
+                    child: _buildPaginationControls(context, controller),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -313,7 +316,7 @@ class _RecipesViewState extends State<RecipesView> {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final bgColor = onPressed != null
     ? AppColor.primaryOrange
-    : (isDark ? AppColor.neutralGrey700 : AppColor.neutralGrey200);
+    : (isDark ? AppColor.darkBorder : AppColor.neutralGrey200);
   return Material(
     color: bgColor,
       borderRadius: BorderRadius.circular(8),
