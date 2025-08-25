@@ -102,7 +102,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                               ),
                               child: Icon(
                                 Icons.edit,
-                                color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                               ),
                             ),
                           ),
@@ -110,7 +110,11 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                         Center(
                           child: FractionallySizedBox(
                             widthFactor: 0.92,
-                            child: Divider(color: AppColor.neutralGrey200),
+                            child: Divider(
+                              color: context.theme.brightness == Brightness.dark
+                                  ? AppColor.neutralGrey700
+                                  : AppColor.neutralGrey200,
+                            ),
                           ),
                         ),
 
@@ -137,14 +141,18 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                             child: Icon(
                               Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                             ),
                           ),
                         ),
                           Center(
                           child: FractionallySizedBox(
                             widthFactor: 0.92,
-                            child: Divider(color: AppColor.neutralGrey200),
+                            child: Divider(
+                              color: context.theme.brightness == Brightness.dark
+                                  ? AppColor.neutralGrey700
+                                  : AppColor.neutralGrey200,
+                            ),
                           ),
                         ),
 
@@ -171,14 +179,18 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                             child: Icon(
                               Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                             ),
                           ),
                         ),
                           Center(
                           child: FractionallySizedBox(
                             widthFactor: 0.92,
-                            child: Divider(color: AppColor.neutralGrey200),
+                            child: Divider(
+                              color: context.theme.brightness == Brightness.dark
+                                  ? AppColor.neutralGrey700
+                                  : AppColor.neutralGrey200,
+                            ),
                           ),
                         ),
 
@@ -205,7 +217,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                             child: Icon(
                               Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                             ),
                           ),
                         ),
