@@ -106,13 +106,22 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             ),
                             child: Icon(
                               Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                             ),
                           ),
                         ),
-                        Center(child: FractionallySizedBox(widthFactor: 0.92, child: Divider(color: AppColor.neutralGrey200))),
+                        Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.92,
+                            child: Divider(
+                              color: context.theme.brightness == Brightness.dark
+                                  ? AppColor.neutralGrey700
+                                  : AppColor.neutralGrey200,
+                            ),
+                          ),
+                        ),
                         ListTile(
-                          onTap: () {
+                            onTap: () {
                             showUpdateGoalDialog(
                               ConstantUserMaster.proteinGoal,
                                   (p0) {
@@ -142,11 +151,20 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             ),
                             child: Icon(
                               Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                             ),
                           ),
                         ),
-                        Center(child: FractionallySizedBox(widthFactor: 0.92, child: Divider(color: AppColor.neutralGrey200))),
+                        Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.92,
+                            child: Divider(
+                              color: context.theme.brightness == Brightness.dark
+                                  ? AppColor.neutralGrey800
+                                  : AppColor.neutralGrey200,
+                            ),
+                          ),
+                        ),
                         ListTile(
                           onTap: () {
                             showUpdateGoalDialog(
@@ -178,11 +196,20 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             ),
                             child: Icon(
                               Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                             ),
                           ),
                         ),
-                        Center(child: FractionallySizedBox(widthFactor: 0.92, child: Divider(color: AppColor.neutralGrey200))),
+                        Center(
+                          child: FractionallySizedBox(
+                            widthFactor: 0.92,
+                            child: Divider(
+                              color: context.theme.brightness == Brightness.dark
+                                  ? AppColor.neutralGrey800
+                                  : AppColor.neutralGrey200,
+                            ),
+                          ),
+                        ),
                         ListTile(
                           onTap: () {
                             showUpdateGoalDialog(
@@ -214,7 +241,7 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
                             ),
                             child: Icon(
                               Icons.edit,
-                              color: context.theme.scaffoldBackgroundColor,
+                              color: AppColor.neutralWhite,
                             ),
                           ),
                         ),
