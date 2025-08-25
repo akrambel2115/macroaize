@@ -3,6 +3,7 @@ import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import '../../SharePrefHelper/ConstantUserMaster.dart' as CUM;
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsController.dart';
@@ -171,11 +172,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   ConstantUserMaster.carbGoal = macros['carbs']!;
                   ConstantUserMaster.fatsGoal = macros['fat']!;
                   // notify user (localized)
-                  Get.snackbar(
-                    'update_targets_title'.tr,
-                    'update_targets_body'.tr,
-                    snackPosition: SnackPosition.TOP,
-                  );
+                  NotificationService.showSuccess('update_targets_body');
                   // Refresh Home screen data if HomeController is available so UI updates immediately
                   try {
                     Get.find<HomeController>().getAllData();
@@ -211,11 +208,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   ConstantUserMaster.proteinGoal = macros['protein']!;
                   ConstantUserMaster.carbGoal = macros['carbs']!;
                   ConstantUserMaster.fatsGoal = macros['fat']!;
-                  Get.snackbar(
-                    'update_targets_title'.tr,
-                    'update_targets_body'.tr,
-                    snackPosition: SnackPosition.TOP,
-                  );
+                  NotificationService.showSuccess('update_targets_body');
                   // Refresh Home screen data if HomeController is available so UI updates immediately
                   try {
                     Get.find<HomeController>().getAllData();
@@ -239,7 +232,8 @@ class AnalyticsView extends GetView<AnalyticsController> {
         child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: AppColor.neutralGrey100,
+          // Match the diagram/card background so the toggle visually sits on the same surface
+          color: context.theme.cardColor,
           borderRadius: BorderRadius.circular(20),
         ),
         child: TabBar(
