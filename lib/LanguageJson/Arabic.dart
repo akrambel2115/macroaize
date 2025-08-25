@@ -53,6 +53,8 @@ const Map<String, String> arabic = {
   "Update Weight Goal": "تحديث هدف الوزن",
   "Enter new weight (kg)": "أدخل الوزن الجديد (كغ)",
   "Cancel": "إلغاء",
+  "Exit": "خروج",
+  
   "Calorie Your Week :": "السعرات الأسبوعية : ",
   "Sun": "الأحد",
   "Mon": "الاثنين",
@@ -481,6 +483,15 @@ const Map<String, String> arabic = {
   "camera_permission_denied_message": "تم رفض الوصول إلى الكاميرا. الرجاء تمكين إذن الكاميرا من إعدادات الجهاز لاستخدام الماسح.",
   "ok": "حسناً",
 
+  // Exit confirmation dialog
+  "exit_app_title": "الخروج من التطبيق",
+  "exit_app_message": "هل أنت متأكد أنك تريد الخروج من التطبيق؟",
+
+  // Nutrition details dialog
+  "nutrition_details": "تفاصيل التغذية",
+  "fats_label": "الدهون",
+  "log": "سجل",
+  
   // Premium paywall (modern)
   'premium_badge': 'المميّز',
   'go_premium_title': 'احصل على المميّز',
@@ -534,6 +545,7 @@ const Map<String, String> arabic = {
   "top_recipes_subtitle": "اكتشف وصفات صحية ولذيذة مصممة لأهدافك",
   "no_recipes_available": "لا توجد وصفات متاحة",
   "Search recipes by name or ingredient": "ابحث عن وصفات بالاسم أو المكوّنات",
+  "failed_to_load_recipes": "فشل تحميل الوصفات. الرجاء المحاولة مرة أخرى.",
   "min": "دقيقة",
   "cal": "سعرة",
   "close": "إغلاق",
@@ -546,6 +558,11 @@ const Map<String, String> arabic = {
   "items": "عناصر",
   "verified": "مُتحقق",
   "estimated": "تقديرية",
+  // Centralized success messages
+  "success": "نجاح",
+  "food_added_success": "تمت إضافة الطعام بنجاح",
+  "food_updated_success": "تم تحديث الطعام بنجاح",
+  "food_deleted_success": "تم حذف {count} عنصرًا بنجاح",
   // Nutrient short labels
   "nut_prt": "بروتين",
   "nut_carb": "كارب",
