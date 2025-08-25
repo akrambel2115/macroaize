@@ -1,6 +1,7 @@
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+// AppColor import removed (unused) after centralizing notifications
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import '../../SharePrefHelper/SharePref.dart';
 import '../../SharePrefHelper/SharePrefKey.dart';
 
@@ -25,13 +26,7 @@ class AdjustGoalsController extends GetxController{
   }
 
   void showSaveNotification() {
-    Get.snackbar(
-      "Success".tr,
-      "Goal updated successfully".tr,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColor.success,
-      colorText: AppColor.neutralWhite,
-    );
+  NotificationService.showSuccess('Goal updated successfully');
   }
 
   // Immediate save helpers for manual edits
