@@ -201,9 +201,15 @@ class _ChatViewState extends State<ChatView> {
                         child: Container(
               padding: EdgeInsetsDirectional.only(start: 10, end: _kActionGap, top: _kActionGap, bottom: _kActionGap),
                           decoration: BoxDecoration(
-                            color: AppColor.neutralWhite,
+                            color: context.theme.brightness == Brightness.dark
+                                ? AppColor.neutralGrey800
+                                : AppColor.neutralWhite,
                             borderRadius: BorderRadius.circular(28),
-                            border: Border.all(color: AppColor.neutralGrey200),
+                            border: Border.all(
+                              color: context.theme.brightness == Brightness.dark
+                                  ? AppColor.neutralGrey800
+                                  : AppColor.neutralGrey200,
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -217,7 +223,9 @@ class _ChatViewState extends State<ChatView> {
                                         minLines: 1,
                                         maxLines: 4,
                                         style: TextStyle(
-                                          color: AppColor.neutralGrey900,
+                                          color: context.theme.brightness == Brightness.dark
+                                              ? AppColor.neutralWhite
+                                              : AppColor.neutralGrey900,
                                           fontFamily: poppins,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 16,
@@ -226,7 +234,9 @@ class _ChatViewState extends State<ChatView> {
                                           isCollapsed: true,
                                           hintText: 'Ask anything'.tr,
                                           hintStyle: TextStyle(
-                                            color: AppColor.neutralGrey500,
+                                            color: context.theme.brightness == Brightness.dark
+                                                ? AppColor.neutralWhite
+                                                : AppColor.neutralGrey500,
                                             fontSize: 15,
                                           ),
                                           border: InputBorder.none,
