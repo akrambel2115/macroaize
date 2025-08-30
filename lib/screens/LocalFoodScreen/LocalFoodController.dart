@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
+import 'package:foodcalorietracker/shared/services/app_user_service.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -11,6 +12,7 @@ import '../../SharePrefHelper/ConstantUserMaster.dart';
 import '../../constant/FontFamily.dart';
 import '../../routes/app_routes.dart';
 import '../../shared/services/notification_service.dart';
+import '../../shared/widgets/PremiumRequiredDialog.dart';
 
 class LocalFoodController extends GetxController {
   Map<String,dynamic> argument = Get.arguments;
@@ -20,6 +22,7 @@ class LocalFoodController extends GetxController {
   static const Duration _debounceDuration = Duration(milliseconds: 300);
   bool isFiltering = false;
   final dbHelper = DatabaseHelper();
+  final _appUserService = AppUserService();
   List<FoodItem> breakfastFoods = [
     FoodItem(name: 'Boiled Egg'.tr, calories: 78, carbs: 1, protein: 6, fats: 5, quantity: '1 egg'.tr),
     FoodItem(name: 'Oatmeal'.tr, calories: 150, carbs: 27, protein: 5, fats: 3, quantity: '1 bowl'.tr),
@@ -278,25 +281,44 @@ class LocalFoodController extends GetxController {
     update();
   }
 
-  void addCustomFood(FoodItem item) {
+  void addCustomFood(FoodItem item) async {
+    // Secure check: ask server for current premium status (non-reactive)
+    final isPremium = await _appUserService.isPremiumNow();
+    if (!isPremium) {
+      _showPremiumRequiredDialog();
+      return;
+    }
+
     filteredItems.insert(0, item);
     update();
-  NotificationService.showSuccess('food_added_success');
-  // persist changes to DB
-  _saveCurrentFoodsToDb();
+    NotificationService.showSuccess('food_added_success');
+    // persist changes to DB
+    _saveCurrentFoodsToDb();
   }
 
-  void editFoodAt(int index, FoodItem item) {
+  void editFoodAt(int index, FoodItem item) async {
+    final isPremium = await _appUserService.isPremiumNow();
+    if (!isPremium) {
+      _showPremiumRequiredDialog();
+      return;
+    }
+
     if (index >= 0 && index < filteredItems.length) {
       filteredItems[index] = item;
       update();
-  NotificationService.showSuccess('food_updated_success');
-  // persist changes to DB
-  _saveCurrentFoodsToDb();
+      NotificationService.showSuccess('food_updated_success');
+      // persist changes to DB
+      _saveCurrentFoodsToDb();
     }
   }
 
   void deleteSelected(BuildContext context) async {
+    final isPremium = await _appUserService.isPremiumNow();
+    if (!isPremium) {
+      _showPremiumRequiredDialog();
+      return;
+    }
+
     if (selectedIndices.isEmpty) return;
 
     final confirm = await showDialog<bool>(
@@ -585,6 +607,29 @@ class LocalFoodController extends GetxController {
           ],
         );
       },
+    );
+  }
+  
+  void _showPremiumRequiredDialog() {
+    Get.dialog(
+      PremiumRequiredDialog(
+        title: 'Premium Feature',
+        message: 'Creating and editing custom foods is a Premium feature.',
+        badge: Text(
+          'Upgrade to Premium to create unlimited custom foods!',
+          textAlign: TextAlign.center,
+          style: Get.textTheme.bodyMedium?.copyWith(
+            color: Colors.orange,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        onUpgrade: () {
+          Get.back();
+          Get.toNamed(Routes.premiumView);
+        },
+        onCancel: () => Get.back(),
+      ),
+      barrierDismissible: false,
     );
   }
 }

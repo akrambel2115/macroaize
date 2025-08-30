@@ -28,14 +28,17 @@ const Map<String, String> arabic = {
   "Well-lit, centered food": "طعام مضاء جيداً ومتوسط",
   "Move camera back": "ابعد الكاميرا",
   "Move camera closer": "قرب الكاميرا",
-  "Center food in the frame and tap to scan": "ضع الطعام في وسط الإطار واضغط للمسح",
+  "Center food in the frame and tap to scan":
+      "ضع الطعام في وسط الإطار واضغط للمسح",
   "Analyzing food...": "تحليل الطعام...",
   "No History Yet": "لا يوجد تاريخ بعد",
-  "Start tracking your meals to see your nutrition history here": "ابدأ بتتبع وجباتك لرؤية تاريخ التغذية هنا",
+  "Start tracking your meals to see your nutrition history here":
+      "ابدأ بتتبع وجباتك لرؤية تاريخ التغذية هنا",
   "Local Food": "الطعام المحلي",
   "Search Food": "البحث عن الطعام",
   "No Food Found": "لم يتم العثور على طعام",
-  "Try searching with different keywords or browse our local food database": "جرب البحث بكلمات مفتاحية مختلفة أو تصفح قاعدة بيانات الطعام المحلي",
+  "Try searching with different keywords or browse our local food database":
+      "جرب البحث بكلمات مفتاحية مختلفة أو تصفح قاعدة بيانات الطعام المحلي",
   "Clear Search": "مسح البحث",
   "Premium Features": "الميزات المميزة",
   "Choose Your Plan": "اختر خطتك",
@@ -44,7 +47,8 @@ const Map<String, String> arabic = {
   "Update": "تحديث",
   "Current Weight": "الوزن الحالي",
   "kg": "كغ",
-  "Try to update once a week so we can adjust your plan to ensure you hit your goal": "حاول التحديث مرة أسبوعيًا حتى نتمكن من تعديل خطتك لضمان تحقيق هدفك",
+  "Try to update once a week so we can adjust your plan to ensure you hit your goal":
+      "حاول التحديث مرة أسبوعيًا حتى نتمكن من تعديل خطتك لضمان تحقيق هدفك",
   "Update Weight": "تحديث الوزن",
   "Week": "أسبوع",
   "Month": "شهر",
@@ -54,7 +58,7 @@ const Map<String, String> arabic = {
   "Enter new weight (kg)": "أدخل الوزن الجديد (كغ)",
   "Cancel": "إلغاء",
   "Exit": "خروج",
-  
+
   "Calorie Your Week :": "السعرات الأسبوعية : ",
   "Sun": "الأحد",
   "Mon": "الاثنين",
@@ -88,7 +92,8 @@ const Map<String, String> arabic = {
   // Subtitle for Adjust Goals in Settings
   "adjust_goals_subtitle": "السعرات، الكربوهيدرات، الدهون والبروتين",
   "Chat history": "سجل المحادثات",
-  "The coach does not memorize chat history. Each interaction is independent.": "لا يقوم المدرب بتذكر سجل المحادثة. كل تفاعل مستقل.",
+  "The coach does not memorize chat history. Each interaction is independent.":
+      "لا يقوم المدرب بتذكر سجل المحادثة. كل تفاعل مستقل.",
   "Legal": "قانوني",
   "Terms and Condition": "الشروط والأحكام",
   "Privacy Policy": "سياسة الخصوصية",
@@ -96,11 +101,13 @@ const Map<String, String> arabic = {
   "VERSION": "الإصدار",
   "History not found": "لم يتم العثور على السجل",
   "Delete Item": "حذف العنصر",
-  "Are you sure you want to delete this item?": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
+  "Are you sure you want to delete this item?":
+      "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
   "Delete": "حذف",
   "Search by Food Name/Dish": "ابحث باسم الطعام / الطبق",
   "Calorie Goal Reached": "تم الوصول إلى هدف السعرات",
-  "You've completed your calorie goal for today. Would you like to add more?": "لقد أكملت هدف السعرات الحرارية لهذا اليوم. هل ترغب في إضافة المزيد؟",
+  "You've completed your calorie goal for today. Would you like to add more?":
+      "لقد أكملت هدف السعرات الحرارية لهذا اليوم. هل ترغب في إضافة المزيد؟",
   "Done": "تم",
   "Add More Calories": "أضف المزيد من السعرات",
   "Boiled Egg": "بيضة مسلوقة",
@@ -221,7 +228,6 @@ const Map<String, String> arabic = {
   "1 bowl + 2 slices": "1 وعاء + 2 شرائح",
   "1 bowl + 2 appams": "1 وعاء + 2 أبام",
 
-
   "3 pieces": "3 قطع",
   "2 chillas + salad": "2 تشيلا + سلطة",
   "Cal": "سعرة",
@@ -231,11 +237,13 @@ const Map<String, String> arabic = {
   "Quantity": "الكمية",
   "Ask anything": "اسأل أي شيء",
   "Ask The Coach": "اسأل الكوتش",
-  "This picture not available Calorie,Protein,Carbs and Fats,": "لا تتوفر في هذه الصورة معلومات عن السعرات الحرارية أو البروتين أو الكربوهيدرات أو الدهون.",
+  "This picture not available Calorie,Protein,Carbs and Fats,":
+      "لا تتوفر في هذه الصورة معلومات عن السعرات الحرارية أو البروتين أو الكربوهيدرات أو الدهون.",
   "Ask Coach": "اسأل المدرب",
   "Write your message": "اكتب رسالتك",
   "Confirm Reset": "تأكيد إعادة تعيين",
-  "Are you sure you want to Reset Data?": "هل أنت متأكد أنك تريد إعادة تعيين الحساب؟",
+  "Are you sure you want to Reset Data?":
+      "هل أنت متأكد أنك تريد إعادة تعيين الحساب؟",
   "Reset": "إعادة تعيين",
   "You have been Reset Account": "تم إعادة تعيين حسابك",
   "Personal Details": "التفاصيل الشخصية",
@@ -266,15 +274,19 @@ const Map<String, String> arabic = {
   "December": "ديسمبر",
   "Update Your Gender": "تحديث جنسك",
   "Adjust Goals": "تعديل الأهداف",
-  "How many workout do you per week?": "كم عدد التمارين التي تقوم بها في الأسبوع؟",
-  "This will used to calibrate your custom plan": "سيتم استخدام هذا لمعايرة خطتك المخصصة",
+  "How many workout do you per week?":
+      "كم عدد التمارين التي تقوم بها في الأسبوع؟",
+  "This will used to calibrate your custom plan":
+      "سيتم استخدام هذا لمعايرة خطتك المخصصة",
   "Choose your height and weight": "اختر طولك ووزنك",
-  "Select your height and weight to calibrate your custom plan": "حدد طولك ووزنك لمعايرة خطتك المخصصة",
+  "Select your height and weight to calibrate your custom plan":
+      "حدد طولك ووزنك لمعايرة خطتك المخصصة",
   "Workout Now and then": "تمارين الآن ثم",
   "A few workout per week": "بعض التمارين في الأسبوع",
   "Dedicated athlete": "رياضي مكرس",
   "What is your goal?": "ما هو هدفك؟",
-  "This helps is generate a plan for your calorie intake.": "يساعد هذا في إنشاء خطة لاستهلاكك من السعرات الحرارية.",
+  "This helps is generate a plan for your calorie intake.":
+      "يساعد هذا في إنشاء خطة لاستهلاكك من السعرات الحرارية.",
   "Gain Weight": "زيادة الوزن",
   "Lose Weight": "فقدان الوزن",
   "Update Calorie Goal": "تحديث هدف السعرات الحرارية",
@@ -416,7 +428,8 @@ const Map<String, String> arabic = {
   "Get All The New Exciting Features": "احصل على جميع الميزات الجديدة المثيرة",
   "Unlock Food Scanner": "فتح ماسح الطعام",
   "Unlock Food Calorie": "فتح تقدير سعرات الطعام",
-  "Unlock Unlimited Chat with Ai": "افتح الدردشة غير المحدودة مع الذكاء الاصطناعي",
+  "Unlock Unlimited Chat with Ai":
+      "افتح الدردشة غير المحدودة مع الذكاء الاصطناعي",
   "Unlimited Food Scanner To Calorie": "ماسح طعام غير محدود لتقدير السعرات",
   "Most Popular": "الأكثر شهرة",
   "Subscription": "الاشتراك",
@@ -425,14 +438,19 @@ const Map<String, String> arabic = {
   "Welcome": "أهلاً وسهلاً",
   "Choose Your Gender": "اختر جنسك",
   "Calorie tracking made easy": "تتبع السعرات بات أسهل",
-  "Just snap a quick photo of your meal and we''ll do the rest": "التقط صورة سريعة لوجبتك وسنتولّى الباقي",
+  "Just snap a quick photo of your meal and we''ll do the rest":
+      "التقط صورة سريعة لوجبتك وسنتولّى الباقي",
   "In-depth nutrition analyses": "تحليلات غذائية معمّقة",
-  "We will keep your informed about your food choicer and their nutritional content": "نُبقيك على اطلاع بخياراتك الغذائية ومحتواها التغذوي",
+  "We will keep your informed about your food choicer and their nutritional content":
+      "نُبقيك على اطلاع بخياراتك الغذائية ومحتواها التغذوي",
   "Transform your body": "حوّل جسدك",
-  "Today is best time to start working toward your dream body": "اليوم هو أفضل وقت للبدء بالعمل نحو جسمك المنشود",
+  "Today is best time to start working toward your dream body":
+      "اليوم هو أفضل وقت للبدء بالعمل نحو جسمك المنشود",
   "Where were you born?": "أين وُلدت؟",
-  "This Will be used to calibrate your custom plan": "سيتم استخدام هذا لمعايرة خطتك المخصصة",
-  "What's stopping you from reaching your goals?": "ما الذي يمنعك من تحقيق أهدافك؟",
+  "This Will be used to calibrate your custom plan":
+      "سيتم استخدام هذا لمعايرة خطتك المخصصة",
+  "What's stopping you from reaching your goals?":
+      "ما الذي يمنعك من تحقيق أهدافك؟",
   "Lack of consistency": "نقص في الاستمرارية",
   "Unhealthy eating habits": "عادات غذائية غير صحية",
   "Lack of supports": "نقص الدعم",
@@ -450,13 +468,13 @@ const Map<String, String> arabic = {
   // Dynamic meal description components
   "meal_contains": "هذه الوجبة تحتوي على",
   "conjunction_and": "و",
-  
+
   // Units and labels
   "kcal_unit": "سعرة حرارية",
   "gram_unit": "غ",
   "unit_piece": "قطعة",
   "protein_unit": "غ",
-  "carbs_unit": "غ", 
+  "carbs_unit": "غ",
   "fat_unit": "غ",
   "Cal Left": "سعرات متبقية",
   "meal_label": "الوجبة",
@@ -474,13 +492,44 @@ const Map<String, String> arabic = {
   "language_english": "English",
   "language_french": "Français",
   "language_arabic": "العربية",
-  "Analyzing nutrition...": "تحليل التغذية..."
-
-  ,
+  "Analyzing nutrition...": "تحليل التغذية...",
+  // Influencer / promo keys
+  "influencer_program": "برنامج المؤثرين",
+  "your_promo_code": "رمز الخصم الخاص بك",
+  "copied": "تم النسخ",
+  "current_balance": "الرصيد الحالي",
+  "total_earned": "إجمالي المبالغ المكتسبة",
+  "referrals_count": "عدد الإحالات",
+  "request_withdrawal": "طلب سحب",
+  "minimum_withdrawal_amount": "الحد الأدنى للسحب: {amount} د.ج",
+  "withdrawal_history": "سجل السحوبات",
+  "promo_code_expired": "انتهت صلاحية رمز الخصم",
+  "promo_expires_in": "ينتهي الرمز خلال @days يومًا",
+  "promo_expires_on": "ينتهي الرمز بتاريخ @date",
+  "promo_code_copied": "تم نسخ رمز الخصم",
+  "promo_code": "رمز الخصم",
+  "enter_promo_code": "أدخل رمز الخصم",
+  "apply_promo_code": "تطبيق",
+  "skip_promo_code": "تخطي",
+  "promo_code_applied": "تم تطبيق رمز الخصم بنجاح!",
+  "promo_code_invalid": "رمز الخصم غير صحيح",
+  "promo_code_dialog_title": "هل لديك رمز خصم؟",
+  "promo_code_dialog_subtitle":
+      "أدخل رمز الخصم الخاص بك للحصول على خصم على اشتراكك",
+  "available_balance": "الرصيد المتاح",
+  "withdrawal_amount": "مبلغ السحب",
+  "enter_amount": "أدخل المبلغ",
+  "bank_account_rip": "حساب البنك (RIP)",
+  "enter_rip_number": "أدخل رقم RIP",
+  "withdrawal_processing_info": "تُعالج السحوبات خلال 5 أيام عمل.",
+  "requested_on": "تم الطلب بتاريخ {date}",
+  "unknown_date": "تاريخ غير معروف",
   // Permission UI
-  "grant_camera_access_in_scanner": "اضغط على الإطار لمنح إذن الوصول إلى الكاميرا",
+  "grant_camera_access_in_scanner":
+      "اضغط على الإطار لمنح إذن الوصول إلى الكاميرا",
   "camera_permission_denied_title": "مطلوب إذن الكاميرا",
-  "camera_permission_denied_message": "تم رفض الوصول إلى الكاميرا. الرجاء تمكين إذن الكاميرا من إعدادات الجهاز لاستخدام الماسح.",
+  "camera_permission_denied_message":
+      "تم رفض الوصول إلى الكاميرا. الرجاء تمكين إذن الكاميرا من إعدادات الجهاز لاستخدام الماسح.",
   "ok": "حسناً",
 
   // Exit confirmation dialog
@@ -491,7 +540,7 @@ const Map<String, String> arabic = {
   "nutrition_details": "تفاصيل التغذية",
   "fats_label": "الدهون",
   "log": "سجل",
-  
+
   // Premium paywall (modern)
   'premium_badge': 'المميّز',
   'go_premium_title': 'احصل على المميّز',
@@ -500,7 +549,7 @@ const Map<String, String> arabic = {
   'feature_ai_scan_subtitle': 'مع مسح الوجبات بالذكاء الاصطناعي وملاحظات يومية',
   'feature_results_title': 'حقق نتائج طويلة الأمد',
   'feature_results_subtitle': 'مع الطيار الآلي وتتبع الماكروز',
-    'feature_chatbot_title': 'الدردشة الذكية "المدرب"',
+  'feature_chatbot_title': 'الدردشة الذكية "المدرب"',
   'feature_chatbot_subtitle': 'إرشاد تغذوي فوري',
   'feature_recipes_title': 'وصفات وأنظمة مميزة',
   'feature_recipes_subtitle': 'ترشدك نحو النجاح',
@@ -518,7 +567,8 @@ const Map<String, String> arabic = {
   // Weight tracking UI
   "Target Weight": "الوزن المستهدف",
   "to go": "للوصول",
-  "Try to update once a week to help us adjust your plan": "حاول التحديث مرة أسبوعياً لمساعدتنا في تعديل خطتك",
+  "Try to update once a week to help us adjust your plan":
+      "حاول التحديث مرة أسبوعياً لمساعدتنا في تعديل خطتك",
   "Weight Overview": "نظرة عامة على الوزن",
   "Current": "الحالي",
   "Goal": "الهدف",
@@ -532,7 +582,8 @@ const Map<String, String> arabic = {
 
   // Notifications
   "update_targets_title": "تم تحديث الأهداف",
-  "update_targets_body": "أعدنا حساب أهدافك اليومية من السعرات والماكروز لتتماشى مع وزنك الجديد.",
+  "update_targets_body":
+      "أعدنا حساب أهدافك اليومية من السعرات والماكروز لتتماشى مع وزنك الجديد.",
 
   // Donut chart center texts
   "daily_macros": "الماكروز اليومية",
@@ -542,6 +593,17 @@ const Map<String, String> arabic = {
   "recipes_title": "الوصفات",
   "top_recipes": "أفضل الوصفات",
   "all_recipes": "جميع الوصفات",
+  // Recipe Detail specific keys
+  "recipe_title": "سموثي التوت الأزرق واللوز",
+  "description":
+      "ابدأ يومك بهذا السموثي المملوء بمضادات الأكسدة، لذيذ وسهل التحضير!",
+  "less_text": "أقل ^",
+  "macronutrients": "المغذيات الكبيرة",
+  "ingredients": "المكونات",
+  "serving": "الحصة",
+  "directions": "الخطوات",
+  "add_to_plan": "أضف إلى الخطة",
+  "step": "خطوة",
   "top_recipes_subtitle": "اكتشف وصفات صحية ولذيذة مصممة لأهدافك",
   "no_recipes_available": "لا توجد وصفات متاحة",
   "Search recipes by name or ingredient": "ابحث عن وصفات بالاسم أو المكوّنات",
@@ -551,7 +613,7 @@ const Map<String, String> arabic = {
   "close": "إغلاق",
 
   "food items found": "أكلة متوفرة",
-  
+
   // Meal Breakdown
   "meal_breakdown": "تفصيل الوجبة",
   "tap_to_edit_portions": "اضغط لتعديل الكميات",
@@ -568,4 +630,27 @@ const Map<String, String> arabic = {
   "nut_carb": "كارب",
   "nut_cal": "سعرات",
   "nut_fat": "دهون",
+  // Authentication messages
+  "auth_login_success": "تم تسجيل الدخول بنجاح",
+  "auth_register_success": "تم إنشاء الحساب بنجاح",
+  "auth_password_reset_sent": "تم إرسال بريد إعادة تعيين كلمة المرور",
+  "auth_wrong_credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+  "auth_account_not_found": "الحساب غير موجود",
+  "auth_email_in_use": "البريد الإلكتروني مستخدم بالفعل",
+  "auth_weak_password": "كلمة المرور ضعيفة جدًا",
+  "auth_account_different_provider": "الحساب مرتبط بمزود تسجيل مختلف",
+  "auth_network_error": "خطأ في الشبكة. تحقق من الاتصال.",
+  "auth_unknown_error": "حدث خطأ غير متوقع",
+  "auth_authentication_error": "خطأ في المصادقة",
+  "auth_unexpected_error": "خطأ غير متوقع",
+  "auth_logout_success": "تم تسجيل الخروج بنجاح",
+  "auth_logout_failed": "فشل تسجيل الخروج",
+  // Title used for the authentication/modal which prompts users to sign in
+  "auth_modal_title": "سجل الدخول للمتابعة",
+  // Daily usage labels
+  "Daily Usage": "الاستخدام اليومي",
+  "Scans": "الماسحات",
+  "Chat": "الدردشة",
+  "left": "متبقي",
+  "login_to_view_usage": "سجل الدخول للحصول على",
 };

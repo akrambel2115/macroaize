@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Default: disallow cleartext for all domains -->
+    <base-config cleartextTrafficPermitted="false" />
+
+    <!-- Permit cleartext only for the Chargily test domain used in the dev environment -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">test.pay.chargily.dz</domain>
+        <domain includeSubdomains="true">pay.chargily.dz</domain>
+    </domain-config>
+</network-security-config>

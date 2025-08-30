@@ -30,11 +30,15 @@ class SharedSearchBar extends StatelessWidget {
     } catch (_) {
       hasText = false;
     }
+    final isDark = context.theme.brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColor.neutralGrey200.withOpacity(0.6), width: 1),
+        border: Border.all(
+          color: isDark ? AppColor.neutralGrey800 : AppColor.neutralGrey200.withOpacity(0.6),
+          width: 1,
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(

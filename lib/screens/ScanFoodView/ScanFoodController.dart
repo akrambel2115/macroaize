@@ -1,13 +1,17 @@
 import 'dart:io';
 import 'package:foodcalorietracker/constant/Appkey.dart';
-import 'package:foodcalorietracker/screens/PremiumScreen/PremiumController.dart';
+import 'package:foodcalorietracker/shared/services/usage_service.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
+import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+// ...existing imports
 import '../../widgets/CropperUiSettings.dart';
 
 import '../../SharePrefHelper/SharePref.dart';
@@ -22,6 +26,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   bool isLoading = false;
   final ImagePicker _picker = ImagePicker();
   bool _permissionDialogShown = false;
+  
+  // Add usage service
+  final _usageService = UsageService();
 
   @override
   Future<void> onInit() async {
@@ -157,8 +164,8 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
   Future<void> cropImage(final image, BuildContext context) async {
     isLoading = false;
-
     update();
+    
     if (image != null) {
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: image.path,
@@ -166,43 +173,90 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
         compressQuality: 100,
         uiSettings: cropperUiSettings(context),
       );
+      
       if (croppedFile != null) {
         File image = File(croppedFile.path);
-        if(devBypassPremium){
-          releaseCamera();
-          // Development mode: ignore premium & limits
-          Get.toNamed(
-            Routes.scanCalorieView,
-            arguments: {'image': image, 'type': isIdentify},
-          );
-        } else if(Get.find<PremiumController>().isPremium){
-          releaseCamera();
-          Get.toNamed(
-            Routes.scanCalorieView,
-            arguments: {'image': image, 'type': isIdentify},
-          );
-        } else {
-          if(scanLimit==0){
-            releaseCamera();
-            Get.toNamed(Routes.premiumView);
-          } else {
-            scanLimit--;
-            update();
-            storeScanLimit();
+        
+        // SECURE FEATURE GATING: Check usage limits via backend
+        isLoading = true;
+        update();
+        
+        try {
+          // Call backend to check and increment usage
+          final result = await _usageService.incrementUsage('scan');
+          
+          if (result.success) {
+            // Usage allowed - proceed with scan
             releaseCamera();
             Get.toNamed(
               Routes.scanCalorieView,
               arguments: {'image': image, 'type': isIdentify},
             );
+          } else {
+            // Usage limit reached - show premium dialog
+            releaseCamera();
+            NotificationService.showError(result.message.isNotEmpty ? result.message : 'daily_scan_limit_reached');
           }
-        }
+        } catch (e) {
+          isLoading = false;
+          update();
 
-      } else {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            // User not authenticated - prompt to login
+            releaseCamera();
+            await _handleAuthenticationRequired();
+            return;
+          }
+
+          final el = e.toString().toLowerCase();
+          if (el.contains('limit') || el.contains('permission-denied') || (el.contains('daily') && el.contains('limit'))) {
+            // Limit-related error -> centralized friendly notification
+            releaseCamera();
+            NotificationService.showError('daily_limit_reached_try_again');
+            return;
+          }
+
+          // Other error
+          releaseCamera();
+          NotificationService.showError('unable_to_process_scan_try_again');
+        }
+        
         isLoading = false;
         update();
       }
     }
   }
+  
+  // usage limit dialog replaced by NotificationService.showError
+  
+  Future<void> _handleAuthenticationRequired() async {
+    // Show authentication modal
+    final success = await AuthModal.show();
+    
+    if (success) {
+      // User logged in successfully - show success message
+      Get.snackbar(
+        'Welcome!',
+        'You can now use the scanner. Please try scanning again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } else {
+      // User cancelled or failed to login
+      Get.snackbar(
+        'Authentication Required',
+        'Please login to use the scanner feature',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    }
+  }
+
   storeScanLimit()
   async {
     SharedPref.saveInt(SharePrefKey.scanLimit, scanLimit);

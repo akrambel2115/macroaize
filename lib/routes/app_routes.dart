@@ -21,6 +21,8 @@ abstract class Routes {
   static const localFoodView = Paths.localFoodView;
   static const languageView = Paths.languageView;
   static const recipesView = Paths.recipesView;
+  static const recipeDetailView = Paths.recipeDetailView;
+  static const accountDetailsView = Paths.accountDetailsView;
 }
 
 abstract class Paths {
@@ -46,4 +48,6 @@ abstract class Paths {
   static const localFoodView = '/LocalFoodView';
   static const languageView = '/LanguageView';
   static const recipesView = '/RecipesView';
+  static const recipeDetailView = '/RecipeDetailView';
+  static const accountDetailsView = '/AccountDetailsView';
 }

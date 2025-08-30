@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/constant/FontFamily.dart';
 import 'package:foodcalorietracker/screens/ChatScreen/ChatController.dart';
+import 'package:foodcalorietracker/shared/services/subscription_service.dart';
+import 'package:foodcalorietracker/shared/models/subscription.dart';
 import 'package:foodcalorietracker/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -46,10 +48,14 @@ class _ChatViewState extends State<ChatView> {
                 _chatNoticeEntry = null;
               }
               // mark as seen so first-time auto-show won't re-trigger
-              await SharedPref.saveBool(SharePrefKey.hasSeenChatHistoryNotice, true);
+              await SharedPref.saveBool(
+                SharePrefKey.hasSeenChatHistoryNotice,
+                true,
+              );
               _chatNoticeEntry = AppWidgets.showTopNotification(
                 context,
-                'The coach does not memorize chat history. Each interaction is independent.'.tr,
+                'The coach does not memorize chat history. Each interaction is independent.'
+                    .tr,
                 duration: const Duration(seconds: 10),
                 autoDismissAfter: const Duration(seconds: 10),
                 persistent: true,
@@ -61,7 +67,10 @@ class _ChatViewState extends State<ChatView> {
               );
               if (mounted) setState(() {});
             },
-            icon: Icon(Icons.lightbulb_outline, color: context.theme.primaryColor),
+            icon: Icon(
+              Icons.lightbulb_outline,
+              color: context.theme.primaryColor,
+            ),
           ),
         ],
       ),
@@ -69,13 +78,18 @@ class _ChatViewState extends State<ChatView> {
         builder: (_) {
           // One-time chat history notice: show top notification the first time user opens chat
           Future.microtask(() async {
-            final seen = await SharedPref.readBool(SharePrefKey.hasSeenChatHistoryNotice) ?? false;
+            final seen =
+                await SharedPref.readBool(
+                  SharePrefKey.hasSeenChatHistoryNotice,
+                ) ??
+                false;
             if (!seen) {
               SharedPref.saveBool(SharePrefKey.hasSeenChatHistoryNotice, true);
               // show and keep a reference so the lamp can toggle it
               _chatNoticeEntry = AppWidgets.showTopNotification(
                 context,
-                'The coach does not memorize chat history. Each interaction is independent.'.tr,
+                'The coach does not memorize chat history. Each interaction is independent.'
+                    .tr,
                 duration: const Duration(seconds: 10),
                 autoDismissAfter: const Duration(seconds: 10),
                 persistent: true,
@@ -126,8 +140,9 @@ class _ChatViewState extends State<ChatView> {
                     padding: EdgeInsets.all(10),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: context.theme.cardColor),
+                      borderRadius: BorderRadius.circular(5),
+                      color: context.theme.cardColor,
+                    ),
                     child: Row(
                       children: [
                         Container(
@@ -135,126 +150,213 @@ class _ChatViewState extends State<ChatView> {
                           width: 100,
                           alignment: AlignmentDirectional.topEnd,
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              image: DecorationImage(
-                                  image: FileImage(
-                                      File(controller.imagePath!.path)),
-                                  fit: BoxFit.cover)),
+                            borderRadius: BorderRadius.circular(10),
+                            image: DecorationImage(
+                              image: FileImage(
+                                File(controller.imagePath!.path),
+                              ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                           child: GestureDetector(
-                              onTap: () {
-                                controller.removeImage();
-                              },
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.red,
-                              )),
-                        )
+                            onTap: () {
+                              controller.removeImage();
+                            },
+                            child: Icon(Icons.close, color: Colors.red),
+                          ),
+                        ),
                       ],
                     ),
                   ),
 
                 // New rounded input bar matching the attached design
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 10,
+                  ),
                   child: Row(
                     children: [
                       // Gallery / add button (small)
                       // Gallery icon (rounded square, subtle border)
-                      GestureDetector(
-                        onTap: () {
-                          if (controller.recording) {
-                            // When recording, this button acts as a close/stop control
-                            controller.stopListening(context);
-                          } else {
-                            controller.takeImage(ImageSource.gallery, context);
-                          }
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          width: _kGallerySize,
-                          height: _kGallerySize,
-                          margin: EdgeInsetsDirectional.only(end: _kActionGap),
-                          decoration: BoxDecoration(
-                            // change color smoothly when toggling recording
-                            color: controller.recording
-                                ? Colors.red.withOpacity(0.12)
-                                : AppColor.primaryOrange.withOpacity(0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 250),
-                              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: FadeTransition(opacity: anim, child: child)),
-                              child: Icon(
-                                controller.recording ? Icons.close : Icons.photo_library_outlined,
-                                color: controller.recording ? Colors.red : AppColor.primaryOrange,
-                                size: 20,
-                                key: ValueKey(controller.recording),
+                      StreamBuilder<Subscription?>(
+                        stream: SubscriptionService().subscriptionStream,
+                        builder: (context, snapshot) {
+                          final isPremium = snapshot.data?.isActive == true;
+
+                          return Stack(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  if (controller.recording) {
+                                    // When recording, this button acts as a close/stop control
+                                    controller.stopListening(context);
+                                  } else {
+                                    controller.takeImage(
+                                      ImageSource.gallery,
+                                      context,
+                                    );
+                                  }
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+                                  width: _kGallerySize,
+                                  height: _kGallerySize,
+                                  margin: EdgeInsetsDirectional.only(
+                                    end: _kActionGap,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    // change color smoothly when toggling recording
+                                    color:
+                                        controller.recording
+                                            ? Colors.red.withOpacity(0.12)
+                                            : (isPremium
+                                                ? AppColor.primaryOrange
+                                                    .withOpacity(0.12)
+                                                : Colors.grey.withOpacity(
+                                                  0.12,
+                                                )),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      transitionBuilder:
+                                          (child, anim) => ScaleTransition(
+                                            scale: anim,
+                                            child: FadeTransition(
+                                              opacity: anim,
+                                              child: child,
+                                            ),
+                                          ),
+                                      child: Icon(
+                                        controller.recording
+                                            ? Icons.close
+                                            : Icons.photo_library_outlined,
+                                        color:
+                                            controller.recording
+                                                ? Colors.red
+                                                : (isPremium
+                                                    ? AppColor.primaryOrange
+                                                    : Colors.grey),
+                                        size: 20,
+                                        key: ValueKey(controller.recording),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
+                              // Premium badge for non-premium users
+                              if (!isPremium && !controller.recording)
+                                Positioned(
+                                  top: 0,
+                                  right: _kActionGap,
+                                  child: Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.star,
+                                      color: Colors.white,
+                                      size: 10,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
 
                       // Centered rounded input container matching the image
-            Expanded(
+                      Expanded(
                         child: Container(
-              padding: EdgeInsetsDirectional.only(start: 10, end: _kActionGap, top: _kActionGap, bottom: _kActionGap),
+                          padding: EdgeInsetsDirectional.only(
+                            start: 10,
+                            end: _kActionGap,
+                            top: _kActionGap,
+                            bottom: _kActionGap,
+                          ),
                           decoration: BoxDecoration(
-                            color: context.theme.brightness == Brightness.dark
-                                ? AppColor.neutralGrey800
-                                : AppColor.neutralWhite,
+                            color:
+                                context.theme.brightness == Brightness.dark
+                                    ? AppColor.neutralGrey800
+                                    : AppColor.neutralWhite,
                             borderRadius: BorderRadius.circular(28),
                             border: Border.all(
-                              color: context.theme.brightness == Brightness.dark
-                                  ? AppColor.neutralGrey800
-                                  : AppColor.neutralGrey200,
+                              color:
+                                  context.theme.brightness == Brightness.dark
+                                      ? AppColor.neutralGrey800
+                                      : AppColor.neutralGrey200,
                             ),
                           ),
                           child: Row(
                             children: [
                               // Input field (no avatar inside)
                               Expanded(
-                                child: controller.recording == false
-                                    ? TextField(
-                                        controller: controller.controller,
-                                        onChanged: (value) => controller.update(),
-                                        onSubmitted: (_) => controller.sendMsg(text: controller.controller.text),
-                                        minLines: 1,
-                                        maxLines: 4,
-                                        style: TextStyle(
-                                          color: context.theme.brightness == Brightness.dark
-                                              ? AppColor.neutralWhite
-                                              : AppColor.neutralGrey900,
-                                          fontFamily: poppins,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
-                                        ),
-                                        decoration: InputDecoration(
-                                          isCollapsed: true,
-                                          hintText: 'Ask anything'.tr,
-                                          hintStyle: TextStyle(
-                                            color: context.theme.brightness == Brightness.dark
-                                                ? AppColor.neutralWhite
-                                                : AppColor.neutralGrey500,
-                                            fontSize: 15,
+                                child:
+                                    controller.recording == false
+                                        ? TextField(
+                                          controller: controller.controller,
+                                          onChanged:
+                                              (value) => controller.update(),
+                                          onSubmitted:
+                                              (_) => controller.sendMsg(
+                                                text:
+                                                    controller.controller.text,
+                                              ),
+                                          minLines: 1,
+                                          maxLines: 4,
+                                          style: TextStyle(
+                                            color:
+                                                context.theme.brightness ==
+                                                        Brightness.dark
+                                                    ? AppColor.neutralWhite
+                                                    : AppColor.neutralGrey900,
+                                            fontFamily: poppins,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16,
                                           ),
-                                          border: InputBorder.none,
-                                          contentPadding: const EdgeInsets.symmetric(vertical: 4),
-                                        ),
-                                      )
-                                    : SizedBox(
-                                        height: 40,
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                          child: VoiceVisualizer(
-                                            level: controller.soundLevel,
-                                            width: 40,
-                                            height: 40,
-                                            color: Colors.black,
+                                          decoration: InputDecoration(
+                                            isCollapsed: true,
+                                            hintText: 'Ask anything'.tr,
+                                            hintStyle: TextStyle(
+                                              color:
+                                                  context.theme.brightness ==
+                                                          Brightness.dark
+                                                      ? AppColor.neutralWhite
+                                                      : AppColor.neutralGrey500,
+                                              fontSize: 15,
+                                            ),
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  vertical: 4,
+                                                ),
+                                          ),
+                                        )
+                                        : SizedBox(
+                                          height: 40,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 2.0,
+                                            ),
+                                            child: VoiceVisualizer(
+                                              level: controller.soundLevel,
+                                              width: 40,
+                                              height: 40,
+                                              color: Colors.black,
+                                            ),
                                           ),
                                         ),
-                                      ),
                               ),
 
                               // removed internal mic icon per request
@@ -264,8 +366,13 @@ class _ChatViewState extends State<ChatView> {
                                 onTap: () {
                                   if (controller.recording) {
                                     controller.stopListening(context);
-                                  } else if (controller.controller.text.isNotEmpty) {
-                                    controller.sendMsg(text: controller.controller.text);
+                                  } else if (controller
+                                      .controller
+                                      .text
+                                      .isNotEmpty) {
+                                    controller.sendMsg(
+                                      text: controller.controller.text,
+                                    );
                                   } else {
                                     controller.startListening();
                                   }
@@ -280,7 +387,8 @@ class _ChatViewState extends State<ChatView> {
                                   child: Padding(
                                     padding: const EdgeInsets.all(6),
                                     child: Icon(
-                                      controller.controller.text.isNotEmpty || controller.recording
+                                      controller.controller.text.isNotEmpty ||
+                                              controller.recording
                                           ? Icons.arrow_upward
                                           : Icons.multitrack_audio,
                                       color: Colors.white,

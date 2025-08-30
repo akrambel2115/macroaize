@@ -41,9 +41,12 @@ import 'package:foodcalorietracker/screens/planIntro/PlanIntroView.dart';
 import 'package:foodcalorietracker/screens/transition/TransitionBinding.dart';
 import 'package:foodcalorietracker/screens/transition/TransitionView.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/screens/AccountDetails/AccountDetailsView.dart';
 import 'package:foodcalorietracker/routes/directional_transition.dart';
 import '../screens/onBording/OnBoardingView.dart';
 import 'app_routes.dart';
+import 'package:foodcalorietracker/Model/Recipe.dart';
+import 'package:foodcalorietracker/screens/RecipesScreen/RecipeDetailScreen.dart';
 
 class AppPages {
   AppPages._();
@@ -72,6 +75,10 @@ class AppPages {
       binding: TransitionBinding(),
       transition: Transition.fade,
       transitionDuration: const Duration(milliseconds: 350),
+    ),
+    GetPage(
+      name: Paths.accountDetailsView,
+      page: () => const AccountDetailsView(),
     ),
     GetPage(
       name: Paths.planIntroView,
@@ -170,6 +177,15 @@ class AppPages {
       page: () => const RecipesView(),
       binding: RecipesBinding(),
       customTransition: DirectionalTransition(),
+    ),
+    GetPage(
+      name: Paths.recipeDetailView,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>?;
+        final recipe = args != null && args['recipe'] is Recipe ? args['recipe'] as Recipe : null;
+        if (recipe == null) return const RecipesView();
+        return RecipeDetailScreen(recipe: recipe);
+      },
     ),
   ];
 }

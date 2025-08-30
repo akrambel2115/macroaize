@@ -4,6 +4,9 @@ class Recipe {
   final String imageUrl;
   final int duration; // in minutes
   final int calories;
+  final int carbs; // grams
+  final int protein; // grams
+  final int fat; // grams
   final String difficulty;
   final List<String> tags;
   final String description;
@@ -16,6 +19,9 @@ class Recipe {
     required this.imageUrl,
     required this.duration,
     required this.calories,
+    this.carbs = 0,
+    this.protein = 0,
+    this.fat = 0,
     this.difficulty = 'Easy',
     this.tags = const [],
     this.description = '',
@@ -30,6 +36,9 @@ class Recipe {
       imageUrl: json['imageUrl'] ?? '',
       duration: json['duration'] ?? 0,
       calories: json['calories'] ?? 0,
+      carbs: json['carbs'] ?? 0,
+      protein: json['protein'] ?? 0,
+      fat: json['fat'] ?? 0,
       difficulty: json['difficulty'] ?? 'Easy',
       tags: List<String>.from(json['tags'] ?? []),
       description: json['description'] ?? '',
@@ -44,7 +53,10 @@ class Recipe {
       'title': title,
       'imageUrl': imageUrl,
       'duration': duration,
-      'calories': calories,
+        'calories': calories,
+        'carbs': carbs,
+        'protein': protein,
+        'fat': fat,
       'difficulty': difficulty,
       'tags': tags,
       'description': description,

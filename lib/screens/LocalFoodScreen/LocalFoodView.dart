@@ -282,31 +282,27 @@ class LocalFoodView extends GetView<LocalFoodController> {
               ),
             ),
           ),
-          GetBuilder<LocalFoodController>(
-            builder: (controller) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(controller.isEditing ? Icons.close_rounded : Icons.tune_rounded, color: AppColor.neutralGrey700),
+                  onPressed: () => controller.toggleEditMode(),
+                ),
+                if (controller.isEditing) ...[
                   IconButton(
-                    icon: Icon(controller.isEditing ? Icons.close_rounded : Icons.tune_rounded, color: AppColor.neutralGrey700),
-                    onPressed: () => controller.toggleEditMode(),
+                    tooltip: 'add_custom_food'.tr,
+                    icon: Icon(Icons.add_rounded, color: AppColor.neutralGrey700),
+                    onPressed: () => _showAddEditDialog(context, controller),
                   ),
-                  if (controller.isEditing) ...[
-                    IconButton(
-                      tooltip: 'add_custom_food'.tr,
-                      icon: Icon(Icons.add_rounded, color: AppColor.neutralGrey700),
-                      onPressed: () => _showAddEditDialog(context, controller),
-                    ),
-                    IconButton(
-                      tooltip: 'delete_selected'.tr,
-                      icon: Icon(Icons.delete_rounded, color: controller.selectedIndices.isNotEmpty ? Colors.red : AppColor.neutralGrey500),
-                      onPressed: controller.selectedIndices.isNotEmpty ? () => controller.deleteSelected(context) : null,
-                    ),
-                  ],
+                  IconButton(
+                    tooltip: 'delete_selected'.tr,
+                    icon: Icon(Icons.delete_rounded, color: controller.selectedIndices.isNotEmpty ? Colors.red : AppColor.neutralGrey500),
+                    onPressed: controller.selectedIndices.isNotEmpty ? () => controller.deleteSelected(context) : null,
+                  ),
                 ],
-              );
-            },
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -645,7 +641,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                       height: 24,
                                     ),
                                     '',
-                                    '${(food.calories * quantity).toString()}',
+                                    (food.calories * quantity).toString(),
                                   ),
                                   _nutrientTile(
                                     context,
@@ -724,15 +720,6 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                     flex: 1,
                                     child: OutlinedButton(
                                       onPressed: () => Navigator.of(context).pop(),
-                                      child: Text(
-                                        'close'.tr,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: context.theme.brightness == Brightness.dark
-                                              ? AppColor.darkText
-                                              : AppColor.neutralGrey700,
-                                        ),
-                                      ),
                                       style: OutlinedButton.styleFrom(
                                         side: BorderSide(
                                           color: context.theme.brightness == Brightness.dark
@@ -742,6 +729,15 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                         padding: const EdgeInsets.symmetric(vertical: 16),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'close'.tr,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: context.theme.brightness == Brightness.dark
+                                              ? AppColor.darkText
+                                              : AppColor.neutralGrey700,
                                         ),
                                       ),
                                     ),

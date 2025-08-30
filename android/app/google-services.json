@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "582471032450",
+    "project_id": "macroaize",
+    "storage_bucket": "macroaize.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582471032450:android:db1a3e746f8f3d65b0de9b",
+        "android_client_info": {
+          "package_name": "com.example.foodcalorietracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "582471032450-h0bkt8rc33bk81cfh7oo3uok6qj73m07.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.foodcalorietracker",
+            "certificate_hash": "c7f575d5209d1f400f37b000d70b8f885d602e63"
+          }
+        },
+        {
+          "client_id": "582471032450-edecc8ot7soae68rop1008su6i44grgl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfyeiVkxn0DRZJpArExJR4qtaf39MFdmU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "582471032450-edecc8ot7soae68rop1008su6i44grgl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "582471032450-2ksaql5o10cmlu8d903r7oij11dg7skq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.foodcalorietracker"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

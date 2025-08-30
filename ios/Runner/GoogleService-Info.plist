@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>582471032450-2ksaql5o10cmlu8d903r7oij11dg7skq.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.582471032450-2ksaql5o10cmlu8d903r7oij11dg7skq</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>582471032450-h0bkt8rc33bk81cfh7oo3uok6qj73m07.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBqam_k-3WVfpHj9CdG7ZJLDg7PA3tnFxY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>582471032450</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.foodcalorietracker</string>
+	<key>PROJECT_ID</key>
+	<string>macroaize</string>
+	<key>STORAGE_BUCKET</key>
+	<string>macroaize.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:582471032450:ios:9c5dfd7c98305931b0de9b</string>
+</dict>
+</plist>

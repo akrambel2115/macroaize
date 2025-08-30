@@ -12,6 +12,7 @@ class DatabaseHelper {
   final String calorie = 'Calorie';
   final String dailyCalorie = 'DailyCalorie';
   final String history = 'CalorieHistory';
+  final String localFood = 'LocalFood';
   final String mainChat = 'MainChat';
   final String subChat = 'SubChat';
 
@@ -27,7 +28,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'my_database.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (Database db, int version) async {
         await db.execute('''
           CREATE TABLE IF NOT EXISTS $calorie (
@@ -63,6 +64,18 @@ class DatabaseHelper {
              )
         ''');
         await db.execute('''
+          CREATE TABLE IF NOT EXISTS $localFood (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            quantity TEXT,
+            calories INTEGER,
+            carbs INTEGER,
+            protein INTEGER,
+            fats INTEGER,
+            type TEXT
+          )
+        ''');
+        await db.execute('''
           CREATE TABLE IF NOT EXISTS $mainChat (
             id INTEGER PRIMARY KEY,
             Question TEXT,
@@ -82,12 +95,32 @@ class DatabaseHelper {
              ''');
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        // migrate from versions <2
         if (oldVersion < 2) {
           // Add fdcId column if not exists
           try {
             await db.execute('ALTER TABLE $history ADD COLUMN fdcId INTEGER');
           } catch (_) {
             // ignore if already exists
+          }
+        }
+        // ensure LocalFood table exists when upgrading to version 3
+        if (oldVersion < 3) {
+          try {
+            await db.execute('''
+          CREATE TABLE IF NOT EXISTS $localFood (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            quantity TEXT,
+            calories INTEGER,
+            carbs INTEGER,
+            protein INTEGER,
+            fats INTEGER,
+            type TEXT
+          )
+        ''');
+          } catch (_) {
+            // ignore if creation fails for any reason
           }
         }
       },
@@ -98,6 +131,27 @@ class DatabaseHelper {
     final db = await database;
     final int id = await db.insert(calorie, details.toMap());
     return id;
+  }
+
+  // Local food helpers
+  Future<int> insertLocalFood(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.insert(localFood, data);
+  }
+
+  Future<List<Map<String, dynamic>>> getLocalFoods(String type) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      localFood,
+      where: 'type=?',
+      whereArgs: [type],
+    );
+    return maps;
+  }
+
+  Future<void> deleteLocalFoodsByType(String type) async {
+    final db = await database;
+    await db.delete(localFood, where: 'type = ?', whereArgs: [type]);
   }
 
   Future<int> insertCalorieHistory(CalorieHistoryModel model) async {

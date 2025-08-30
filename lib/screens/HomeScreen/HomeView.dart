@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
+// removed unused 'dart:math' import — ring painter moved to shared widget
 // ...existing code...
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
@@ -11,8 +11,12 @@ import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:foodcalorietracker/widgets/EnergyOrbs.dart';
+import 'package:foodcalorietracker/widgets/CalorieRing.dart';
+import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:foodcalorietracker/shared/widgets/PremiumRequiredDialog.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:foodcalorietracker/Model/Recipe.dart';
 
 class HomeView extends GetView<HomeController> {
   // Centralized spacing for meal cards in the history section.
@@ -37,38 +41,41 @@ class HomeView extends GetView<HomeController> {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           // Slightly reduce horizontal padding to give cards more room without affecting overall layout
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20), // Consistent spacing using multiples of 8dp
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 20,
+          ), // Consistent spacing using multiples of 8dp
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Date selector
               _buildDateSelector(context),
-              
+
               const SizedBox(height: 24), // Consistent spacing
-              
               // Calorie tracking card
               _buildCalorieTrackingCard(context),
-              
+
               const SizedBox(height: 24),
-              
+
               // Nutrition progress
               _buildNutritionProgress(context),
-              
-              const SizedBox(height: 32), // Increased spacing for better hierarchy
-              
+
+              const SizedBox(
+                height: 32,
+              ), // Increased spacing for better hierarchy
               // Recipes section
               _buildRecipesSection(context),
-              
+
               const SizedBox(height: 32),
-              
+
               // History section
               _buildHistorySection(context),
-              
+
               const SizedBox(height: 24),
-              
+
               // Meal cards
               _buildMealCards(context),
-              
+
               const SizedBox(height: 24), // Bottom padding for FAB
             ],
           ),
@@ -93,9 +100,9 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
           Text(
-            'track_subtitle'.tr.isNotEmpty 
-              ? 'track_subtitle'.tr 
-              : 'Track your daily nutrition',
+            'track_subtitle'.tr.isNotEmpty
+                ? 'track_subtitle'.tr
+                : 'Track your daily nutrition',
             style: context.theme.textTheme.bodyMedium?.copyWith(
               color: AppColor.neutralGrey600,
             ),
@@ -111,11 +118,7 @@ class HomeView extends GetView<HomeController> {
             size: ModernButtonSize.small,
             // Open the premium view when the crown button is tapped
             onPressed: () => Get.toNamed(Routes.premiumView),
-            icon: Image.asset(
-              AppAssets.crownIcon,
-              height: 24,
-              width: 24,
-            ),
+            icon: Image.asset(AppAssets.crownIcon, height: 24, width: 24),
           ),
         ),
       ],
@@ -133,19 +136,29 @@ class HomeView extends GetView<HomeController> {
             final visibleCount = 4;
             final totalItemWidth = itemWidth + itemSpacing;
             final totalWidth = constraints.maxWidth;
-            final sidePadding = (totalWidth - (visibleCount * totalItemWidth) + itemSpacing) / 2;
+            final sidePadding =
+                (totalWidth - (visibleCount * totalItemWidth) + itemSpacing) /
+                2;
             return GetBuilder<HomeController>(
               builder: (controller) {
                 return ListView.builder(
                   controller: controller.scrollController,
                   scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: sidePadding > 0 ? sidePadding : 0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: sidePadding > 0 ? sidePadding : 0,
+                  ),
                   itemCount: controller.dates.length,
                   itemBuilder: (context, index) {
-                    bool isToday = controller.dates[index].day == controller.today.day;
+                    bool isToday =
+                        controller.dates[index].day == controller.today.day;
                     return Padding(
                       // Use directional padding so horizontal gaps respect TextDirection (RTL/LTR)
-                      padding: EdgeInsetsDirectional.only(end: index == controller.dates.length - 1 ? 0 : itemSpacing),
+                      padding: EdgeInsetsDirectional.only(
+                        end:
+                            index == controller.dates.length - 1
+                                ? 0
+                                : itemSpacing,
+                      ),
                       child: ModernScaleTransition(
                         child: GestureDetector(
                           onTap: () => controller.dateFilter(index),
@@ -153,21 +166,26 @@ class HomeView extends GetView<HomeController> {
                             width: itemWidth,
                             child: Container(
                               decoration: BoxDecoration(
-                                gradient: isToday ? AppColor.primaryGradient : null,
+                                gradient:
+                                    isToday ? AppColor.primaryGradient : null,
                                 color: isToday ? null : context.theme.cardColor,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                  color: isToday
-                    ? Colors.transparent
-                    : (context.theme.brightness == Brightness.dark
-                      ? AppColor.neutralGrey800
-                      : AppColor.neutralGrey200),
+                                  color:
+                                      isToday
+                                          ? Colors.transparent
+                                          : (context.theme.brightness ==
+                                                  Brightness.dark
+                                              ? AppColor.neutralGrey800
+                                              : AppColor.neutralGrey200),
                                   width: 1,
                                 ),
                                 boxShadow: [
                                   if (isToday)
                                     BoxShadow(
-                                      color: AppColor.primaryOrange.withOpacity(0.3),
+                                      color: AppColor.primaryOrange.withOpacity(
+                                        0.3,
+                                      ),
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
                                     ),
@@ -180,39 +198,63 @@ class HomeView extends GetView<HomeController> {
                                     // Use translation keys for weekdays so the labels come from language JSON
                                     // Keys used: 'Mon','Tue','Wed','Thu','Fri','Sat','Sun'
                                     (() {
-                                      final weekdayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                                      final lang = Get.locale?.languageCode ?? Get.deviceLocale?.languageCode ?? 'en';
-                                      final key = weekdayKeys[controller.dates[index].weekday - 1];
+                                      final weekdayKeys = [
+                                        'Mon',
+                                        'Tue',
+                                        'Wed',
+                                        'Thu',
+                                        'Fri',
+                                        'Sat',
+                                        'Sun',
+                                      ];
+                                      final lang =
+                                          Get.locale?.languageCode ??
+                                          Get.deviceLocale?.languageCode ??
+                                          'en';
+                                      final key =
+                                          weekdayKeys[controller
+                                                  .dates[index]
+                                                  .weekday -
+                                              1];
                                       final label = key.tr;
                                       // keep English in uppercase as previous design used uppercase short day names
-                                      return lang == 'en' ? label.toUpperCase() : label;
+                                      return lang == 'en'
+                                          ? label.toUpperCase()
+                                          : label;
                                     })(),
-                                    style: context.textTheme.labelSmall?.copyWith(
-                                      color: isToday
-                                          ? Colors.white
-                                          : AppColor.neutralGrey600,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: context.textTheme.labelSmall
+                                        ?.copyWith(
+                                          color:
+                                              isToday
+                                                  ? Colors.white
+                                                  : AppColor.neutralGrey600,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                   const SizedBox(height: 4),
                                   Container(
                                     width: 32,
                                     height: 32,
                                     decoration: BoxDecoration(
-                                      color: isToday
-                                          ? Colors.white
-                                          : Colors.transparent,
+                                      color:
+                                          isToday
+                                              ? Colors.white
+                                              : Colors.transparent,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Center(
                                       child: Text(
                                         controller.dates[index].day.toString(),
-                                        style: context.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: isToday
-                                              ? AppColor.primaryOrange
-                                              : context.theme.primaryColor,
-                                        ),
+                                        style: context.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  isToday
+                                                      ? AppColor.primaryOrange
+                                                      : context
+                                                          .theme
+                                                          .primaryColor,
+                                            ),
                                       ),
                                     ),
                                   ),
@@ -236,10 +278,12 @@ class HomeView extends GetView<HomeController> {
   Widget _buildCalorieTrackingCard(BuildContext context) {
     return GetBuilder<HomeController>(
       builder: (controller) {
-        double progress = controller.isLoading 
-          ? 0.0 
-          : (controller.consumedKcal / ConstantUserMaster.calorieGoal).clamp(0.0, 1.0);
-        
+        double progress =
+            controller.isLoading
+                ? 0.0
+                : (controller.consumedKcal / ConstantUserMaster.calorieGoal)
+                    .clamp(0.0, 1.0);
+
         return ModernFadeSlideTransition(
           beginOffset: const Offset(0, 0.2),
           child: Stack(
@@ -248,212 +292,197 @@ class HomeView extends GetView<HomeController> {
               ModernCard(
                 enableGradient: true,
                 child: Column(
-              children: [
-                // Header
-                Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColor.primaryOrange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.local_fire_department,
-                        color: AppColor.primaryOrange,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      "Track Food".tr,
-                      style: context.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
+                    // Header
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColor.primaryOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.local_fire_department,
+                            color: AppColor.primaryOrange,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          "Track Food".tr,
+                          style: context.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
                         // Minimal inline edit icon aligned with title
                         _InlineEditIcon(
                           onTap: () => Get.toNamed(Routes.adjustGoalsView),
                         ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Redesigned calorie block: left shows goal + nutrient bars, right shows
-                // circular 'cal left' indicator — layout mirrors the provided mockup.
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Left column: Calorie goal + small nutrient progress rows
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Calorie goal'.tr,
-                            style: context.textTheme.labelSmall?.copyWith(
-                              color: AppColor.neutralGrey600,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: ConstantUserMaster.calorieGoal.toDouble()),
-                            duration: const Duration(milliseconds: 900),
-                            curve: Curves.easeOutCubic,
-                            builder: (context, animatedValue, _) {
-                              return Text(
-                                NumberFormat.decimalPattern().format(animatedValue.round()),
-                                style: context.textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Small nutrient rows
-                          _buildMiniNutrientRow(
-                            context,
-                            // use existing translation keys (already present in language files)
-                            label: 'Protein'.tr,
-                            value: controller.consumedProtein,
-                            goal: ConstantUserMaster.proteinGoal,
-                            color: AppColor.primaryOrange,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildMiniNutrientRow(
-                            context,
-                            label: 'Carbs'.tr,
-                            value: controller.consumedCarbs,
-                            goal: ConstantUserMaster.carbGoal,
-                            color: AppColor.primaryOrange,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildMiniNutrientRow(
-                            context,
-                            label: 'Fats'.tr,
-                            value: controller.consumedFats,
-                            goal: ConstantUserMaster.fatsGoal,
-                            color: AppColor.primaryOrange,
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
 
-                    const SizedBox(width: 16),
+                    const SizedBox(height: 24),
 
-                    // Right column: Circular remaining calories — give more room for a larger radius
-                    Expanded(
-                      flex: 2,
-                      child: Center(
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final size = math.min(constraints.maxWidth, constraints.maxHeight);
-                              // Circle scale: larger visual radius within the expanded column
-                              final circleSize = size * 1.12;
-                              // Stroke width: scale up slightly to match larger radius
-                              final stroke = math.max(8.0, size * 0.12);
-                              return Center(
-                                child: SizedBox(
-                                  width: circleSize,
-                                  height: circleSize,
-                                  child: Stack(
-                                    alignment: Alignment.center,
+                    // Redesigned calorie block: left shows goal + nutrient bars, right shows
+                    // circular 'cal left' indicator — layout mirrors the provided mockup.
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Left column: Calorie goal + small nutrient progress rows
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Calorie goal'.tr,
+                                style: context.textTheme.labelSmall?.copyWith(
+                                  color: AppColor.neutralGrey600,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              TweenAnimationBuilder<double>(
+                                tween: Tween(
+                                  begin: 0.0,
+                                  end:
+                                      ConstantUserMaster.calorieGoal.toDouble(),
+                                ),
+                                duration: const Duration(milliseconds: 900),
+                                curve: Curves.easeOutCubic,
+                                builder: (context, animatedValue, _) {
+                                  return Text(
+                                    NumberFormat.decimalPattern().format(
+                                      animatedValue.round(),
+                                    ),
+                                    style: context.textTheme.headlineLarge
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Small nutrient rows
+                              _buildMiniNutrientRow(
+                                context,
+                                // use existing translation keys (already present in language files)
+                                label: 'Protein'.tr,
+                                value: controller.consumedProtein,
+                                goal: ConstantUserMaster.proteinGoal,
+                                color: AppColor.primaryOrange,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildMiniNutrientRow(
+                                context,
+                                label: 'Carbs'.tr,
+                                value: controller.consumedCarbs,
+                                goal: ConstantUserMaster.carbGoal,
+                                color: AppColor.primaryOrange,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildMiniNutrientRow(
+                                context,
+                                label: 'Fats'.tr,
+                                value: controller.consumedFats,
+                                goal: ConstantUserMaster.fatsGoal,
+                                color: AppColor.primaryOrange,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        // Right column: Circular remaining calories — use shared CalorieRing widget
+                        Expanded(
+                          flex: 2,
+                          child: Center(
+                            child: SizedBox(
+                              width: 220,
+                              height: 220,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CalorieRing(
+                                    progress: progress,
+                                    size: 140,
+                                    strokeWidth: 16,
+                                    progressColor: AppColor.primaryOrange,
+                                  ),
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      SizedBox(
-                                        width: circleSize,
-                                        height: circleSize,
-                                        child: TweenAnimationBuilder<double>(
-                                          tween: Tween(begin: 0.0, end: progress),
-                                          duration: const Duration(milliseconds: 450),
-                                          builder: (context, animatedProgress, _) {
-                                            return CustomPaint(
-                                              painter: _RoundedArcPainter(
-                                                progress: animatedProgress,
-                                                strokeWidth: stroke,
-                          backgroundColor: context.theme.brightness == Brightness.dark
-                            ? AppColor.neutralGrey800
-                            : AppColor.neutralGrey200,
-                                                progressColor: AppColor.primaryOrange,
-                                              ),
-                                            );
-                                          },
+                                      TweenAnimationBuilder<double>(
+                                        tween: Tween(
+                                          begin: 0.0,
+                                          end:
+                                              controller.remainingKcal
+                                                  .toDouble(),
                                         ),
-                                      ),
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          TweenAnimationBuilder<double>(
-                                            tween: Tween(begin: 0.0, end: controller.remainingKcal.toDouble()),
-                                            duration: const Duration(milliseconds: 700),
-                                            curve: Curves.easeOut,
-                                            builder: (context, animatedValue, _) {
-                                              return Text(
-                                                animatedValue.round().toString(),
-                                                style: context.textTheme.headlineLarge?.copyWith(
+                                        duration: const Duration(
+                                          milliseconds: 700,
+                                        ),
+                                        curve: Curves.easeOut,
+                                        builder: (context, animatedValue, _) {
+                                          return Text(
+                                            animatedValue.round().toString(),
+                                            style: context
+                                                .textTheme
+                                                .headlineLarge
+                                                ?.copyWith(
                                                   fontWeight: FontWeight.bold,
-                                                  // Fixed numeric size so increasing the circle doesn't scale the number
-                                                  fontSize: 22,
+                                                  fontSize: 26,
                                                 ),
-                                              );
-                                            },
-                                          ),
-                                          Text(
-                                            'Cal Left'.tr,
-                                            style: context.textTheme.labelSmall?.copyWith(
+                                          );
+                                        },
+                                      ),
+                                      Text(
+                                        'Cal Left'.tr,
+                                        style: context.textTheme.labelSmall
+                                            ?.copyWith(
                                               color: AppColor.neutralGrey600,
-                                              // Slightly reduced from previous to avoid overpowering the number
-                                              fontSize: size * 0.095,
                                               fontWeight: FontWeight.w600,
                                             ),
-                                          ),
-                                        ],
                                       ),
                                     ],
                                   ),
-                                ),
-                              );
-                            },
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // Modern, compact add button below goal calories
+                    Center(
+                      child: Material(
+                        color: AppColor.neutralGrey800,
+                        shape: const CircleBorder(),
+                        elevation: 4,
+                        shadowColor: Colors.black.withOpacity(0.25),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => showMealSelectionSheet(context),
+                          splashColor: Colors.white.withOpacity(0.08),
+                          highlightColor: Colors.white.withOpacity(0.12),
+                          child: SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Center(
+                              child: Icon(
+                                Icons.add,
+                                size: 28,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                // Modern, compact add button below goal calories
-                Center(
-                  child: Material(
-                    color: AppColor.neutralGrey800,
-                    shape: const CircleBorder(),
-                    elevation: 4,
-                    shadowColor: Colors.black.withOpacity(0.25),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => showMealSelectionSheet(context),
-                      splashColor: Colors.white.withOpacity(0.08),
-                      highlightColor: Colors.white.withOpacity(0.12),
-                      child: SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Center(
-                          child: Icon(
-                            Icons.add,
-                            size: 28,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
               ),
             ],
           ),
@@ -503,10 +532,7 @@ class HomeView extends GetView<HomeController> {
             style: ModernButtonStyle.ghost,
             size: ModernButtonSize.small,
             onPressed: () {
-              Get.toNamed(
-                Routes.historyView,
-                arguments: {"type": "All"},
-              );
+              Get.toNamed(Routes.historyView, arguments: {"type": "All"});
             },
           ),
         ],
@@ -521,96 +547,90 @@ class HomeView extends GetView<HomeController> {
         'icon': AppAssets.breakfast,
         'color': AppColor.tertiary,
       },
-      {
-        'name': 'Lunch',
-        'icon': AppAssets.lunch,
-        'color': AppColor.tertiary,
-      },
+      {'name': 'Lunch', 'icon': AppAssets.lunch, 'color': AppColor.tertiary},
       {
         'name': 'snack(s)',
         'icon': AppAssets.snacks,
         'color': AppColor.tertiary,
       },
-      {
-        'name': 'Dinner',
-        'icon': AppAssets.dinner,
-        'color': AppColor.tertiary,
-      },
+      {'name': 'Dinner', 'icon': AppAssets.dinner, 'color': AppColor.tertiary},
     ];
 
     return Column(
-      children: meals.asMap().entries.map((entry) {
-        int index = entry.key;
-        Map<String, dynamic> meal = entry.value;
-        
-        return ModernFadeSlideTransition(
-          beginOffset: Offset(0, 0.5 + (index * 0.1)),
-          child: ModernCard(
-            // Keep horizontal gutters but remove vertical gap so cards touch.
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, _kMealCardSpacing),
-            // Slightly reduce internal padding for denser layout while preserving touch targets.
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-            // Reduce shadow intensity to avoid overlapping glow when cards touch.
-            boxShadow: [
-              BoxShadow(
-                color: AppColor.primaryOrange.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+      children:
+          meals.asMap().entries.map((entry) {
+            int index = entry.key;
+            Map<String, dynamic> meal = entry.value;
+
+            return ModernFadeSlideTransition(
+              beginOffset: Offset(0, 0.5 + (index * 0.1)),
+              child: ModernCard(
+                // Keep horizontal gutters but remove vertical gap so cards touch.
+                margin: const EdgeInsets.fromLTRB(12, 0, 12, _kMealCardSpacing),
+                // Slightly reduce internal padding for denser layout while preserving touch targets.
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 14,
+                ),
+                // Reduce shadow intensity to avoid overlapping glow when cards touch.
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColor.primaryOrange.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+                onTap: () {
+                  Get.toNamed(
+                    Routes.historyView,
+                    arguments: {"type": meal['name']},
+                  );
+                },
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColor.primaryOrange.withOpacity(0.1),
+                            AppColor.primaryOrange.withOpacity(0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Image.asset(meal['icon']),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        (meal['name'] as String).tr,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: AppColor.neutralGrey400,
+                    ),
+                  ],
+                ),
               ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-            onTap: () {
-              Get.toNamed(
-                Routes.historyView,
-                arguments: {"type": meal['name']},
-              );
-            },
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColor.primaryOrange.withOpacity(0.1),
-                        AppColor.primaryOrange.withOpacity(0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Image.asset(
-                      meal['icon'],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    (meal['name'] as String).tr,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppColor.neutralGrey400,
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -625,17 +645,14 @@ class HomeView extends GetView<HomeController> {
           shape: BoxShape.circle,
           gradient: AppColor.primaryGradient,
         ),
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 28,
-        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
 
   // Small, reusable nutrient row used by the redesigned Track Food card.
-  Widget _buildMiniNutrientRow(BuildContext context, {
+  Widget _buildMiniNutrientRow(
+    BuildContext context, {
     required String label,
     required int value,
     required int goal,
@@ -661,9 +678,10 @@ class HomeView extends GetView<HomeController> {
                   Container(
                     height: 6,
                     decoration: BoxDecoration(
-              color: context.theme.brightness == Brightness.dark
-                ? AppColor.neutralGrey800
-                : AppColor.neutralGrey200,
+                      color:
+                          context.theme.brightness == Brightness.dark
+                              ? AppColor.neutralGrey800
+                              : AppColor.neutralGrey200,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -727,7 +745,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Title
               Text(
                 'Which meal would you like to track?'.tr,
@@ -736,14 +754,24 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Meal options
-              ...['BreakFast', 'Lunch', 'snack(s)', 'Dinner'].asMap().entries.map((entry) {
+              ...[
+                'BreakFast',
+                'Lunch',
+                'snack(s)',
+                'Dinner',
+              ].asMap().entries.map((entry) {
                 int index = entry.key;
                 String meal = entry.value;
                 final colors = List<Color>.filled(4, AppColor.primaryOrange);
-                final icons = [AppAssets.breakfast, AppAssets.lunch, AppAssets.snacks, AppAssets.dinner];
-                
+                final icons = [
+                  AppAssets.breakfast,
+                  AppAssets.lunch,
+                  AppAssets.snacks,
+                  AppAssets.dinner,
+                ];
+
                 return ModernFadeSlideTransition(
                   beginOffset: Offset(0, 0.3 + (index * 0.1)),
                   child: Container(
@@ -751,7 +779,10 @@ class HomeView extends GetView<HomeController> {
                     child: ModernCard(
                       onTap: () {
                         Navigator.pop(context);
-                        Get.toNamed(Routes.localFoodView, arguments: {"value": meal});
+                        Get.toNamed(
+                          Routes.localFoodView,
+                          arguments: {"value": meal},
+                        );
                       },
                       child: Row(
                         children: [
@@ -802,7 +833,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                 );
               }),
-              
+
               const SizedBox(height: 20),
             ],
           ),
@@ -843,7 +874,7 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
             TextButton(
-              onPressed: () => Get.toNamed(Routes.recipesView, arguments: {'showBack': true}),
+              onPressed: () => _navigateToRecipes(),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -871,130 +902,166 @@ class HomeView extends GetView<HomeController> {
           child: ListView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            children: _getMockRecipes().map((recipe) {
-              return Container(
-                width: 160,
-                margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(
-                  // Keep card background consistent with theme so title area doesn't show a contrasting band
-                  color: context.theme.cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+            children:
+                _getMockRecipes().map((recipe) {
+                  return GestureDetector(
+                    onTap: () async {
+                      try {
+                        final appUserService = Get.find<AppUserService>();
+                        final isPremium = await appUserService.isPremiumNow();
+                        if (!isPremium) {
+                          _showPremiumRequiredDialog();
+                          return;
+                        }
+                        Get.toNamed(
+                          Routes.recipeDetailView,
+                          arguments: {
+                            'recipe': Recipe(
+                              id: recipe['title'] as String,
+                              title: recipe['title'] as String,
+                              imageUrl: (recipe['imageUrl'] as String?) ?? '',
+                              duration: recipe['duration'] as int,
+                              calories: recipe['calories'] as int,
+                            ),
+                          },
+                        );
+                      } catch (_) {
+                        _showPremiumRequiredDialog();
+                      }
+                    },
+                    child: Container(
+                      width: 160,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        // Keep card background consistent with theme so title area doesn't show a contrasting band
+                        color: context.theme.cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      // Render image as background and overlay title on top so there's no separate info strip
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // Background image covers whole card
+                            recipe['imageUrl'] != null
+                                ? Image.network(
+                                  recipe['imageUrl']!,
+                                  fit: BoxFit.cover,
+                                )
+                                : Container(
+                                  color: context.theme.cardColor,
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.restaurant_rounded,
+                                      size: 32,
+                                      color: AppColor.neutralGrey500,
+                                    ),
+                                  ),
+                                ),
+                            // Dim overlay (optional for readability) - keep fully transparent if you want no overlay
+                            Positioned.fill(
+                              child: Container(
+                                // Transparent overlay to remove any visible band — change to Colors.black.withOpacity(0.25) if you want subtle readabilty
+                                color: Colors.transparent,
+                              ),
+                            ),
+                            // Badges
+                            Positioned(
+                              bottom: 8,
+                              left: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time_rounded,
+                                      size: 10,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '${recipe['duration']} ${'min'.tr}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 8,
+                              right: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColor.primaryOrange.withOpacity(
+                                    0.9,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '${recipe['calories']} ${'cal'.tr}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Title overlay (no background)
+                            Positioned(
+                              left: 12,
+                              right: 12,
+                              bottom: 36,
+                              child: Text(
+                                recipe['title']!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.theme.textTheme.titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      height: 1.2,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.6),
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
-                ),
-                // Render image as background and overlay title on top so there's no separate info strip
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Background image covers whole card
-                      recipe['imageUrl'] != null
-                          ? Image.network(
-                              recipe['imageUrl']!,
-                              fit: BoxFit.cover,
-                            )
-                          : Container(
-                              color: context.theme.cardColor,
-                              child: const Center(
-                                child: Icon(
-                                  Icons.restaurant_rounded,
-                                  size: 32,
-                                  color: AppColor.neutralGrey500,
-                                ),
-                              ),
-                            ),
-                      // Dim overlay (optional for readability) - keep fully transparent if you want no overlay
-                      Positioned.fill(
-                        child: Container(
-                          // Transparent overlay to remove any visible band — change to Colors.black.withOpacity(0.25) if you want subtle readabilty
-                          color: Colors.transparent,
-                        ),
-                      ),
-                      // Badges
-                      Positioned(
-                        bottom: 8,
-                        left: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.access_time_rounded,
-                                size: 10,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${recipe['duration']} ${'min'.tr}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColor.primaryOrange.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            '${recipe['calories']} ${'cal'.tr}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Title overlay (no background)
-                      Positioned(
-                        left: 12,
-                        right: 12,
-                        bottom: 36,
-                        child: Text(
-                          recipe['title']!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            height: 1.2,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.6),
-                                offset: const Offset(0, 1),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
         ),
       ],
@@ -1005,86 +1072,33 @@ class HomeView extends GetView<HomeController> {
     return [
       {
         'title': 'Blueberry Almond Smoothie',
-        'imageUrl': 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=300&h=200&fit=crop',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=300&h=200&fit=crop',
         'duration': 10,
         'calories': 400,
       },
       {
         'title': 'Chicken & Quinoa Stuffed Peppers',
-        'imageUrl': 'https://images.unsplash.com/photo-1604909052743-94e838986d24?w=300&h=200&fit=crop',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1604909052743-94e838986d24?w=300&h=200&fit=crop',
         'duration': 40,
         'calories': 700,
       },
       {
         'title': 'Peanut Butter Banana Toast',
-        'imageUrl': 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=300&h=200&fit=crop',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=300&h=200&fit=crop',
         'duration': 10,
         'calories': 350,
       },
       {
         'title': 'Veggie & Turkey Stir-Fry',
-        'imageUrl': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=300&h=200&fit=crop',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=300&h=200&fit=crop',
         'duration': 30,
         'calories': 750,
       },
     ];
-  }
-}
-
-// Custom painter that draws a rounded-cap progress arc (so ends are rounded instead of flat).
-class _RoundedArcPainter extends CustomPainter {
-  final double progress; // 0.0 - 1.0
-  final double strokeWidth;
-  final Color backgroundColor;
-  final Color progressColor;
-
-  _RoundedArcPainter({
-    required this.progress,
-    required this.strokeWidth,
-    required this.backgroundColor,
-    required this.progressColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final center = rect.center;
-    final radius = math.min(size.width, size.height) / 2;
-
-    // Background circle
-    final bgPaint = Paint()
-      ..color = backgroundColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(center, radius - strokeWidth / 2, bgPaint);
-
-    // Progress arc
-    final progressPaint = Paint()
-      ..color = progressColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..isAntiAlias = true;
-
-    final startAngle = -math.pi / 2; // start at top
-    final sweepAngle = 2 * math.pi * progress;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      startAngle,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _RoundedArcPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.strokeWidth != strokeWidth ||
-        oldDelegate.backgroundColor != backgroundColor ||
-        oldDelegate.progressColor != progressColor;
   }
 }
 
@@ -1105,9 +1119,10 @@ class _InlineEditIconState extends State<_InlineEditIcon> {
 
   @override
   Widget build(BuildContext context) {
-  final Color iconColor = AppColor.primaryOrange;
-  final Color bgColor = AppColor.primaryOrange
-    .withOpacity(_pressed ? 0.25 : (_hovered ? 0.18 : 0.12));
+    final Color iconColor = AppColor.primaryOrange;
+    final Color bgColor = AppColor.primaryOrange.withOpacity(
+      _pressed ? 0.25 : (_hovered ? 0.18 : 0.12),
+    );
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -1162,4 +1177,44 @@ class _EditIcon extends StatelessWidget {
       color: IconTheme.of(context).color ?? AppColor.neutralGrey500,
     );
   }
+}
+
+void _navigateToRecipes() async {
+  try {
+    final appUserService = Get.find<AppUserService>();
+    final isPremium = await appUserService.isPremiumNow();
+    if (isPremium) {
+      Get.toNamed(Routes.recipesView, arguments: {'showBack': true});
+    } else {
+      _showPremiumRequiredDialog();
+    }
+  } catch (_) {
+    // Fail closed on any error
+    _showPremiumRequiredDialog();
+  }
+}
+
+void _showPremiumRequiredDialog() {
+  final txtTheme = Get.textTheme; // use Get context-safe theme
+  Get.dialog(
+    PremiumRequiredDialog(
+      title: 'Premium Required'.tr,
+      message:
+          'Access to recipes requires a premium subscription. Upgrade now to unlock this feature.'
+              .tr,
+      badge: Text(
+        'Unlock all recipes and features with Premium'.tr,
+        textAlign: TextAlign.center,
+        style: txtTheme.bodyMedium?.copyWith(
+          color: Colors.orange,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onUpgrade: () {
+        Get.back();
+        Get.toNamed(Routes.premiumView);
+      },
+      onCancel: () => Get.back(),
+    ),
+  );
 }

@@ -30,5 +30,9 @@ const iOSInAppPurchaseIdMonthly = "Enter IOS In App Purchase Key Monthly";
 const iOSInAppPurchaseIdYearly = "Enter IOS In App Purchase Key Yearly";
 
 int scanLimit =  5;
-// Development flag to bypass premium restrictions
-bool devBypassPremium = true; // set to false for production
+// Development flag to bypass premium restrictions (DO NOT use in production)
+bool devBypassPremium = false; // IMPORTANT: Set to false for production
+
+// New secure limits - enforced by backend
+const int FREE_SCAN_LIMIT = 2;
+const int FREE_CHAT_LIMIT = 5;

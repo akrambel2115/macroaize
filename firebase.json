@@ -1,0 +1,48 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "macroaize",
+          "appId": "1:582471032450:android:db1a3e746f8f3d65b0de9b",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "macroaize",
+          "configurations": {
+            "android": "1:582471032450:android:db1a3e746f8f3d65b0de9b",
+            "ios": "1:582471032450:ios:9c5dfd7c98305931b0de9b"
+          }
+        }
+      }
+    }
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20",
+    "ignore": [
+  "node_modules",
+  ".git"
+    ],
+    "predeploy": [
+      "npm --prefix functions run build"
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}

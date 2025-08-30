@@ -1,0 +1,8 @@
+node_modules
+lib
+
+# Ignore all env files except the example template
+.env
+.env.local
+.env.prod
+.env.macroaize

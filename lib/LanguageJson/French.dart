@@ -27,7 +27,8 @@ const Map<String, String> french = {
   "Update": "Mettre à jour",
   "Current Weight": "Poids actuel",
   "kg": "kg",
-  "Try to update once a week so we can adjust your plan to ensure you hit your goal": "Essayez de mettre à jour une fois par semaine pour que nous puissions ajuster votre plan et atteindre votre objectif",
+  "Try to update once a week so we can adjust your plan to ensure you hit your goal":
+      "Essayez de mettre à jour une fois par semaine pour que nous puissions ajuster votre plan et atteindre votre objectif",
   "Update Weight": "Mettre à jour le poids",
   "Week": "Semaine",
   "Month": "Mois",
@@ -70,7 +71,8 @@ const Map<String, String> french = {
   // Subtitle for Adjust Goals in Settings
   "adjust_goals_subtitle": "Calories, glucides, lipides et protéines",
   "Chat history": "Historique de chat",
-  "The coach does not memorize chat history. Each interaction is independent.": "Le coach ne mémorise pas l'historique des discussions. Chaque interaction est indépendante.",
+  "The coach does not memorize chat history. Each interaction is independent.":
+      "Le coach ne mémorise pas l'historique des discussions. Chaque interaction est indépendante.",
   "Legal": "Mentions légales",
   "Terms and Condition": "Conditions générales",
   "Privacy Policy": "Politique de confidentialité",
@@ -78,11 +80,13 @@ const Map<String, String> french = {
   "VERSION": "VERSION",
   "History not found": "Historique introuvable",
   "Delete Item": "Supprimer l'élément",
-  "Are you sure you want to delete this item?": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+  "Are you sure you want to delete this item?":
+      "Êtes-vous sûr de vouloir supprimer cet élément ?",
   "Delete": "Supprimer",
   "Search by Food Name/Dish": "Rechercher par nom de plat/aliment",
   "Calorie Goal Reached": "Objectif calorique atteint",
-  "You've completed your calorie goal for today. Would you like to add more?": "Vous avez atteint votre objectif calorique pour aujourd'hui. Souhaitez-vous en ajouter davantage ?",
+  "You've completed your calorie goal for today. Would you like to add more?":
+      "Vous avez atteint votre objectif calorique pour aujourd'hui. Souhaitez-vous en ajouter davantage ?",
   "Done": "Terminé",
   "Add More Calories": "Ajouter plus de calories",
   "Boiled Egg": "Œuf dur",
@@ -203,7 +207,6 @@ const Map<String, String> french = {
   "1 bowl + 2 slices": "1 bol + 2 tranches",
   "1 bowl + 2 appams": "1 bol + 2 appams",
 
-
   "3 pieces": "3 pièces",
   "2 chillas + salad": "2 chillas + salade",
   "Cal": "Cal",
@@ -213,11 +216,13 @@ const Map<String, String> french = {
   "Quantity": "Quantité",
   "Ask anything": "Posez une question",
   "Ask The Coach": "Demandez au Coach",
-  "This picture not available Calorie,Protein,Carbs and Fats,": "Cette image n'est pas disponible pour les calories, protéines, glucides et graisses.",
+  "This picture not available Calorie,Protein,Carbs and Fats,":
+      "Cette image n'est pas disponible pour les calories, protéines, glucides et graisses.",
   "Ask Coach": "Demandez au Coach",
   "Write your message": "Écrivez votre message",
   "Confirm Reset": "Confirmer la réinitialisation",
-  "Are you sure you want to Reset Data?": "Êtes-vous sûr de vouloir réinitialiser le compte ?",
+  "Are you sure you want to Reset Data?":
+      "Êtes-vous sûr de vouloir réinitialiser le compte ?",
   "Reset": "Réinitialiser",
   "You have been Reset Account": "Votre compte a été réinitialisé",
   "Personal Details": "Détails personnels",
@@ -248,15 +253,19 @@ const Map<String, String> french = {
   "December": "Décembre",
   "Update Your Gender": "Mettre à jour votre genre",
   "Adjust Goals": "Ajuster les objectifs",
-  "How many workout do you per week?": "Combien de séances d'entraînement par semaine ?",
-  "This will used to calibrate your custom plan": "Cela sera utilisé pour calibrer votre plan personnalisé",
+  "How many workout do you per week?":
+      "Combien de séances d'entraînement par semaine ?",
+  "This will used to calibrate your custom plan":
+      "Cela sera utilisé pour calibrer votre plan personnalisé",
   "Choose your height and weight": "Choisissez votre taille et votre poids",
-  "Select your height and weight to calibrate your custom plan": "Sélectionnez votre taille et votre poids pour calibrer votre plan personnalisé",
+  "Select your height and weight to calibrate your custom plan":
+      "Sélectionnez votre taille et votre poids pour calibrer votre plan personnalisé",
   "Workout Now and then": "S'entraîner de temps en temps",
   "A few workout per week": "Quelques entraînements par semaine",
   "Dedicated athlete": "Athlète dédié",
   "What is your goal?": "Quel est votre objectif ?",
-  "This helps is generate a plan for your calorie intake.": "Cela aide à générer un plan pour votre apport calorique.",
+  "This helps is generate a plan for your calorie intake.":
+      "Cela aide à générer un plan pour votre apport calorique.",
   "Gain Weight": "Prendre du poids",
   "Lose Weight": "Perdre du poids",
   "Update Calorie Goal": "Mettre à jour l'objectif calorique",
@@ -395,11 +404,14 @@ const Map<String, String> french = {
   "1 tomato": "1 tomate",
   "Restore": "Restaurer",
   "Get Premium": "Obtenez Premium",
-  "Get All The New Exciting Features": "Obtenez toutes les nouvelles fonctionnalités passionnantes",
+  "Get All The New Exciting Features":
+      "Obtenez toutes les nouvelles fonctionnalités passionnantes",
   "Unlock Food Scanner": "Déverrouiller le scanner alimentaire",
   "Unlock Food Calorie": "Déverrouiller les calories alimentaires",
-  "Unlock Unlimited Chat with Ai": "Déverrouiller la discussion illimitée avec l'IA",
-  "Unlimited Food Scanner To Calorie": "Scanner alimentaire illimité vers les calories",
+  "Unlock Unlimited Chat with Ai":
+      "Déverrouiller la discussion illimitée avec l'IA",
+  "Unlimited Food Scanner To Calorie":
+      "Scanner alimentaire illimité vers les calories",
   "Most Popular": "Les plus populaires",
   "Subscription": "Abonnement",
   "BUY NOW": "ACHETEZ MAINTENANT",
@@ -410,14 +422,19 @@ const Map<String, String> french = {
   "welcome_subtitle_prefix": "Bienvenue dans votre ",
   "welcome_subtitle_highlight": "coach nutritionnel",
   "Calorie tracking made easy": "Suivi des calories simplifié",
-  "Just snap a quick photo of your meal and we''ll do the rest": "Prenez une photo rapide de votre repas et nous ferons le reste",
+  "Just snap a quick photo of your meal and we''ll do the rest":
+      "Prenez une photo rapide de votre repas et nous ferons le reste",
   "In-depth nutrition analyses": "Analyses nutritionnelles approfondies",
-  "We will keep your informed about your food choicer and their nutritional content": "Nous vous tiendrons informé de vos choix alimentaires et de leur contenu nutritionnel",
+  "We will keep your informed about your food choicer and their nutritional content":
+      "Nous vous tiendrons informé de vos choix alimentaires et de leur contenu nutritionnel",
   "Transform your body": "Transformez votre corps",
-  "Today is best time to start working toward your dream body": "Aujourd'hui est le meilleur moment pour commencer à travailler pour atteindre votre corps de rêve",
+  "Today is best time to start working toward your dream body":
+      "Aujourd'hui est le meilleur moment pour commencer à travailler pour atteindre votre corps de rêve",
   "Where were you born?": "Où êtes-vous né ?",
-  "This Will be used to calibrate your custom plan": "Cela sera utilisé pour calibrer votre plan personnalisé",
-  "What's stopping you from reaching your goals?": "Qu'est-ce qui vous empêche d'atteindre vos objectifs ?",
+  "This Will be used to calibrate your custom plan":
+      "Cela sera utilisé pour calibrer votre plan personnalisé",
+  "What's stopping you from reaching your goals?":
+      "Qu'est-ce qui vous empêche d'atteindre vos objectifs ?",
   "Lack of consistency": "Manque de cohérence",
   "Unhealthy eating habits": "Habitudes alimentaires malsaines",
   "Lack of supports": "Manque de soutien",
@@ -431,21 +448,52 @@ const Map<String, String> french = {
   // Dynamic meal description components
   "meal_contains": "Ce repas contient",
   "conjunction_and": "et",
-  
+
   // Units and labels
   "kcal_unit": "kcal",
   "gram_unit": "g",
   "unit_piece": "pièce",
   "protein_unit": "g",
   "carbs_unit": "g",
-  "fat_unit": "g", 
+  "fat_unit": "g",
   // Localized language display names
   "language_english": "English",
   "language_french": "Français",
   "language_arabic": "العربية",
   "Cal Left": "cal restants",
-  "meal_label": "Repas"
-  ,
+  "meal_label": "Repas",
+  // Influencer / promo keys
+  "influencer_program": "Programme d'influence",
+  "your_promo_code": "Votre code promo",
+  "copied": "Copié",
+  "current_balance": "Solde actuel",
+  "total_earned": "Total gagné",
+  "referrals_count": "Parrains",
+  "request_withdrawal": "Demander un retrait",
+  "minimum_withdrawal_amount": "Montant minimum de retrait : {amount} DZD",
+  "withdrawal_history": "Historique des retraits",
+  "promo_code_expired": "Le code promo a expiré",
+  "promo_expires_in": "Le promo expire dans @days jours",
+  "promo_expires_on": "Le code promo expire le @date",
+  "promo_code_copied": "Code promo copié",
+  "promo_code": "Code Promo",
+  "enter_promo_code": "Entrez le code promo",
+  "apply_promo_code": "Appliquer",
+  "skip_promo_code": "Passer",
+  "promo_code_applied": "Code promo appliqué avec succès !",
+  "promo_code_invalid": "Code promo invalide",
+  "promo_code_dialog_title": "Vous avez un code promo ?",
+  "promo_code_dialog_subtitle":
+      "Entrez votre code promo pour obtenir une réduction sur votre abonnement",
+  "available_balance": "Solde disponible",
+  "withdrawal_amount": "Montant du retrait",
+  "enter_amount": "Entrez le montant",
+  "bank_account_rip": "Compte bancaire (RIP)",
+  "enter_rip_number": "Entrez le numéro RIP",
+  "withdrawal_processing_info":
+      "Les retraits sont traités sous 5 jours ouvrables.",
+  "requested_on": "Demandé le {date}",
+  "unknown_date": "Date inconnue",
   // Abbreviations for compact badges
   "cals": "cals",
   "prot": "prot",
@@ -457,11 +505,13 @@ const Map<String, String> french = {
   "nut_cal": "cal",
   "nut_fat": "fat",
   // Permission UI
-  "grant_camera_access_in_scanner": "Appuyez sur le cadre pour autoriser l'accès à la caméra",
+  "grant_camera_access_in_scanner":
+      "Appuyez sur le cadre pour autoriser l'accès à la caméra",
   "camera_permission_denied_title": "Permission de la caméra requise",
-  "camera_permission_denied_message": "L'accès à la caméra a été refusé. Veuillez activer la permission de la caméra dans les paramètres de votre appareil pour utiliser le scanner.",
+  "camera_permission_denied_message":
+      "L'accès à la caméra a été refusé. Veuillez activer la permission de la caméra dans les paramètres de votre appareil pour utiliser le scanner.",
   "ok": "OK",
-  
+
   // Exit confirmation dialog
   "exit_app_title": "Quitter l'application",
   "exit_app_message": "Êtes-vous sûr de vouloir quitter l'application ?",
@@ -473,12 +523,13 @@ const Map<String, String> french = {
   // Premium paywall (modern)
   'premium_badge': 'PREMIUM',
   'go_premium_title': 'Passez en Premium',
-  'go_premium_subtitle': 'L’expérience complète du meilleur programme diététique',
+  'go_premium_subtitle':
+      'L’expérience complète du meilleur programme diététique',
   'feature_ai_scan_title': 'Gérez votre poids et mangez mieux',
   'feature_ai_scan_subtitle': 'avec le Scan de repas IA, retours quotidiens',
   'feature_results_title': 'Obtenez des résultats durables',
   'feature_results_subtitle': 'avec Autopilot et le suivi des macros',
-    'feature_chatbot_title': 'Chatbot IA "Coach"',
+  'feature_chatbot_title': 'Chatbot IA "Coach"',
   'feature_chatbot_subtitle': 'Guidance nutritionnelle instantanée',
   'feature_recipes_title': 'Des recettes et régimes premium',
   'feature_recipes_subtitle': 'vous guideront vers la réussite',
@@ -496,21 +547,23 @@ const Map<String, String> french = {
   // Weight tracking UI
   "Target Weight": "Poids cible",
   "to go": "à atteindre",
-  "Try to update once a week to help us adjust your plan": "Essayez de mettre à jour une fois par semaine pour nous aider à ajuster votre plan",
+  "Try to update once a week to help us adjust your plan":
+      "Essayez de mettre à jour une fois par semaine pour nous aider à ajuster votre plan",
   "Weight Overview": "Aperçu du poids",
   "Current": "Actuel",
   "Goal": "Objectif",
   "invalid_number": "Veuillez entrer un nombre entier valide",
   "weight_out_of_range": "Veuillez entrer un poids entre 20 et 300 kg",
-  
+
   // Celebration strip messages
   "goal_achieved_message": "Objectif atteint ! Continuez à briller.",
   "on_a_roll_message": "Super lancée — chaque pas compte !",
   "keep_momentum_message": "Des progrès réalisés — gardez l'élan !",
-  
+
   // Notifications
   "update_targets_title": "Cibles mises à jour",
-  "update_targets_body": "Nous avons recalculé vos objectifs quotidiens de calories et de macronutriments en fonction de votre nouveau poids.",
+  "update_targets_body":
+      "Nous avons recalculé vos objectifs quotidiens de calories et de macronutriments en fonction de votre nouveau poids.",
 
   // Donut chart center texts
   "daily_macros": "Macros quotidiennes",
@@ -519,17 +572,31 @@ const Map<String, String> french = {
   // Recipes Section
   "recipes_title": "Recettes",
   "top_recipes": "Meilleures recettes",
-  "all_recipes": "Toutes les recettes", 
-  "top_recipes_subtitle": "Découvrez des recettes saines et délicieuses conçues pour vos objectifs",
+  "all_recipes": "Toutes les recettes",
+  // Recipe Detail specific keys
+  "recipe_title": "Smoothie aux myrtilles et amandes",
+  "description":
+      "Commencez votre journée avec ce smoothie riche en antioxydants, délicieux et facile à préparer !",
+  "less_text": "Moins ^",
+  "macronutrients": "Macronutriments",
+  "ingredients": "Ingrédients",
+  "serving": "Portion",
+  "directions": "Instructions",
+  "add_to_plan": "Ajouter au plan",
+  "step": "Étape",
+  "top_recipes_subtitle":
+      "Découvrez des recettes saines et délicieuses conçues pour vos objectifs",
   "no_recipes_available": "Aucune recette disponible",
-  "Search recipes by name or ingredient": "Recherchez des recettes par nom ou ingrédient",
-  "failed_to_load_recipes": "Échec du chargement des recettes. Veuillez réessayer.",
+  "Search recipes by name or ingredient":
+      "Recherchez des recettes par nom ou ingrédient",
+  "failed_to_load_recipes":
+      "Échec du chargement des recettes. Veuillez réessayer.",
   "min": "min",
   "cal": "Cal",
   "close": "Fermer",
 
   "food items found": "articles de nourriture trouvés",
-  
+
   // Meal Breakdown
   "meal_breakdown": "Répartition du Repas",
   "tap_to_edit_portions": "Appuyez pour modifier les portions",
@@ -541,4 +608,28 @@ const Map<String, String> french = {
   "food_added_success": "Aliment ajouté avec succès",
   "food_updated_success": "Aliment mis à jour avec succès",
   "food_deleted_success": "{count} aliment(s) supprimé(s) avec succès",
+  // Authentication messages
+  "auth_login_success": "Connexion réussie",
+  "auth_register_success": "Compte créé avec succès",
+  "auth_password_reset_sent": "E-mail de réinitialisation envoyé",
+  "auth_wrong_credentials": "E-mail ou mot de passe incorrect",
+  "auth_account_not_found": "Compte non trouvé",
+  "auth_email_in_use": "E-mail déjà utilisé",
+  "auth_weak_password": "Mot de passe trop faible",
+  "auth_account_different_provider":
+      "Le compte existe avec un fournisseur différent",
+  "auth_network_error": "Erreur réseau. Vérifiez votre connexion.",
+  "auth_unknown_error": "Une erreur inattendue est survenue",
+  "auth_authentication_error": "Erreur d'authentification",
+  "auth_unexpected_error": "Erreur inattendue",
+  "auth_logout_success": "Déconnecté avec succès",
+  "auth_logout_failed": "Échec de la déconnexion",
+  // Title used for the authentication/modal which prompts users to sign in
+  "auth_modal_title": "Connectez-vous pour continuer",
+  // Daily usage labels
+  "Daily Usage": "Utilisation quotidienne",
+  "Scans": "Analyses",
+  "Chat": "Chat",
+  "left": "restant",
+  "login_to_view_usage": "Connectez-vous pour obtenir",
 };

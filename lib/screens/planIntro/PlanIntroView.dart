@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+// ...existing imports...
 import 'package:foodcalorietracker/screens/planIntro/PlanIntroController.dart';
 import 'package:foodcalorietracker/widgets/AnimatedBackground.dart';
+import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
 
 class PlanIntroView extends GetView<PlanIntroController> {
   const PlanIntroView({super.key});
@@ -108,7 +109,7 @@ class PlanIntroView extends GetView<PlanIntroController> {
                       
                       const Spacer(flex: 2),
                       
-                      // Continue Button
+                      // Continue Button (shared PrimaryCTA)
                       AnimatedBuilder(
                         animation: controller.buttonAnimation,
                         builder: (context, child) {
@@ -116,7 +117,14 @@ class PlanIntroView extends GetView<PlanIntroController> {
                             scale: controller.buttonAnimation.value,
                             child: Opacity(
                               opacity: controller.fadeAnimation.value,
-                              child: _buildContinueButton(context, controller),
+                              child: PrimaryCTA(
+                                label: 'continue_cta'.tr,
+                                pressAnimation: controller.buttonPressAnimation,
+                                onTapDown: controller.onButtonPressed,
+                                onTapUp: controller.onButtonReleased,
+                                onTapCancel: controller.onButtonReleased,
+                                onTap: controller.navigateToGenderChoice,
+                              ),
                             ),
                           );
                         },
@@ -134,62 +142,5 @@ class PlanIntroView extends GetView<PlanIntroController> {
     );
   }
 
-  Widget _buildContinueButton(BuildContext context, PlanIntroController controller) {
-    return GestureDetector(
-      onTapDown: (_) => controller.onButtonPressed(),
-      onTapUp: (_) => controller.onButtonReleased(),
-      onTapCancel: () => controller.onButtonReleased(),
-      onTap: () => controller.navigateToGenderChoice(),
-      child: AnimatedBuilder(
-        animation: controller.buttonPressAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: controller.buttonPressAnimation.value,
-            child: Container(
-              width: double.infinity,
-              height: 60,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColor.primaryOrange,
-                    AppColor.primaryOrange.withOpacity(0.8),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColor.primaryOrange.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'continue_cta'.tr,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  // Continue button extracted to widgets/PrimaryCTA.dart
 }

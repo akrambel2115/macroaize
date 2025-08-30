@@ -1,3 +1,4 @@
+import 'package:foodcalorietracker/shared/widgets/PremiumRequiredDialog.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:dart_openai/dart_openai.dart';
@@ -7,8 +8,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foodcalorietracker/Model/MainChatModel.dart';
 import 'package:foodcalorietracker/Model/SubchatModel.dart';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
+import 'package:foodcalorietracker/shared/services/usage_service.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
+import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
+import 'package:foodcalorietracker/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -46,6 +53,9 @@ class ChatController extends GetxController {
   int? rateLimitRemaining;
   DateTime? rateLimitReset;
   bool get isRateLimited => rateLimitRemaining != null && rateLimitRemaining! <= 0 && rateLimitReset != null && DateTime.now().isBefore(rateLimitReset!);
+
+  // Add usage service
+  final _usageService = UsageService();
 
   void _applyRateLimitHeaders(http.Response response){
     try {
@@ -121,7 +131,39 @@ class ChatController extends GetxController {
         );
         return;
       }
+      
       if (text.isNotEmpty) {
+      // SECURE FEATURE GATING: Check chat usage before proceeding
+      try {
+        final result = await _usageService.incrementUsage('chat');
+          
+          if (!result.success) {
+            // Usage limit reached -> show centralized notification
+            if (result.limitReached) {
+              NotificationService.showError(result.message.isNotEmpty ? result.message : 'daily_chat_limit_reached');
+            } else {
+              NotificationService.showError('unable_to_send_message_try_again');
+            }
+            return;
+          }
+        } catch (e) {
+          // Only redirect to login if actually unauthenticated; otherwise show error.
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            await _handleAuthenticationRequired();
+            return;
+          }
+
+          final el = e.toString().toLowerCase();
+          if (el.contains('limit') || el.contains('permission-denied') || el.contains('daily')) {
+            NotificationService.showError('daily_limit_reached_try_again');
+            return;
+          }
+
+          NotificationService.showError('unable_to_send_message_try_again');
+          return;
+        }
+        // Usage allowed - proceed with chat
         text = text.trim();
         controller.clear();
         FocusManager.instance.primaryFocus?.unfocus();
@@ -309,15 +351,10 @@ class ChatController extends GetxController {
         );
       }
     } catch (err) {
-      /// Show Error Toast USER
-      Fluttertoast.showToast(
-        msg: "Hmm...something seems to have gone wrong.",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        fontSize: 12.0,
-      );
+      // Centralized error notification for unexpected failures
+      NotificationService.showError('hmm_something_went_wrong');
 
-      /// Print Error debug mode
+      // Print Error debug mode
       if (kDebugMode) {
         print("ERROR $err");
       }
@@ -331,12 +368,49 @@ class ChatController extends GetxController {
   }
 
   takeImage(ImageSource source, BuildContext context) async {
+    // Check if user has premium access for image attachments
+    try {
+      final appUserService = Get.find<AppUserService>();
+      final isPremium = await appUserService.isPremiumNow();
+      if (!isPremium) {
+        _showImageAttachmentPremiumDialog();
+        return;
+      }
+    } catch (_) {
+      // Fail closed on any error
+      _showImageAttachmentPremiumDialog();
+      return;
+    }
+    
+    // Premium user - proceed with image selection
     XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       File imagePath = File(image.path);
       update();
       await cropImage(imagePath, context);
     }
+  }
+
+  void _showImageAttachmentPremiumDialog() {
+    Get.dialog(
+      PremiumRequiredDialog(
+        title: 'Premium Required'.tr,
+        message: 'Access to image attachments requires a premium subscription. Upgrade now to unlock this feature.'.tr,
+        badge: Text(
+          'Unlock image attachment to the coach with Premium'.tr,
+          textAlign: TextAlign.center,
+          style: Get.textTheme.bodyMedium?.copyWith(
+            color: Colors.orange,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        onUpgrade: () {
+          Get.back();
+          Get.toNamed(Routes.premiumView);
+        },
+        onCancel: () => Get.back(),
+      ),
+    );
   }
 
   Future<void> cropImage(final image, BuildContext context) async {
@@ -548,5 +622,34 @@ class ChatController extends GetxController {
         );
       },
     );
+  }
+  
+  // chat limit dialog replaced by NotificationService.showError
+  
+  Future<void> _handleAuthenticationRequired() async {
+    // Show authentication modal
+    final success = await AuthModal.show();
+    
+    if (success) {
+      // User logged in successfully - show success message
+      Get.snackbar(
+        'Welcome!',
+        'You can now use the chat. Please try sending your message again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } else {
+      // User cancelled or failed to login
+      Get.snackbar(
+        'Authentication Required',
+        'Please login to use the chat feature',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 }
