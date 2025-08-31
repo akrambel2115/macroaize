@@ -17,27 +17,34 @@ jobs:
 
       - run: flutter pub get
 
-      # 🔥 CRITICAL: Force iOS 15.0 in Podfile and Xcode project
-      - name: Set iOS 15.0 Deployment Target
+      # 💥 THE FIX: Force iOS 15.0 for ALL pods
+      - name: Configure iOS 15.0 Deployment Target
         run: |
-          echo "🔧 Forcing iOS 15.0 in Podfile..."
-          # Ensure platform is set to 15.0
+          # 1. Set global platform
           sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' ios/Podfile
+          
+          # 2. CRITICAL: Force iOS 15.0 for EVERY pod
+          cat << 'EOF' >> ios/Podfile
+          
+          # Force iOS 15.0 for all pods
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              target.build_configurations.each do |config|
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+                config.build_settings['SWIFT_VERSION'] = '5.9'
+              end
+            end
+          end
+          EOF
 
-          echo "🔧 Forcing iOS 15.0 in Xcode project..."
-          # Update deployment target in pbxproj
+          # 3. Update Xcode project
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
 
-          # Also ensure Swift version is set
-          sed -i '' 's/SWIFT_VERSION = [0-9.]*;/SWIFT_VERSION = 5.9;/g' ios/Runner.xcodeproj/project.pbxproj || echo "SWIFT_VERSION already set"
-
-          # Verify
+          # 4. Verify
           echo "✅ Podfile:"
-          grep "platform :ios" ios/Podfile
-          echo "✅ IPHONEOS_DEPLOYMENT_TARGET:"
+          grep -A 5 "post_install" ios/Podfile
+          echo "✅ Xcode project:"
           grep "IPHONEOS_DEPLOYMENT_TARGET" ios/Runner.xcodeproj/project.pbxproj | head -n 2
-          echo "✅ SWIFT_VERSION:"
-          grep "SWIFT_VERSION" ios/Runner.xcodeproj/project.pbxproj | head -n 1
 
       - name: Install Pods
         run: |
@@ -61,6 +68,6 @@ jobs:
         with:
           tag_name: v2.0
           files: build/ipa/Runner.ipa
-          body: "Unsigned IPA with iOS 15.0"
+          body: "Unsigned IPA with iOS 15.0 (Firebase fixed)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
