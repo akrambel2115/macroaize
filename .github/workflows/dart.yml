@@ -1,3 +1,5 @@
+#.github/workflows/iOS-ipa-build.yml
+
 name: iOS-ipa-build
 
 on:
@@ -5,32 +7,38 @@ on:
 
 jobs:
   build-ios:
-    name: 🎉 iOS Build
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v3
+    name: 🎉 iOS Build.
+    runs-on: macos-15
 
-      - uses: subosito/flutter-action@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: "stable"
           architecture: x64
+      - run: flutter --version
 
-      - run: flutter pub get
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
-      - run: pod install --repo-update
+      - name: Install CocoaPods dependencies
+        run: pod install --repo-update
         working-directory: ios
 
-      # Direct IPA export approach for unsigned build
       - name: Build unsigned IPA
         run: |
+          set -ex
           flutter build ios --release --no-codesign
           cd build/ios/iphoneos
           mkdir Payload
           cp -r Runner.app Payload
           zip -r app.ipa Payload
           ls -la app.ipa
-          mkdir -p ../ipa
-          mv app.ipa ../ipa/Runner.ipa
+          mkdir -p../ipa
+          mv app.ipa../ipa/Runner.ipa
 
       - name: Verify IPA
         run: |
@@ -40,8 +48,11 @@ jobs:
       - name: Find IPA
         id: find_ipa
         run: |
+          set -ex
           ipa=$(find build -type f -name '*.ipa' | head -n 1)
-          if [ -z "$ipa" ] || [ ! -s "$ipa" ]; then
+          if [ -z "$ipa" ] |
+
+          | [! -s "$ipa" ]; then
             echo "No valid IPA found"
             exit 1
           fi
