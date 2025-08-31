@@ -6,99 +6,37 @@ on:
 jobs:
   build-ios:
     name: 🎉 iOS Build
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          channel: 'stable'
           architecture: x64
-
       - run: flutter pub get
+      
 
-      # 🔥 ULTIMATE FIX: Force iOS 15.0 for ALL pods with guaranteed method
-      - name: Configure iOS 15.0 Deployment Target
-        run: |
-          # 1. Set global platform
-          sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' ios/Podfile
-          
-          # 2. CRITICAL: Replace post_install with guaranteed working version
-          cat > ios/Podfile << 'EOF'
-# Uncomment this line to define a global platform for your project
-platform :ios, '15.0'
+      - run: pod repo update
+        working-directory: ios
 
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
-ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+      - run: flutter build ios --release --no-codesign
 
-project 'Runner', {
-  'Debug' => :debug,
-  'Profile' => :release,
-  'Release' => :release,
-}
+      - run: mkdir Payload
+        working-directory: build/ios/iphoneos
 
-def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
-  end
+      - run: mv Runner.app/ Payload
+        working-directory: build/ios/iphoneos
 
-  File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/FLUTTER_ROOT\=(.*)/)
-    return matches[1].strip if matches
-  end
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
-end
+      - name: Zip output
+        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
+        working-directory: build/ios/iphoneos
 
-require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
-
-flutter_ios_podfile_setup
-
-# Force iOS 15.0 for ALL pods - GUARANTEED WORKING
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-    target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-      config.build_settings['SWIFT_VERSION'] = '5.9'
-      # Critical for Firebase
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
-    end
-  end
-end
-EOF
-
-          # 3. Update Xcode project
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
-
-          # 4. Verify
-          echo "✅ Podfile (MUST show BUILD_LIBRARY_FOR_DISTRIBUTION):"
-          grep -A 5 "post_install" ios/Podfile
-          echo "✅ Xcode project:"
-          grep "IPHONEOS_DEPLOYMENT_TARGET" ios/Runner.xcodeproj/project.pbxproj | head -n 2
-
-      - name: Install Pods
-        run: |
-          cd ios
-          pod install --repo-update
-        env:
-          FLUTTER_ROOT: ${{ github.workspace }}
-
-      - name: Build unsigned IPA
-        run: |
-          flutter build ios --release --no-codesign --build-name=1.0.0 --build-number=1
-          cd build/ios/iphoneos
-          mkdir -p Payload
-          cp -R Runner.app Payload/
-          zip -r Runner.ipa Payload
-          mkdir -p ../ipa
-          mv Runner.ipa ../ipa/
-
-      - name: Upload IPA
-        uses: softprops/action-gh-release@v1
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          tag_name: v2.0
-          files: build/ipa/Runner.ipa
-          body: "Unsigned IPA with iOS 15.0 (Firebase FIXED)"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/ios/iphoneos/FlutterIpaExport.ipa
+          tag: v1.0
+          overwrite: true
+          body: "This is first release"
