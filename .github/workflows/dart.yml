@@ -17,32 +17,29 @@ jobs:
 
       - run: flutter pub get
 
-      # 💥 THE FIX: Force iOS 15.0 for ALL pods
+      # ✅ CORRECTED: Modify existing post_install block
       - name: Configure iOS 15.0 Deployment Target
         run: |
           # 1. Set global platform
           sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' ios/Podfile
           
-          # 2. CRITICAL: Force iOS 15.0 for EVERY pod
-          cat << 'EOF' >> ios/Podfile
-          
-          # Force iOS 15.0 for all pods
-          post_install do |installer|
-            installer.pods_project.targets.each do |target|
-              target.build_configurations.each do |config|
-                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-                config.build_settings['SWIFT_VERSION'] = '5.9'
-              end
-            end
-          end
-          EOF
+          # 2. CRITICAL: Modify existing post_install block
+          sed -i '' '/post_install do |installer|/,/end/ {
+            /end/ {
+              i\
+              \ \ \ \ \ \ \ \ target.build_configurations.each do |config|\
+              \ \ \ \ \ \ \ \ \ \ config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"] = "15.0"\
+              \ \ \ \ \ \ \ \ \ \ config.build_settings["SWIFT_VERSION"] = "5.9"\
+              \ \ \ \ \ \ \ \ end
+            }
+          }' ios/Podfile
 
           # 3. Update Xcode project
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
 
-          # 4. Verify
-          echo "✅ Podfile:"
-          grep -A 5 "post_install" ios/Podfile
+          # 4. Verify changes
+          echo "✅ Podfile (should show modified post_install):"
+          grep -A 10 "post_install" ios/Podfile
           echo "✅ Xcode project:"
           grep "IPHONEOS_DEPLOYMENT_TARGET" ios/Runner.xcodeproj/project.pbxproj | head -n 2
 
