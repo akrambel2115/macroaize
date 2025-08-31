@@ -15,32 +15,37 @@ jobs:
           channel: "stable"
           architecture: x64
 
-      # ✅ Step 1: Update iOS Deployment Target to 15.0
-      - name: Set iOS 15.0 Deployment Target
-        run: |
-          # 1. Update Podfile
-          echo "Updating Podfile to iOS 15.0..."
-          sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' ios/Podfile
-
-          # 2. Update Xcode project (project.pbxproj)
-          echo "Updating Xcode project file..."
-          sed -i '' -E 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9]+(\.[0-9]+)*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' ios/Runner.xcodeproj/project.pbxproj
-
-          # 3. Verify changes
-          echo "✅ Podfile updated:"
-          grep "platform :ios" ios/Podfile
-          echo "✅ Xcode project updated:"
-          grep "IPHONEOS_DEPLOYMENT_TARGET" ios/Runner.xcodeproj/project.pbxproj | head -n 1
-
       - run: flutter pub get
 
-      - run: |
+      # 🔥 CRITICAL: Force iOS 15.0 in Podfile and Xcode project
+      - name: Set iOS 15.0 Deployment Target
+        run: |
+          echo "🔧 Forcing iOS 15.0 in Podfile..."
+          # Ensure platform is set to 15.0
+          sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' ios/Podfile
+
+          echo "🔧 Forcing iOS 15.0 in Xcode project..."
+          # Update deployment target in pbxproj
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
+
+          # Also ensure Swift version is set
+          sed -i '' 's/SWIFT_VERSION = [0-9.]*;/SWIFT_VERSION = 5.9;/g' ios/Runner.xcodeproj/project.pbxproj || echo "SWIFT_VERSION already set"
+
+          # Verify
+          echo "✅ Podfile:"
+          grep "platform :ios" ios/Podfile
+          echo "✅ IPHONEOS_DEPLOYMENT_TARGET:"
+          grep "IPHONEOS_DEPLOYMENT_TARGET" ios/Runner.xcodeproj/project.pbxproj | head -n 2
+          echo "✅ SWIFT_VERSION:"
+          grep "SWIFT_VERSION" ios/Runner.xcodeproj/project.pbxproj | head -n 1
+
+      - name: Install Pods
+        run: |
           cd ios
           pod install --repo-update
         env:
           FLUTTER_ROOT: ${{ github.workspace }}
 
-      # Build unsigned IPA
       - name: Build unsigned IPA
         run: |
           flutter build ios --release --no-codesign --build-name=1.0.0 --build-number=1
@@ -56,6 +61,6 @@ jobs:
         with:
           tag_name: v2.0
           files: build/ipa/Runner.ipa
-          body: "Unsigned IPA build with iOS 15.0"
+          body: "Unsigned IPA with iOS 15.0"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
