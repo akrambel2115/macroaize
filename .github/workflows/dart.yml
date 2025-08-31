@@ -10,21 +10,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 👉 CRITICAL: Update deployment targets BEFORE pub get
+      - name: Set iOS 15.0 Deployment Target
+        run: |
+          # Update Podfile
+          echo "Updating Podfile to iOS 15.0..."
+          sed -i '' 's/.*flutter_ios_podfile_setup.*/&\n  platform :ios, "15.0"/' ios/Podfile
+          
+          # Update Xcode project
+          echo "Updating Xcode project to iOS 15.0..."
+          plutil -replace attributes.TargetAttributes.com.apple.product-type.attributes.iOS.DeploymentTarget -string 15.0 ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swift-package-versions/Package-versions.plist
+          plutil -replace attributes.TargetAttributes.com.apple.product-type.attributes.iOS.SDKVersion -string 15.0 ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swift-package-versions/Package-versions.plist
+          
+          # Verify changes
+          echo "Podfile changes:"
+          grep -A 2 "flutter_ios_podfile_setup" ios/Podfile
+          echo "\nXcode deployment target:"
+          plutil -p ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swift-package-versions/Package-versions.plist | grep -E 'DeploymentTarget|SDKVersion'
+
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
           architecture: x64
 
       - run: flutter pub get
-
-      # 👉 CRITICAL FIX: Update iOS deployment target to 15.0
-      - name: Update iOS Deployment Target
-        run: |
-          # Update Podfile
-          sed -i '' 's/platform :ios, .*/platform :ios, "15.0"/' ios/Podfile
-          
-          # Update Xcode project
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9]*\.[0-9]*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' ios/Runner.xcodeproj/project.pbxproj
 
       - run: pod install --repo-update
         working-directory: ios
@@ -34,8 +43,8 @@ jobs:
         run: |
           flutter build ios --release --no-codesign
           cd build/ios/iphoneos
-          mkdir Payload
-          cp -r Runner.app Payload
+          mkdir -p Payload
+          cp -R Runner.app Payload/
           zip -r app.ipa Payload
           mkdir -p ../ipa
           mv app.ipa ../ipa/Runner.ipa
@@ -45,6 +54,6 @@ jobs:
         with:
           tag_name: v2.0
           files: build/ipa/Runner.ipa
-          body: "First unsigned IPA release"
+          body: "Unsigned IPA build with iOS 15.0 deployment target"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
