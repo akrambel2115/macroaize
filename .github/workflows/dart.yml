@@ -1,5 +1,3 @@
-#.github/workflows/iOS-ipa-build.yml
-
 name: iOS-ipa-build
 
 on:
@@ -7,63 +5,46 @@ on:
 
 jobs:
   build-ios:
-    name: 🎉 iOS Build.
-    runs-on: macos-15
-
+    name: 🎉 iOS Build
+    runs-on: macos-14
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
           architecture: x64
-      - run: flutter --version
 
-      - name: Get Flutter dependencies
-        run: flutter pub get
+      - run: flutter pub get
 
-      - name: Install CocoaPods dependencies
-        run: pod install --repo-update
+      # 👉 CRITICAL FIX: Update iOS deployment target to 15.0
+      - name: Update iOS Deployment Target
+        run: |
+          # Update Podfile
+          sed -i '' 's/platform :ios, .*/platform :ios, "15.0"/' ios/Podfile
+          
+          # Update Xcode project
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9]*\.[0-9]*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' ios/Runner.xcodeproj/project.pbxproj
+
+      - run: pod install --repo-update
         working-directory: ios
 
+      # Direct IPA export approach for unsigned build
       - name: Build unsigned IPA
         run: |
-          set -ex
           flutter build ios --release --no-codesign
           cd build/ios/iphoneos
           mkdir Payload
           cp -r Runner.app Payload
           zip -r app.ipa Payload
-          ls -la app.ipa
-          mkdir -p../ipa
-          mv app.ipa../ipa/Runner.ipa
-
-      - name: Verify IPA
-        run: |
-          find build -name "*.ipa" -exec ls -la {} \;
-          find build -name "*.ipa" -exec file {} \;
-
-      - name: Find IPA
-        id: find_ipa
-        run: |
-          set -ex
-          ipa=$(find build -type f -name '*.ipa' | head -n 1)
-          if [ -z "$ipa" ] |
-
-          | [! -s "$ipa" ]; then
-            echo "No valid IPA found"
-            exit 1
-          fi
-          echo "Found IPA: $ipa ($(du -h $ipa | cut -f1))"
-          echo "path=$ipa" >> $GITHUB_OUTPUT
+          mkdir -p ../ipa
+          mv app.ipa ../ipa/Runner.ipa
 
       - name: Upload IPA
-        uses: svenstaro/upload-release-action@v2
+        uses: softprops/action-gh-release@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.find_ipa.outputs.path }}
-          tag: v2.0
-          overwrite: true
-          body: "This is first release"
+          tag_name: v2.0
+          files: build/ipa/Runner.ipa
+          body: "First unsigned IPA release"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
