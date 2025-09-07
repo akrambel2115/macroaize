@@ -5,6 +5,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'MainController.dart';
 import 'shared/services/app_user_service.dart';
+import 'shared/services/app_config_service.dart';
+import 'shared/services/update_guard_service.dart';
 import 'ThemeService/AppTheme.dart';
 import 'ThemeService/ThemeController.dart';
 import 'constant/DatabaseHelper.dart';
@@ -51,6 +53,17 @@ Future<void> main() async {
     // If locale data fails to initialize, fall back to default formats
   }
   Get.put(MainController());
+  // Load app config early
+  try {
+    await Get.putAsync<AppConfigService>(() async => AppConfigService().load());
+    // Optionally trigger a refresh later; load() already schedules background refresh
+  } catch (_) {}
+  // Register UpdateGuardService; actual enforcement runs after app starts
+  try {
+    if (!Get.isRegistered<UpdateGuardService>()) {
+      Get.put<UpdateGuardService>(UpdateGuardService(), permanent: true);
+    }
+  } catch (_) {}
   // Ensure AppUserService is registered early so Get.find<AppUserService>()
   // calls from views/controllers won't throw. Use putPermanent to avoid
   // accidental disposal during navigation.
@@ -75,8 +88,27 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _updateChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_updateChecked) return;
+      _updateChecked = true;
+      try {
+        await Get.find<UpdateGuardService>().enforceMinimumVersion();
+      } catch (_) {}
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +120,7 @@ class MyApp extends StatelessWidget {
     Get.put(MainController());
     Get.put(PremiumController());
 
-    return GetBuilder<MainController>(
+  return GetBuilder<MainController>(
       builder: (mc) {
         return GetMaterialApp(
           translations: LocalString(),

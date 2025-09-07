@@ -50,7 +50,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
           fontWeight: FontWeight.w600,
         ),
       ),
-  actions: [],
+      actions: [],
       elevation: 0,
       scrolledUnderElevation: 0,
     );
@@ -77,7 +77,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 ),
               ],
             ),
-              child: ModernFadeSlideTransition(
+            child: ModernFadeSlideTransition(
               child: CustomButtom(
                 backgroundcolor: context.theme.focusColor,
                 btncolor: Colors.white,
@@ -210,33 +210,38 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-  Widget _buildResultContent(BuildContext context, ScanCalorieController controller) {
+  Widget _buildResultContent(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 100),
       child: Column(
         children: [
           // Hero image section
           _buildHeroImageSection(context, controller),
-          
+
           // Main content
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 // Meal info card
-                if (controller.calorie != 0) _buildMealInfoCard(context, controller),
-                
+                if (controller.calorie != 0)
+                  _buildMealInfoCard(context, controller),
+
                 const SizedBox(height: 16),
-                
+
                 // Meal Breakdown (if available)
-                if (controller.hasBreakdown) _buildMealBreakdown(context, controller),
+                if (controller.hasBreakdown)
+                  _buildMealBreakdown(context, controller),
 
                 // Quantity selector (fallback for single item mode)
                 if (!controller.hasBreakdown && controller.calorie != 0)
                   _buildQuantitySelector(context, controller),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Capsule macro grid (animated) — uses totals either from items or single
                 if (controller.calorie != 0)
                   CapsuleMacroGrid(
@@ -245,12 +250,13 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                     carbs: controller.carbsQuantity,
                     fats: controller.fatsQuantity,
                   ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // AI Chat button
-                if (controller.calorie != 0) _buildAIChatButton(context, controller),
-                
+                if (controller.calorie != 0)
+                  _buildAIChatButton(context, controller),
+
                 // No data state
                 if (controller.calorie == 0) _buildNoDataState(context),
               ],
@@ -261,7 +267,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-  Widget _buildHeroImageSection(BuildContext context, ScanCalorieController controller) {
+  Widget _buildHeroImageSection(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
     return Container(
       height: 280,
       width: double.infinity,
@@ -287,10 +296,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
           fit: StackFit.expand,
           children: [
             // Main image
-            Image.file(
-              controller.image,
-              fit: BoxFit.cover,
-            ),
+            Image.file(controller.image, fit: BoxFit.cover),
             // Gradient overlay
             Container(
               decoration: BoxDecoration(
@@ -314,7 +320,8 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                   beginOffset: const Offset(-0.3, 0),
                   child: UsdaBadge(
                     verified: controller.usdaVerified,
-                    filled: true, // Use filled background for better visibility over image
+                    filled:
+                        true, // Use filled background for better visibility over image
                   ),
                 ),
               ),
@@ -371,7 +378,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-  Widget _buildMealInfoCard(BuildContext context, ScanCalorieController controller) {
+  Widget _buildMealInfoCard(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
     return ModernFadeSlideTransition(
       beginOffset: const Offset(0, 0.2),
       child: ModernCard(
@@ -423,12 +433,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               ),
               child: Text(
                 controller.buildMealDescription(),
-                style: context.textTheme.bodyMedium?.copyWith(
-                  height: 1.5,
-                ),
-                textAlign: Get.locale?.languageCode.toLowerCase() == 'ar' 
-                  ? TextAlign.right 
-                  : TextAlign.left,
+                style: context.textTheme.bodyMedium?.copyWith(height: 1.5),
+                textAlign:
+                    Get.locale?.languageCode.toLowerCase() == 'ar'
+                        ? TextAlign.right
+                        : TextAlign.left,
               ),
             ),
           ],
@@ -437,7 +446,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-  Widget _buildQuantitySelector(BuildContext context, ScanCalorieController controller) {
+  Widget _buildQuantitySelector(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
     return ModernFadeSlideTransition(
       beginOffset: const Offset(0, 0.2),
       child: Padding(
@@ -509,7 +521,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-  Widget _buildQuantityButton(BuildContext context, IconData icon, VoidCallback? onTap) {
+  Widget _buildQuantityButton(
+    BuildContext context,
+    IconData icon,
+    VoidCallback? onTap,
+  ) {
     final bool disabled = onTap == null;
     return GestureDetector(
       onTap: onTap,
@@ -530,8 +546,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-
-  Widget _buildAIChatButton(BuildContext context, ScanCalorieController controller) {
+  Widget _buildAIChatButton(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
     return ModernFadeSlideTransition(
       beginOffset: const Offset(0, 0.3),
       child: Container(
@@ -574,11 +592,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 color: AppColor.warning.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.search_off,
-                size: 48,
-                color: AppColor.warning,
-              ),
+              child: Icon(Icons.search_off, size: 48, color: AppColor.warning),
             ),
             const SizedBox(height: 16),
             Text(
@@ -600,10 +614,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                   arguments: {"image": controller.image},
                 );
               },
-              icon: const Icon(
-                Icons.psychology,
-                size: 18,
-              ),
+              icon: const Icon(Icons.psychology, size: 18),
             ),
           ],
         ),
@@ -611,7 +622,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
-  Widget _buildMealBreakdown(BuildContext context, ScanCalorieController controller) {
+  Widget _buildMealBreakdown(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
     return ModernFadeSlideTransition(
       beginOffset: const Offset(0, 0.2),
       child: ModernCard(
@@ -631,7 +645,8 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      Icons.fastfood, // different icon from the meal info section
+                      Icons
+                          .fastfood, // different icon from the meal info section
                       color: AppColor.primaryGreen,
                       size: 20,
                     ),
@@ -663,7 +678,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColor.primaryGreen.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -697,27 +715,32 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.all(12),
                   itemCount: controller.items.length,
-                  separatorBuilder: (ctx, idx) => Container(
-                    height: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          AppColor.neutralGrey200.withOpacity(0.3),
-                          Colors.transparent,
-                        ],
+                  separatorBuilder:
+                      (ctx, idx) => Container(
+                        height: 1,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.transparent,
+                              AppColor.neutralGrey200.withOpacity(0.3),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
                   itemBuilder: (ctx, idx) {
                     final it = controller.items[idx];
-                    final units = const ['piece', 'g']; // Limited to only piece and g
+                    final units = const [
+                      'piece',
+                      'g',
+                    ]; // Limited to only piece and g
                     String currentUnit = it.unit;
                     return Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: context.theme.scaffoldBackgroundColor.withOpacity(0.7),
+                        color: context.theme.scaffoldBackgroundColor
+                            .withOpacity(0.7),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
@@ -737,9 +760,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                 width: 4,
                                 height: 24,
                                 decoration: BoxDecoration(
-                                  color: it.usdaVerified 
-                                    ? AppColor.success 
-                                    : AppColor.warning,
+                                  color:
+                                      it.usdaVerified
+                                          ? AppColor.success
+                                          : AppColor.warning,
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -747,26 +771,32 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                               Expanded(
                                 child: Text(
                                   it.name,
-                                  style: context.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: -0.2,
-                                  ),
+                                  style: context.textTheme.titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: -0.2,
+                                      ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: it.usdaVerified 
-                                    ? AppColor.success.withOpacity(0.1)
-                                    : AppColor.warning.withOpacity(0.1),
+                                  color:
+                                      it.usdaVerified
+                                          ? AppColor.success.withOpacity(0.1)
+                                          : AppColor.warning.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: it.usdaVerified 
-                                      ? AppColor.success.withOpacity(0.3)
-                                      : AppColor.warning.withOpacity(0.3),
+                                    color:
+                                        it.usdaVerified
+                                            ? AppColor.success.withOpacity(0.3)
+                                            : AppColor.warning.withOpacity(0.3),
                                     width: 1,
                                   ),
                                 ),
@@ -774,21 +804,28 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      it.usdaVerified ? Icons.verified : Icons.info_outline,
+                                      it.usdaVerified
+                                          ? Icons.verified
+                                          : Icons.info_outline,
                                       size: 14,
-                                      color: it.usdaVerified 
-                                        ? AppColor.success 
-                                        : AppColor.warning,
+                                      color:
+                                          it.usdaVerified
+                                              ? AppColor.success
+                                              : AppColor.warning,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      it.usdaVerified ? 'verified'.tr : 'estimated'.tr,
-                                      style: context.textTheme.labelSmall?.copyWith(
-                                        color: it.usdaVerified 
-                                          ? AppColor.success 
-                                          : AppColor.warning,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      it.usdaVerified
+                                          ? 'verified'.tr
+                                          : 'estimated'.tr,
+                                      style: context.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color:
+                                                it.usdaVerified
+                                                    ? AppColor.success
+                                                    : AppColor.warning,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -796,7 +833,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          
+
                           // Controls row (amount input and unit selector)
                           Row(
                             children: [
@@ -808,32 +845,45 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                   color: context.theme.cardColor,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: AppColor.neutralGrey300.withOpacity(0.5),
+                                    color: AppColor.neutralGrey300.withOpacity(
+                                      0.5,
+                                    ),
                                     width: 1,
                                   ),
                                 ),
                                 child: TextFormField(
                                   initialValue: it.amount.toStringAsFixed(
-                                    it.amount == it.amount.truncateToDouble() ? 0 : 1
+                                    it.amount == it.amount.truncateToDouble()
+                                        ? 0
+                                        : 1,
                                   ),
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   textAlign: TextAlign.center,
                                   style: context.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
                                     isDense: true,
                                   ),
                                   onFieldSubmitted: (v) {
                                     final val = double.tryParse(v) ?? it.amount;
-                                    controller.updateItemAmount(idx, val, currentUnit);
+                                    controller.updateItemAmount(
+                                      idx,
+                                      val,
+                                      currentUnit,
+                                    );
                                   },
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              
+
                               // Unit selector with enhanced styling
                               StatefulBuilder(
                                 builder: (ctx2, setState) {
@@ -843,12 +893,15 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                   }
                                   return Container(
                                     height: 44,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: context.theme.cardColor,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: AppColor.neutralGrey300.withOpacity(0.5),
+                                        color: AppColor.neutralGrey300
+                                            .withOpacity(0.5),
                                         width: 1,
                                       ),
                                     ),
@@ -861,22 +914,34 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                         color: AppColor.neutralGrey500,
                                         size: 18,
                                       ),
-                                      items: units.map((u) {
-                                        final label = u == 'g' ? 'gram_unit'.tr : 'unit_piece'.tr;
-                                        return DropdownMenuItem(
-                                          value: u,
-                                          child: Text(
-                                            label,
-                                            style: context.textTheme.bodyMedium?.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                      items:
+                                          units.map((u) {
+                                            final label =
+                                                u == 'g'
+                                                    ? 'gram_unit'.tr
+                                                    : 'unit_piece'.tr;
+                                            return DropdownMenuItem(
+                                              value: u,
+                                              child: Text(
+                                                label,
+                                                style: context
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                              ),
+                                            );
+                                          }).toList(),
                                       onChanged: (u) {
                                         if (u == null) return;
                                         setState(() => currentUnit = u);
-                                        controller.updateItemAmount(idx, it.amount, currentUnit);
+                                        controller.updateItemAmount(
+                                          idx,
+                                          it.amount,
+                                          currentUnit,
+                                        );
                                       },
                                     ),
                                   );
@@ -884,12 +949,15 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                               ),
                             ],
                           ),
-                          
+
                           const SizedBox(height: 12),
-                          
+
                           // Nutrition info with full width display
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -908,39 +976,53 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                             child: Column(
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // Left column: Protein (top) and Fat (bottom)
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
-                                            Icon(Icons.fitness_center, size: 14, color: AppColor.primaryOrange),
+                                            Icon(
+                                              Icons.fitness_center,
+                                              size: 14,
+                                              color: AppColor.primaryOrange,
+                                            ),
                                             const SizedBox(width: 6),
                                             Text(
                                               '${'nut_prt'.tr}: ${it.protein.round()}${'gram_unit'.tr}',
-                                              style: context.textTheme.bodySmall?.copyWith(
-                                                color: AppColor.primaryOrange,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                              style: context.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        AppColor.primaryOrange,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                             ),
                                           ],
                                         ),
                                         const SizedBox(height: 8),
                                         Row(
                                           children: [
-                                            Icon(Icons.opacity, size: 14, color: AppColor.primaryOrange),
+                                            Icon(
+                                              Icons.opacity,
+                                              size: 14,
+                                              color: AppColor.primaryOrange,
+                                            ),
                                             const SizedBox(width: 6),
                                             Text(
                                               '${'nut_fat'.tr}: ${it.fat.round()}${'gram_unit'.tr}',
-                                              style: context.textTheme.bodySmall?.copyWith(
-                                                color: AppColor.primaryOrange,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                              style: context.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        AppColor.primaryOrange,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                             ),
                                           ],
                                         ),
@@ -949,20 +1031,27 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
 
                                     // Right column: Calories (top) and Carbs (bottom)
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
                                       children: [
                                         Row(
                                           children: [
                                             Text(
                                               '${'nut_cal'.tr}: ${it.kcal.round()}',
-                                              style: context.textTheme.bodySmall?.copyWith(
-                                                color: AppColor.primaryOrange,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w700,
-                                              ),
+                                              style: context.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        AppColor.primaryOrange,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
                                             ),
                                             const SizedBox(width: 6),
-                                            Icon(Icons.local_fire_department, size: 14, color: AppColor.primaryOrange),
+                                            Icon(
+                                              Icons.local_fire_department,
+                                              size: 14,
+                                              color: AppColor.primaryOrange,
+                                            ),
                                           ],
                                         ),
                                         const SizedBox(height: 8),
@@ -970,14 +1059,20 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                           children: [
                                             Text(
                                               '${'nut_carb'.tr}: ${it.carbs.round()}${'gram_unit'.tr}',
-                                              style: context.textTheme.bodySmall?.copyWith(
-                                                color: AppColor.primaryOrange,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                              style: context.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        AppColor.primaryOrange,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                             ),
                                             const SizedBox(width: 6),
-                                            Icon(Icons.grain, size: 14, color: AppColor.primaryOrange),
+                                            Icon(
+                                              Icons.grain,
+                                              size: 14,
+                                              color: AppColor.primaryOrange,
+                                            ),
                                           ],
                                         ),
                                       ],

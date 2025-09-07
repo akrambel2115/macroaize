@@ -53,7 +53,7 @@ class Influencer {
       earningsDzd: (data['earningsDzd'] as num?)?.toDouble() ?? 0.0,
       totalEarningsDzd: (data['totalEarningsDzd'] as num?)?.toDouble() ?? 0.0,
       usersCount: (data['usersCount'] as num?)?.toInt() ?? 0,
-      minWithdrawal: (data['minWithdrawal'] as num?)?.toDouble() ?? 2000.0,
+      minWithdrawal: (data['minWithdrawal'] as num?)?.toDouble() ?? 0.0,
       isActive: data['isActive'] == true,
       withdrawHistory: parseWithdrawHistory(data['withdrawHistory']),
     );
@@ -77,18 +77,20 @@ class Influencer {
 class WithdrawalRecord {
   final String id;
   final double amount;
-  final String ripLast4;
+  final String ripMasked; // Masked RIP for display (e.g., "••••••••••••1234")
   final DateTime? requestedAt;
   final String status;
   final String? estimatedProcessingDate;
+  final DateTime? completedAt;
 
   const WithdrawalRecord({
     required this.id,
     required this.amount,
-    required this.ripLast4,
+    required this.ripMasked,
     this.requestedAt,
     required this.status,
     this.estimatedProcessingDate,
+    this.completedAt,
   });
 
   factory WithdrawalRecord.fromMap(Map<String, dynamic> data) {
@@ -103,10 +105,15 @@ class WithdrawalRecord {
     return WithdrawalRecord(
       id: data['id']?.toString() ?? '',
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      ripLast4: data['ripLast4']?.toString() ?? '',
+      // Handle backward compatibility: new records have 'ripMasked', old ones have 'rip' or 'ripLast4'
+      ripMasked:
+          data['ripMasked']?.toString() ??
+          _maskRip(data['rip']?.toString() ?? '') ??
+          '****${data['ripLast4']?.toString() ?? ''}',
       requestedAt: parseDate(data['requestedAt']),
       status: data['status']?.toString() ?? 'unknown',
       estimatedProcessingDate: data['estimatedProcessingDate']?.toString(),
+      completedAt: parseDate(data['completedAt']),
     );
   }
 
@@ -124,3 +131,11 @@ class WithdrawalRecord {
   }
 }
 
+/// Helper function to mask RIP for backward compatibility
+String? _maskRip(String rip) {
+  if (rip.isEmpty) return null;
+  final clean = rip.replaceAll(RegExp(r'\s+'), '');
+  if (clean.length <= 4) return '****$clean';
+  return clean.substring(0, clean.length - 4).replaceAll(RegExp(r'.'), '•') +
+      clean.substring(clean.length - 4);
+}

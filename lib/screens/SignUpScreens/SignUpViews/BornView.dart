@@ -4,6 +4,7 @@ import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 
 class BornView extends GetView<SignUpController> {
   const BornView({super.key});
@@ -13,7 +14,7 @@ class BornView extends GetView<SignUpController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-  // Back button moved to the SignUp scaffold to keep layout consistent
+        // Back button moved to the SignUp scaffold to keep layout consistent
         Text(
           "Where were you born?".tr,
           style: context.theme.textTheme.headlineLarge,
@@ -25,100 +26,137 @@ class BornView extends GetView<SignUpController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-    // Month Picker
+            // Month Picker
             Expanded(
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-      color: context.theme.brightness == Brightness.light ? Colors.white : Colors.black,
+                  color:
+                      context.theme.brightness == Brightness.light
+                          ? Colors.white
+                          : AppColor.darkCard,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: GetBuilder<SignUpController>(builder: (controller) {
-                  return CupertinoPicker(
-                    itemExtent: 40,
-                    scrollController: FixedExtentScrollController(
-                      initialItem: controller.selectedMonth,
-                    ),
-                    onSelectedItemChanged: (index) {
-                      controller.selectedMonth = index;
-                      controller.update();
-                    },
-                    children:
-                    controller.months
-                        .map(
-                          (month) => pickerText(
-                        month.tr,
-                        controller.selectedMonth ==
-                            controller.months.indexOf(month),context,
+                child: GetBuilder<SignUpController>(
+                  builder: (controller) {
+                    return CupertinoPicker(
+                      itemExtent: 40,
+                      scrollController: FixedExtentScrollController(
+                        initialItem: controller.selectedMonth,
                       ),
-                    )
-                        .toList(),
-                  );
-                },),
+                      onSelectedItemChanged: (index) {
+                        controller.selectedMonth = index;
+                        controller.update();
+                      },
+                      children:
+                          controller.months.map((month) {
+                            return Center(
+                              child: Text(
+                                month.tr,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color:
+                                      context.theme.brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    );
+                  },
+                ),
               ),
             ),
             SizedBox(width: 10),
-    // Day Picker
+            // Day Picker
             Expanded(
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-      color: context.theme.brightness == Brightness.light ? Colors.white : Colors.black,
+                  color:
+                      context.theme.brightness == Brightness.light
+                          ? Colors.white
+                          : AppColor.darkCard,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: GetBuilder<SignUpController>(builder: (controller) {
-                  return CupertinoPicker(
-                    itemExtent: 40,
-                    scrollController: FixedExtentScrollController(
-                      initialItem: controller.selectedDay - 1,
-                    ),
-                    onSelectedItemChanged: (index) {
-                      controller.selectedDay = index + 1;
-                      controller.updateDaysInMonth();
-                      controller.update();
-                    },
-                    children:
-                    controller.days
-                        .map((day) => pickerText(
-                        day.toString(),
-                        controller.selectedDay == day,context,
+                child: GetBuilder<SignUpController>(
+                  builder: (controller) {
+                    return CupertinoPicker(
+                      itemExtent: 40,
+                      scrollController: FixedExtentScrollController(
+                        initialItem: controller.selectedDay - 1,
                       ),
-                    ).toList(),
-                  );
-                },),
+                      onSelectedItemChanged: (index) {
+                        controller.selectedDay = index + 1;
+                        controller.updateDaysInMonth();
+                        controller.update();
+                      },
+                      children:
+                          controller.days.map((day) {
+                            return Center(
+                              child: Text(
+                                day.toString(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color:
+                                      context.theme.brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    );
+                  },
+                ),
               ),
             ),
             SizedBox(width: 10),
-    Expanded(
+            Expanded(
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-      color: context.theme.brightness == Brightness.light ? Colors.white : Colors.black,
+                  color:
+                      context.theme.brightness == Brightness.light
+                          ? Colors.white
+                          : AppColor.darkCard,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: GetBuilder<SignUpController>(builder: (controller) {
-                  return CupertinoPicker(
-                    itemExtent: 40,
-                    scrollController: FixedExtentScrollController(
-                      initialItem: controller.years.indexOf(
-                        controller.selectedYear,
+                child: GetBuilder<SignUpController>(
+                  builder: (controller) {
+                    return CupertinoPicker(
+                      itemExtent: 40,
+                      scrollController: FixedExtentScrollController(
+                        initialItem: controller.years.indexOf(
+                          controller.selectedYear,
+                        ),
                       ),
-                    ),
-                    onSelectedItemChanged: (index) {
-                      controller.selectedYear = controller.years[index];
-                      controller.update();
-                    },
-                    children:
-                    controller.years
-                        .map(
-                          (year) => pickerText(
-                        year.toString(),
-                        controller.selectedYear == year,context,
-                      ),
-                    )
-                        .toList(),
-                  );
-                },),
+                      onSelectedItemChanged: (index) {
+                        controller.selectedYear = controller.years[index];
+                        controller.update();
+                      },
+                      children:
+                          controller.years.map((year) {
+                            return Center(
+                              child: Text(
+                                year.toString(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color:
+                                      context.theme.brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -158,28 +196,16 @@ class BornView extends GetView<SignUpController> {
                 style: ModernButtonStyle.primary,
                 size: ModernButtonSize.medium,
                 borderRadius: BorderRadius.circular(30),
-                icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                icon: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white,
+                ),
                 height: 50,
               ),
             ),
           ],
         ).paddingOnly(top: 30),
       ],
-    );
-  }
-
-  Widget pickerText(String text, bool isSelected,BuildContext context) {
-    return Center(
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      color: context.theme.brightness == Brightness.light
-        ? Colors.black
-        : (isSelected ? context.theme.scaffoldBackgroundColor : Colors.grey),
-        ),
-      ),
     );
   }
 }

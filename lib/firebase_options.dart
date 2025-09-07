@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDfyeiVkxn0DRZJpArExJR4qtaf39MFdmU',
-    appId: '1:582471032450:android:db1a3e746f8f3d65b0de9b',
+    appId: '1:582471032450:android:a2abb5ed83ee9c96b0de9b',
     messagingSenderId: '582471032450',
     projectId: 'macroaize',
     storageBucket: 'macroaize.firebasestorage.app',
@@ -59,10 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBqam_k-3WVfpHj9CdG7ZJLDg7PA3tnFxY',
-    appId: '1:582471032450:ios:9c5dfd7c98305931b0de9b',
+    appId: '1:582471032450:ios:9acfe66988d3d111b0de9b',
     messagingSenderId: '582471032450',
     projectId: 'macroaize',
     storageBucket: 'macroaize.firebasestorage.app',
-    iosBundleId: 'com.example.foodcalorietracker',
+    androidClientId: '582471032450-h0bkt8rc33bk81cfh7oo3uok6qj73m07.apps.googleusercontent.com',
+    iosClientId: '582471032450-ek1mh77ula8jd013uv0t5f3oeksvberc.apps.googleusercontent.com',
+    iosBundleId: 'com.macroaize.app',
   );
+
 }

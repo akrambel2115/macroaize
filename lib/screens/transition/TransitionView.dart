@@ -20,7 +20,7 @@ class TransitionView extends GetView<TransitionController> {
               FadeTransition(
                 opacity: controller.fadeAnim,
                 child: Builder(builder: (ctx) {
-                  if (controller.assetPath == AppAssets.loadingClock) {
+                  if (controller.assetPath == AppAssets.loadingClock || controller.assetPath == AppAssets.loader) {
                     // Small centered loading clock for returning users
                     return Center(
                       child: SizedBox(

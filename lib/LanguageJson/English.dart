@@ -39,6 +39,18 @@ const Map<String, String> english = {
   "No Food Found": "No Food Found",
   "Try searching with different keywords or browse our local food database":
       "Try searching with different keywords or browse our local food database",
+  // Local Food add / edit dialog keys
+  "add_custom_food": "Add Custom Food",
+  "edit_food": "Edit Food",
+  "name": "Name",
+  "quantity": "Quantity",
+  "calories": "Calories",
+  "add": "Add",
+  "save": "Save",
+  "Custom Food": "Custom Food",
+  "delete_selected": "Delete Selected",
+  "proteins": "Proteins",
+
   "Clear Search": "Clear Search",
   "Premium Features": "Premium Features",
   "Choose Your Plan": "Choose Your Plan",
@@ -515,7 +527,7 @@ const Map<String, String> english = {
   'feature_recipes_title': 'Premium recipes and diets',
   'feature_recipes_subtitle': 'will guide you toward success',
   'best_value': 'BEST VALUE',
-  'save_percent': 'SAVE {percent}%*',
+  'save_percent': 'SAVE @percent%*',
   'months_12': '12 Months',
   'month_1': '1 Month',
   'billed_annually': 'Billed annually',
@@ -595,7 +607,7 @@ const Map<String, String> english = {
   "success": "Success",
   "food_added_success": "Food added successfully",
   "food_updated_success": "Food updated successfully",
-  "food_deleted_success": "{count} food item(s) deleted",
+  "food_deleted_success": "@count food item(s) deleted",
   "failed_to_load_recipes": "Failed to load recipes. Please try again.",
   // Authentication messages
   "auth_login_success": "Signed in successfully",
@@ -627,7 +639,7 @@ const Map<String, String> english = {
   "total_earned": "Total earned",
   "referrals_count": "Referrals",
   "request_withdrawal": "Request withdrawal",
-  "minimum_withdrawal_amount": "Minimum withdrawal amount: {amount} DZD",
+  "minimum_withdrawal_amount": "Minimum withdrawal amount: @amount DZD",
   "withdrawal_history": "Withdrawal history",
   "promo_code_expired": "Promo code expired",
   "promo_expires_in": "Promo expires in @days days",
@@ -640,7 +652,7 @@ const Map<String, String> english = {
   "enter_rip_number": "Enter RIP number",
   "withdrawal_processing_info":
       "Withdrawals are processed within 5 business days.",
-  "requested_on": "Requested on {date}",
+  "requested_on": "Requested on @date",
   "unknown_date": "Unknown date",
   "login_to_view_usage": "Login to get",
   "promo_code": "Promo Code",
@@ -652,4 +664,164 @@ const Map<String, String> english = {
   "promo_code_dialog_title": "Have a promo code?",
   "promo_code_dialog_subtitle":
       "Enter your promo code to get a discount on your subscription",
+
+  // Email verification translations
+  "email_verification_title": "Verify Your Email",
+  "email_verification_subtitle": "Check your email to continue",
+  "email_sent_to": "We've sent a verification link to @email",
+  "email_verification_instructions":
+      "Click the link in your email to verify your account. This helps us keep your account secure.",
+  "checking_verification_status": "Checking verification status...",
+  "resend_verification_email": "Resend Email",
+  "resend_cooldown": "Resend in @seconds seconds",
+  "resend_limit_reached": "@attempts attempts remaining",
+  "verification_attempts_remaining": "@remaining of @total attempts remaining",
+  "email_verification_success":
+      "Email verified successfully! Welcome to macroAize",
+  "email_verification_resent": "Verification email sent! Check your inbox",
+  "email_verification_resend_error":
+      "Failed to send verification email. Please try again",
+  "email_verification_max_attempts":
+      "Maximum resend attempts reached. Please try again later",
+  "email_verification_cooldown":
+      "Please wait @seconds seconds before requesting another email",
+  "skip_verification_title": "Skip Verification?",
+  "skip_verification_warning":
+      "This will allow access without email verification. Not recommended for security.",
+  "skip_anyway": "Skip Anyway",
+  "skip_verification": "Skip Verification",
+  "verify": "Verify",
+  "sign_out_title": "Sign Out?",
+  "sign_out_confirmation": "Are you sure you want to sign out?",
+  "sign_out": "Sign Out",
+  "cancel": "Cancel",
+  "email_verification_error": "Email verification failed. Please try again",
+
+  // Email verification guard messages
+  "auth_required": "Please sign in to continue",
+  "email_verification_required_for_feature":
+      "Please verify your email to use this feature",
+  "email_verification_required_for_premium":
+      "Email verification required to access premium features",
+  "email_verification_required_for_scan":
+      "Please verify your email to use the food scanner",
+  "email_verification_required_for_chat":
+      "Please verify your email to chat with the AI coach",
+  "email_verification_required_for_app_access":
+      "Email verification required to access the app",
+
+  // Premium Required Messages
+  "premium_required": "Premium Required",
+  "premium_feature": "Premium Feature",
+  "recipes_premium_message":
+      "Access to recipes requires a premium subscription. Upgrade now to unlock this feature.",
+  "recipes_premium_badge": "Unlock all recipes and features with Premium",
+  "local_food_premium_message":
+      "Creating and editing custom foods is a Premium feature.",
+  "local_food_premium_badge":
+      "Upgrade to Premium to create unlimited custom foods!",
+  "chat_image_premium_message":
+      "Access to image attachments requires a premium subscription. Upgrade now to unlock this feature.",
+  "chat_image_premium_badge":
+      "Unlock image attachment to the coach with Premium",
+  "go_premium": "Go Premium",
+  "maybe_later": "Maybe Later",
+
+  // History fallbacks
+  "unknown_meal": "Unknown meal",
+
+  // UI status indicators
+  "email_verified_status": "Verified",
+  "email_unverified_status": "Unverified",
+  "email_verified": "Email Verified",
+  "email_verification_complete_subtitle":
+      "Your account is secure and ready to use",
+  "email_verification_required": "Email Verification Required",
+  "email_verification_required_subtitle":
+      "Please verify @email to access all features",
+  "verify_email": "Verify Email",
+  "verify_now": "Verify Now",
+  "refresh": "Refresh",
+  "refresh_failed": "Failed to refresh status. Please try again",
+  "tap_to_verify_email": "Tap to verify your email address",
+
+  // Account activation gating warnings
+  "account_activation_required": "Account activation required",
+  "account_activation_required_for_chat":
+      "Please activate your account to use the AI coach",
+  "account_activation_required_for_scanner":
+      "Please activate your account to use the food scanner",
+  "account_activation_required_for_premium":
+      "Please activate your account to purchase premium",
+  "verify_account_to_continue": "Verify your email to continue",
+
+  // Settings - Account Section
+  "account": "Account",
+  "tap_to_view_details": "Tap to view details",
+  "register_login": "Register / Login",
+  "access_account_sync_data": "Access your account and sync data",
+
+  // Settings - App Info Section
+  "app_info": "App Info",
+  "version": "Version",
+  "reset_data": "Reset Data",
+  "clear_all_app_data": "Clear all app data",
+  "account_reset_success": "Account has been reset successfully",
+
+  // Account Details page translations
+  "account_details_title": "Account Details",
+  "no_name": "No name",
+  "name_label": "Name",
+  "email_label": "Email",
+  "change_password": "Change Password",
+  "logout": "Logout",
+  "display_name_updated": "Display name updated",
+  "edit_display_name": "Edit display name",
+  "new_display_name": "New display name",
+  "required": "Required",
+  "too_short": "Too short",
+  "too_long": "Too long",
+  "password_changed_message": "Password changed. Please login again.",
+    "current_password_incorrect": "Current password is incorrect.",
+    "too_many_attempts": "Too many attempts, please try later.",
+    "please_relogin": "Please re-login and try again.",
+    "operation_failed": "Operation failed.",
+
+    // Change Password page translations
+    "current_password_label": "Current password",
+    "new_password_label": "New password",
+    "confirm_new_password_label": "Confirm new password",
+    "min_8_chars": "Min 8 chars",
+    "password_complexity_hint": "Use upper, lower, number, symbol",
+    "must_differ_from_current": "Must differ from current",
+    "does_not_match": "Does not match",
+    "please_fix_errors": "Please fix the errors",
+    "change_password_cta": "Change Password",
+
+  // Withdrawal specific translations
+  "withdrawal_submitted": "Withdrawal Request Submitted",
+  "request_id": "Request ID: @id",
+  "processing_time": "Processing Time: @days business days",
+  "withdrawal_email_confirmation":
+      "You will receive an email confirmation once your withdrawal has been processed.",
+  "got_it": "Got it",
+  "processing": "Processing",
+  "copy_failed": "Copy failed: @error",
+  "email_verification_required_withdrawal":
+      "Email verification is required to request withdrawals",
+  "completed": "Completed",
+  "failed": "Failed",
+  "view_all": "View All",
+  "showing_recent_withdrawals": "Showing @shown of @total withdrawals",
+  "withdrawal_history_full": "Withdrawal History",
+  "no_withdrawal_history": "No withdrawal history yet",
+  "withdrawal_history_empty_description":
+      "Request your first withdrawal to see your transaction history here",
+  "view_withdrawal_history": "View Withdrawal History",
+  "withdrawal_history_subtitle": "Track all your withdrawal requests",
+  "request_id_short": "ID",
+  "bank_account_short": "Account",
+  "requested_date": "Requested",
+  "processing_date": "Processing Deadline",
+  "processing_deadline": "Deadline",
 };

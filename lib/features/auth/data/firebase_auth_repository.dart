@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:crypto/crypto.dart';
 
+import '../../../shared/services/email_verification_guard.dart';
 import '../domain/auth_failure.dart';
 import '../domain/auth_repository.dart';
 
@@ -15,16 +16,22 @@ class FirebaseAuthRepository implements AuthRepository {
   final GoogleSignIn _google;
 
   FirebaseAuthRepository({FirebaseAuth? auth, GoogleSignIn? google})
-      : _auth = auth ?? FirebaseAuth.instance,
-        _google = google ?? GoogleSignIn(scopes: ['email']);
+    : _auth = auth ?? FirebaseAuth.instance,
+      _google = google ?? GoogleSignIn(scopes: ['email']);
 
   @override
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
   @override
-  Future<(User?, AuthFailure?)> signInWithEmail({required String email, required String password}) async {
+  Future<(User?, AuthFailure?)> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
     try {
-      final cred = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final cred = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       return (cred.user, null);
     } on FirebaseAuthException catch (e) {
       return (null, CredentialFailure(e.code, e.message ?? ''));
@@ -34,10 +41,24 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<(User?, AuthFailure?)> registerWithEmail({required String email, required String password, required String firstName, required String lastName}) async {
+  Future<(User?, AuthFailure?)> registerWithEmail({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+  }) async {
     try {
-      final cred = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      final cred = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       await cred.user?.updateDisplayName('$firstName $lastName');
+
+      // CRITICAL: Send email verification immediately after registration
+      if (cred.user != null) {
+        await cred.user!.sendEmailVerification();
+      }
+
       return (cred.user, null);
     } on FirebaseAuthException catch (e) {
       return (null, CredentialFailure(e.code, e.message ?? ''));
@@ -65,13 +86,19 @@ class FirebaseAuthRepository implements AuthRepository {
         // Default scopes fine
       }
       final account = await _google.signIn();
-      if (account == null) return (null, CredentialFailure('canceled', 'Canceled'));
+      if (account == null) {
+        return (null, CredentialFailure('canceled', 'Canceled'));
+      }
       final auth = await account.authentication;
-      final oauthCred = GoogleAuthProvider.credential(idToken: auth.idToken, accessToken: auth.accessToken);
+      final oauthCred = GoogleAuthProvider.credential(
+        idToken: auth.idToken,
+        accessToken: auth.accessToken,
+      );
       final res = await _auth.signInWithCredential(oauthCred);
       final user = res.user;
       // Ensure displayName is set
-      if (user != null && (user.displayName == null || user.displayName!.trim().isEmpty)) {
+      if (user != null &&
+          (user.displayName == null || user.displayName!.trim().isEmpty)) {
         final g = await _google.signInSilently();
         final given = g?.displayName;
         if (given != null && given.trim().isNotEmpty) {
@@ -90,7 +117,13 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<(User?, AuthFailure?)> signInWithApple() async {
     try {
       if (!Platform.isIOS) {
-        return (null, CredentialFailure('unsupported-platform', 'Apple Sign-In is only available on iOS'));
+        return (
+          null,
+          CredentialFailure(
+            'unsupported-platform',
+            'Apple Sign-In is only available on iOS',
+          ),
+        );
       }
 
       // 1) Create a secure random nonce and its SHA256 hash
@@ -107,21 +140,23 @@ class FirebaseAuthRepository implements AuthRepository {
       );
 
       // 3) Create OAuth credential for Firebase including the raw (unhashed) nonce
-      final oauth = OAuthProvider('apple.com').credential(
-        idToken: credential.identityToken,
-        rawNonce: rawNonce,
-      );
+      final oauth = OAuthProvider(
+        'apple.com',
+      ).credential(idToken: credential.identityToken, rawNonce: rawNonce);
 
       // 4) Sign-in (or link) with Firebase
       final res = await _auth.signInWithCredential(oauth);
       final user = res.user;
 
       // Best-effort: update display name if provided
-      final fullName = [credential.givenName, credential.familyName]
-          .where((e) => (e ?? '').trim().isNotEmpty)
-          .join(' ')
-          .trim();
-      if (user != null && fullName.isNotEmpty && (user.displayName == null || user.displayName!.isEmpty)) {
+      final fullName =
+          [
+            credential.givenName,
+            credential.familyName,
+          ].where((e) => (e ?? '').trim().isNotEmpty).join(' ').trim();
+      if (user != null &&
+          fullName.isNotEmpty &&
+          (user.displayName == null || user.displayName!.isEmpty)) {
         await user.updateDisplayName(fullName);
       }
 
@@ -146,6 +181,13 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
+    // Get current user ID before signing out
+    final currentUserId = _auth.currentUser?.uid;
+
+    // Reset email verification skip flag for this user on logout
+    final guard = EmailVerificationGuard();
+    await guard.resetSkipFlag(currentUserId);
+
     try {
       // Sign out of Google if previously used (ignore errors)
       await _google.signOut();
@@ -155,9 +197,13 @@ class FirebaseAuthRepository implements AuthRepository {
 
   // Secure nonce helpers
   String _generateNonce([int length = 32]) {
-    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
     final random = Random.secure();
-    final values = List<int>.generate(length, (_) => random.nextInt(charset.length));
+    final values = List<int>.generate(
+      length,
+      (_) => random.nextInt(charset.length),
+    );
     return values.map((i) => charset[i]).join();
   }
 
@@ -171,24 +217,32 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AuthFailure?> linkWithApple() async {
     try {
       if (!Platform.isIOS) {
-        return CredentialFailure('unsupported-platform', 'Apple Sign-In is only available on iOS');
+        return CredentialFailure(
+          'unsupported-platform',
+          'Apple Sign-In is only available on iOS',
+        );
       }
 
       final user = _auth.currentUser;
       if (user == null) {
-        return CredentialFailure('not-authenticated', 'No current user to link');
+        return CredentialFailure(
+          'not-authenticated',
+          'No current user to link',
+        );
       }
 
       final rawNonce = _generateNonce(32);
       final hashedNonce = _sha256ofString(rawNonce);
       final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
         nonce: hashedNonce,
       );
-      final oauth = OAuthProvider('apple.com').credential(
-        idToken: credential.identityToken,
-        rawNonce: rawNonce,
-      );
+      final oauth = OAuthProvider(
+        'apple.com',
+      ).credential(idToken: credential.identityToken, rawNonce: rawNonce);
       await user.linkWithCredential(oauth);
       return null;
     } on FirebaseAuthException catch (e) {
@@ -212,7 +266,9 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AuthFailure?> updateDisplayName(String name) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) return CredentialFailure('not-authenticated', 'Not authenticated');
+      if (user == null) {
+        return CredentialFailure('not-authenticated', 'Not authenticated');
+      }
       await user.updateDisplayName(name);
       await user.reload();
       return null;
@@ -227,10 +283,17 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AuthFailure?> reauthenticateWithPassword(String password) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) return CredentialFailure('not-authenticated', 'Not authenticated');
+      if (user == null) {
+        return CredentialFailure('not-authenticated', 'Not authenticated');
+      }
       final email = user.email;
-      if (email == null) return CredentialFailure('no-email', 'No email available');
-      final cred = EmailAuthProvider.credential(email: email, password: password);
+      if (email == null) {
+        return CredentialFailure('no-email', 'No email available');
+      }
+      final cred = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
       await user.reauthenticateWithCredential(cred);
       return null;
     } on FirebaseAuthException catch (e) {
@@ -244,7 +307,9 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AuthFailure?> updatePassword(String newPassword) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) return CredentialFailure('not-authenticated', 'Not authenticated');
+      if (user == null) {
+        return CredentialFailure('not-authenticated', 'Not authenticated');
+      }
       await user.updatePassword(newPassword);
       await user.reload();
       return null;
@@ -260,5 +325,46 @@ class FirebaseAuthRepository implements AuthRepository {
     final user = _auth.currentUser;
     if (user == null) return [];
     return user.providerData.map((p) => p.providerId).toList();
+  }
+
+  @override
+  Future<AuthFailure?> sendEmailVerification() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        return CredentialFailure('not-authenticated', 'No current user');
+      }
+      if (user.emailVerified) {
+        return null; // Already verified
+      }
+      await user.sendEmailVerification();
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return CredentialFailure(e.code, e.message ?? '');
+    } catch (e) {
+      return UnknownFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<bool> isEmailVerified() async {
+    final user = _auth.currentUser;
+    return user?.emailVerified ?? false;
+  }
+
+  @override
+  Future<AuthFailure?> reloadUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        return CredentialFailure('not-authenticated', 'No current user');
+      }
+      await user.reload();
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return CredentialFailure(e.code, e.message ?? '');
+    } catch (e) {
+      return UnknownFailure(e.toString());
+    }
   }
 }

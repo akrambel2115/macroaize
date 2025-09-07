@@ -49,33 +49,37 @@ class ScanCalorieController extends GetxController {
 
   bool get hasBreakdown => items.isNotEmpty;
 
-  int get totalKcalFromItems => items.fold(0, (sum, it) => sum + it.kcal.round());
-  int get totalProteinFromItems => items.fold(0, (sum, it) => sum + it.protein.round());
-  int get totalCarbsFromItems => items.fold(0, (sum, it) => sum + it.carbs.round());
+  int get totalKcalFromItems =>
+      items.fold(0, (sum, it) => sum + it.kcal.round());
+  int get totalProteinFromItems =>
+      items.fold(0, (sum, it) => sum + it.protein.round());
+  int get totalCarbsFromItems =>
+      items.fold(0, (sum, it) => sum + it.carbs.round());
   int get totalFatFromItems => items.fold(0, (sum, it) => sum + it.fat.round());
 
-  String get displayMealName => localizeMealName(mealName.isNotEmpty ? mealName : type);
+  String get displayMealName =>
+      localizeMealName(mealName.isNotEmpty ? mealName : type);
 
   String buildMealDescription() {
     final cal = _fmt(calorieQuantity);
     final protein = _fmt(proteinQuantity);
     final carbs = _fmt(carbsQuantity);
     final fat = _fmt(fatsQuantity);
-    
+
     final containsText = 'meal_contains'.tr;
     final calUnit = 'kcal_unit'.tr;
     final proteinUnit = 'protein_unit'.tr;
     final carbsUnit = 'carbs_unit'.tr;
     final fatUnit = 'fat_unit'.tr;
     final andWord = 'conjunction_and'.tr;
-    
+
     final currentLang = Get.locale?.languageCode.toLowerCase() ?? 'en';
-    
+
     if (currentLang == 'ar') {
       // Arabic: improved structure with proper conjunction usage
       return '$containsText $cal $calUnit، $protein $proteinUnit من البروتين، $carbs $carbsUnit من الكربوهيدرات، $andWord $fat $fatUnit من الدهون.';
     } else if (currentLang == 'fr') {
-      // French: improved structure with proper conjunction usage  
+      // French: improved structure with proper conjunction usage
       return '$containsText $cal $calUnit, $protein $proteinUnit de protéines, $carbs $carbsUnit de glucides $andWord $fat $fatUnit de lipides.';
     } else {
       // English: improved structure with proper conjunction usage
@@ -83,62 +87,60 @@ class ScanCalorieController extends GetxController {
     }
   }
 
-
   String _fmt(int v) {
     final locale = Get.locale?.toString();
     final nf = NumberFormat.decimalPattern(locale);
     return nf.format(v);
   }
 
-
   String localizeMealName(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return type.tr;
-    
+
     // First, try direct translation lookup
     final normalized = trimmed
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
         .replaceAll(RegExp(r'_+'), '_')
         .replaceAll(RegExp(r'^_|_$'), '');
-        
+
     final candidateKeys = <String>[
       'foods.$normalized', // preferred namespace for food items
-      normalized,          // direct key
-      trimmed,             // as-is key
+      normalized, // direct key
+      trimmed, // as-is key
     ];
-    
+
     for (final key in candidateKeys) {
       final translated = key.tr;
       if (translated != key) return translated; // found a translation
     }
-    
+
     // If no direct translation, attempt AI-powered translation
     return _translateMealName(trimmed);
   }
 
   String _translateMealName(String originalName) {
     final currentLang = Get.locale?.languageCode.toLowerCase() ?? 'en';
-    
+
     // If already in English or no translation needed, return as-is
     if (currentLang == 'en') return originalName;
-    
+
     // For Arabic and French, provide context-aware translations
     // This would ideally be powered by AI, but for now we'll use pattern matching
     // and common food name translations
-    
+
     if (currentLang == 'ar') {
       return _translateToArabic(originalName);
     } else if (currentLang == 'fr') {
       return _translateToFrench(originalName);
     }
-    
+
     return originalName; // fallback to original
   }
 
   String _translateToArabic(String name) {
     final lowerName = name.toLowerCase();
-    
+
     // Common food translations to Arabic
     final arabicTranslations = {
       'chicken': 'دجاج',
@@ -168,28 +170,28 @@ class ScanCalorieController extends GetxController {
       'roasted': 'محمص',
       'baked': 'مخبوز',
     };
-    
+
     // Try exact matches first
     if (arabicTranslations.containsKey(lowerName)) {
       return arabicTranslations[lowerName]!;
     }
-    
+
     // Try partial matches for compound food names
     for (final entry in arabicTranslations.entries) {
       if (lowerName.contains(entry.key)) {
         return name.replaceAll(
-          RegExp(entry.key, caseSensitive: false), 
-          entry.value
+          RegExp(entry.key, caseSensitive: false),
+          entry.value,
         );
       }
     }
-    
+
     return name; // fallback to original
   }
 
   String _translateToFrench(String name) {
     final lowerName = name.toLowerCase();
-    
+
     // Common food translations to French
     final frenchTranslations = {
       'chicken': 'poulet',
@@ -219,22 +221,22 @@ class ScanCalorieController extends GetxController {
       'roasted': 'rôti',
       'baked': 'cuit au four',
     };
-    
+
     // Try exact matches first
     if (frenchTranslations.containsKey(lowerName)) {
       return frenchTranslations[lowerName]!;
     }
-    
+
     // Try partial matches for compound food names
     for (final entry in frenchTranslations.entries) {
       if (lowerName.contains(entry.key)) {
         return name.replaceAll(
-          RegExp(entry.key, caseSensitive: false), 
-          entry.value
+          RegExp(entry.key, caseSensitive: false),
+          entry.value,
         );
       }
     }
-    
+
     return name; // fallback to original
   }
 
@@ -244,100 +246,108 @@ class ScanCalorieController extends GetxController {
     super.onInit();
     image = argument['image'];
     type = argument['type'];
-  // First, attempt multi-item breakdown
-  final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image);
-  final parsedItems = _parseMealItems(itemsJsonStr);
-  if (parsedItems.isNotEmpty) {
-    // Enrich each item with USDA per-100g and compute nutrients
-    await _enrichItemsWithUsda(parsedItems);
-    items
-      ..clear()
-      ..addAll(parsedItems);
+    // First, attempt multi-item breakdown
+    final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image);
+    final parsedItems = _parseMealItems(itemsJsonStr);
+    if (parsedItems.isNotEmpty) {
+      // Enrich each item with USDA per-100g and compute nutrients
+      await _enrichItemsWithUsda(parsedItems);
+      items
+        ..clear()
+        ..addAll(parsedItems);
 
-    // Use totals from items for overall macros
-    calorie = totalKcalFromItems;
-    protein = totalProteinFromItems;
-    carbs = totalCarbsFromItems;
-    fats = totalFatFromItems;
-    _recalculateTotals();
-    // For header display, build a short composite meal name
-    mealName = _buildCompositeName(parsedItems);
-    mealNameEnglish = mealName; // not needed for search when breakdown exists
-    usdaVerified = items.every((it) => it.usdaVerified);
-  } else {
-    // Fallback to single-item old flow
-    await OpenAiCalling.sentImageApi(image).then((value) async {
-      response = value;
-      log('RAW_AI_RESPONSE => $response');
-      Map<String, dynamic> parsed = parseNutritionWithName(response);
-      Map<String, int> nutrition = {
-        'calories': parsed['calories'] ?? 0,
-        'protein': parsed['protein'] ?? 0,
-        'carbs': parsed['carbs'] ?? 0,
-        'fat': parsed['fat'] ?? 0,
-      };
-      
-      mealName = (parsed['food_name'] as String?)?.trim() ?? '';
-      mealNameEnglish = (parsed['food_name_english'] as String?)?.trim() ?? '';
-      
-      log('PARSED_NUTRITION => $nutrition');
-      log('AI_MEAL_NAME => $mealName');
-      log('AI_MEAL_NAME_ENGLISH => $mealNameEnglish');
-      
-      calorie = nutrition["calories"] ?? 0;
-      calorieQuantity = calorie;
-      protein = nutrition["protein"] ?? 0;
-      proteinQuantity = protein;
-      carbs = nutrition["carbs"] ?? 0;
-      carbsQuantity = carbs;
-      fats = nutrition["fat"] ?? 0;
-      fatsQuantity = fats;
-    });
+      // Use totals from items for overall macros
+      calorie = totalKcalFromItems;
+      protein = totalProteinFromItems;
+      carbs = totalCarbsFromItems;
+      fats = totalFatFromItems;
+      _recalculateTotals();
+      // For header display, build a short composite meal name
+      mealName = _buildCompositeName(parsedItems);
+      mealNameEnglish = mealName; // not needed for search when breakdown exists
+      usdaVerified = items.every((it) => it.usdaVerified);
+    } else {
+      // Fallback to single-item old flow
+      await OpenAiCalling.sentImageApi(image).then((value) async {
+        response = value;
+        log('RAW_AI_RESPONSE => $response');
+        Map<String, dynamic> parsed = parseNutritionWithName(response);
+        Map<String, int> nutrition = {
+          'calories': parsed['calories'] ?? 0,
+          'protein': parsed['protein'] ?? 0,
+          'carbs': parsed['carbs'] ?? 0,
+          'fat': parsed['fat'] ?? 0,
+        };
 
-    // Try USDA enrichment if we have an English meal name
-    try {
-      String searchName = mealNameEnglish.trim().isNotEmpty ? mealNameEnglish.trim() : mealName.trim();
-      if (searchName.isNotEmpty) {
-        log('USDA_SEARCH => Searching for: "$searchName"');
-        final results = await _usda.searchFood(searchName, limit: 3);
-        log('USDA_RESULTS => Found ${results.length} results');
-        if (results.isNotEmpty) {
-          for (int i = 0; i < results.length; i++) {
-            log('USDA_RESULT_$i => ${results[i].description} (${results[i].calories} cal)');
+        mealName = (parsed['food_name'] as String?)?.trim() ?? '';
+        mealNameEnglish =
+            (parsed['food_name_english'] as String?)?.trim() ?? '';
+
+        log('PARSED_NUTRITION => $nutrition');
+        log('AI_MEAL_NAME => $mealName');
+        log('AI_MEAL_NAME_ENGLISH => $mealNameEnglish');
+
+        calorie = nutrition["calories"] ?? 0;
+        calorieQuantity = calorie;
+        protein = nutrition["protein"] ?? 0;
+        proteinQuantity = protein;
+        carbs = nutrition["carbs"] ?? 0;
+        carbsQuantity = carbs;
+        fats = nutrition["fat"] ?? 0;
+        fatsQuantity = fats;
+      });
+
+      // Try USDA enrichment if we have an English meal name
+      try {
+        String searchName =
+            mealNameEnglish.trim().isNotEmpty
+                ? mealNameEnglish.trim()
+                : mealName.trim();
+        if (searchName.isNotEmpty) {
+          log('USDA_SEARCH => Searching for: "$searchName"');
+          final results = await _usda.searchFood(searchName, limit: 3);
+          log('USDA_RESULTS => Found ${results.length} results');
+          if (results.isNotEmpty) {
+            for (int i = 0; i < results.length; i++) {
+              log(
+                'USDA_RESULT_$i => ${results[i].description} (${results[i].calories} cal)',
+              );
+            }
+            usdaOptions = results;
+            final UsdaFood picked = results.first; // always pick first
+            usdaFdcId = picked.fdcId;
+            usdaVerified = true;
+            log('USDA_VERIFIED => Using: ${picked.description}');
+            // Overwrite macros with USDA values (rounded)
+            calorie = picked.calories.round();
+            calorieQuantity = calorie * quantity;
+            protein = picked.protein.round();
+            proteinQuantity = protein * quantity;
+            carbs = picked.carbs.round();
+            carbsQuantity = carbs * quantity;
+            fats = picked.fats.round();
+            fatsQuantity = fats * quantity;
+          } else {
+            // No USDA data found - keep usdaVerified = false
+            log('USDA_NO_RESULTS => No results found for: "$searchName"');
+            usdaVerified = false;
           }
-          usdaOptions = results;
-          final UsdaFood picked = results.first; // always pick first
-          usdaFdcId = picked.fdcId;
-          usdaVerified = true;
-          log('USDA_VERIFIED => Using: ${picked.description}');
-          // Overwrite macros with USDA values (rounded)
-          calorie = picked.calories.round();
-          calorieQuantity = calorie * quantity;
-          protein = picked.protein.round();
-          proteinQuantity = protein * quantity;
-          carbs = picked.carbs.round();
-          carbsQuantity = carbs * quantity;
-          fats = picked.fats.round();
-          fatsQuantity = fats * quantity;
         } else {
-          // No USDA data found - keep usdaVerified = false
-          log('USDA_NO_RESULTS => No results found for: "$searchName"');
+          // No meal name to search - keep usdaVerified = false
+          log('USDA_NO_MEAL_NAME => No meal name to search');
           usdaVerified = false;
         }
-      } else {
-        // No meal name to search - keep usdaVerified = false
-        log('USDA_NO_MEAL_NAME => No meal name to search');
+      } catch (e) {
+        // Fallback to AI-estimated values
+        log('USDA_ERROR => $e');
         usdaVerified = false;
+        try {
+          Fluttertoast.showToast(
+            msg: "Couldn’t fetch USDA data, using AI estimation instead.",
+          );
+        } catch (_) {}
       }
-    } catch (e) {
-      // Fallback to AI-estimated values
-      log('USDA_ERROR => $e');
-      usdaVerified = false;
-      try {
-        Fluttertoast.showToast(msg: "Couldn’t fetch USDA data, using AI estimation instead.");
-      } catch (_) {}
     }
-  }
     isLoading = false;
     update();
   }
@@ -351,44 +361,82 @@ class ScanCalorieController extends GetxController {
 
   List<MealBreakdownItem> _parseMealItems(String text) {
     try {
-      final trimmed = text.trim();
-      if (trimmed.startsWith('{')) {
-        final data = jsonDecode(trimmed);
-        final items = (data['mealItems'] as List?) ?? [];
-        return items.map<MealBreakdownItem>((it) {
-          final name = (it['name'] ?? '').toString();
-          final en = (it['english_name'] ?? '').toString();
-          final portionType = (it['portionType'] ?? '').toString();
-          final count = (it['count'] ?? 1).toDouble(); // default to 1 if not specified
-          final estimatedWeight = (it['estimatedWeight'] ?? 0).toDouble();
-          
-          // Convert to the expected format for MealBreakdownItem.fromBasic
-          String estimatedAmount;
-          if (portionType == 'pieces' && count > 0) {
-            estimatedAmount = '${count.toInt()} pieces';
-          } else {
-            estimatedAmount = '${estimatedWeight.toInt()}g';
+      String raw = text.trim();
+      if (raw.isEmpty) return [];
+
+      // 1) If response contains markdown code fences, extract inner JSON
+      if (raw.contains('```')) {
+        final start = raw.indexOf('```');
+        final end = raw.lastIndexOf('```');
+        if (end > start) {
+          raw = raw.substring(start + 3, end).trim();
+          // drop leading language tag like "json"
+          if (raw.startsWith('json')) {
+            raw = raw.substring(4).trimLeft();
           }
-          
-          // Create item with visual weight estimation override
-          var item = MealBreakdownItem.fromBasic(
-            name: name, 
-            englishName: en.isNotEmpty ? en : name, 
-            estimatedAmount: estimatedAmount
-          );
-          
-          // Override grams with AI's visual weight estimate if available
-          if (estimatedWeight > 0) {
-            item = item.copyWith(grams: estimatedWeight);
-          }
-          
-          return item;
-        }).toList();
+        }
       }
+
+      // 2) If model returned just an array, wrap it
+      if (raw.startsWith('[') && raw.endsWith(']')) {
+        raw = '{"mealItems": $raw}';
+      }
+
+      // 3) If still not an object, try to extract the first {...} block containing mealItems
+      if (!(raw.startsWith('{') && raw.endsWith('}'))) {
+        final mealIdx = raw.indexOf('mealItems');
+        if (mealIdx != -1) {
+          final braceStart = raw.lastIndexOf('{', mealIdx);
+          final braceEnd = raw.indexOf('}', mealIdx);
+          if (braceStart != -1 && braceEnd != -1 && braceEnd > braceStart) {
+            raw = raw.substring(braceStart, braceEnd + 1);
+          }
+        }
+      }
+
+      final dynamic decoded = jsonDecode(raw);
+      final List list = (decoded is Map)
+          ? (decoded['mealItems'] as List? ?? const [])
+          : (decoded is List ? decoded : const []);
+
+      final result = list.map<MealBreakdownItem>((it) {
+        final name = (it['name'] ?? '').toString();
+        final en = (it['english_name'] ?? '').toString();
+        final portionType = (it['portionType'] ?? '').toString();
+        final count = (it['count'] ?? 1);
+        final doubleCount = (count is num)
+            ? count.toDouble()
+            : double.tryParse(count.toString()) ?? 1.0;
+        final ew = (it['estimatedWeight'] ?? 0);
+        final estimatedWeight = (ew is num)
+            ? ew.toDouble()
+            : double.tryParse(ew.toString()) ?? 0.0;
+
+        // Convert to expected estimatedAmount string
+        String estimatedAmount;
+        if (portionType == 'pieces' && doubleCount > 0) {
+          estimatedAmount = '${doubleCount.toInt()} pieces';
+        } else {
+          estimatedAmount = '${estimatedWeight.toInt()}g';
+        }
+
+        var item = MealBreakdownItem.fromBasic(
+          name: name,
+          englishName: en.isNotEmpty ? en : name,
+          estimatedAmount: estimatedAmount,
+        );
+        if (estimatedWeight > 0) {
+          item = item.copyWith(grams: estimatedWeight);
+        }
+        return item;
+      }).toList();
+
+      log('ITEMS_PARSED => ${result.length} item(s)');
+      return result;
     } catch (e) {
       log('ITEMS_PARSE_FAIL => $e');
+      return [];
     }
-    return [];
   }
 
   Future<void> _enrichItemsWithUsda(List<MealBreakdownItem> list) async {
@@ -398,47 +446,60 @@ class ScanCalorieController extends GetxController {
         final results = await _usda.searchFood(it.englishName, limit: 1);
         if (results.isNotEmpty) {
           final r = results.first;
-          final updated = it.copyWith(
-            fdcId: r.fdcId,
-            usdaVerified: true,
-            kcalPer100g: r.calories,
-            proteinPer100g: r.protein,
-            carbsPer100g: r.carbs,
-            fatPer100g: r.fats,
-          ).recalcFromPer100g();
+          final updated =
+              it
+                  .copyWith(
+                    fdcId: r.fdcId,
+                    usdaVerified: true,
+                    kcalPer100g: r.calories,
+                    proteinPer100g: r.protein,
+                    carbsPer100g: r.carbs,
+                    fatPer100g: r.fats,
+                  )
+                  .recalcFromPer100g();
           list[i] = updated;
         } else {
-            // No USDA result — provide a small fallback for common foods like eggs
-            final nameLower = it.englishName.toLowerCase();
-            if (nameLower.contains('egg')) {
-              // Boiled egg approximate per 100g (more conservative values)
-              list[i] = it.copyWith(
-                usdaVerified: false,
-                kcalPer100g: 146.0,  // closer to your expected 146 cal for ~100g
-                proteinPer100g: 12.0, // matches your expected 12g
-                carbsPer100g: 1.1,
-                fatPer100g: 10.0,
-              ).recalcFromPer100g();
-              log('USDA_FALLBACK => applied egg fallback for ${it.englishName}');
-            } else {
-              list[i] = it.copyWith(usdaVerified: false).recalcFromPer100g();
-            }
-        }
-      } catch (e) {
-          // In case of API error, attempt same egg fallback before giving zeroes
+          // No USDA result — provide a small fallback for common foods like eggs
           final nameLower = it.englishName.toLowerCase();
           if (nameLower.contains('egg')) {
-            list[i] = it.copyWith(
-              usdaVerified: false,
-              kcalPer100g: 146.0,  // closer to your expected 146 cal for ~100g
-              proteinPer100g: 12.0, // matches your expected 12g
-              carbsPer100g: 1.1,
-              fatPer100g: 10.0,
-            ).recalcFromPer100g();
-            log('USDA_FALLBACK_ERROR => applied egg fallback for ${it.englishName}');
+            // Boiled egg approximate per 100g (more conservative values)
+            list[i] =
+                it
+                    .copyWith(
+                      usdaVerified: false,
+                      kcalPer100g:
+                          146.0, // closer to your expected 146 cal for ~100g
+                      proteinPer100g: 12.0, // matches your expected 12g
+                      carbsPer100g: 1.1,
+                      fatPer100g: 10.0,
+                    )
+                    .recalcFromPer100g();
+            log('USDA_FALLBACK => applied egg fallback for ${it.englishName}');
           } else {
             list[i] = it.copyWith(usdaVerified: false).recalcFromPer100g();
           }
+        }
+      } catch (e) {
+        // In case of API error, attempt same egg fallback before giving zeroes
+        final nameLower = it.englishName.toLowerCase();
+        if (nameLower.contains('egg')) {
+          list[i] =
+              it
+                  .copyWith(
+                    usdaVerified: false,
+                    kcalPer100g:
+                        146.0, // closer to your expected 146 cal for ~100g
+                    proteinPer100g: 12.0, // matches your expected 12g
+                    carbsPer100g: 1.1,
+                    fatPer100g: 10.0,
+                  )
+                  .recalcFromPer100g();
+          log(
+            'USDA_FALLBACK_ERROR => applied egg fallback for ${it.englishName}',
+          );
+        } else {
+          list[i] = it.copyWith(usdaVerified: false).recalcFromPer100g();
+        }
       }
     }
   }
@@ -449,10 +510,16 @@ class ScanCalorieController extends GetxController {
     final it = items[index];
     double grams = it.grams;
     switch (unit) {
-  case 'piece': grams = newAmount * 50; break; // 1 piece ≈ 50g
-      default: grams = newAmount; // g
+      case 'piece':
+        grams = newAmount * 50;
+        break; // 1 piece ≈ 50g
+      default:
+        grams = newAmount; // g
     }
-    final updated = it.copyWith(amount: newAmount, unit: unit, grams: grams).recalcFromPer100g();
+    final updated =
+        it
+            .copyWith(amount: newAmount, unit: unit, grams: grams)
+            .recalcFromPer100g();
     items[index] = updated;
     _recalcFromItems();
   }
@@ -467,7 +534,6 @@ class ScanCalorieController extends GetxController {
   }
 
   // _promptUsdaSelection removed: always select the first USDA result now.
-
 
   /// Set quantity with validation (clamped between kMinQuantity and kMaxQuantity)
   void setQuantity(int q, {bool notify = true}) {
@@ -505,7 +571,13 @@ class ScanCalorieController extends GetxController {
     fatsQuantity = fats * quantity;
   }
 
-  void setBaseMacros({required int calories, required int proteinG, required int carbsG, required int fatsG, bool notify = true}) {
+  void setBaseMacros({
+    required int calories,
+    required int proteinG,
+    required int carbsG,
+    required int fatsG,
+    bool notify = true,
+  }) {
     calorie = calories;
     protein = proteinG;
     carbs = carbsG;
@@ -588,7 +660,6 @@ class ScanCalorieController extends GetxController {
         Get.offAllNamed(Routes.leadingView);
       }
     }
-
   }
 
   Map<String, int> extractNutritionalValues(String text) {
@@ -616,25 +687,39 @@ class ScanCalorieController extends GetxController {
   }
 
   // New: Try JSON first, fallback to legacy regex. Also parse optional food_name.
-  Map<String,dynamic> parseNutritionWithName(String text){
-
-    try{
+  Map<String, dynamic> parseNutritionWithName(String text) {
+    try {
       final trimmed = text.trim();
-      if(trimmed.startsWith('{') && trimmed.endsWith('}')){
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
         dynamic data;
-        try { data = jsonDecode(trimmed); } catch(_){ data = null; }
-        if(data is Map<String,dynamic>){
-          int toInt(dynamic v){
-            if(v==null) return 0; if(v is int) return v; if(v is double) return v.round();
-            if(v is String){ return int.tryParse(v.replaceAll(RegExp(r'[^0-9]'),'')) ?? 0; }
+        try {
+          data = jsonDecode(trimmed);
+        } catch (_) {
+          data = null;
+        }
+        if (data is Map<String, dynamic>) {
+          int toInt(dynamic v) {
+            if (v == null) return 0;
+            if (v is int) return v;
+            if (v is double) return v.round();
+            if (v is String) {
+              return int.tryParse(v.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+            }
             return 0;
           }
+
           final calories = toInt(data['calories']);
-          final protein  = toInt(data['protein_g']);
-          final carbs    = toInt(data['carbohydrates_g']);
-            final fats     = toInt(data['fats_g']);
-          final name = (data['food_name'] is String) ? (data['food_name'] as String) : '';
-          final nameEnglish = (data['food_name_english'] is String) ? (data['food_name_english'] as String) : '';
+          final protein = toInt(data['protein_g']);
+          final carbs = toInt(data['carbohydrates_g']);
+          final fats = toInt(data['fats_g']);
+          final name =
+              (data['food_name'] is String)
+                  ? (data['food_name'] as String)
+                  : '';
+          final nameEnglish =
+              (data['food_name_english'] is String)
+                  ? (data['food_name_english'] as String)
+                  : '';
           return {
             'food_name': name,
             'food_name_english': nameEnglish,
@@ -645,16 +730,12 @@ class ScanCalorieController extends GetxController {
           };
         }
       }
-    }catch(e){
+    } catch (e) {
       log('JSON_PARSE_FAIL => $e');
     }
     // Fallback regex method
     final vals = extractNutritionalValues(text);
-    return {
-      'food_name': '',
-      'food_name_english': '',
-      ...vals,
-    };
+    return {'food_name': '', 'food_name_english': '', ...vals};
   }
 
   addSqlData(String type) async {
@@ -666,10 +747,14 @@ class ScanCalorieController extends GetxController {
         protein: proteinQuantity,
         carbs: carbsQuantity,
         image: imageData,
-  fats: fatsQuantity,
+        fats: fatsQuantity,
         type: type,
-  fdcId: usdaFdcId,
-  // Note: schema lacks fdcId; consider adding if needed later
+        fdcId: usdaFdcId,
+        // Note: schema lacks fdcId; consider adding if needed later
+        title:
+            (mealNameEnglish.trim().isNotEmpty
+                ? mealNameEnglish.trim()
+                : mealName.trim()),
       ),
     );
   }
@@ -699,7 +784,8 @@ class ScanCalorieController extends GetxController {
     final file = File(filePath);
 
     if (await file.exists()) {
-      return await file.readAsBytes(); // Read and return the bytes if the file exists.
+      return await file
+          .readAsBytes(); // Read and return the bytes if the file exists.
     } else {
       print("Error: File does not exist");
       return null; // Return null if the file does not exist.

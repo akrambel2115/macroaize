@@ -28,6 +28,7 @@ class ModernButton extends StatefulWidget {
   final double? height;
   final EdgeInsetsGeometry? padding;
   final BorderRadius? borderRadius;
+  final TextStyle? textStyle;
 
   const ModernButton({
     super.key,
@@ -42,6 +43,7 @@ class ModernButton extends StatefulWidget {
     this.height,
     this.padding,
     this.borderRadius,
+  this.textStyle,
   });
 
   @override
@@ -225,7 +227,7 @@ class _ModernButtonState extends State<ModernButton>
 
   Widget _buildButtonContent(BuildContext context) {
     final textColor = _getTextColor(context);
-    final textStyle = _getTextStyle(context).copyWith(color: textColor);
+  final effectiveTextStyle = (widget.textStyle ?? _getTextStyle(context)).copyWith(color: textColor);
 
     if (widget.loading) {
       return SizedBox(
@@ -250,7 +252,7 @@ class _ModernButtonState extends State<ModernButton>
     children.add(
       Text(
         widget.text,
-        style: textStyle,
+        style: effectiveTextStyle,
         textAlign: TextAlign.center,
       ),
     );

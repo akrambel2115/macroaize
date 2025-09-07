@@ -29,6 +29,18 @@ const Map<String, String> french = {
   "kg": "kg",
   "Try to update once a week so we can adjust your plan to ensure you hit your goal":
       "Essayez de mettre à jour une fois par semaine pour que nous puissions ajuster votre plan et atteindre votre objectif",
+  // Local Food add / edit dialog keys
+  "add_custom_food": "Ajouter un aliment personnalisé",
+  "edit_food": "Modifier l'aliment",
+  "name": "Nom",
+  "quantity": "Quantité",
+  "calories": "Calories",
+  "add": "Ajouter",
+  "save": "Enregistrer",
+  "Custom Food": "Aliment personnalisé",
+  "delete_selected": "Supprimer la sélection",
+  "proteins": "Protéines",
+
   "Update Weight": "Mettre à jour le poids",
   "Week": "Semaine",
   "Month": "Mois",
@@ -470,7 +482,7 @@ const Map<String, String> french = {
   "total_earned": "Total gagné",
   "referrals_count": "Parrains",
   "request_withdrawal": "Demander un retrait",
-  "minimum_withdrawal_amount": "Montant minimum de retrait : {amount} DZD",
+  "minimum_withdrawal_amount": "Montant minimum de retrait : @amount DZD",
   "withdrawal_history": "Historique des retraits",
   "promo_code_expired": "Le code promo a expiré",
   "promo_expires_in": "Le promo expire dans @days jours",
@@ -492,8 +504,34 @@ const Map<String, String> french = {
   "enter_rip_number": "Entrez le numéro RIP",
   "withdrawal_processing_info":
       "Les retraits sont traités sous 5 jours ouvrables.",
-  "requested_on": "Demandé le {date}",
+  "requested_on": "Demandé le @date",
   "unknown_date": "Date inconnue",
+  // Withdrawal specific translations
+  "withdrawal_submitted": "Demande de retrait envoyée",
+  "request_id": "ID de demande : @id",
+  "processing_time": "Délai de traitement : @days jours ouvrables",
+  "withdrawal_email_confirmation":
+      "Vous recevrez un e-mail de confirmation lorsque votre retrait aura été traité.",
+  "got_it": "Compris",
+  "processing": "En cours",
+  "copy_failed": "Échec de la copie : @error",
+  "request_id_short": "ID",
+  "bank_account_short": "Compte",
+  "processing_date": "Date limite de traitement",
+  "processing_deadline": "Date limite",
+  "requested_date": "Demandé",
+  "completed": "Terminé",
+  "failed": "Échoué",
+  "email_verification_required_withdrawal":
+      "La vérification de l'email est requise pour demander un retrait",
+  "view_all": "Voir tout",
+  "showing_recent_withdrawals": "Affichage de @shown sur @total retraits",
+  "withdrawal_history_full": "Historique des retraits",
+  "no_withdrawal_history": "Aucun historique de retrait pour le moment",
+  "withdrawal_history_empty_description":
+      "Demandez votre premier retrait pour voir votre historique de transactions ici",
+  "view_withdrawal_history": "Voir l'historique des retraits",
+  "withdrawal_history_subtitle": "Suivez toutes vos demandes de retrait",
   // Abbreviations for compact badges
   "cals": "cals",
   "prot": "prot",
@@ -534,7 +572,7 @@ const Map<String, String> french = {
   'feature_recipes_title': 'Des recettes et régimes premium',
   'feature_recipes_subtitle': 'vous guideront vers la réussite',
   'best_value': 'MEILLEUR CHOIX',
-  'save_percent': 'ÉCONOMISEZ {percent}%*',
+  'save_percent': 'ÉCONOMISEZ @percent%*',
   'months_12': '12 mois',
   'month_1': '1 mois',
   'billed_annually': 'Facturé annuellement',
@@ -607,7 +645,7 @@ const Map<String, String> french = {
   "success": "Succès",
   "food_added_success": "Aliment ajouté avec succès",
   "food_updated_success": "Aliment mis à jour avec succès",
-  "food_deleted_success": "{count} aliment(s) supprimé(s) avec succès",
+  "food_deleted_success": "@count aliment(s) supprimé(s) avec succès",
   // Authentication messages
   "auth_login_success": "Connexion réussie",
   "auth_register_success": "Compte créé avec succès",
@@ -632,4 +670,171 @@ const Map<String, String> french = {
   "Chat": "Chat",
   "left": "restant",
   "login_to_view_usage": "Connectez-vous pour obtenir",
+
+  // Email verification translations
+  "email_verification_title": "Vérifiez votre email",
+  "email_verification_subtitle": "Vérifiez votre email pour continuer",
+  "email_sent_to": "Nous avons envoyé un lien de vérification à @email",
+  "email_verification_instructions":
+      "Cliquez sur le lien dans votre email pour vérifier votre compte. Cela nous aide à sécuriser votre compte.",
+  "checking_verification_status": "Vérification du statut de vérification...",
+  "resend_verification_email": "Renvoyer l'email",
+  "resend_cooldown": "Renvoyer dans @seconds secondes",
+  "resend_limit_reached": "@attempts tentatives restantes",
+  "verification_attempts_remaining":
+      "@remaining sur @total tentatives restantes",
+  "email_verification_success":
+      "Email vérifié avec succès! Bienvenue sur macroAize",
+  "email_verification_resent":
+      "Email de vérification envoyé! Vérifiez votre boîte de réception",
+  "email_verification_resend_error":
+      "Échec de l'envoi de l'email de vérification. Veuillez réessayer",
+  "email_verification_max_attempts":
+      "Nombre maximum de tentatives atteint. Veuillez réessayer plus tard",
+  "email_verification_cooldown":
+      "Veuillez attendre @seconds secondes avant de demander un autre email",
+  "skip_verification_title": "Passer la vérification?",
+  "skip_verification_warning":
+      "Cela permettra l'accès sans vérification de l'email. Non recommandé pour la sécurité.",
+  "skip_anyway": "Passer quand même",
+  "skip_verification": "Ignorer la vérification",
+  "verify": "Vérifier",
+  "sign_out_title": "Se déconnecter?",
+  "sign_out_confirmation": "Êtes-vous sûr de vouloir vous déconnecter?",
+  "sign_out": "Se déconnecter",
+  "cancel": "Annuler",
+  "email_verification_error":
+      "La vérification de l'email a échoué. Veuillez réessayer",
+
+  // Email verification guard messages
+  "auth_required": "Veuillez vous connecter pour continuer",
+  "email_verification_required_for_feature":
+      "Veuillez vérifier votre email pour utiliser cette fonctionnalité",
+  "email_verification_required_for_premium":
+      "Vérification d'email requise pour accéder aux fonctionnalités premium",
+  "email_verification_required_for_scan":
+      "Veuillez vérifier votre email pour utiliser le scanner alimentaire",
+  "email_verification_required_for_chat":
+      "Veuillez vérifier votre email pour discuter avec le coach IA",
+  "email_verification_required_for_app_access":
+      "Vérification d'email requise pour accéder à l'application",
+
+  // UI status indicators
+  "email_verified_status": "Vérifié",
+  "email_unverified_status": "Non vérifié",
+  "email_verified": "Email vérifié",
+  "email_verification_complete_subtitle":
+      "Votre compte est sécurisé et prêt à utiliser",
+  "email_verification_required": "Vérification d'email requise",
+  "email_verification_required_subtitle":
+      "Veuillez vérifier @email pour accéder à toutes les fonctionnalités",
+  "verify_email": "Vérifier l'email",
+  "verify_now": "Vérifier maintenant",
+  "refresh": "Actualiser",
+  "refresh_failed": "Échec de l'actualisation du statut. Veuillez réessayer",
+  "tap_to_verify_email": "Appuyez pour vérifier votre adresse e-mail",
+
+  // Account activation gating warnings
+  "account_activation_required": "Activation de compte requise",
+  "account_activation_required_for_chat":
+      "Veuillez activer votre compte pour utiliser le coach IA",
+  "account_activation_required_for_scanner":
+      "Veuillez activer votre compte pour utiliser le scanner alimentaire",
+  "account_activation_required_for_premium":
+      "Veuillez activer votre compte pour acheter premium",
+  "verify_account_to_continue": "Vérifiez votre email pour continuer",
+
+  // Premium Required Messages
+  "premium_required": "Premium Requis",
+  "premium_feature": "Fonctionnalité Premium",
+  "recipes_premium_message":
+      "L'accès aux recettes nécessite un abonnement premium. Passez à la version premium maintenant pour débloquer cette fonctionnalité.",
+  "recipes_premium_badge":
+      "Débloquez toutes les recettes et fonctionnalités avec Premium",
+  "local_food_premium_message":
+      "Créer et modifier des aliments personnalisés est une fonctionnalité Premium.",
+  "local_food_premium_badge":
+      "Passez à Premium pour créer des aliments personnalisés illimités !",
+  "chat_image_premium_message":
+      "L'accès aux pièces jointes d'images nécessite un abonnement premium. Passez à la version premium maintenant pour débloquer cette fonctionnalité.",
+  "chat_image_premium_badge":
+      "Débloquez les pièces jointes d'images au coach avec Premium",
+  "go_premium": "Passer à Premium",
+  "maybe_later": "Peut-être plus tard",
+  // History fallbacks
+  "unknown_meal": "Repas inconnu",
+
+  // Login/Register Form Labels
+  "login": "Connexion",
+  "register": "S'inscrire",
+  "email": "E-mail",
+  "password": "Mot de passe",
+  "confirm_password": "Confirmer le mot de passe",
+  "first_name": "Prénom",
+  "last_name": "Nom de famille",
+  "forgot_password": "Mot de passe oublié ?",
+  "continue_with_google": "Continuer avec Google",
+  "continue_with_apple": "Continuer avec Apple",
+
+  // Validation Messages
+  "email_required": "L'e-mail est requis",
+    "required": "Requis",
+  "invalid_email_format": "Format d'e-mail invalide",
+  "password_required": "Le mot de passe est requis",
+  "password_min_length": "Min 8 caractères",
+  "password_complexity":
+      "Utilisez majuscules, minuscules, chiffres et symboles",
+  "name_required": "Requis",
+  "name_too_short": "Trop court",
+  "passwords_do_not_match": "Les mots de passe ne correspondent pas",
+  "please_fix_errors": "Veuillez corriger les erreurs",
+  "accept_terms_of_service": "Veuillez accepter les Conditions d'utilisation",
+
+  // Terms of Service
+  "by_registering_agree": "En m'inscrivant, j'accepte les ",
+  "terms_of_service": "Conditions d'utilisation",
+
+  // Registration Success
+  "auth_register_verification_required":
+      "Compte créé ! Veuillez vérifier votre e-mail pour vérifier votre compte.",
+
+  // Settings - Account Section
+  "account": "Compte",
+  "tap_to_view_details": "Appuyez pour voir les détails",
+  "register_login": "S'inscrire / Se connecter",
+  "access_account_sync_data":
+      "Accédez à votre compte et synchronisez les données",
+
+  // Settings - App Info Section
+  "app_info": "Informations sur l'app",
+  "version": "Version",
+  "reset_data": "Réinitialiser les données",
+  "clear_all_app_data": "Effacer toutes les données de l'application",
+  "account_reset_success": "Le compte a été réinitialisé avec succès",
+
+  // Account Details page translations
+  "account_details_title": "Détails du compte",
+  "no_name": "Aucun nom",
+  "name_label": "Nom",
+  "email_label": "E-mail",
+  "change_password": "Changer le mot de passe",
+  "logout": "Se déconnecter",
+  "display_name_updated": "Nom d'affichage mis à jour",
+  "edit_display_name": "Modifier le nom d'affichage",
+  "new_display_name": "Nouveau nom d'affichage",
+  "password_changed_message": "Mot de passe changé. Veuillez vous reconnecter.",
+    "current_password_incorrect": "Le mot de passe actuel est incorrect.",
+    "too_many_attempts": "Trop de tentatives, veuillez réessayer plus tard.",
+    "please_relogin": "Veuillez vous reconnecter et réessayer.",
+    "operation_failed": "L'opération a échoué.",
+    // Change Password page translations
+    "current_password_label": "Mot de passe actuel",
+    "new_password_label": "Nouveau mot de passe",
+    "confirm_new_password_label": "Confirmer le nouveau mot de passe",
+    "min_8_chars": "Min 8 caractères",
+    "password_complexity_hint": "Utilisez majuscule, minuscule, chiffre, symbole",
+    "must_differ_from_current": "Doit différer du mot de passe actuel",
+    "does_not_match": "Ne correspond pas",
+    "change_password_cta": "Changer le mot de passe",
 };
+

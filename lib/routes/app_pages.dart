@@ -1,4 +1,3 @@
-
 import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsBinding.dart';
 import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsView.dart';
 import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsBinding.dart';
@@ -40,6 +39,8 @@ import 'package:foodcalorietracker/screens/planIntro/PlanIntroBinding.dart';
 import 'package:foodcalorietracker/screens/planIntro/PlanIntroView.dart';
 import 'package:foodcalorietracker/screens/transition/TransitionBinding.dart';
 import 'package:foodcalorietracker/screens/transition/TransitionView.dart';
+import 'package:foodcalorietracker/screens/WithdrawalHistoryScreen/WithdrawalHistoryBinding.dart';
+import 'package:foodcalorietracker/screens/WithdrawalHistoryScreen/WithdrawalHistoryView.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/screens/AccountDetails/AccountDetailsView.dart';
 import 'package:foodcalorietracker/routes/directional_transition.dart';
@@ -47,6 +48,8 @@ import '../screens/onBording/OnBoardingView.dart';
 import 'app_routes.dart';
 import 'package:foodcalorietracker/Model/Recipe.dart';
 import 'package:foodcalorietracker/screens/RecipesScreen/RecipeDetailScreen.dart';
+import 'package:foodcalorietracker/screens/EmailVerificationScreen/EmailVerificationView.dart';
+import 'package:foodcalorietracker/screens/EmailVerificationScreen/EmailVerificationBinding.dart';
 
 class AppPages {
   AppPages._();
@@ -89,78 +92,83 @@ class AppPages {
     ),
     GetPage(
       name: Paths.onBoardingView,
-      page: () =>  OnBoardingView(),
+      page: () => OnBoardingView(),
       binding: OnBoardingBinding(),
     ),
     GetPage(
       name: Paths.signUpView,
-      page: () =>  SignUpView(),
+      page: () => SignUpView(),
       binding: SignUpBinding(),
       customTransition: DirectionalTransition(),
     ),
     GetPage(
       name: Paths.leadingView,
-      page: () =>  LeadingView(),
+      page: () => LeadingView(),
       binding: LeadingBinding(),
     ),
     GetPage(
-  name: Paths.homeView,
-  page: () =>  HomeView(),
-  binding: HomeBinding(),
-  customTransition: DirectionalTransition(),
+      name: Paths.homeView,
+      page: () => HomeView(),
+      binding: HomeBinding(),
+      customTransition: DirectionalTransition(),
     ),
     GetPage(
-  name: Paths.scanFoodView,
-  page: () =>  ScanFoodView(),
-  binding: ScanFoodBinding(),
-  customTransition: DirectionalTransition(),
+      name: Paths.scanFoodView,
+      page: () => ScanFoodView(),
+      binding: ScanFoodBinding(),
+      customTransition: DirectionalTransition(),
     ),
     GetPage(
-  name: Paths.analyticsView,
-  page: () =>  AnalyticsView(),
-  binding: AnalyticsBinding(),
-  customTransition: DirectionalTransition(),
+      name: Paths.analyticsView,
+      page: () => AnalyticsView(),
+      binding: AnalyticsBinding(),
+      customTransition: DirectionalTransition(),
     ),
     GetPage(
       name: Paths.settingView,
-      page: () =>  SettingView(),
+      page: () => SettingView(),
       binding: SettingBinding(),
     ),
     GetPage(
       name: Paths.adjustGoalsView,
-      page: () =>  AdjustGoalsView(),
+      page: () => AdjustGoalsView(),
       binding: AdjustGoalsBinding(),
     ),
     GetPage(
       name: Paths.personalDetailsView,
-      page: () =>  PersonalDetailsView(),
+      page: () => PersonalDetailsView(),
       binding: PersonalDetailsBinding(),
     ),
     GetPage(
       name: Paths.scanCalorieView,
-      page: () =>  ScanCalorieView(),
+      page: () => ScanCalorieView(),
       binding: ScanCalorieBinding(),
       customTransition: DirectionalTransition(),
     ),
     GetPage(
       name: Paths.historyView,
-      page: () =>  HistoryView(),
+      page: () => HistoryView(),
       binding: HistoryBinding(),
     ),
     GetPage(
       name: Paths.premiumView,
-      page: () =>  PremiumView(),
+      page: () => PremiumView(),
       binding: PremiumBinding(),
     ),
     GetPage(
       name: Paths.chatView,
-      page: () =>  ChatView(),
+      page: () => ChatView(),
       binding: ChatBinding(),
     ),
     GetPage(
       name: Paths.chatHistoryView,
-      page: () =>  ChatHistoryView(),
+      page: () => ChatHistoryView(),
       binding: ChatHistoryBinding(),
+    ),
+    GetPage(
+      name: Paths.withdrawalHistoryView,
+      page: () => WithdrawalHistoryView(),
+      binding: WithdrawalHistoryBinding(),
     ),
     GetPage(
       name: Paths.localFoodView,
@@ -182,10 +190,20 @@ class AppPages {
       name: Paths.recipeDetailView,
       page: () {
         final args = Get.arguments as Map<String, dynamic>?;
-        final recipe = args != null && args['recipe'] is Recipe ? args['recipe'] as Recipe : null;
+        final recipe =
+            args != null && args['recipe'] is Recipe
+                ? args['recipe'] as Recipe
+                : null;
         if (recipe == null) return const RecipesView();
         return RecipeDetailScreen(recipe: recipe);
       },
+    ),
+    GetPage(
+      name: Paths.emailVerificationView,
+      page: () => const EmailVerificationView(),
+      binding: EmailVerificationBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
   ];
 }

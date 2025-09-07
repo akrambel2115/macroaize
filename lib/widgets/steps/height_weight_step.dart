@@ -33,7 +33,14 @@ class HeightWeightStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: padding ?? EdgeInsets.only(left: 10, right: 10, bottom: MediaQuery.of(context).padding.bottom, top: 10),
+      padding:
+          padding ??
+          EdgeInsets.only(
+            left: 10,
+            right: 10,
+            bottom: MediaQuery.of(context).padding.bottom,
+            top: 10,
+          ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -50,7 +57,9 @@ class HeightWeightStep extends StatelessWidget {
             style: context.theme.textTheme.headlineLarge,
           ).paddingOnly(top: 20),
           Text(
-            (subtitle ?? 'Select your height and weight to calibrate your custom plan').tr,
+            (subtitle ??
+                    'Select your height and weight to calibrate your custom plan')
+                .tr,
             style: context.theme.textTheme.titleSmall,
           ).paddingOnly(top: 10, bottom: 10),
           // Make the picker + Lottie scrollable so the footer stays pinned
@@ -69,9 +78,9 @@ class HeightWeightStep extends StatelessWidget {
               ),
             ),
           ),
-      Row(
+          Row(
             children: [
-        if (showFooterPrevious && onBack != null)
+              if (showFooterPrevious && onBack != null)
                 Expanded(
                   child: ModernButton(
                     text: 'Previous'.tr,
@@ -82,7 +91,8 @@ class HeightWeightStep extends StatelessWidget {
                     height: 50,
                   ),
                 ),
-        if (showFooterPrevious && onBack != null) const SizedBox(width: 10),
+              if (showFooterPrevious && onBack != null)
+                const SizedBox(width: 10),
               Expanded(
                 child: ModernButton(
                   text: 'Continue'.tr,
@@ -90,7 +100,10 @@ class HeightWeightStep extends StatelessWidget {
                   style: ModernButtonStyle.primary,
                   size: ModernButtonSize.medium,
                   borderRadius: BorderRadius.circular(30),
-                  icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                  icon: const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                  ),
                   height: 50,
                 ),
               ),

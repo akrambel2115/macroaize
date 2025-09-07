@@ -1,4 +1,3 @@
-// Simple local webhook payload signer for manual testing against emulator
 require('dotenv').config();
 const crypto = require('crypto');
 const axios = require('axios');

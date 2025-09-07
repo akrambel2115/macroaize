@@ -49,43 +49,48 @@ class AuthController extends GetxController {
   }
 
   void toggleLoginObscure() => loginObscure.value = !loginObscure.value;
-  void toggleRegisterPasswordObscure() => registerPasswordObscure.value = !registerPasswordObscure.value;
-  void toggleRegisterConfirmObscure() => registerConfirmObscure.value = !registerConfirmObscure.value;
+  void toggleRegisterPasswordObscure() =>
+      registerPasswordObscure.value = !registerPasswordObscure.value;
+  void toggleRegisterConfirmObscure() =>
+      registerConfirmObscure.value = !registerConfirmObscure.value;
 
   // Validation
   String? validateEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Email is required';
+    if (v == null || v.trim().isEmpty) return 'email_required'.tr;
     final ok = RegExp(r'^\S+@\S+\.\S+$').hasMatch(v.trim());
-    if (!ok) return 'Invalid email format';
+    if (!ok) return 'invalid_email_format'.tr;
     return null;
   }
 
   String? validatePassword(String? v) {
-    if (v == null || v.isEmpty) return 'Password is required';
-    if (v.length < 8) return 'Min 8 characters';
+    if (v == null || v.isEmpty) return 'password_required'.tr;
+    if (v.length < 8) return 'password_min_length'.tr;
     final upper = RegExp(r'[A-Z]').hasMatch(v);
     final lower = RegExp(r'[a-z]').hasMatch(v);
     final digit = RegExp(r'\d').hasMatch(v);
     final symbol = RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-\[\]\\/]').hasMatch(v);
-    if (!(upper && lower && digit && symbol)) return 'Use upper, lower, number, symbol';
+    if (!(upper && lower && digit && symbol)) return 'password_complexity'.tr;
     return null;
   }
 
   String? validateName(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Required';
-    if (v.trim().length < 2) return 'Too short';
+    if (v == null || v.trim().isEmpty) return 'name_required'.tr;
+    if (v.trim().length < 2) return 'name_too_short'.tr;
     return null;
   }
 
   String? validateConfirm(String? v) {
-    if (v != password.text) return 'Passwords do not match';
+    if (v != password.text) return 'passwords_do_not_match'.tr;
     return null;
   }
 
   Future<User?> loginEmail() async {
     if (!(loginKey.currentState?.validate() ?? false)) return null;
     return _guard(() async {
-      final (user, failure) = await repo.signInWithEmail(email: email.text.trim(), password: password.text);
+      final (user, failure) = await repo.signInWithEmail(
+        email: email.text.trim(),
+        password: password.text,
+      );
       final res = _handle(user, failure);
       if (res != null) lastSuccessKey.value = 'auth_login_success';
       return res;
@@ -93,7 +98,9 @@ class AuthController extends GetxController {
   }
 
   Future<User?> registerEmail() async {
-    if (!(registerKey.currentState?.validate() ?? false) || !tosAccepted.value) return null;
+    if (!(registerKey.currentState?.validate() ?? false) || !tosAccepted.value) {
+      return null;
+    }
     return _guard(() async {
       final (user, failure) = await repo.registerWithEmail(
         email: email.text.trim(),
@@ -102,24 +109,28 @@ class AuthController extends GetxController {
         lastName: lastName.text.trim(),
       );
       final res = _handle(user, failure);
-      if (res != null) lastSuccessKey.value = 'auth_register_success';
+      if (res != null) {
+        // CRITICAL: After successful registration, redirect to email verification
+        // Don't set success message as we're redirecting to verification screen
+        lastSuccessKey.value = 'auth_register_verification_required';
+      }
       return res;
     });
   }
 
   Future<User?> google() async => _guard(() async {
-        final (user, failure) = await repo.signInWithGoogle();
-  final res = _handle(user, failure);
-  if (res != null) lastSuccessKey.value = 'auth_login_success';
-  return res;
-      });
+    final (user, failure) = await repo.signInWithGoogle();
+    final res = _handle(user, failure);
+    if (res != null) lastSuccessKey.value = 'auth_login_success';
+    return res;
+  });
 
   Future<User?> apple() async => _guard(() async {
-        final (user, failure) = await repo.signInWithApple();
-        final res = _handle(user, failure);
-        if (res != null) lastSuccessKey.value = 'auth_login_success';
-        return res;
-      });
+    final (user, failure) = await repo.signInWithApple();
+    final res = _handle(user, failure);
+    if (res != null) lastSuccessKey.value = 'auth_login_success';
+    return res;
+  });
 
   // Facebook sign-in removed; use Google or email/password
 

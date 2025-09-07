@@ -39,6 +39,18 @@ const Map<String, String> arabic = {
   "No Food Found": "لم يتم العثور على طعام",
   "Try searching with different keywords or browse our local food database":
       "جرب البحث بكلمات مفتاحية مختلفة أو تصفح قاعدة بيانات الطعام المحلي",
+  // Local Food add / edit dialog keys
+  "add_custom_food": "إضافة طعام مخصص",
+  "edit_food": "تعديل الطعام",
+  "name": "الاسم",
+  "quantity": "الكمية",
+  "calories": "السعرات",
+  "add": "إضافة",
+  "save": "حفظ",
+  "Custom Food": "طعام مخصص",
+  "delete_selected": "حذف المحدد",
+  "proteins": "بروتينات",
+
   "Clear Search": "مسح البحث",
   "Premium Features": "الميزات المميزة",
   "Choose Your Plan": "اختر خطتك",
@@ -470,7 +482,7 @@ const Map<String, String> arabic = {
   "conjunction_and": "و",
 
   // Units and labels
-  "kcal_unit": "سعرة حرارية",
+  "kcal_unit": "س.ح",
   "gram_unit": "غ",
   "unit_piece": "قطعة",
   "protein_unit": "غ",
@@ -501,7 +513,7 @@ const Map<String, String> arabic = {
   "total_earned": "إجمالي المبالغ المكتسبة",
   "referrals_count": "عدد الإحالات",
   "request_withdrawal": "طلب سحب",
-  "minimum_withdrawal_amount": "الحد الأدنى للسحب: {amount} د.ج",
+  "minimum_withdrawal_amount": "الحد الأدنى للسحب: @amount دج",
   "withdrawal_history": "سجل السحوبات",
   "promo_code_expired": "انتهت صلاحية رمز الخصم",
   "promo_expires_in": "ينتهي الرمز خلال @days يومًا",
@@ -522,8 +534,34 @@ const Map<String, String> arabic = {
   "bank_account_rip": "حساب البنك (RIP)",
   "enter_rip_number": "أدخل رقم RIP",
   "withdrawal_processing_info": "تُعالج السحوبات خلال 5 أيام عمل.",
-  "requested_on": "تم الطلب بتاريخ {date}",
+  "requested_on": "تم الطلب بتاريخ @date",
   "unknown_date": "تاريخ غير معروف",
+  // Withdrawal specific translations
+  "withdrawal_submitted": "تم إرسال طلب السحب",
+  "request_id": "معرف الطلب: @id",
+  "processing_time": "وقت المعالجة: @days أيام عمل",
+  "withdrawal_email_confirmation":
+      "ستتلقى رسالة تأكيد عبر البريد الإلكتروني بمجرد معالجة سحبك.",
+  "got_it": "حسناً",
+  "processing": "جاري المعالجة",
+  "copy_failed": "فشل النسخ: @error",
+  "request_id_short": "ID",
+  "bank_account_short": "الحساب",
+  "processing_date": "أجل المعالجة",
+  "processing_deadline": "الموعد النهائي",
+  "requested_date": "تم الطلب",
+  "completed": "مكتمل",
+  "failed": "فشل",
+  "email_verification_required_withdrawal":
+      "تتطلب عملية السحب التحقق من البريد الإلكتروني",
+  "view_all": "عرض الكل",
+  "showing_recent_withdrawals": "عرض @shown من @total سحوبات",
+  "withdrawal_history_full": "سجل السحوبات",
+  "no_withdrawal_history": "لا يوجد سجل سحوبات حتى الآن",
+  "withdrawal_history_empty_description":
+      "اطلب أول سحوبة لك لترى سجل المعاملات هنا",
+  "view_withdrawal_history": "عرض سجل السحوبات",
+  "withdrawal_history_subtitle": "تتبع جميع طلبات السحب الخاصة بك",
   // Permission UI
   "grant_camera_access_in_scanner":
       "اضغط على الإطار لمنح إذن الوصول إلى الكاميرا",
@@ -554,7 +592,7 @@ const Map<String, String> arabic = {
   'feature_recipes_title': 'وصفات وأنظمة مميزة',
   'feature_recipes_subtitle': 'ترشدك نحو النجاح',
   'best_value': 'أفضل قيمة',
-  'save_percent': 'وفّر {percent}%*',
+  'save_percent': 'وفّر @percent%*',
   'months_12': '12 شهرًا',
   'month_1': 'شهر واحد',
   'billed_annually': 'يتم الفوترة سنويًا',
@@ -562,7 +600,7 @@ const Map<String, String> arabic = {
   'per_month': 'شهريًا',
   'continue_cta': 'متابعة',
   'compared_to_monthly': '*مقارنة بالدفع الشهري',
-  'currency_dzd': 'د.ج',
+  'currency_dzd': 'دج',
 
   // Weight tracking UI
   "Target Weight": "الوزن المستهدف",
@@ -624,7 +662,7 @@ const Map<String, String> arabic = {
   "success": "نجاح",
   "food_added_success": "تمت إضافة الطعام بنجاح",
   "food_updated_success": "تم تحديث الطعام بنجاح",
-  "food_deleted_success": "تم حذف {count} عنصرًا بنجاح",
+  "food_deleted_success": "تم حذف @count عنصرًا بنجاح",
   // Nutrient short labels
   "nut_prt": "بروتين",
   "nut_carb": "كارب",
@@ -653,4 +691,160 @@ const Map<String, String> arabic = {
   "Chat": "الدردشة",
   "left": "متبقي",
   "login_to_view_usage": "سجل الدخول للحصول على",
+
+  // Email verification translations
+  "email_verification_title": "تحقق من بريدك الإلكتروني",
+  "email_verification_subtitle": "تحقق من بريدك الإلكتروني للمتابعة",
+  "email_sent_to": "لقد أرسلنا رابط التحقق إلى @email",
+  "email_verification_instructions":
+      "انقر على الرابط في بريدك الإلكتروني للتحقق من حسابك. هذا يساعدنا في الحفاظ على أمان حسابك.",
+  "checking_verification_status": "جاري التحقق من حالة التحقق...",
+  "resend_verification_email": "إعادة إرسال البريد الإلكتروني",
+  "resend_cooldown": "إعادة الإرسال خلال @seconds ثانية",
+  "resend_limit_reached": "متبقي @attempts محاولات",
+  "verification_attempts_remaining": "@remaining من @total محاولات متبقية",
+  "email_verification_success":
+      "تم التحقق من البريد الإلكتروني بنجاح! مرحباً بك في ماكروآيز",
+  "email_verification_resent": "تم إرسال بريد التحقق! تحقق من صندوق الوارد",
+  "email_verification_resend_error": "فشل في إرسال بريد التحقق. حاول مرة أخرى",
+  "email_verification_max_attempts":
+      "تم الوصول إلى العدد الأقصى من المحاولات. حاول مرة أخرى لاحقاً",
+  "email_verification_cooldown":
+      "الرجاء الانتظار @seconds ثانية قبل طلب بريد آخر",
+  "skip_verification_title": "تخطي التحقق؟",
+  "skip_verification_warning":
+      "هذا سيتيح الوصول دون التحقق من البريد الإلكتروني. غير مستحسن للأمان.",
+  "skip_anyway": "تخطي على أي حال",
+  "skip_verification": "تخطي التحقق",
+  "verify": "تحقق",
+  "sign_out_title": "تسجيل الخروج؟",
+  "sign_out_confirmation": "هل أنت متأكد من رغبتك في تسجيل الخروج؟",
+  "sign_out": "تسجيل الخروج",
+  "cancel": "إلغاء",
+  "email_verification_error": "فشل التحقق من البريد الإلكتروني. حاول مرة أخرى",
+
+  // Email verification guard messages
+  "auth_required": "الرجاء تسجيل الدخول للمتابعة",
+  "email_verification_required_for_feature":
+      "الرجاء التحقق من بريدك الإلكتروني لاستخدام هذه الميزة",
+  "email_verification_required_for_premium":
+      "التحقق من البريد الإلكتروني مطلوب للوصول إلى الميزات المميزة",
+  "email_verification_required_for_scan":
+      "الرجاء التحقق من بريدك الإلكتروني لاستخدام ماسح الطعام",
+  "email_verification_required_for_chat":
+      "الرجاء التحقق من بريدك الإلكتروني للدردشة مع المدرب الذكي",
+  "email_verification_required_for_app_access":
+      "التحقق من البريد الإلكتروني مطلوب للوصول إلى التطبيق",
+
+  // UI status indicators
+  "email_verified_status": "تم التحقق",
+  "email_unverified_status": "غير محقق",
+  "email_verified": "تم التحقق من البريد الإلكتروني",
+  "email_verification_complete_subtitle": "حسابك آمن وجاهز للاستخدام",
+  "email_verification_required": "التحقق من البريد الإلكتروني مطلوب",
+  "email_verification_required_subtitle":
+      "الرجاء التحقق من @email للوصول إلى جميع الميزات",
+  "verify_email": "التحقق من البريد الإلكتروني",
+  "verify_now": "التحقق الآن",
+  "refresh": "تحديث",
+  "refresh_failed": "فشل في تحديث الحالة. حاول مرة أخرى",
+  "tap_to_verify_email": "اضغط للتحقق من عنوان بريدك الإلكتروني",
+
+  // Account activation gating warnings
+  "account_activation_required": "تفعيل الحساب مطلوب",
+  "account_activation_required_for_chat":
+      "الرجاء تفعيل حسابك لاستخدام المدرب الذكي",
+  "account_activation_required_for_scanner":
+      "الرجاء تفعيل حسابك لاستخدام ماسح الطعام",
+  "account_activation_required_for_premium":
+      "الرجاء تفعيل حسابك لشراء النسخة المميزة",
+  "verify_account_to_continue": "تحقق من بريدك الإلكتروني للمتابعة",
+
+  // Premium Required Messages
+  "premium_required": "النسخة المميزة مطلوبة",
+  "premium_feature": "ميزة مميزة",
+  "recipes_premium_message":
+      "الوصول إلى الوصفات يتطلب اشتراكاً مميزاً. ارفع مستوى اشتراكك الآن لفتح هذه الميزة.",
+  "recipes_premium_badge": "افتح جميع الوصفات والميزات مع النسخة المميزة",
+  "local_food_premium_message": "إنشاء وتعديل الأطعمة المخصصة هي ميزة مميزة.",
+  "local_food_premium_badge":
+      "ارفع مستوى اشتراكك إلى النسخة المميزة لإنشاء أطعمة مخصصة غير محدودة!",
+  "chat_image_premium_message":
+      "الوصول إلى المرفقات المصورة يتطلب اشتراكاً مميزاً. ارفع مستوى اشتراكك الآن لفتح هذه الميزة.",
+  "chat_image_premium_badge": "افتح إرفاق الصور للمدرب مع النسخة المميزة",
+  "go_premium": "احصل على النسخة المميزة",
+  "maybe_later": "ربما لاحقاً",
+  // History fallbacks
+  "unknown_meal": "وجبة غير معروفة",
+
+  // Login/Register Form Labels
+  "login": "تسجيل الدخول",
+  "register": "إنشاء حساب",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "confirm_password": "تأكيد كلمة المرور",
+  "first_name": "الاسم الأول",
+  "last_name": "الاسم الأخير",
+  "forgot_password": "نسيت كلمة المرور؟",
+  "continue_with_google": "المتابعة مع جوجل",
+  "continue_with_apple": "المتابعة مع آبل",
+
+  // Validation Messages
+  "email_required": "البريد الإلكتروني مطلوب",
+    "required": "مطلوب",
+  "invalid_email_format": "تنسيق البريد الإلكتروني غير صحيح",
+  "password_required": "كلمة المرور مطلوبة",
+  "password_min_length": "الحد الأدنى 8 أحرف",
+  "password_complexity": "استخدم حروف كبيرة وصغيرة وأرقام ورموز",
+  "name_required": "مطلوب",
+  "name_too_short": "قصير جداً",
+  "passwords_do_not_match": "كلمات المرور غير متطابقة",
+  "please_fix_errors": "يرجى إصلاح الأخطاء",
+  "accept_terms_of_service": "يرجى قبول شروط الخدمة",
+
+  // Terms of Service
+  "by_registering_agree": "بالتسجيل أوافق على ",
+  "terms_of_service": "شروط الخدمة",
+
+  // Registration Success
+  "auth_register_verification_required":
+      "تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني للتحقق من حسابك.",
+
+  // Settings - Account Section
+  "account": "الحساب",
+  "tap_to_view_details": "اضغط لرؤية التفاصيل",
+  "register_login": "تسجيل / دخول",
+  "access_account_sync_data": "الوصول إلى حسابك ومزامنة البيانات",
+
+  // Settings - App Info Section
+  "app_info": "معلومات التطبيق",
+  "version": "الإصدار",
+  "reset_data": "إعادة تعيين البيانات",
+  "clear_all_app_data": "مسح جميع بيانات التطبيق",
+  "account_reset_success": "تم إعادة تعيين الحساب بنجاح",
+
+  // Account Details page translations
+  "account_details_title": "تفاصيل الحساب",
+  "no_name": "لا يوجد اسم",
+  "name_label": "الاسم",
+  "email_label": "البريد الإلكتروني",
+  "change_password": "تغيير كلمة المرور",
+  "logout": "تسجيل الخروج",
+  "display_name_updated": "تم تحديث اسم العرض",
+  "edit_display_name": "تعديل اسم العرض",
+  "new_display_name": "اسم العرض الجديد",
+  "password_changed_message": "تم تغيير كلمة المرور. يرجى تسجيل الدخول مرة أخرى.",
+    "current_password_incorrect": "كلمة المرور الحالية غير صحيحة.",
+    "too_many_attempts": "محاولات كثيرة جداً، يرجى المحاولة لاحقًا.",
+    "please_relogin": "الرجاء إعادة تسجيل الدخول ثم المحاولة.",
+    "operation_failed": "فشل العملية.",
+    // Change Password page translations
+    "current_password_label": "كلمة المرور الحالية",
+    "new_password_label": "كلمة المرور الجديدة",
+    "confirm_new_password_label": "تأكيد كلمة المرور الجديدة",
+    "min_8_chars": "الحد الأدنى 8 أحرف",
+    "password_complexity_hint": "استخدم حرف كبير، حرف صغير، رقم، رمز",
+    "must_differ_from_current": "يجب أن تختلف عن الحالية",
+    "does_not_match": "لا يتطابق",
+    "change_password_cta": "تغيير كلمة المرور",
 };

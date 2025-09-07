@@ -11,18 +11,19 @@ class AutoGoalView extends GetView<AdjustGoalsController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AdjustGoalsController>(
-      builder: (c) => GoalStep(
-        selectedGoal: c.selectedWGoal,
-        onSelectGoal: c.onChangeGoal,
-        onDesiredWeightChanged: (kg) => c.onChangeDesiredWeight(kg),
-        onBack: () => c.onChangeView(2),
-        onContinue: () {
-          if (c.selectedWGoal.isNotEmpty) {
-            c.setHasChanges(true);
-            c.saveOnSql();
-          }
-        },
-      ),
+      builder:
+          (c) => GoalStep(
+            selectedGoal: c.selectedWGoal,
+            onSelectGoal: c.onChangeGoal,
+            onDesiredWeightChanged: (kg) => c.onChangeDesiredWeight(kg),
+            onBack: () => c.onChangeView(2),
+            onContinue: () {
+              if (c.selectedWGoal.isNotEmpty) {
+                c.setHasChanges(true);
+                c.saveOnSql();
+              }
+            },
+          ),
     );
   }
 }

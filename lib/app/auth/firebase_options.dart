@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '582471032450',
     projectId: 'macroaize',
     storageBucket: 'macroaize.firebasestorage.app',
-    iosBundleId: 'com.example.foodcalorietracker',
+    iosBundleId: 'com.macroaize.app',
   );
 }

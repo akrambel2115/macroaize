@@ -12,7 +12,7 @@ class PrimaryCTA extends StatelessWidget {
   final VoidCallback? onTapUp;
   final VoidCallback? onTapCancel;
   final Animation<double>? pressAnimation;
-  final IconData icon;
+  final IconData? icon;
 
   const PrimaryCTA({
     super.key,
@@ -22,7 +22,7 @@ class PrimaryCTA extends StatelessWidget {
     this.onTapUp,
     this.onTapCancel,
     this.pressAnimation,
-    this.icon = Icons.arrow_forward_rounded,
+  this.icon,
   });
 
   @override
@@ -60,8 +60,10 @@ class PrimaryCTA extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          const SizedBox(width: 12),
-          Icon(icon, color: Colors.white, size: 24),
+          if (icon != null) ...[
+            const SizedBox(width: 12),
+            Icon(icon, color: Colors.white, size: 24),
+          ],
         ],
       ),
     );

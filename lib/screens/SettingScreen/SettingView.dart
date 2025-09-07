@@ -13,12 +13,14 @@ import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
 import 'package:foodcalorietracker/shared/models/subscription.dart';
 import 'package:foodcalorietracker/shared/services/subscription_service.dart';
 import 'package:foodcalorietracker/shared/services/usage_service.dart';
 import 'package:foodcalorietracker/shared/models/user_usage.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 import 'package:foodcalorietracker/shared/services/influencer_service.dart';
 import 'package:foodcalorietracker/shared/models/influencer.dart';
 import 'subscription_status_card.dart';
@@ -28,8 +30,6 @@ import 'package:intl/intl.dart';
 
 // Configuration class for easy maintenance and updates
 class SettingConfig {
-  // App version - update this when releasing new versions
-  static const String appVersion = "1.0.0";
 
   // Customization menu items - easily add/remove/modify settings
   static const List<Map<String, dynamic>> customizationItems = [
@@ -87,6 +87,14 @@ class SettingView extends GetView<SettingController> {
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => SettingController());
+    // Ensure AppConfigService is refreshed when Settings opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        Get.find<AppConfigService>().refresh();
+      } catch (_) {
+        // AppConfigService might not be ready yet
+      }
+    });
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: _buildModernAppBar(context),
@@ -169,85 +177,130 @@ class SettingView extends GetView<SettingController> {
             ModernFadeSlideTransition(
               beginOffset: const Offset(0, 0.2),
               child: ModernCard(
-                child: Column(
-                  children: [
-                    // Show login prompt when user is not authenticated
-                    StreamBuilder<User?>(
-                      stream: FirebaseAuth.instance.authStateChanges(),
-                      builder: (context, authSnap) {
-                        final user = authSnap.data;
-                        if (user == null) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () async {
-                                await AuthModal.show();
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: AppColor.primaryOrange.withOpacity(
-                                    0.04,
+                child: StreamBuilder<User?>(
+                  stream: FirebaseAuth.instance.authStateChanges(),
+                  builder: (context, authSnap) {
+                    final user = authSnap.data;
+                    // If user not authenticated: show login prompt AND free-tier limits from Remote Config
+                    if (user == null) {
+                      final cfg = Get.find<AppConfigService>();
+                      return Obx(() {
+                        // Listen to isLoaded to rebuild when config refreshes
+                        cfg.isLoaded; // trigger rebuild
+                        final remainingScans = cfg.freeScanLimit;
+                        final remainingChats = cfg.freeChatLimit;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  await AuthModal.show();
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
                                   ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: AppColor.primaryOrange
-                                            .withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(8),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: AppColor.primaryOrange.withOpacity(0.04),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: AppColor.primaryOrange.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.login,
+                                          color: AppColor.primaryOrange,
+                                          size: 18,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        Icons.login,
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'login_to_view_usage'.tr,
+                                          style: context.textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColor.primaryOrange,
+                                          ),
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 14,
                                         color: AppColor.primaryOrange,
-                                        size: 18,
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        'login_to_view_usage'.tr,
-                                        style: context.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                              color: AppColor.primaryOrange,
-                                            ),
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.arrow_forward_ios,
-                                      size: 14,
-                                      color: AppColor.primaryOrange,
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    // Usage values
-                    StreamBuilder<UserUsage?>(
+                            const SizedBox(height: 10),
+                            _buildProfileInfoRow(
+                              context,
+                              'Scans'.tr,
+                              '$remainingScans ${'left'.tr}',
+                              Icons.photo_camera_outlined,
+                              AppColor.primaryGreen,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildProfileInfoRow(
+                              context,
+                              'Chat'.tr,
+                              '$remainingChats ${'left'.tr}',
+                              Icons.chat_bubble_outline,
+                              AppColor.accent,
+                            ),
+                          ],
+                        );
+                      });
+                    }
+
+                    // Authenticated: show live usage values
+                    return StreamBuilder<UserUsage?>(
                       stream: usageService.usageStream,
                       builder: (context, usageSnapshot) {
-                        final usage =
-                            usageSnapshot.data ??
+                        if (usageSnapshot.connectionState == ConnectionState.waiting || !usageSnapshot.hasData) {
+                          // Show a tiny placeholder while we hydrate from server to avoid misleading defaults
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Column(
+                              children: [
+                                _buildProfileInfoRow(
+                                  context,
+                                  'Scans'.tr,
+                                  '... ',
+                                  Icons.photo_camera_outlined,
+                                  AppColor.primaryGreen,
+                                ),
+                                const SizedBox(height: 16),
+                                _buildProfileInfoRow(
+                                  context,
+                                  'Chat'.tr,
+                                  '... ',
+                                  Icons.chat_bubble_outline,
+                                  AppColor.accent,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        final usage = usageSnapshot.data ??
                             const UserUsage(scanCount: 0, chatCount: 0);
-                        final remainingScans = (usage.scanLimit -
-                                usage.scanCount)
-                            .clamp(0, usage.scanLimit);
-                        final remainingChats = (usage.chatLimit -
-                                usage.chatCount)
-                            .clamp(0, usage.chatLimit);
+                        final remainingScans =
+                            (usage.scanLimit - usage.scanCount)
+                                .clamp(0, usage.scanLimit);
+                        final remainingChats =
+                            (usage.chatLimit - usage.chatCount)
+                                .clamp(0, usage.chatLimit);
 
                         return Column(
                           children: [
@@ -270,8 +323,8 @@ class SettingView extends GetView<SettingController> {
                           ],
                         );
                       },
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -448,7 +501,7 @@ class SettingView extends GetView<SettingController> {
         const SizedBox(height: 16),
         _buildSectionHeader(
           context,
-          'Account'.tr,
+          'account'.tr,
           Icons.manage_accounts_outlined,
         ),
         const SizedBox(height: 12),
@@ -469,7 +522,7 @@ class SettingView extends GetView<SettingController> {
                         user.displayName?.trim().isNotEmpty == true
                             ? user.displayName!.trim()
                             : (user.email ?? 'Account'),
-                        'Tap to view details',
+                        'tap_to_view_details'.tr,
                         Icons.person_outline,
                         AppColor.primaryOrange,
                         onTap: () => Get.toNamed(Routes.accountDetailsView),
@@ -477,8 +530,8 @@ class SettingView extends GetView<SettingController> {
                     else
                       _buildSettingRow(
                         context,
-                        'Register / Login',
-                        'Access your account and sync data',
+                        'register_login'.tr,
+                        'access_account_sync_data'.tr,
                         Icons.login,
                         AppColor.secondary,
                         onTap: () async {
@@ -523,13 +576,7 @@ class SettingView extends GetView<SettingController> {
                     },
                   ),
                 ),
-                Divider(
-                  height: 24,
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? AppColor.neutralGrey700
-                          : AppColor.neutralGrey200,
-                ),
+                const SizedBox(height: 12),
                 _buildSettingRow(
                   context,
                   "Language".tr,
@@ -538,13 +585,7 @@ class SettingView extends GetView<SettingController> {
                   AppColor.tertiary,
                   onTap: () => Get.toNamed(Routes.languageView),
                 ),
-                Divider(
-                  height: 24,
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? AppColor.neutralGrey700
-                          : AppColor.neutralGrey200,
-                ),
+                const SizedBox(height: 12),
                 // Dynamic customization items from config
                 ...SettingConfig.customizationItems.asMap().entries.map((
                   entry,
@@ -565,14 +606,7 @@ class SettingView extends GetView<SettingController> {
                         item['color'] as Color,
                         onTap: () => Get.toNamed(item['route'] as String),
                       ),
-                      if (!isLast)
-                        Divider(
-                          height: 24,
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? AppColor.neutralGrey700
-                                  : AppColor.neutralGrey200,
-                        ),
+                      if (!isLast) const SizedBox(height: 12),
                     ],
                   );
                 }),
@@ -612,14 +646,7 @@ class SettingView extends GetView<SettingController> {
                               () =>
                                   _handleLegalAction(item['action'] as String),
                         ),
-                        if (!isLast)
-                          Divider(
-                            height: 24,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppColor.neutralGrey700
-                                    : AppColor.neutralGrey200,
-                          ),
+                        if (!isLast) const SizedBox(height: 12),
                       ],
                     );
                   }).toList(),
@@ -634,31 +661,27 @@ class SettingView extends GetView<SettingController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, "App Info".tr, Icons.info_outline),
+        _buildSectionHeader(context, "app_info".tr, Icons.info_outline),
         const SizedBox(height: 12),
         ModernFadeSlideTransition(
           beginOffset: const Offset(0, 0.5),
           child: ModernCard(
             child: Column(
               children: [
+                Obx(() => _buildSettingRow(
+                      context,
+                      "version".tr,
+                      controller.appVersion.value.isNotEmpty
+                          ? controller.appVersion.value
+                          : 'unknown',
+                      Icons.code_outlined,
+                      AppColor.neutralGrey600,
+                    )),
+                const SizedBox(height: 12),
                 _buildSettingRow(
                   context,
-                  "Version".tr,
-                  SettingConfig.appVersion,
-                  Icons.code_outlined,
-                  AppColor.neutralGrey600,
-                ),
-                Divider(
-                  height: 24,
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? AppColor.neutralGrey700
-                          : AppColor.neutralGrey200,
-                ),
-                _buildSettingRow(
-                  context,
-                  "Reset Data".tr,
-                  "Clear all app data",
+                  "reset_data".tr,
+                  "clear_all_app_data".tr,
                   Icons.delete_outline,
                   AppColor.error,
                   onTap: () => showDeleteDialog(context),
@@ -882,11 +905,20 @@ class SettingView extends GetView<SettingController> {
               Row(
                 children: [
                   Expanded(
-                    child: ModernButton(
-                      text: "Cancel".tr,
-                      style: ModernButtonStyle.outline,
-                      size: ModernButtonSize.medium,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColor.error,
+                        side: BorderSide(color: AppColor.error),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                       onPressed: () => Get.back(),
+                      child: Text(
+                        "Cancel".tr,
+                        style: TextStyle(color: AppColor.error),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1072,45 +1104,27 @@ class SettingView extends GetView<SettingController> {
                         );
                       },
                     ),
-                    Divider(
-                      height: 24,
-                      color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? AppColor.neutralGrey700
-                              : AppColor.neutralGrey200,
-                    ),
+                    const SizedBox(height: 12),
 
                     // Current balance
                     _buildProfileInfoRow(
                       context,
                       'current_balance'.tr,
-                      '${influencer.earningsDzd.toStringAsFixed(0)} DZD',
+                      '${influencer.earningsDzd.toStringAsFixed(0)} ${'currency_dzd'.tr}',
                       Icons.account_balance_wallet,
                       AppColor.success,
                     ),
-                    Divider(
-                      height: 24,
-                      color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? AppColor.neutralGrey700
-                              : AppColor.neutralGrey200,
-                    ),
+                    const SizedBox(height: 12),
 
                     // Total earned
                     _buildProfileInfoRow(
                       context,
                       'total_earned'.tr,
-                      '${influencer.totalEarningsDzd.toStringAsFixed(0)} DZD',
+                      '${influencer.totalEarningsDzd.toStringAsFixed(0)} ${'currency_dzd'.tr}',
                       Icons.trending_up,
                       AppColor.info,
                     ),
-                    Divider(
-                      height: 24,
-                      color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? AppColor.neutralGrey700
-                              : AppColor.neutralGrey200,
-                    ),
+                    const SizedBox(height: 12),
 
                     // Referrals count
                     _buildProfileInfoRow(
@@ -1120,54 +1134,37 @@ class SettingView extends GetView<SettingController> {
                       Icons.people,
                       AppColor.warning,
                     ),
-                    Divider(
-                      height: 24,
-                      color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? AppColor.neutralGrey700
-                              : AppColor.neutralGrey200,
-                    ),
+                    const SizedBox(height: 12),
 
                     // Withdrawal action row
                     _buildSettingRow(
                       context,
                       'request_withdrawal'.tr,
-                      influencer.canWithdraw
-                          ? null
-                          : 'minimum_withdrawal_amount'.trParams({
-                            'amount': influencer.minWithdrawal.toStringAsFixed(
-                              0,
-                            ),
-                          }),
+                      'minimum_withdrawal_amount'.trParams({
+                        'amount': influencer.minWithdrawal.toStringAsFixed(0),
+                      }),
                       Icons.account_balance,
                       influencer.canWithdraw
                           ? AppColor.primaryOrange
                           : AppColor.neutralGrey600,
-                      onTap:
-                          influencer.canWithdraw
-                              ? () => _showWithdrawalDialog(context, influencer)
-                              : null,
+                      onTap: () => _showWithdrawalDialog(context, influencer),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Withdrawal history action row
+                    _buildSettingRow(
+                      context,
+                      'view_withdrawal_history'.tr,
+                      'withdrawal_history_subtitle'.tr,
+                      Icons.history,
+                      AppColor.info,
+                      onTap: () => Get.toNamed(Routes.withdrawalHistoryView),
                     ),
 
                     // Expiration info if applicable
                     if (influencer.expirationDate != null) ...[
                       const SizedBox(height: 16),
                       _buildExpirationInfo(context, influencer),
-                    ],
-
-                    // Withdrawal history (last 3)
-                    if (influencer.withdrawHistory.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        'withdrawal_history'.tr,
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ...influencer.withdrawHistory
-                          .take(3)
-                          .map((w) => _buildWithdrawalHistoryItem(context, w)),
                     ],
                   ],
                 ),
@@ -1182,6 +1179,7 @@ class SettingView extends GetView<SettingController> {
 
   // Removed old Influencer-specific section builders in favor of unified Setting rows
 
+  // ignore: unused_element
   Widget _buildWithdrawalHistoryItem(
     BuildContext context,
     WithdrawalRecord withdrawal,
@@ -1308,9 +1306,15 @@ class SettingView extends GetView<SettingController> {
   // Removed unused _buildStatCard in favor of standard setting rows
 
   void _copyPromoCode(String promoCode) {
-    // For now, just show a success message - clipboard implementation would require additional imports
-    NotificationService.showSuccess('promo_code_copied'.tr);
-    // TODO: Add clipboard import and implement: Clipboard.setData(ClipboardData(text: promoCode));
+    try {
+      Clipboard.setData(ClipboardData(text: promoCode));
+      NotificationService.showSuccess('promo_code_copied'.tr);
+    } catch (e) {
+      // If clipboard access fails, still inform the user
+      NotificationService.showError(
+        'copy_failed'.trParams({'error': e.toString()}),
+      );
+    }
   }
 
   void _showWithdrawalDialog(BuildContext context, Influencer influencer) {
@@ -1385,7 +1389,7 @@ class SettingView extends GetView<SettingController> {
                         ),
                         const Spacer(),
                         Text(
-                          '${influencer.earningsDzd.toStringAsFixed(0)} DZD',
+                          '${influencer.earningsDzd.toStringAsFixed(0)} ${'currency_dzd'.tr}',
                           style: context.textTheme.titleMedium?.copyWith(
                             color: AppColor.success,
                             fontWeight: FontWeight.bold,
@@ -1409,7 +1413,7 @@ class SettingView extends GetView<SettingController> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: 'enter_amount'.tr,
-                      suffixText: 'DZD',
+                      suffixText: 'currency_dzd'.tr,
                       errorStyle: context.textTheme.labelMedium?.copyWith(
                         color: AppColor.error,
                       ),
@@ -1549,6 +1553,11 @@ class SettingView extends GetView<SettingController> {
                             Get.back(); // Close dialog
 
                             if (result.success) {
+                              _showProcessingTimeAlert(
+                                context,
+                                result.withdrawalId ?? 'Unknown',
+                                3,
+                              );
                               NotificationService.showSuccess(result.message);
                             } else {
                               NotificationService.showError(result.message);
@@ -1571,6 +1580,361 @@ class SettingView extends GetView<SettingController> {
     );
   }
 
+  /// Shows full withdrawal history in a modal dialog
+  // ignore: unused_element
+  void _showFullWithdrawalHistory(
+    BuildContext context,
+    List<WithdrawalRecord> withdrawalHistory,
+  ) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: context.theme.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: Get.height * 0.8,
+            maxWidth: Get.width * 0.9,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColor.primaryOrange.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.history,
+                      color: AppColor.primaryOrange,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'withdrawal_history'.tr,
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColor.primaryOrange,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      color: AppColor.neutralGrey600,
+                      onPressed: () => Get.back(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Content
+              Flexible(
+                child:
+                    withdrawalHistory.isEmpty
+                        ? Container(
+                          padding: const EdgeInsets.all(40),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.inbox_outlined,
+                                size: 48,
+                                color: AppColor.neutralGrey400,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'no_withdrawal_history'.tr,
+                                style: context.textTheme.titleMedium?.copyWith(
+                                  color: AppColor.neutralGrey600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        : ListView.separated(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(20),
+                          itemCount: withdrawalHistory.length,
+                          separatorBuilder:
+                              (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final withdrawal = withdrawalHistory[index];
+                            return _buildEnhancedWithdrawalHistoryItem(
+                              context,
+                              withdrawal,
+                            );
+                          },
+                        ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+  /// Enhanced withdrawal history item with more details
+  Widget _buildEnhancedWithdrawalHistoryItem(
+    BuildContext context,
+    WithdrawalRecord withdrawal,
+  ) {
+    Color statusColor;
+    IconData statusIcon;
+
+    switch (withdrawal.status.toLowerCase()) {
+      case 'completed':
+        statusColor = AppColor.success;
+        statusIcon = Icons.check_circle;
+        break;
+      case 'processing':
+        statusColor = AppColor.warning;
+        statusIcon = Icons.schedule;
+        break;
+      case 'failed':
+      case 'cancelled':
+        statusColor = AppColor.error;
+        statusIcon = Icons.cancel;
+        break;
+      default:
+        statusColor = AppColor.neutralGrey600;
+        statusIcon = Icons.info;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.theme.scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: statusColor.withOpacity(0.2), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row with amount and status
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${withdrawal.amount.toStringAsFixed(0)} ${'currency_dzd'.tr}',
+                  style: context.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 14, color: statusColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      withdrawal.statusDisplay,
+                      style: context.textTheme.labelSmall?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Details grid
+          Row(
+            children: [
+              Expanded(
+                child: _buildDetailItem(
+                  context,
+                  'request_id_short'.tr,
+                  withdrawal.id,
+                  Icons.confirmation_number_outlined,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildDetailItem(
+                  context,
+                  'bank_account_short'.tr,
+                  withdrawal.ripMasked,
+                  Icons.account_balance,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDetailItem(
+                  context,
+                  'requested_date'.tr,
+                  withdrawal.requestedAt != null
+                      ? _formatDate(withdrawal.requestedAt!)
+                      : 'unknown_date'.tr,
+                  Icons.calendar_today,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildDetailItem(
+                  context,
+                  'processing_deadline'.tr,
+                  withdrawal.estimatedProcessingDate ?? 'unknown_date'.tr,
+                  Icons.schedule,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Helper to build detail items in withdrawal history
+  Widget _buildDetailItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: AppColor.neutralGrey500),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: AppColor.neutralGrey600,
+                  fontSize: 10,
+                ),
+              ),
+              Text(
+                value,
+                style: context.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Shows a processing time alert after successful withdrawal request
+  void _showProcessingTimeAlert(
+    BuildContext context,
+    String withdrawalId,
+    int processingDays,
+  ) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: context.theme.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColor.success.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle,
+                color: AppColor.success,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'withdrawal_submitted'.tr,
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'request_id'.trParams({'id': withdrawalId}),
+              style: context.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColor.primaryOrange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.schedule, color: AppColor.primaryOrange),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'processing_time'.trParams({
+                        'days': processingDays.toString(),
+                      }),
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'withdrawal_email_confirmation'.tr,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: AppColor.neutralGrey600,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          ModernButton(
+            text: 'got_it'.tr,
+            style: ModernButtonStyle.primary,
+            size: ModernButtonSize.medium,
+            onPressed: () => Get.back(),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+  }
+
   String _formatDate(DateTime date) {
     // TODO: Implement proper date formatting based on locale
     return '${date.day}/${date.month}/${date.year}';
@@ -1581,7 +1945,18 @@ class SettingView extends GetView<SettingController> {
     await dbHelper.sqlClear();
     SharedPref.clear();
     await Get.find<ThemeController>().toggleTheme(true);
-    NotificationService.showSuccess("You have been Reset Account");
+    NotificationService.showSuccess("account_reset_success".tr);
     Get.offAllNamed(AppPages.initial);
+  }
+
+  // ignore: unused_element
+  String _maskRip(String rip) {
+    if (rip.isEmpty) return '';
+    if (rip.length <= 4) return rip; // If it's already short, don't mask
+
+    // Show only the last 4 digits for security, mask the rest
+    final lastFour = rip.substring(rip.length - 4);
+    final masked = '*' * (rip.length - 4);
+    return '$masked$lastFour';
   }
 }

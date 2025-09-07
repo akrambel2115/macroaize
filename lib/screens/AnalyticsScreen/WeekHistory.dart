@@ -21,56 +21,81 @@ class WeekHistory extends GetView<AnalyticsController> {
               borderRadius: BorderRadius.circular(10),
               color: context.theme.cardColor,
             ),
-            child: GetBuilder<AnalyticsController>(builder: (controller) {
-              return Column(
-                children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                            "Calorie Your Week :".tr,
-                            style: context.theme.textTheme.titleMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
-                          ).paddingOnly(bottom: 15,right: 5),  Text(
-                            "${controller.yourWeeklyGoal}",
-                            style: context.theme.textTheme.titleMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
-                          ).paddingOnly(bottom: 15),
-                    ],
-                  ),
-                  Expanded(child: SfCartesianChart(
-                    primaryXAxis: CategoryAxis(
-                      majorGridLines: MajorGridLines(width: 0),
-                      // Reduce font size so longer localized weekday names fit better
-                      labelStyle: context.theme.textTheme.labelSmall?.copyWith(fontSize: 9),
-                      // Ensure every category label is attempted to be rendered even
-                      // when localized strings are longer (e.g., Arabic full names).
-                      interval: 1,
-                      // Rotate labels to reduce overlap for longer localized names
-                      labelRotation: -45,
+            child: GetBuilder<AnalyticsController>(
+              builder: (controller) {
+                return Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Calorie Your Week :".tr,
+                          style: context.theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ).paddingOnly(bottom: 15, right: 5),
+                        Text(
+                          "${controller.yourWeeklyGoal}",
+                          style: context.theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors
+                                        .grey[300] // Light gray for dark mode
+                                    : null, // Use default theme color for light mode
+                          ),
+                        ).paddingOnly(bottom: 15),
+                      ],
                     ),
-                    primaryYAxis: NumericAxis(
-                      majorGridLines: MajorGridLines(width: 1),
-                      labelStyle: context.theme.textTheme.labelSmall?.copyWith(fontSize: 11),
-                    ),
-                    series: [
-                      ColumnSeries<SalesData, String>(
-                        dataSource: controller.weeklyData,
-                        xValueMapper: (SalesData sales, _) => sales.time.tr,
-                        color: context.theme.focusColor,
-                        yValueMapper: (SalesData sales, _) => sales.ml,
-                        dataLabelSettings: DataLabelSettings(
-                          isVisible: true,
-                          textStyle: context.theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                    Expanded(
+                      child: SfCartesianChart(
+                        primaryXAxis: CategoryAxis(
+                          majorGridLines: MajorGridLines(width: 0),
+                          // Reduce font size so longer localized weekday names fit better
+                          labelStyle: context.theme.textTheme.labelSmall
+                              ?.copyWith(fontSize: 9),
+                          // Ensure every category label is attempted to be rendered even
+                          // when localized strings are longer (e.g., Arabic full names).
+                          interval: 1,
+                          // Rotate labels to reduce overlap for longer localized names
+                          labelRotation: -45,
                         ),
-                      )
-                    ],
-                  ))
-
-                ],
-              );
-            },),
+                        primaryYAxis: NumericAxis(
+                          majorGridLines: MajorGridLines(width: 1),
+                          labelStyle: context.theme.textTheme.labelSmall
+                              ?.copyWith(fontSize: 11),
+                        ),
+                        series: [
+                          ColumnSeries<SalesData, String>(
+                            dataSource: controller.weeklyData,
+                            xValueMapper: (SalesData sales, _) => sales.time.tr,
+                            color: context.theme.focusColor,
+                            yValueMapper: (SalesData sales, _) => sales.ml,
+                            dataLabelSettings: DataLabelSettings(
+                              isVisible: true,
+                              textStyle: context.theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 11,
+                                color:
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors
+                                            .grey[300] // Light gray for dark mode
+                                        : null, // Use default theme color for light mode
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
-
 }

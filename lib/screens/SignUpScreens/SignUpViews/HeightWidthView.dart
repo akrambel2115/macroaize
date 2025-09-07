@@ -11,21 +11,22 @@ class HeightWidth extends GetView<SignUpController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<SignUpController>(
-      builder: (c) => HeightWeightStep(
-        onHeightCmChanged: (cm) => c.selectedCm = cm,
-        onHeightFeetInchesChanged: (feet, inches) {
-          c.selectedFeet = feet;
-          c.selectedInches = inches;
-        },
-        onWeightKgChanged: (kg) => c.selectedWeightKg = kg,
-  onBack: () {
-          c.selectedView = 1; // go back to Workout
-          c.update();
-        },
-  showHeaderBack: false,
-        showFooterPrevious: true,
-        onContinue: () => c.onChangeView(),
-      ),
+      builder:
+          (c) => HeightWeightStep(
+            onHeightCmChanged: (cm) => c.selectedCm = cm,
+            onHeightFeetInchesChanged: (feet, inches) {
+              c.selectedFeet = feet;
+              c.selectedInches = inches;
+            },
+            onWeightKgChanged: (kg) => c.selectedWeightKg = kg,
+            onBack: () {
+              c.selectedView = 1; // go back to Workout
+              c.update();
+            },
+            showHeaderBack: false,
+            showFooterPrevious: true,
+            onContinue: () => c.onChangeView(),
+          ),
     );
   }
 }

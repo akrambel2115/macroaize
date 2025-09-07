@@ -4,32 +4,42 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Subscriptions: only owner can read; NO CLIENT WRITES allowed for security
     // All subscription modifications must go through backend functions
+    // CRITICAL: Require email verification for accessing subscription data
     match /subscriptions/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && 
+                   request.auth.uid == userId &&
+                   request.auth.token.email_verified == true;
       allow write: if false; // No client writes - only backend functions can modify subscriptions
     }
 
     // --- NEW Usage Tracking Rules ---
     match /user_usage/{userId} {
       // A user can read their own usage to see their limits in the UI.
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // CRITICAL: Require email verification for reading usage data
+      allow read: if request.auth != null && 
+                   request.auth.uid == userId &&
+                   request.auth.token.email_verified == true;
       // NO ONE can write to this from the client. It MUST be done by a Cloud Function.
       allow write: if false; 
     }
 
     // --- NEW Premium Content Rules ---
     match /recipes/{recipeId} {
-      // Only allow reads if user has an active premium subscription
+      // Only allow reads if user has verified email AND active premium subscription
+      // CRITICAL: Email verification is required for all premium content access
       allow read: if request.auth != null && 
+                   request.auth.token.email_verified == true &&
                    exists(/databases/$(database)/documents/subscriptions/$(request.auth.uid)) &&
                    get(/databases/$(database)/documents/subscriptions/$(request.auth.uid)).data.isPremium == true &&
                    get(/databases/$(database)/documents/subscriptions/$(request.auth.uid)).data.endDate.toMillis() > request.time.toMillis();
-      allow write: if false; // Only you can add recipes
+      allow write: if false; // Only backend can add recipes
     }
 
     match /custom_foods/{foodId} {
-      // Only allow reads/writes if user has an active premium subscription
+      // Only allow reads/writes if user has verified email AND active premium subscription
+      // CRITICAL: Email verification is required for all premium content access
       allow read, write: if request.auth != null &&
+                          request.auth.token.email_verified == true &&
                           exists(/databases/$(database)/documents/subscriptions/$(request.auth.uid)) &&
                           get(/databases/$(database)/documents/subscriptions/$(request.auth.uid)).data.isPremium == true &&
                           get(/databases/$(database)/documents/subscriptions/$(request.auth.uid)).data.endDate.toMillis() > request.time.toMillis();
@@ -45,16 +55,29 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Influencers collection: read-only for influencers themselves, no client writes
+    // Influencers collection: read-only for verified influencers themselves, no client writes
     match /influencers/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create, update: if request.auth.token.admin == true;
+      // CRITICAL: Require email verification for reading influencer data
+      allow read: if request.auth != null && 
+                   request.auth.uid == userId &&
+                   request.auth.token.email_verified == true;
+      // Only admins can create/update influencer records
+      // SECURITY: Prevent any writes containing 'rip' field to avoid plain text RIP storage
+      allow create, update: if request.auth.token.admin == true &&
+                              !('rip' in request.resource.data) &&
+                              !(request.resource.data.keys().hasAny(['rip']));
       allow delete: if false;
     }
 
     // Influencer audit logs: no client access
     match /influencer_audit/{id} {
       allow read, write: if false;
+    }
+
+    // Secure withdrawal data with encrypted RIPs: STRICT no client access
+    // Only accessible through admin Cloud Functions with proper authentication
+    match /withdrawals_secure/{id} {
+      allow read, write: if false; // Completely blocked from client access
     }
 
     // Email queue for notifications: no client access

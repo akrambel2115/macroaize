@@ -25,79 +25,94 @@ class _SignUpViewState extends State<SignUpView> {
           right: 10,
           left: 10,
         ),
-        child: GetBuilder<SignUpController>(builder: (controller) {
-          // Map the selectedView into a 6-step progress (gender..stoppingGoal)
-          final int stepIndex = controller.selectedView.clamp(0, 5);
-          final bool forward = stepIndex >= _prevStep;
+        child: GetBuilder<SignUpController>(
+          builder: (controller) {
+            // Map the selectedView into a 6-step progress (gender..stoppingGoal)
+            final int stepIndex = controller.selectedView.clamp(0, 5);
+            final bool forward = stepIndex >= _prevStep;
 
-          // Update prev step for next build (no setState required)
-          _prevStep = stepIndex;
+            // Update prev step for next build (no setState required)
+            _prevStep = stepIndex;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Step progress indicator (6 steps) — show above the back button on all pages
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
-                child: _StepProgressIndicator(
-                  currentStep: stepIndex,
-                  total: 6,
-                  activeColor: AppColor.primaryOrange,
-                ),
-              ),
-              // Top left back button (use shared AppWidgets.backButton for consistent look)
-              AppWidgets.backButton(context, () {
-                if (controller.selectedView > 0) {
-                  controller.selectedView = controller.selectedView - 1;
-                  controller.update();
-                } else {
-                  Get.back();
-                }
-              }),
-              const SizedBox(height: 8),
-
-              // The active screen with smooth animated transitions
-              Expanded(
-                child: AnimatedSwitcher(
-                  // Increased duration for a slower, smoother transition
-                  duration: const Duration(milliseconds: 700),
-                  // Use symmetric easeInOut curves for smoother entrance/exit
-                  switchInCurve: Curves.easeInOut,
-                  switchOutCurve: Curves.easeInOut,
-                  transitionBuilder: (child, animation) {
-                    // Combine slide + fade for a smoother transition.
-                    // When the app is in RTL (e.g., Arabic) we need to flip the
-                    // slide direction so forward/back navigation feels natural.
-                    final textDir = Directionality.of(context);
-                    final bool isRtl = textDir == TextDirection.rtl;
-
-                    // Determine the animation start offset based on directionality
-                    // and whether the navigation is forward.
-                    final Offset begin = forward
-                        ? (isRtl ? const Offset(-1.0, 0.0) : const Offset(1.0, 0.0))
-                        : (isRtl ? const Offset(1.0, 0.0) : const Offset(-1.0, 0.0));
-
-                    final offsetAnimation = animation.drive(Tween<Offset>(
-                      begin: begin,
-                      end: Offset.zero,
-                    ).chain(CurveTween(curve: Curves.easeInOut)));
-
-                    final fadeAnim = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
-
-                    return FadeTransition(
-                      opacity: fadeAnim,
-                      child: SlideTransition(position: offsetAnimation, child: child),
-                    );
-                  },
-                  child: KeyedSubtree(
-                    key: ValueKey<int>(controller.selectedView),
-                    child: controller.screens[controller.selectedView],
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Step progress indicator (6 steps) — show above the back button on all pages
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6.0),
+                  child: _StepProgressIndicator(
+                    currentStep: stepIndex,
+                    total: 6,
+                    activeColor: AppColor.primaryOrange,
                   ),
                 ),
-              ),
-            ],
-          );
-        }),
+                // Top left back button (use shared AppWidgets.backButton for consistent look)
+                AppWidgets.backButton(context, () {
+                  if (controller.selectedView > 0) {
+                    controller.selectedView = controller.selectedView - 1;
+                    controller.update();
+                  } else {
+                    Get.back();
+                  }
+                }),
+                const SizedBox(height: 8),
+
+                // The active screen with smooth animated transitions
+                Expanded(
+                  child: AnimatedSwitcher(
+                    // Increased duration for a slower, smoother transition
+                    duration: const Duration(milliseconds: 700),
+                    // Use symmetric easeInOut curves for smoother entrance/exit
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    transitionBuilder: (child, animation) {
+                      // Combine slide + fade for a smoother transition.
+                      // When the app is in RTL (e.g., Arabic) we need to flip the
+                      // slide direction so forward/back navigation feels natural.
+                      final textDir = Directionality.of(context);
+                      final bool isRtl = textDir == TextDirection.rtl;
+
+                      // Determine the animation start offset based on directionality
+                      // and whether the navigation is forward.
+                      final Offset begin =
+                          forward
+                              ? (isRtl
+                                  ? const Offset(-1.0, 0.0)
+                                  : const Offset(1.0, 0.0))
+                              : (isRtl
+                                  ? const Offset(1.0, 0.0)
+                                  : const Offset(-1.0, 0.0));
+
+                      final offsetAnimation = animation.drive(
+                        Tween<Offset>(
+                          begin: begin,
+                          end: Offset.zero,
+                        ).chain(CurveTween(curve: Curves.easeInOut)),
+                      );
+
+                      final fadeAnim = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeInOut,
+                      );
+
+                      return FadeTransition(
+                        opacity: fadeAnim,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: KeyedSubtree(
+                      key: ValueKey<int>(controller.selectedView),
+                      child: controller.screens[controller.selectedView],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -108,11 +123,15 @@ class _StepProgressIndicator extends StatelessWidget {
   final int total;
   final Color? activeColor;
 
-  const _StepProgressIndicator({required this.currentStep, required this.total, this.activeColor});
+  const _StepProgressIndicator({
+    required this.currentStep,
+    required this.total,
+    this.activeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-  final primary = activeColor ?? context.theme.primaryColor;
+    final primary = activeColor ?? context.theme.primaryColor;
     final inactive = Colors.grey.shade300;
     const duration = Duration(milliseconds: 420);
     const curve = Curves.easeInOut;
@@ -131,11 +150,21 @@ class _StepProgressIndicator extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
               color: active ? primary : Colors.white,
-              border: Border.all(color: active ? primary : Colors.grey.shade400, width: 2),
+              border: Border.all(
+                color: active ? primary : Colors.grey.shade400,
+                width: 2,
+              ),
               shape: BoxShape.circle,
-              boxShadow: active
-                  ? [BoxShadow(color: (primary).withOpacity(0.18), blurRadius: 8, offset: const Offset(0, 4))]
-                  : null,
+              boxShadow:
+                  active
+                      ? [
+                        BoxShadow(
+                          color: (primary).withOpacity(0.18),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                      : null,
             ),
             alignment: Alignment.center,
             child: AnimatedDefaultTextStyle(

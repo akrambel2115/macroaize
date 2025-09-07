@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
@@ -6,7 +5,8 @@ import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/historyScreen/DeleteDailog.dart';
 import 'package:foodcalorietracker/screens/historyScreen/HistoryController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
+// 'ModernButton' import removed: empty-state now uses ContinueButton.
+import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:foodcalorietracker/widgets/NutritionBadge.dart';
 import 'package:get/get.dart';
@@ -41,7 +41,10 @@ class HistoryView extends GetView<HistoryController> {
         child: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_rounded,
-            color: AppColor.neutralGrey700,
+            color:
+                context.theme.brightness == Brightness.light
+                    ? AppColor.neutralGrey700
+                    : Colors.white,
           ),
           onPressed: () => Get.back(),
         ),
@@ -50,7 +53,10 @@ class HistoryView extends GetView<HistoryController> {
         "History".tr,
         style: context.textTheme.headlineLarge?.copyWith(
           fontWeight: FontWeight.bold,
-          color: AppColor.neutralGrey900,
+          color:
+              context.theme.brightness == Brightness.light
+                  ? AppColor.neutralGrey900
+                  : Colors.white,
         ),
       ),
       actions: [
@@ -63,7 +69,10 @@ class HistoryView extends GetView<HistoryController> {
                   angle: c.sortAsc ? math.pi : 0,
                   child: Icon(
                     Icons.sort,
-                    color: AppColor.neutralGrey700,
+                    color:
+                        context.theme.brightness == Brightness.light
+                            ? AppColor.neutralGrey700
+                            : Colors.white,
                   ),
                 ),
                 onPressed: () {
@@ -89,14 +98,11 @@ class HistoryView extends GetView<HistoryController> {
           SliverPadding(
             padding: const EdgeInsets.all(20),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return ModernFadeSlideTransition(
-                    child: _buildHistoryCard(context, controller, index),
-                  );
-                },
-                childCount: controller.sqlHistory.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                return ModernFadeSlideTransition(
+                  child: _buildHistoryCard(context, controller, index),
+                );
+              }, childCount: controller.sqlHistory.length),
             ),
           ),
         ],
@@ -104,9 +110,13 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildHistoryCard(BuildContext context, HistoryController controller, int index) {
+  Widget _buildHistoryCard(
+    BuildContext context,
+    HistoryController controller,
+    int index,
+  ) {
     final historyItem = controller.sqlHistory[index];
-    
+
     return ModernCard(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -123,7 +133,9 @@ class HistoryView extends GetView<HistoryController> {
                   onTap: () {
                     showCustomDeleteDialog(
                       onDelete: () {
-                        controller.dbHelper.deleteCalorieHistory(historyItem.id!);
+                        controller.dbHelper.deleteCalorieHistory(
+                          historyItem.id!,
+                        );
                         controller.getHistory();
                       },
                       context: context,
@@ -145,11 +157,11 @@ class HistoryView extends GetView<HistoryController> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
-          // Food image centered on top and single-line nutrition row below
-          Center(child: _buildFoodImage(historyItem.image, size: 110)),
+
+          // Show title instead of image for both local and scanned meals
+          Center(child: _buildHistoryTitle(context, historyItem.title)),
           const SizedBox(height: 16),
           // Render nutrition items inline in a single row without scrolling.
           // Use Expanded so each badge shares available space and reduce gaps to avoid overflow.
@@ -159,10 +171,10 @@ class HistoryView extends GetView<HistoryController> {
                 child: NutritionBadge(
                   label: "Calorie".tr,
                   value: historyItem.calorie.toString(),
-                  iconWidget: Icon(
-                    Icons.local_fire_department_rounded,
-                    color: AppColor.historyAccent,
-                    size: 28,
+                  iconWidget: Image.asset(
+                    'assets/icons/calorie.png',
+                    width: 28,
+                    height: 28,
                   ),
                   accentColor: AppColor.historyAccent,
                   iconSize: 28,
@@ -178,8 +190,6 @@ class HistoryView extends GetView<HistoryController> {
                     AppAssets.protein,
                     width: 28,
                     height: 28,
-                    color: AppColor.historyAccent,
-                    colorBlendMode: BlendMode.srcIn,
                   ),
                   accentColor: AppColor.historyAccent,
                   iconSize: 28,
@@ -195,8 +205,6 @@ class HistoryView extends GetView<HistoryController> {
                     AppAssets.carb,
                     width: 28,
                     height: 28,
-                    color: AppColor.historyAccent,
-                    colorBlendMode: BlendMode.srcIn,
                   ),
                   accentColor: AppColor.historyAccent,
                   iconSize: 28,
@@ -208,13 +216,7 @@ class HistoryView extends GetView<HistoryController> {
                 child: NutritionBadge(
                   label: "Fats".tr,
                   value: historyItem.fats.toString(),
-                  iconWidget: Image.asset(
-                    AppAssets.fat,
-                    width: 28,
-                    height: 28,
-                    color: AppColor.historyAccent,
-                    colorBlendMode: BlendMode.srcIn,
-                  ),
+                  iconWidget: Image.asset(AppAssets.fat, width: 28, height: 28),
                   accentColor: AppColor.historyAccent,
                   iconSize: 28,
                   unit: 'fat_unit'.tr,
@@ -222,9 +224,9 @@ class HistoryView extends GetView<HistoryController> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Timestamp
           _buildTimestamp(context),
         ],
@@ -234,8 +236,8 @@ class HistoryView extends GetView<HistoryController> {
 
   Widget _buildMealTypeChip(BuildContext context, String mealType) {
     Color chipColor;
-  String chipIconAsset = '';
-    
+    String chipIconAsset = '';
+
     switch (mealType.toLowerCase()) {
       case 'breakfast':
         chipColor = AppColor.warning;
@@ -253,31 +255,20 @@ class HistoryView extends GetView<HistoryController> {
         chipColor = AppColor.accent;
         chipIconAsset = AppAssets.moreIcon;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: chipColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: chipColor.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: chipColor.withOpacity(0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           chipIconAsset.isNotEmpty
-              ? Image.asset(
-                  chipIconAsset,
-                  width: 16,
-                  height: 16,
-                )
-              : Icon(
-                  Icons.cookie_outlined,
-                  size: 16,
-                  color: chipColor,
-                ),
+              ? Image.asset(chipIconAsset, width: 16, height: 16)
+              : Icon(Icons.cookie_outlined, size: 16, color: chipColor),
           const SizedBox(width: 6),
           Text(
             mealType.tr,
@@ -291,32 +282,25 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildFoodImage(String? imagePath, {double size = 80}) {
+  Widget _buildHistoryTitle(BuildContext context, String? title) {
+    final String display =
+        (title == null || title.trim().isEmpty)
+            ? 'unknown_meal'.tr
+            : title.trim();
     return Container(
-      width: size,
-      height: size,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
+        color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        gradient: AppColor.cardGradient,
-        boxShadow: [
-          BoxShadow(
-            color: AppColor.lightShadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColor.neutralGrey300.withOpacity(0.5)),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: imagePath != null && File(imagePath).existsSync()
-            ? Image.file(
-                File(imagePath),
-                fit: BoxFit.cover,
-              )
-            : Image.asset(
-                AppAssets.oneBodyImage,
-                fit: BoxFit.cover,
-              ),
+      child: Text(
+        display,
+        textAlign: TextAlign.center,
+        style: context.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: context.theme.colorScheme.onSurface,
+        ),
       ),
     );
   }
@@ -365,9 +349,9 @@ class HistoryView extends GetView<HistoryController> {
                   color: Colors.white,
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               Text(
                 "No History Yet".tr,
                 style: context.textTheme.headlineMedium?.copyWith(
@@ -375,25 +359,27 @@ class HistoryView extends GetView<HistoryController> {
                   color: AppColor.neutralGrey800,
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               Text(
-                "Start tracking your meals to see your nutrition history here".tr,
+                "Start tracking your meals to see your nutrition history here"
+                    .tr,
                 textAlign: TextAlign.center,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: AppColor.neutralGrey600,
                   height: 1.5,
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
-              ModernButton(
-                text: 'Track Food'.tr,
-                style: ModernButtonStyle.gradient,
-                size: ModernButtonSize.large,
-                onPressed: () {
+
+              ContinueButton(
+                // Use the localized 'Track Food' label instead of the default
+                // 'continue_cta' and hide the arrow icon for this screen.
+                labelKey: 'Track Food',
+                icon: null,
+                onTap: () {
                   // TODO: Navigate to scan food screen
                   Get.back();
                 },

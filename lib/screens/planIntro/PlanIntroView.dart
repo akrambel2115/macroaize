@@ -5,7 +5,7 @@ import 'package:foodcalorietracker/constant/AppAssets.dart';
 // ...existing imports...
 import 'package:foodcalorietracker/screens/planIntro/PlanIntroController.dart';
 import 'package:foodcalorietracker/widgets/AnimatedBackground.dart';
-import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
+import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 
 class PlanIntroView extends GetView<PlanIntroController> {
   const PlanIntroView({super.key});
@@ -117,8 +117,7 @@ class PlanIntroView extends GetView<PlanIntroController> {
                             scale: controller.buttonAnimation.value,
                             child: Opacity(
                               opacity: controller.fadeAnimation.value,
-                              child: PrimaryCTA(
-                                label: 'continue_cta'.tr,
+                              child: ContinueButton(
                                 pressAnimation: controller.buttonPressAnimation,
                                 onTapDown: controller.onButtonPressed,
                                 onTapUp: controller.onButtonReleased,

@@ -108,6 +108,62 @@ class InfluencerService {
       throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
   }
+
+  /// Admin only: Get decrypted RIP for a withdrawal
+  /// Requires admin role in Firebase custom claims
+  Future<AdminWithdrawalDetails> adminGetWithdrawalRip(
+    String withdrawalId,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw StateError('Not authenticated');
+
+    try {
+      final callable = _functions.httpsCallable('adminGetWithdrawalRip');
+      final result = await callable.call({'withdrawalId': withdrawalId.trim()});
+
+      final data = result.data as Map<String, dynamic>;
+      return AdminWithdrawalDetails(
+        success: data['success'] == true,
+        withdrawalId: data['withdrawalId']?.toString() ?? '',
+        rip: data['rip']?.toString() ?? '',
+        userId: data['userId']?.toString() ?? '',
+        amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
+        status: data['status']?.toString() ?? 'unknown',
+      );
+    } catch (e) {
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  /// Admin only: Mark withdrawal as completed or failed
+  /// Requires admin role in Firebase custom claims
+  Future<AdminActionResult> adminCompleteWithdrawal(
+    String withdrawalId,
+    String status,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw StateError('Not authenticated');
+
+    if (!['completed', 'failed'].contains(status)) {
+      throw ArgumentError('Status must be either "completed" or "failed"');
+    }
+
+    try {
+      final callable = _functions.httpsCallable('adminCompleteWithdrawal');
+      final result = await callable.call({
+        'withdrawalId': withdrawalId.trim(),
+        'status': status,
+      });
+
+      final data = result.data as Map<String, dynamic>;
+      return AdminActionResult(
+        success: data['success'] == true,
+        message: data['message']?.toString() ?? 'Action completed',
+      );
+    } catch (e) {
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
 }
 
 class PromoCodeValidationResult {
@@ -134,3 +190,27 @@ class WithdrawalResult {
   });
 }
 
+class AdminWithdrawalDetails {
+  final bool success;
+  final String withdrawalId;
+  final String rip; // Decrypted RIP - only for admin use
+  final String userId;
+  final double amount;
+  final String status;
+
+  const AdminWithdrawalDetails({
+    required this.success,
+    required this.withdrawalId,
+    required this.rip,
+    required this.userId,
+    required this.amount,
+    required this.status,
+  });
+}
+
+class AdminActionResult {
+  final bool success;
+  final String message;
+
+  const AdminActionResult({required this.success, required this.message});
+}

@@ -102,18 +102,18 @@ class AccountController extends GetxController {
       switch (f.code) {
         case 'wrong-password':
         case 'invalid-credential':
-          return 'Current password is incorrect.';
+      return 'current_password_incorrect'.tr;
         case 'too-many-requests':
-          return 'Too many attempts, please try later.';
+      return 'too_many_attempts'.tr;
         case 'requires-recent-login':
-          return 'Please re-login and try again.';
+      return 'please_relogin'.tr;
         default:
-          return f.message.isNotEmpty ? f.message : 'Authentication error';
+      return f.message.isNotEmpty ? f.message : 'auth_authentication_error'.tr;
       }
     }
-    if (f is NetworkFailure) return 'Network error, check connection.';
-    if (f is UnknownFailure) return 'Unexpected error occurred.';
-    return 'Operation failed.';
+    if (f is NetworkFailure) return 'auth_network_error'.tr;
+    if (f is UnknownFailure) return 'auth_unknown_error'.tr;
+    return 'operation_failed'.tr;
   }
 
   @override

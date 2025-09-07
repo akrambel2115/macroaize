@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:foodcalorietracker/constant/Appkey.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class UsdaFood {
   final int fdcId;
@@ -29,39 +28,26 @@ class UsdaApiFailure implements Exception {
 }
 
 class UsdaApiService {
-  static const _base = 'https://api.nal.usda.gov/fdc/v1/foods/search';
 
   /// Search top results for a food name. Returns up to [limit] items.
   Future<List<UsdaFood>> searchFood(String query, {int limit = 3, String? locale}) async {
     if (query.trim().isEmpty) return [];
-
-    final key = usdaApiKey;
-    if (key.isEmpty || key == 'YOUR_USDA_API_KEY' || key == 'ENTER_USDA_API_KEY') {
-      // Missing key — treat as failure so callers can fallback.
-      throw UsdaApiFailure('Missing USDA API key');
-    }
-
-    final uri = Uri.parse(_base).replace(queryParameters: {
-      'query': query,
-      'api_key': key,
-      'pageSize': '$limit',
-      // 'sortBy': 'dataType.keyword', // optional
-    });
-
-    http.Response res;
+    // Call secure backend proxy to avoid exposing API key in client
+    final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+    HttpsCallable callable = functions.httpsCallable('searchUsdaFoods');
+    dynamic raw;
     try {
-      res = await http.get(uri).timeout(const Duration(seconds: 10));
+      final res = await callable.call({'query': query, 'limit': limit});
+      raw = res.data;
+    } on FirebaseFunctionsException catch (e) {
+      throw UsdaApiFailure(e.message ?? 'USDA function error', statusCode: e.code == 'unavailable' ? 503 : null);
     } catch (e) {
-      throw UsdaApiFailure('Network error: $e');
-    }
-
-    if (res.statusCode != 200) {
-      throw UsdaApiFailure('HTTP ${res.statusCode}', statusCode: res.statusCode);
+      throw UsdaApiFailure('Function call error: $e');
     }
 
     Map<String, dynamic> json;
     try {
-      json = jsonDecode(res.body) as Map<String, dynamic>;
+      json = jsonDecode(jsonEncode(raw)) as Map<String, dynamic>;
     } catch (e) {
       throw UsdaApiFailure('Invalid JSON: $e');
     }

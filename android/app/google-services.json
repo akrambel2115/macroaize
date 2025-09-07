@@ -7,20 +7,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:582471032450:android:db1a3e746f8f3d65b0de9b",
+        "mobilesdk_app_id": "1:582471032450:android:a2abb5ed83ee9c96b0de9b",
         "android_client_info": {
-          "package_name": "com.example.foodcalorietracker"
+          "package_name": "com.macroaize.app"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "582471032450-h0bkt8rc33bk81cfh7oo3uok6qj73m07.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.foodcalorietracker",
-            "certificate_hash": "c7f575d5209d1f400f37b000d70b8f885d602e63"
-          }
-        },
         {
           "client_id": "582471032450-edecc8ot7soae68rop1008su6i44grgl.apps.googleusercontent.com",
           "client_type": 3

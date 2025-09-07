@@ -23,6 +23,8 @@ abstract class Routes {
   static const recipesView = Paths.recipesView;
   static const recipeDetailView = Paths.recipeDetailView;
   static const accountDetailsView = Paths.accountDetailsView;
+  static const emailVerificationView = Paths.emailVerificationView;
+  static const withdrawalHistoryView = Paths.withdrawalHistoryView;
 }
 
 abstract class Paths {
@@ -50,4 +52,6 @@ abstract class Paths {
   static const recipesView = '/RecipesView';
   static const recipeDetailView = '/RecipeDetailView';
   static const accountDetailsView = '/AccountDetailsView';
+  static const emailVerificationView = '/EmailVerificationView';
+  static const withdrawalHistoryView = '/WithdrawalHistoryView';
 }

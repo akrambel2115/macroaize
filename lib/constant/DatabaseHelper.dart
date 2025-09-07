@@ -28,7 +28,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'my_database.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (Database db, int version) async {
         await db.execute('''
           CREATE TABLE IF NOT EXISTS $calorie (
@@ -53,15 +53,16 @@ class DatabaseHelper {
         await db.execute('''
           CREATE TABLE IF NOT EXISTS $history (
             id INTEGER PRIMARY KEY,
-        calorie INTEGER,
-        date TEXT,
-        protein INTEGER,
-        carbs INTEGER,
-        fats INTEGER,
-        type TEXT,
-        image BLOB,
-        fdcId INTEGER
-             )
+            calorie INTEGER,
+            date TEXT,
+            protein INTEGER,
+            carbs INTEGER,
+            fats INTEGER,
+            type TEXT,
+            image BLOB,
+            fdcId INTEGER,
+            title TEXT
+          )
         ''');
         await db.execute('''
           CREATE TABLE IF NOT EXISTS $localFood (
@@ -123,6 +124,14 @@ class DatabaseHelper {
             // ignore if creation fails for any reason
           }
         }
+        // add title column to history when upgrading to version 4
+        if (oldVersion < 4) {
+          try {
+            await db.execute('ALTER TABLE $history ADD COLUMN title TEXT');
+          } catch (_) {
+            // ignore if already exists
+          }
+        }
       },
     );
   }
@@ -168,6 +177,7 @@ class DatabaseHelper {
     final db = await database;
     return await db.insert(mainChat, details.toMap());
   }
+
   Future<int> insertSubChatModel(SubChatModel details) async {
     final db = await database;
     return await db.insert(subChat, details.toMap());
@@ -183,13 +193,16 @@ class DatabaseHelper {
 
   Future<List<SubChatModel>> getSubChat(int mainChatId) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(subChat, where: 'MainChatID=?',
+    final List<Map<String, dynamic>> maps = await db.query(
+      subChat,
+      where: 'MainChatID=?',
       whereArgs: [mainChatId],
     );
     return List.generate(maps.length, (i) {
       return SubChatModel.fromMap(maps[i]);
     });
   }
+
   //
   Future<List<SqlCalorieModel>> getCalorieData() async {
     final db = await database;
@@ -223,6 +236,7 @@ class DatabaseHelper {
     await db.delete(history, where: 'id = ?', whereArgs: [id]);
     // return result.isNotEmpty ? result.first : null;
   }
+
   Future<void> deleteMainChat(int id) async {
     final db = await database;
     await db.delete(mainChat, where: 'id = ?', whereArgs: [id]);

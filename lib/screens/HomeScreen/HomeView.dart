@@ -17,6 +17,7 @@ import 'package:foodcalorietracker/shared/widgets/PremiumRequiredDialog.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:foodcalorietracker/Model/Recipe.dart';
+import '../../widgets/VerifyEmailButton.dart';
 
 class HomeView extends GetView<HomeController> {
   // Centralized spacing for meal cards in the history section.
@@ -110,6 +111,10 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
       actions: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: const VerifyEmailButton(),
+        ),
         Padding(
           padding: const EdgeInsets.all(8),
           child: ModernButton(
@@ -1198,12 +1203,10 @@ void _showPremiumRequiredDialog() {
   final txtTheme = Get.textTheme; // use Get context-safe theme
   Get.dialog(
     PremiumRequiredDialog(
-      title: 'Premium Required'.tr,
-      message:
-          'Access to recipes requires a premium subscription. Upgrade now to unlock this feature.'
-              .tr,
+      title: 'premium_required'.tr,
+      message: 'recipes_premium_message'.tr,
       badge: Text(
-        'Unlock all recipes and features with Premium'.tr,
+        'recipes_premium_badge'.tr,
         textAlign: TextAlign.center,
         style: txtTheme.bodyMedium?.copyWith(
           color: Colors.orange,

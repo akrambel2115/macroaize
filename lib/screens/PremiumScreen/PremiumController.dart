@@ -9,13 +9,12 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-
-import '../../constant/Appkey.dart';
-import '../../constant/AppColor.dart';
-// import '../../routes/app_routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../features/auth/presentation/auth_modal.dart';
-import 'CheckoutWebView.dart';
+import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
+
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import '../../constant/AppColor.dart';
 import '../../shared/services/influencer_service.dart';
 
 class PremiumController extends GetxController {
@@ -29,26 +28,28 @@ class PremiumController extends GetxController {
   double discountRate = 0.0;
   String? promoError;
   final _influencerService = InfluencerService();
+  final _appUserService = AppUserService();
   InAppPurchase inAppPurchase = InAppPurchase.instance;
   late StreamSubscription<dynamic> streamSubscription;
   StreamSubscription<DocumentSnapshot>? _firestoreSubscription;
   StreamSubscription<User?>? _authSubscription;
-  Set<String> ids =
-      Platform.isAndroid
-          ? {
-            androidInAppPurchaseIdWeekly,
-            androidInAppPurchaseIdMonthly,
-            androidInAppPurchaseIdYearly,
-          }
-          : {
-            iOSInAppPurchaseIdWeekly,
-            iOSInAppPurchaseIdMonthly,
-            iOSInAppPurchaseIdYearly,
-          };
+  late Set<String> ids;
   List<ProductDetails> products = [];
 
   @override
   void onInit() {
+    final cfg = Get.find<AppConfigService>();
+    ids = Platform.isAndroid
+        ? {
+            cfg.androidIapIds['weekly'] ?? '',
+            cfg.androidIapIds['monthly'] ?? '',
+            cfg.androidIapIds['yearly'] ?? '',
+          }
+        : {
+            cfg.iosIapIds['weekly'] ?? '',
+            cfg.iosIapIds['monthly'] ?? '',
+            cfg.iosIapIds['yearly'] ?? '',
+          };
     // TODO: implement onInit
     super.onInit();
     getPremium();
@@ -196,13 +197,39 @@ class PremiumController extends GetxController {
       }
     }
 
+    // SECURITY CHECK 3: Account activation gating - refresh auth state then check email verification
+    try {
+      await user.reload();
+      await user.getIdToken(true); // force refresh to update claims like email_verified
+    } catch (_) {}
+    // Use centralized gating with localization
+    if (!_appUserService.checkAccountActivation('premium')) {
+      return;
+    }
+
     // SECURITY CHECK 3: After login, verify user doesn't have active premium
     try {
-      final subscriptionDoc =
-          await FirebaseFirestore.instance
-              .collection('subscriptions')
-              .doc(user.uid)
-              .get();
+    // Attempt to read subscription; on permission issues, refresh token once and retry
+    Future<DocumentSnapshot<Map<String, dynamic>>> readSub() => FirebaseFirestore
+      .instance
+          .collection('subscriptions')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+    DocumentSnapshot<Map<String, dynamic>> subscriptionDoc;
+      try {
+        subscriptionDoc = await readSub();
+      } catch (e) {
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('permission') || msg.contains('permission-denied')) {
+          try {
+            await FirebaseAuth.instance.currentUser?.getIdToken(true);
+          } catch (_) {}
+          subscriptionDoc = await readSub();
+        } else {
+          rethrow;
+        }
+      }
 
       if (subscriptionDoc.exists) {
         final data = subscriptionDoc.data();
@@ -253,7 +280,7 @@ class PremiumController extends GetxController {
       StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            backgroundColor: context.theme.cardColor,
+            backgroundColor: const Color(0xFF1C1C1E),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -261,6 +288,7 @@ class PremiumController extends GetxController {
               'promo_code_dialog_title'.tr,
               style: context.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             content: Column(
@@ -270,7 +298,7 @@ class PremiumController extends GetxController {
                 Text(
                   'promo_code_dialog_subtitle'.tr,
                   style: context.textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
+                    color: Colors.grey[300],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -467,15 +495,23 @@ class PremiumController extends GetxController {
         return;
       }
 
-      // Navigate to in-app WebView checkout and wait for result
-      final paymentResult = await Get.to(
-        () => CheckoutWebView(initialUrl: url),
+      // Open checkout in external browser (Chrome on Android, Safari on iOS)
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
       );
 
-      if (paymentResult == true) {
-        Fluttertoast.showToast(msg: 'Payment successful! Premium activated.');
-        // The Firestore listener will automatically update isPremium
+      if (!launched) {
+        Fluttertoast.showToast(
+          msg: 'Could not open browser for checkout',
+        );
+        return;
       }
+
+      // Inform the user and rely on Firestore listener to reflect premium status
+      Fluttertoast.showToast(
+        msg: 'Complete payment in your browser. Return to the app when done.',
+      );
     } catch (e) {
       if (kDebugMode) print('createChargilyPayment error: $e');
 
@@ -520,14 +556,16 @@ class PremiumController extends GetxController {
   }
 
   openPrivacy() async {
-    final Uri url = Uri.parse(privacyLink);
+  final cfg = Get.find<AppConfigService>();
+  final Uri url = Uri.parse(cfg.privacyLink);
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
   }
 
   openTerms() async {
-    final Uri url = Uri.parse(termsLink);
+  final cfg = Get.find<AppConfigService>();
+  final Uri url = Uri.parse(cfg.termsLink);
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }

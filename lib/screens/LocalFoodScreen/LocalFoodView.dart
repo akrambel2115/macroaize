@@ -76,14 +76,23 @@ class LocalFoodView extends GetView<LocalFoodController> {
                 TextField(controller: nameCtrl, decoration: inputDecoration('name'.tr)),
                 TextField(controller: qtyCtrl, decoration: inputDecoration('quantity'.tr)),
                 TextField(controller: calCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('calories'.tr)),
-                TextField(controller: proteinCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('protein'.tr)),
+                TextField(controller: proteinCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('proteins'.tr)),
                 TextField(controller: carbsCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('carbs'.tr)),
                 TextField(controller: fatsCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('fats'.tr)),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text('cancel'.tr)),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(
+                'cancel'.tr,
+                style: TextStyle(
+                  color: AppColor.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
             TextButton(
               onPressed: () {
                 final name = nameCtrl.text.trim();
@@ -109,8 +118,14 @@ class LocalFoodView extends GetView<LocalFoodController> {
                 }
 
                 Navigator.of(ctx).pop();
-              },
-              child: Text(editIndex == null ? 'add'.tr : 'save'.tr),
+                },
+              child: Text(
+                editIndex == null ? 'add'.tr : 'save'.tr,
+                style: TextStyle(
+                  color: AppColor.success,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         );

@@ -30,11 +30,15 @@ class ChatWidget extends StatelessWidget {
     // Right-aligned for user messages, left-aligned for AI messages
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
   final bgColor = isUser
+  ? (context.theme.brightness == Brightness.dark
+    ? AppColor.neutralGrey800
+    : AppColor.neutralGrey100)
+  : context.theme.cardColor;
+  final textColor = isUser
     ? (context.theme.brightness == Brightness.dark
-        ? AppColor.neutralGrey800
-        : AppColor.neutralGrey200)
-    : context.theme.cardColor;
-    final textColor = isUser ? Colors.white : context.textTheme.bodyLarge?.color;
+      ? AppColor.neutralWhite
+      : AppColor.neutralGrey900)
+    : context.textTheme.bodyLarge?.color;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

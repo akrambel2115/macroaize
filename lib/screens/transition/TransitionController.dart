@@ -28,7 +28,8 @@ class TransitionController extends GetxController with GetTickerProviderStateMix
 
   void _selectAsset() async {
     final onboardingCompleted = await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
-    assetPath = onboardingCompleted ? AppAssets.loadingClock : AppAssets.transition;
+  // If onboarding is completed, show a small loader; otherwise show full transition
+  assetPath = onboardingCompleted ? AppAssets.loader : AppAssets.transition;
     update();
   }
 

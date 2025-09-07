@@ -24,8 +24,8 @@ class GoalStep extends StatelessWidget {
     required this.onDesiredWeightChanged,
     required this.onContinue,
     this.onBack,
-  this.showHeaderBack = false,
-  this.showFooterPrevious = true,
+    this.showHeaderBack = false,
+    this.showFooterPrevious = true,
     this.padding,
   });
 
@@ -51,7 +51,9 @@ class GoalStep extends StatelessWidget {
               style: context.theme.textTheme.headlineLarge,
             ).paddingOnly(top: 20),
             Text(
-              (subtitle ?? 'This helps is generate a plan for your calorie intake.').tr,
+              (subtitle ??
+                      'This helps is generate a plan for your calorie intake.')
+                  .tr,
               style: context.theme.textTheme.titleSmall,
             ).paddingOnly(top: 10, bottom: 10),
             GoalAndWeightPicker(
@@ -59,9 +61,9 @@ class GoalStep extends StatelessWidget {
               onSelectGoal: onSelectGoal,
               onDesiredWeightChanged: onDesiredWeightChanged,
             ),
-      Row(
+            Row(
               children: [
-        if (showFooterPrevious && onBack != null)
+                if (showFooterPrevious && onBack != null)
                   Expanded(
                     child: ModernButton(
                       text: 'Previous'.tr,
@@ -72,7 +74,8 @@ class GoalStep extends StatelessWidget {
                       height: 50,
                     ),
                   ),
-        if (showFooterPrevious && onBack != null) const SizedBox(width: 10),
+                if (showFooterPrevious && onBack != null)
+                  const SizedBox(width: 10),
                 Expanded(
                   child: ModernButton(
                     text: 'Continue'.tr,
@@ -80,7 +83,10 @@ class GoalStep extends StatelessWidget {
                     style: ModernButtonStyle.primary,
                     size: ModernButtonSize.medium,
                     borderRadius: BorderRadius.circular(30),
-                    icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.white,
+                    ),
                     height: 50,
                   ),
                 ),

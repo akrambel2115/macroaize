@@ -10,12 +10,12 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController mainController;
   late AnimationController scaleController;
   late Animation<double> scaleAnimation;
-  
+
   List<AnimationController> letterControllers = [];
   List<Animation<double>> letterAnimations = [];
-  
+
   List<Map<String, dynamic>> appNameLetters = [];
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -32,7 +32,7 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
     _started = true;
     _startAnimationSequence();
   }
-  
+
   void _setupAppName() {
     // Use orange color for all letters in the app name
     for (int i = 0; i < appName.length; i++) {
@@ -42,48 +42,43 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       });
     }
   }
-  
+
   void _initializeAnimations() {
     // Main controller for overall timing
     mainController = AnimationController(
       duration: const Duration(milliseconds: 3000),
       vsync: this,
     );
-    
+
     // Scale animation for final bounce (stronger pop)
     scaleController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.15,
-    ).animate(CurvedAnimation(
-      parent: scaleController,
-      curve: Curves.elasticOut,
-    ));
-    
+
+    scaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: scaleController, curve: Curves.elasticOut),
+    );
+
     // Individual letter animations
     for (int i = 0; i < appNameLetters.length; i++) {
       AnimationController letterController = AnimationController(
         duration: const Duration(milliseconds: 450), // Faster animation
         vsync: this,
       );
-      
+
       Animation<double> letterAnimation = Tween<double>(
         begin: -60.0, // Start above screen (less distance for smoother feel)
-        end: 0.0,     // End at normal position
-      ).animate(CurvedAnimation(
-        parent: letterController,
-        curve: Curves.easeOutBack,
-      ));
-      
+        end: 0.0, // End at normal position
+      ).animate(
+        CurvedAnimation(parent: letterController, curve: Curves.easeOutBack),
+      );
+
       letterControllers.add(letterController);
       letterAnimations.add(letterAnimation);
     }
   }
-  
+
   void _startAnimationSequence() async {
     // Start letter animations with staggered delay - don't await each one
     for (int i = 0; i < letterControllers.length; i++) {
@@ -91,24 +86,27 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
         letterControllers[i].forward();
       });
     }
-    
+
     // Wait for all letters to finish dropping
-    await Future.delayed(Duration(milliseconds: 120 * letterControllers.length + 500));
-    
+    await Future.delayed(
+      Duration(milliseconds: 120 * letterControllers.length + 500),
+    );
+
     // Start scale animation
     scaleController.forward().then((_) {
       scaleController.reverse();
     });
-    
+
     // Navigate to next screen after animations
     await Future.delayed(const Duration(milliseconds: 1200));
     _navigateToNext();
   }
-  
+
   void _navigateToNext() async {
     // Check if onboarding is completed
-    final onboardingCompleted = await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
-    
+    final onboardingCompleted =
+        await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
+
     if (onboardingCompleted) {
       // User has completed onboarding, play the transition Lottie then go home
       Get.offAllNamed(Routes.transitionView);
@@ -117,7 +115,7 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       Get.offAllNamed(Routes.welcomeView);
     }
   }
-  
+
   @override
   void onClose() {
     mainController.dispose();

@@ -21,8 +21,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   List<Map<String, String>> get _ingredients {
     // convert recipe.ingredients (List<String>) into name/qty pairs when possible
-    if (widget.recipe.ingredients.isEmpty) return [];
-    return widget.recipe.ingredients.map((s) {
+    final lang = Get.locale?.languageCode ?? 'en';
+    final base = widget.recipe.localizedIngredients(lang);
+    if (base.isEmpty) return [];
+    return base.map((s) {
       // try splitting on two-column separator
       final parts = s.split(RegExp(r"\s{2,}|\t| - ")); // flexible split
       if (parts.length >= 2) return {"name": parts[0], "qty": parts[1]};
@@ -30,9 +32,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }).toList();
   }
 
-  List<String> get _steps => widget.recipe.instructions.isNotEmpty
-      ? widget.recipe.instructions
-      : ["Mix all ingredients in a blender until smooth.", "Taste and add honey if needed.", "Serve chilled and enjoy."];
+  List<String> get _steps {
+    final lang = Get.locale?.languageCode ?? 'en';
+    final steps = widget.recipe.localizedInstructions(lang);
+    if (steps.isNotEmpty) return steps;
+    // basic fallback sample
+    return [
+      "Mix all ingredients in a blender until smooth.",
+      "Taste and add honey if needed.",
+      "Serve chilled and enjoy.",
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,11 +214,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         children: [
           Text('description'.tr, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 8),
-          // Static description — removed expand/collapse toggle to avoid gaps
-          Text(
-            '${'description'.tr} ${'description'.tr}',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Builder(builder: (_) {
+            final lang = Get.locale?.languageCode ?? 'en';
+            final desc = widget.recipe.localizedDescription(lang).trim();
+            if (desc.isEmpty) return const SizedBox.shrink();
+            return Text(
+              desc,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 13.0,
+                    color:
+                        isDark ? AppColor.neutralGrey200 : AppColor.neutralGrey600,
+                  ),
+            );
+          }),
         ],
       ),
     );
@@ -243,19 +261,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _macroRing(
-                label: 'Carbs',
+                label: 'Carbs'.tr,
                 value: '${widget.recipe.carbs}g',
                 color: Colors.green,
                 progress: (widget.recipe.carbs / 100).toDouble().clamp(0.0, 1.0),
               ),
               _macroRing(
-                label: 'Protein',
+                label: 'Protein'.tr,
                 value: '${widget.recipe.protein}g',
                 color: Colors.red,
                 progress: (widget.recipe.protein / 100).toDouble().clamp(0.0, 1.0),
               ),
               _macroRing(
-                label: 'Fat',
+                label: 'Fats'.tr,
                 value: '${widget.recipe.fat}g',
                 color: Colors.orange,
                 progress: (widget.recipe.fat / 100).toDouble().clamp(0.0, 1.0),

@@ -33,16 +33,14 @@ class PremiumRequiredDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
-          Icon(
-            Icons.star,
-            color: Colors.orange,
-            size: 24,
-          ),
+          Icon(Icons.star, color: Colors.orange, size: 24),
           SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
-              style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              style: Get.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -51,17 +49,17 @@ class PremiumRequiredDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            message,
-            style: Get.textTheme.bodyMedium,
-          ),
+          Text(message, style: Get.textTheme.bodyMedium),
           SizedBox(height: 12),
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.orange.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.orange.withOpacity(0.3), width: 1),
+              border: Border.all(
+                color: Colors.orange.withOpacity(0.3),
+                width: 1,
+              ),
             ),
             alignment: Alignment.center,
             child: badge,
@@ -73,13 +71,18 @@ class PremiumRequiredDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextButton(
-              onPressed: onUpgrade ?? () {
-                Get.back();
-                Get.toNamed(Routes.premiumView);
-              },
+              onPressed:
+                  onUpgrade ??
+                  () {
+                    Get.back();
+                    Get.toNamed(Routes.premiumView);
+                  },
               child: Text(
-                'Go Premium',
-                style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600),
+                'go_premium'.tr,
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             const SizedBox(height: 4),
@@ -90,8 +93,12 @@ class PremiumRequiredDialog extends StatelessWidget {
                 splashFactory: NoSplash.splashFactory,
               ),
               child: Text(
-                'Maybe Later',
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.normal, fontSize: 13),
+                'maybe_later'.tr,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.normal,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],

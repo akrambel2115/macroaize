@@ -1,27 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../Model/openAIModel.dart';
-import '../constant/Appkey.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 
 class OpenAiCalling {
   // New: request a meal breakdown as list of items
   static Future<String> analyzeMealItems(File image) async {
     try {
       final currentLang = _getLanguageName();
-      String apiEndpoint = 'https://openrouter.ai/api/v1/chat/completions';
-      final headers = {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'YOUR_APP_URL',
-        'X-Title': 'Food Calorie Tracker',
-      };
       final bytes = await image.readAsBytes();
       final base64Image = base64Encode(bytes);
       final parameters = {
-        'model': 'qwen/qwen2.5-vl-72b-instruct:free',
+        'model': Get.find<AppConfigService>().aiModel,
         'messages': [
           {
             'role': 'system',
@@ -46,24 +39,13 @@ class OpenAiCalling {
         'temperature': 0,
         'max_tokens': 500,
       };
-      final response = await http.post(
-        Uri.parse(apiEndpoint),
-        headers: headers,
-        body: jsonEncode(parameters),
-      );
-
-      if (response.statusCode == 200) {
-        final responseBody = utf8.decode(response.bodyBytes);
-        final decodedJson = jsonDecode(responseBody);
-        OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-        return data.choices!.first.message!.content.toString();
-      } else {
-        if (kDebugMode) {
-          print(response.statusCode);
-          print(response.body);
-        }
-        return "Something Went Wrong";
-      }
+  final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+  final callable = functions.httpsCallable('chatWithOpenRouter');
+  final result = await callable.call(parameters);
+  // Normalize to Map<String, dynamic> deeply to avoid nested Map<Object?, Object?> types
+  final decodedJson = jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
+      OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+      return data.choices!.first.message!.content.toString();
     } catch (e) {
       if (kDebugMode) {
         print("error analyzeMealItems====> $e");
@@ -76,19 +58,10 @@ class OpenAiCalling {
     try {
       // Get current app language for response localization
       final currentLang = _getLanguageName();
-
-      // Changed to OpenRouter endpoint
-      String apiEndpoint = 'https://openrouter.ai/api/v1/chat/completions';
-      final headers = {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'YOUR_APP_URL', // Optional, for OpenRouter analytics
-        'X-Title': 'Food Calorie Tracker', // Optional, for OpenRouter analytics
-      };
       final bytes = await image.readAsBytes();
       final base64Image = base64Encode(bytes);
       final parameters = {
-        'model': 'qwen/qwen2.5-vl-72b-instruct:free',
+        'model': Get.find<AppConfigService>().aiModel,
         'messages': [
           {
             'role': 'system',
@@ -113,24 +86,13 @@ class OpenAiCalling {
         'temperature': 0,
         'max_tokens': 300,
       };
-      final response = await http.post(
-        Uri.parse(apiEndpoint),
-        headers: headers,
-        body: jsonEncode(parameters),
-      );
-
-      if (response.statusCode == 200) {
-        final responseBody = utf8.decode(response.bodyBytes);
-        final decodedJson = jsonDecode(responseBody);
-        OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-        return data.choices!.first.message!.content.toString();
-      } else {
-        if (kDebugMode) {
-          print(response.statusCode);
-          print(response.body);
-        }
-        return "Something Went Wrong";
-      }
+  final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+  final callable = functions.httpsCallable('chatWithOpenRouter');
+  final result = await callable.call(parameters);
+  // Normalize to Map<String, dynamic> deeply to avoid nested Map<Object?, Object?> types
+  final decodedJson = jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
+      OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+      return data.choices!.first.message!.content.toString();
     } catch (e) {
       if (kDebugMode) {
         print("error is====> $e");

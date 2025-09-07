@@ -1,4 +1,4 @@
-package com.example.foodcalorietracker
+package com.macroaize.app
 
 import io.flutter.embedding.android.FlutterActivity
 

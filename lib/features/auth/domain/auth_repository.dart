@@ -4,8 +4,16 @@ import 'auth_failure.dart';
 abstract class AuthRepository {
   Stream<User?> authStateChanges();
 
-  Future<(User?, AuthFailure?)> signInWithEmail({required String email, required String password});
-  Future<(User?, AuthFailure?)> registerWithEmail({required String email, required String password, required String firstName, required String lastName});
+  Future<(User?, AuthFailure?)> signInWithEmail({
+    required String email,
+    required String password,
+  });
+  Future<(User?, AuthFailure?)> registerWithEmail({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+  });
   Future<AuthFailure?> sendPasswordReset({required String email});
 
   Future<(User?, AuthFailure?)> signInWithGoogle();
@@ -15,6 +23,11 @@ abstract class AuthRepository {
   Future<AuthFailure?> reauthenticateWithPassword(String password);
   Future<AuthFailure?> updatePassword(String newPassword);
   Future<List<String>> getLinkedProviders();
+
+  // Email verification methods
+  Future<AuthFailure?> sendEmailVerification();
+  Future<bool> isEmailVerified();
+  Future<AuthFailure?> reloadUser();
 
   Future<void> signOut();
 }

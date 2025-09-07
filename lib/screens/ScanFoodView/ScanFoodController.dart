@@ -1,7 +1,8 @@
 import 'dart:io';
-import 'package:foodcalorietracker/constant/Appkey.dart';
 import 'package:foodcalorietracker/shared/services/usage_service.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
+
+import 'package:foodcalorietracker/shared/services/app_user_service.dart';
 import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -14,8 +15,6 @@ import 'package:image_picker/image_picker.dart';
 // ...existing imports
 import '../../widgets/CropperUiSettings.dart';
 
-import '../../SharePrefHelper/SharePref.dart';
-import '../../SharePrefHelper/SharePrefKey.dart';
 import '../../routes/app_routes.dart';
 
 class ScanFoodController extends GetxController with WidgetsBindingObserver {
@@ -26,16 +25,17 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   bool isLoading = false;
   final ImagePicker _picker = ImagePicker();
   bool _permissionDialogShown = false;
-  
-  // Add usage service
+
+  // Add usage service and app user service
   final _usageService = UsageService();
+  final _appUserService = AppUserService();
 
   @override
   Future<void> onInit() async {
     // TODO: implement onInit
     super.onInit();
-  WidgetsBinding.instance.addObserver(this);
-  await _ensureCameraReady();
+    WidgetsBinding.instance.addObserver(this);
+    await _ensureCameraReady();
   }
 
   Future<void> _ensureCameraReady() async {
@@ -49,7 +49,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
       cameraController = CameraController(cams[0], ResolutionPreset.max);
       await cameraController!.initialize();
-      await cameraController!.lockCaptureOrientation(DeviceOrientation.portraitUp);
+      await cameraController!.lockCaptureOrientation(
+        DeviceOrientation.portraitUp,
+      );
       update();
     } catch (e) {
       if (e is CameraException) {
@@ -98,7 +100,8 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
   // Public: ensure camera is initialized when scanner becomes visible again
   Future<void> ensureCameraActive() async {
-    if (cameraController == null || cameraController!.value.isInitialized == false) {
+    if (cameraController == null ||
+        cameraController!.value.isInitialized == false) {
       await _ensureCameraReady();
     }
   }
@@ -116,20 +119,21 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   void onClose() {
     // TODO: implement onClose
     super.onClose();
-  WidgetsBinding.instance.removeObserver(this);
-  cameraController?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    cameraController?.dispose();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-  cameraController?.dispose();
+    cameraController?.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
       // Release camera when app goes to background or becomes inactive
       releaseCamera();
     }
@@ -137,6 +141,11 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   }
 
   takeImage(ImageSource source, BuildContext context) async {
+    // ACCOUNT ACTIVATION GATING: Check if account is activated before allowing scan
+    if (!_appUserService.checkAccountActivation('scanner')) {
+      return;
+    }
+
     XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       imagePath = File(image.path);
@@ -146,12 +155,19 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   }
 
   onTackImageCamera(BuildContext context) async {
+    // ACCOUNT ACTIVATION GATING: Check if account is activated before allowing scan
+    if (!_appUserService.checkAccountActivation('scanner')) {
+      return;
+    }
+
     isLoading = true;
     update();
     // ensure camera is initialized before taking a picture
-    if (cameraController == null || cameraController!.value.isInitialized == false) {
+    if (cameraController == null ||
+        cameraController!.value.isInitialized == false) {
       await _ensureCameraReady();
-      if (cameraController == null || cameraController!.value.isInitialized == false) {
+      if (cameraController == null ||
+          cameraController!.value.isInitialized == false) {
         isLoading = false;
         update();
         return;
@@ -165,7 +181,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   Future<void> cropImage(final image, BuildContext context) async {
     isLoading = false;
     update();
-    
+
     if (image != null) {
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: image.path,
@@ -173,18 +189,19 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
         compressQuality: 100,
         uiSettings: cropperUiSettings(context),
       );
-      
+
       if (croppedFile != null) {
         File image = File(croppedFile.path);
-        
+
         // SECURE FEATURE GATING: Check usage limits via backend
+        // This includes authentication AND email verification checks
         isLoading = true;
         update();
-        
+
         try {
           // Call backend to check and increment usage
           final result = await _usageService.incrementUsage('scan');
-          
+
           if (result.success) {
             // Usage allowed - proceed with scan
             releaseCamera();
@@ -195,7 +212,11 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           } else {
             // Usage limit reached - show premium dialog
             releaseCamera();
-            NotificationService.showError(result.message.isNotEmpty ? result.message : 'daily_scan_limit_reached');
+            NotificationService.showError(
+              result.message.isNotEmpty
+                  ? result.message
+                  : 'daily_scan_limit_reached',
+            );
           }
         } catch (e) {
           isLoading = false;
@@ -210,7 +231,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           }
 
           final el = e.toString().toLowerCase();
-          if (el.contains('limit') || el.contains('permission-denied') || (el.contains('daily') && el.contains('limit'))) {
+          if (el.contains('limit') ||
+              el.contains('permission-denied') ||
+              (el.contains('daily') && el.contains('limit'))) {
             // Limit-related error -> centralized friendly notification
             releaseCamera();
             NotificationService.showError('daily_limit_reached_try_again');
@@ -221,19 +244,19 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           releaseCamera();
           NotificationService.showError('unable_to_process_scan_try_again');
         }
-        
+
         isLoading = false;
         update();
       }
     }
   }
-  
+
   // usage limit dialog replaced by NotificationService.showError
-  
+
   Future<void> _handleAuthenticationRequired() async {
     // Show authentication modal
     final success = await AuthModal.show();
-    
+
     if (success) {
       // User logged in successfully - show success message
       Get.snackbar(
@@ -257,12 +280,8 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  storeScanLimit()
-  async {
-    SharedPref.saveInt(SharePrefKey.scanLimit, scanLimit);
-    scanLimit = await SharedPref.readInt(SharePrefKey.scanLimit);
-    update();
-  }
+  // scanLimit persistence removed; limits are enforced on backend via UsageService
+
   onChangeIdentify(String value) {
     isIdentify = value;
     update();

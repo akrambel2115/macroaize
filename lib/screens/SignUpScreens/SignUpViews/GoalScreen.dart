@@ -10,22 +10,23 @@ class GoalScreen extends GetView<SignUpController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<SignUpController>(
-      builder: (c) => GoalStep(
-        selectedGoal: c.selectedWGoal,
-        onSelectGoal: c.onChangeGoal,
-        onDesiredWeightChanged: (kg) => c.onChangeDesiredWeight(kg),
-        onContinue: () {
-          if (c.selectedWGoal.isNotEmpty) {
-            c.onChangeView();
-          }
-        },
-  onBack: () {
-          c.selectedView = 2; // go back to Height & Weight
-          c.update();
-        },
-  showHeaderBack: false,
-        showFooterPrevious: true,
-      ),
+      builder:
+          (c) => GoalStep(
+            selectedGoal: c.selectedWGoal,
+            onSelectGoal: c.onChangeGoal,
+            onDesiredWeightChanged: (kg) => c.onChangeDesiredWeight(kg),
+            onContinue: () {
+              if (c.selectedWGoal.isNotEmpty) {
+                c.onChangeView();
+              }
+            },
+            onBack: () {
+              c.selectedView = 2; // go back to Height & Weight
+              c.update();
+            },
+            showHeaderBack: false,
+            showFooterPrevious: true,
+          ),
     );
   }
 }

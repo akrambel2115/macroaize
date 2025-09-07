@@ -40,7 +40,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Get.back(),
         ),
-  title: Text('Change Password', style: theme.textTheme.titleMedium?.copyWith(fontSize: 20, fontWeight: FontWeight.w600)),
+  title: Text('change_password'.tr, style: theme.textTheme.titleMedium?.copyWith(fontSize: 20, fontWeight: FontWeight.w600)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: theme.colorScheme.onSurface,
@@ -56,31 +56,31 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 const SizedBox(height: 4),
                 PasswordField(
                   controller: controller.currentPassword,
-                  label: 'Current password',
-                  validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                  label: 'current_password_label'.tr,
+                  validator: (v) => (v == null || v.isEmpty) ? 'required'.tr : null,
                   autofocus: false,
                 ),
                 const SizedBox(height: 12),
                 PasswordField(
                   controller: controller.newPassword,
-                  label: 'New password',
+                  label: 'new_password_label'.tr,
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Required';
-                    if (v.length < 8) return 'Min 8 chars';
+                    if (v == null || v.isEmpty) return 'required'.tr;
+                    if (v.length < 8) return 'min_8_chars'.tr;
                     final upper = RegExp(r'[A-Z]').hasMatch(v);
                     final lower = RegExp(r'[a-z]').hasMatch(v);
                     final digit = RegExp(r'\d').hasMatch(v);
-                    final symbol = RegExp(r'[!@#\$%\^&*(),.?":{}|<>_\-\[\]\\/]').hasMatch(v);
-                    if (!(upper && lower && digit && symbol)) return 'Use upper, lower, number, symbol';
-                    if (v == controller.currentPassword.text) return 'Must differ from current';
+                    final symbol = RegExp(r'[!@#\$%\^&*(),.?":{}|<>_\-\[\]\\\/]').hasMatch(v);
+                    if (!(upper && lower && digit && symbol)) return 'password_complexity_hint'.tr;
+                    if (v == controller.currentPassword.text) return 'must_differ_from_current'.tr;
                     return null;
                   },
                 ),
                 const SizedBox(height: 12),
                 PasswordField(
                   controller: controller.confirmPassword,
-                  label: 'Confirm new password',
-                  validator: (v) => (v != controller.newPassword.text) ? 'Does not match' : null,
+                  label: 'confirm_new_password_label'.tr,
+                  validator: (v) => (v != controller.newPassword.text) ? 'does_not_match'.tr : null,
                 ),
                 const SizedBox(height: 18),
                 Obx(() => Text(
@@ -94,7 +94,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     TextButton(
                       onPressed: () => Get.back(),
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      child: const Text('Cancel'),
+                      child: Text('cancel'.tr),
                     ),
                     const SizedBox(width: 8),
                     Obx(() {
@@ -110,7 +110,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               ? () async {
                                   // Validate on press (not during build)
                                   if (!(_formKey.currentState?.validate() ?? false)) {
-                                    controller.errorText.value = 'Please fix the errors';
+                                    controller.errorText.value = 'please_fix_errors'.tr;
                                     return;
                                   }
                                   await controller.changePassword();
@@ -123,7 +123,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           ),
                           child: loading
                               ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green))
-                              : const Text('Change Password'),
+                              : Text('change_password_cta'.tr),
                         ),
                       );
                     }),

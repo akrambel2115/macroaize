@@ -3,7 +3,7 @@ import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:foodcalorietracker/screens/PremiumScreen/PremiumController.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 import 'package:get/get.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -289,12 +289,9 @@ class PremiumView extends GetView<PremiumController> {
                                   ],
                                 );
                               }
-                              return ModernButton(
-                                text: 'continue_cta'.tr,
-                                style: ModernButtonStyle.gradient,
-                                size: ModernButtonSize.large,
-                                width: double.infinity,
-                                onPressed: () => controller.buy(),
+                              return ContinueButton(
+                                onTap: () => controller.buy(),
+                                icon: null,
                               );
                             },
                           ),

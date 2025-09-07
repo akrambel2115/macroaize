@@ -11,7 +11,7 @@ import '../data/auth_service.dart';
 import 'auth_controller.dart';
 import 'auth_theme.dart';
 import '../../../shared/services/notification_service.dart';
-import 'package:foodcalorietracker/constant/Appkey.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 
 class AuthModal extends StatelessWidget {
   final bool isFullScreen;
@@ -22,8 +22,11 @@ class AuthModal extends StatelessWidget {
     Get.put(AuthController(repo), tag: 'auth');
     // Push a full-screen route so the auth flows take the entire screen.
     final res = await Get.to<bool?>(() => const AuthModal(isFullScreen: true));
-  // If the controller set a success key, show it after the screen has closed so the snackbar is visible
-  final controller = Get.isRegistered<AuthController>(tag: 'auth') ? Get.find<AuthController>(tag: 'auth') : null;
+    // If the controller set a success key, show it after the screen has closed so the snackbar is visible
+    final controller =
+        Get.isRegistered<AuthController>(tag: 'auth')
+            ? Get.find<AuthController>(tag: 'auth')
+            : null;
     final successKey = controller?.lastSuccessKey.value ?? '';
     // Delete the controller after the current frame so widgets that still
     // depend on it can finish their teardown. This avoids the
@@ -62,35 +65,49 @@ class AuthModal extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             if (!isFullScreen) ...[
-              Container(width: 36, height: 4, decoration: BoxDecoration(color: Colors.grey.shade400, borderRadius: BorderRadius.circular(2))),
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               const SizedBox(height: 8),
-              Text('auth_modal_title'.tr, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                'auth_modal_title'.tr,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 8),
             ],
             TabBar(
-              tabs: const [Tab(text: 'Login'), Tab(text: 'Register')],
-              labelStyle: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              tabs: [Tab(text: 'login'.tr), Tab(text: 'register'.tr)],
+              labelStyle: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            Builder(builder: (context) {
-              // Compute available height after keyboard is shown and constrain modal to a sensible size.
-              final media = MediaQuery.of(context);
-              final screenH = media.size.height;
-              final keyboardH = media.viewInsets.bottom;
-              final availableH = (screenH - keyboardH).clamp(360.0, screenH);
+            Builder(
+              builder: (context) {
+                // Compute available height after keyboard is shown and constrain modal to a sensible size.
+                final media = MediaQuery.of(context);
+                final screenH = media.size.height;
+                final keyboardH = media.viewInsets.bottom;
+                final availableH = (screenH - keyboardH).clamp(360.0, screenH);
 
-              // Use up to 85% of available height for the modal body, but clamp to avoid tiny or huge sizes.
-              final double bodyHeight = (availableH * 0.85).clamp(360.0, 720.0);
+                // Use up to 85% of available height for the modal body, but clamp to avoid tiny or huge sizes.
+                final double bodyHeight = (availableH * 0.85).clamp(
+                  360.0,
+                  720.0,
+                );
 
-              return SizedBox(
-                height: bodyHeight,
-                child: TabBarView(
-                  children: [
-                    _LoginTab(),
-                    _RegisterTab(),
-                  ],
-                ),
-              );
-            }),
+                return SizedBox(
+                  height: bodyHeight,
+                  child: TabBarView(children: [_LoginTab(), _RegisterTab()]),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -114,9 +131,7 @@ class AuthModal extends StatelessWidget {
                   constraints: BoxConstraints(
                     minHeight: constraints.maxHeight - keyboardHeight,
                   ),
-                  child: IntrinsicHeight(
-                    child: content,
-                  ),
+                  child: IntrinsicHeight(child: content),
                 ),
               );
             },
@@ -129,19 +144,22 @@ class AuthModal extends StatelessWidget {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: isFullScreen
-          ? BoxDecoration(color: theme.scaffoldBackgroundColor)
-          : BoxDecoration(
-              color: isDark ? const Color(0xFF121212) : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  blurRadius: 24,
-                  offset: const Offset(0, -8),
-                )
-              ],
-            ),
+      decoration:
+          isFullScreen
+              ? BoxDecoration(color: theme.scaffoldBackgroundColor)
+              : BoxDecoration(
+                color: isDark ? const Color(0xFF121212) : Colors.white,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 24,
+                    offset: const Offset(0, -8),
+                  ),
+                ],
+              ),
       child: content,
     );
   }
@@ -167,68 +185,99 @@ class _LoginTab extends GetView<AuthController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            TextFormField(
-              controller: c.email,
-              decoration: modernInput('Email'),
-              keyboardType: TextInputType.emailAddress,
-              validator: c.validateEmail,
-              autofillHints: const [AutofillHints.email],
-            ),
-            const SizedBox(height: 12),
-            Obx(() => TextFormField(
-              controller: c.password,
-              decoration: modernInput('Password').copyWith(
-                suffixIcon: c.showPasswordEye.value
-                    ? IconButton(
-                        icon: Icon(
-                          c.loginObscure.value ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye,
-                          color: Colors.orange,
-                        ),
-                        onPressed: () => c.toggleLoginObscure(),
-                      )
-                    : null,
+              TextFormField(
+                controller: c.email,
+                decoration: modernInput(
+                  'email'.tr,
+                  errorStyle: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontSize: 13,
+                  ),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: c.validateEmail,
+                autofillHints: const [AutofillHints.email],
               ),
-              obscureText: c.loginObscure.value,
-              validator: c.validatePassword,
-            )),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => c.resetPassword(),
-                child: const Text('Forgot Password?'),
+              const SizedBox(height: 12),
+              Obx(
+                () => TextFormField(
+                  controller: c.password,
+                  decoration: modernInput(
+                    'password'.tr,
+                    errorStyle: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontSize: 13,
+                    ),
+                  ).copyWith(
+                    suffixIcon:
+                        c.showPasswordEye.value
+                            ? IconButton(
+                              icon: Icon(
+                                c.loginObscure.value
+                                    ? FontAwesomeIcons.eyeSlash
+                                    : FontAwesomeIcons.eye,
+                                color: Colors.orange,
+                              ),
+                              onPressed: () => c.toggleLoginObscure(),
+                            )
+                            : null,
+                  ),
+                  obscureText: c.loginObscure.value,
+                  validator: c.validatePassword,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Obx(() => Text(
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => c.resetPassword(),
+                  child: Text('forgot_password'.tr),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Obx(
+                () => Text(
                   c.errorText.value,
-                  style: TextStyle(color: theme.colorScheme.error),
-                )),
-            const SizedBox(height: 12),
-            Obx(() => FilledButton(
-                  onPressed: c.isLoading.value
-                      ? null
-                      : () async {
-                          // Validate on press, not during build
-                          if (!(c.loginKey.currentState?.validate() ?? false)) {
-                            c.errorText.value = 'Please fix the errors';
-                            return;
-                          }
-                          final user = await c.loginEmail();
-                          if (user != null) Get.back(result: true);
-                        },
-      style: modernFilledButton(context),
-      child: c.isLoading.value
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Login'),
-                )),
-            const SizedBox(height: 12),
-            const _SocialButtons(),
-          ],
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Obx(
+                () => FilledButton(
+                  onPressed:
+                      c.isLoading.value
+                          ? null
+                          : () async {
+                            // Validate on press, not during build
+                            if (!(c.loginKey.currentState?.validate() ??
+                                false)) {
+                              c.errorText.value = 'please_fix_errors'.tr;
+                              return;
+                            }
+                            final user = await c.loginEmail();
+                            if (user != null) Get.back(result: true);
+                          },
+                  style: modernFilledButton(context),
+                  child:
+                      c.isLoading.value
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : Text('login'.tr),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const _SocialButtons(),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -252,80 +301,131 @@ class _RegisterTab extends GetView<AuthController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            Row(children: [
-        Expanded(
-                child: TextFormField(
-                  controller: c.firstName,
-          decoration: modernInput('First name'),
-                  validator: c.validateName,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: c.firstName,
+                      decoration: modernInput(
+                        'first_name'.tr,
+                        errorStyle: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.error,
+                          fontSize: 13,
+                        ),
+                      ),
+                      validator: c.validateName,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: c.lastName,
+                      decoration: modernInput(
+                        'last_name'.tr,
+                        errorStyle: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.error,
+                          fontSize: 13,
+                        ),
+                      ),
+                      validator: c.validateName,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: c.email,
+                decoration: modernInput(
+                  'Email',
+                  errorStyle: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontSize: 13,
+                  ),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: c.validateEmail,
+                autofillHints: const [AutofillHints.email],
+              ),
+              const SizedBox(height: 12),
+              Obx(
+                () => TextFormField(
+                  controller: c.password,
+                  decoration: modernInput(
+                    'password'.tr,
+                    errorStyle: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontSize: 13,
+                    ),
+                  ).copyWith(
+                    suffixIcon:
+                        c.showPasswordEye.value
+                            ? IconButton(
+                              icon: Icon(
+                                c.registerPasswordObscure.value
+                                    ? FontAwesomeIcons.eyeSlash
+                                    : FontAwesomeIcons.eye,
+                                color: Colors.orange,
+                              ),
+                              onPressed:
+                                  () => c.toggleRegisterPasswordObscure(),
+                            )
+                            : null,
+                  ),
+                  obscureText: c.registerPasswordObscure.value,
+                  validator: c.validatePassword,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: c.lastName,
-                  decoration: modernInput('Last name'),
-                  validator: c.validateName,
+              const SizedBox(height: 12),
+              Obx(
+                () => TextFormField(
+                  controller: c.confirmPassword,
+                  decoration: modernInput(
+                    'confirm_password'.tr,
+                    errorStyle: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontSize: 13,
+                    ),
+                  ).copyWith(
+                    suffixIcon:
+                        c.showConfirmEye.value
+                            ? IconButton(
+                              icon: Icon(
+                                c.registerConfirmObscure.value
+                                    ? FontAwesomeIcons.eyeSlash
+                                    : FontAwesomeIcons.eye,
+                                color: Colors.orange,
+                              ),
+                              onPressed: () => c.toggleRegisterConfirmObscure(),
+                            )
+                            : null,
+                  ),
+                  obscureText: c.registerConfirmObscure.value,
+                  validator: c.validateConfirm,
                 ),
               ),
-            ]),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: c.email,
-              decoration: modernInput('Email'),
-              keyboardType: TextInputType.emailAddress,
-              validator: c.validateEmail,
-              autofillHints: const [AutofillHints.email],
-            ),
-            const SizedBox(height: 12),
-            Obx(() => TextFormField(
-              controller: c.password,
-              decoration: modernInput('Password').copyWith(
-                suffixIcon: c.showPasswordEye.value
-                    ? IconButton(
-                        icon: Icon(
-                          c.registerPasswordObscure.value ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye,
-                          color: Colors.orange,
-                        ),
-                        onPressed: () => c.toggleRegisterPasswordObscure(),
-                      )
-                    : null,
-              ),
-              obscureText: c.registerPasswordObscure.value,
-              validator: c.validatePassword,
-            )),
-            const SizedBox(height: 12),
-            Obx(() => TextFormField(
-              controller: c.confirmPassword,
-              decoration: modernInput('Confirm password').copyWith(
-                suffixIcon: c.showConfirmEye.value
-                    ? IconButton(
-                        icon: Icon(
-                          c.registerConfirmObscure.value ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye,
-                          color: Colors.orange,
-                        ),
-                        onPressed: () => c.toggleRegisterConfirmObscure(),
-                      )
-                    : null,
-              ),
-              obscureText: c.registerConfirmObscure.value,
-              validator: c.validateConfirm,
-            )),
-            const SizedBox(height: 8),
-            Obx(() {
-              final base = (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-                color: theme.colorScheme.onSurface,
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
-              );
-              final linkStyle = base.copyWith(decoration: TextDecoration.underline, color: theme.colorScheme.primary);
-              final recognizer = TapGestureRecognizer()
-                ..onTap = () async {
-                  final uri = Uri.parse(termsLink);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
-                };
+              const SizedBox(height: 8),
+              Obx(() {
+                final base = (theme.textTheme.bodySmall ?? const TextStyle())
+                    .copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    );
+                final linkStyle = base.copyWith(
+                  decoration: TextDecoration.underline,
+                  color: theme.colorScheme.primary,
+                );
+                final recognizer =
+                    TapGestureRecognizer()
+                      ..onTap = () async {
+                        final uri = Uri.parse(Get.find<AppConfigService>().termsLink);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      };
                 return InkWell(
                   onTap: () => c.tosAccepted.value = !c.tosAccepted.value,
                   child: Row(
@@ -339,50 +439,77 @@ class _RegisterTab extends GetView<AuthController> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text.rich(
-                          TextSpan(children: [
-                            TextSpan(text: 'By registering I agree to the ', style: base),
-                            TextSpan(text: 'Terms of Service', style: linkStyle, recognizer: recognizer),
-                          ]),
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'by_registering_agree'.tr,
+                                style: base,
+                              ),
+                              TextSpan(
+                                text: 'terms_of_service'.tr,
+                                style: linkStyle,
+                                recognizer: recognizer,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 );
-            }),
-            const SizedBox(height: 8),
-            Obx(() => Text(
+              }),
+              const SizedBox(height: 8),
+              Obx(
+                () => Text(
                   c.errorText.value,
-                  style: TextStyle(color: theme.colorScheme.error),
-                )),
-            const SizedBox(height: 12),
-            Obx(() => FilledButton(
-                  onPressed: c.isLoading.value
-                      ? null
-                      : () async {
-                          // Validate on press
-                          if (!(c.registerKey.currentState?.validate() ?? false)) {
-                            c.errorText.value = 'Please fix the errors';
-                            return;
-                          }
-                          if (!c.tosAccepted.value) {
-                            c.errorText.value = 'Please accept the Terms of Service';
-                            return;
-                          }
-                          final user = await c.registerEmail();
-                          if (user != null) Get.back(result: true);
-                        },
-      style: modernFilledButton(context),
-      child: c.isLoading.value
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Register'),
-                )),
-            const SizedBox(height: 12),
-            const _SocialButtons(),
-          ],
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Obx(
+                () => FilledButton(
+                  onPressed:
+                      c.isLoading.value
+                          ? null
+                          : () async {
+                            // Validate on press
+                            if (!(c.registerKey.currentState?.validate() ??
+                                false)) {
+                              c.errorText.value = 'please_fix_errors'.tr;
+                              return;
+                            }
+                            if (!c.tosAccepted.value) {
+                              c.errorText.value = 'accept_terms_of_service'.tr;
+                              return;
+                            }
+                            final user = await c.registerEmail();
+                            if (user != null) {
+                              Get.back(result: true);
+                              // Navigate to email verification screen
+                              Get.offAllNamed('/EmailVerificationView');
+                            }
+                          },
+                  style: modernFilledButton(context),
+                  child:
+                      c.isLoading.value
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : Text('register'.tr),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const _SocialButtons(),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -400,15 +527,20 @@ class _SocialButtons extends GetView<AuthController> {
       return Column(
         children: [
           OutlinedButton.icon(
-            icon: const Icon(FontAwesomeIcons.google, size: 18, color: Colors.redAccent),
-            label: const Text('Continue with Google'),
+            icon: const Icon(
+              FontAwesomeIcons.google,
+              size: 18,
+              color: Colors.redAccent,
+            ),
+            label: Text('continue_with_google'.tr),
             style: modernOutlinedButton(context),
-            onPressed: loading
-                ? null
-                : () async {
-                    final user = await c.google();
-                    if (user != null) Get.back(result: true);
-                  },
+            onPressed:
+                loading
+                    ? null
+                    : () async {
+                      final user = await c.google();
+                      if (user != null) Get.back(result: true);
+                    },
           ),
           const SizedBox(height: 8),
           if (Platform.isIOS)
@@ -417,20 +549,27 @@ class _SocialButtons extends GetView<AuthController> {
               builder: (context, snapshot) {
                 final available = snapshot.data ?? false;
                 if (!available) return const SizedBox.shrink();
-                return Column(children: [
-                  OutlinedButton.icon(
-                    icon: const Icon(FontAwesomeIcons.apple, size: 18, color: Colors.black),
-                    label: const Text('Continue with Apple'),
-                    style: modernOutlinedButton(context),
-                    onPressed: loading
-                        ? null
-                        : () async {
-                            final user = await c.apple();
-                            if (user != null) Get.back(result: true);
-                          },
-                  ),
-                  const SizedBox(height: 8),
-                ]);
+                return Column(
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(
+                        FontAwesomeIcons.apple,
+                        size: 18,
+                        color: Colors.black,
+                      ),
+                      label: Text('continue_with_apple'.tr),
+                      style: modernOutlinedButton(context),
+                      onPressed:
+                          loading
+                              ? null
+                              : () async {
+                                final user = await c.apple();
+                                if (user != null) Get.back(result: true);
+                              },
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                );
               },
             ),
         ],

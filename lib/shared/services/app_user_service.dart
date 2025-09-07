@@ -3,6 +3,7 @@ import 'package:foodcalorietracker/shared/models/subscription.dart';
 import 'package:foodcalorietracker/shared/models/user_usage.dart';
 import 'package:foodcalorietracker/shared/services/subscription_service.dart';
 import 'package:foodcalorietracker/shared/services/usage_service.dart';
+import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'dart:async';
 
 /// Unified model combining user authentication, subscription, and usage data
@@ -16,8 +17,14 @@ class AppUser {
   /// Check if user is authenticated
   bool get isAuthenticated => firebaseUser != null;
 
+  /// Check if user's email is verified
+  bool get isEmailVerified => firebaseUser?.emailVerified == true;
+
   /// Check if user has an active premium subscription
   bool get isPremium => subscription?.isActive == true;
+
+  /// Check if user is authenticated AND email verified (secure authentication state)
+  bool get isSecurelyAuthenticated => isAuthenticated && isEmailVerified;
 
   /// User's display name or email
   String get displayName {
@@ -164,5 +171,70 @@ class AppUserService {
   /// Convenience method to check if user is authenticated
   bool isAuthenticated() {
     return FirebaseAuth.instance.currentUser != null;
+  }
+
+  /// Check if current user's email is verified
+  bool isEmailVerified() {
+    return FirebaseAuth.instance.currentUser?.emailVerified == true;
+  }
+
+  /// Check if user is securely authenticated (authenticated AND email verified)
+  bool isSecurelyAuthenticated() {
+    final user = FirebaseAuth.instance.currentUser;
+    return user != null && user.emailVerified;
+  }
+
+  /// Check if user needs email verification (authenticated but not verified)
+  bool needsEmailVerification() {
+    final user = FirebaseAuth.instance.currentUser;
+    return user != null && !user.emailVerified;
+  }
+
+  /// ACCOUNT ACTIVATION GATING
+  /// Central method to check if user's account is activated (email verified)
+  /// and show appropriate warnings if not. Returns true if user can proceed.
+  ///
+  /// [feature] - The feature being accessed ('chat', 'scanner', 'premium')
+  /// [showWarning] - Whether to show a warning notification (default: true)
+  bool checkAccountActivation(String feature, {bool showWarning = true}) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    // If user is not authenticated at all
+    if (user == null) {
+      if (showWarning) {
+        NotificationService.showError('auth_required');
+      }
+      return false;
+    }
+
+    // If user is authenticated but email is not verified
+    if (!user.emailVerified) {
+      if (showWarning) {
+        String messageKey;
+        switch (feature.toLowerCase()) {
+          case 'chat':
+            messageKey = 'account_activation_required_for_chat';
+            break;
+          case 'scanner':
+            messageKey = 'account_activation_required_for_scanner';
+            break;
+          case 'premium':
+            messageKey = 'account_activation_required_for_premium';
+            break;
+          default:
+            messageKey = 'verify_account_to_continue';
+        }
+        NotificationService.showError(messageKey);
+      }
+      return false;
+    }
+
+    // Account is activated (email verified)
+    return true;
+  }
+
+  /// Quick check if account is activated without showing warnings
+  bool isAccountActivated() {
+    return checkAccountActivation('', showWarning: false);
   }
 }

@@ -40,9 +40,10 @@ class GoalAndWeightPicker extends StatelessWidget {
           height: 150,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
+            color:
+                Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : AppColor.darkCard,
             borderRadius: BorderRadius.circular(10),
           ),
           child: CupertinoPicker(
@@ -56,9 +57,10 @@ class GoalAndWeightPicker extends StatelessWidget {
                   '${minKg + index} ${'kg'.tr}',
                   style: TextStyle(
                     fontSize: 18,
-                    color: Theme.of(context).brightness == Brightness.light
-                        ? Colors.black
-                        : Colors.white,
+                    color:
+                        Theme.of(context).brightness == Brightness.light
+                            ? Colors.black
+                            : Colors.white,
                   ),
                 ),
               );
@@ -85,10 +87,10 @@ class _SplitGoalCard extends StatelessWidget {
     final bool isLose = selectedGoal == 'Lose Weight';
     final bool hasSel = selectedGoal.isNotEmpty;
 
-  // Further reduce heights to avoid scrolling on most devices
-  final double topH = hasSel ? (isGain ? 120 : 60) : 80;
-  final double botH = hasSel ? (isLose ? 120 : 60) : 80;
-  // animations use individual curves per widget
+    // Further reduce heights to avoid scrolling on most devices
+    final double topH = hasSel ? (isGain ? 120 : 60) : 80;
+    final double botH = hasSel ? (isLose ? 120 : 60) : 80;
+    // animations use individual curves per widget
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -109,7 +111,7 @@ class _SplitGoalCard extends StatelessWidget {
             IgnorePointer(
               child: Align(
                 alignment: Alignment.center,
-                  child: Transform.rotate(
+                child: Transform.rotate(
                   angle: -0.785398, // -45 degrees
                   child: Container(
                     width: 2,
@@ -117,7 +119,10 @@ class _SplitGoalCard extends StatelessWidget {
                     // Stack doesn't leave extra space under the lower tile
                     height: topH + botH,
                     color: Colors.white.withOpacity(
-                        Theme.of(context).brightness == Brightness.light ? 0.5 : 0.2),
+                      Theme.of(context).brightness == Brightness.light
+                          ? 0.5
+                          : 0.2,
+                    ),
                   ),
                 ),
               ),
@@ -130,7 +135,10 @@ class _SplitGoalCard extends StatelessWidget {
                   label: 'Gain Weight'.tr,
                   icon: Icons.arrow_upward_rounded,
                   assetIcon: 'assets/icons/gain.png',
-                  gradient: const [AppColor.primaryOrange, Colors.deepOrangeAccent],
+                  gradient: const [
+                    AppColor.primaryOrange,
+                    Colors.deepOrangeAccent,
+                  ],
                   selected: isGain,
                   onTap: () => onSelectGoal('Gain Weight'),
                 ),
@@ -192,9 +200,10 @@ class _HalfTile extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: selected
-                      ? gradient
-                      : gradient.map((c) => c.withOpacity(0.8)).toList(),
+                  colors:
+                      selected
+                          ? gradient
+                          : gradient.map((c) => c.withOpacity(0.8)).toList(),
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -213,10 +222,12 @@ class _HalfTile extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         label,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ],
                   ),

@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 
 class HeightWeightPicker extends StatelessWidget {
   final void Function(int cm)? onHeightCmChanged;
-  final void Function(int feet, int inches)? onHeightFeetInchesChanged; // kept for compatibility but not used
+  final void Function(int feet, int inches)?
+  onHeightFeetInchesChanged; // kept for compatibility but not used
   final void Function(int kg)? onWeightKgChanged;
 
   const HeightWeightPicker({
@@ -19,7 +21,7 @@ class HeightWeightPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-  const SizedBox(height: 20),
+        const SizedBox(height: 20),
         // Two pickers row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -40,9 +42,10 @@ class HeightWeightPicker extends StatelessWidget {
                     height: 150,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.white
-                          : Colors.black,
+                      color:
+                          Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : AppColor.darkCard,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: CupertinoPicker(
@@ -52,18 +55,20 @@ class HeightWeightPicker extends StatelessWidget {
                         onHeightCmChanged?.call(cm);
                       },
                       children: List.generate(130, (index) {
-                              return Center(
-                                child: Text(
-                                  '${120 + index}${'cm'.tr}',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Theme.of(context).brightness == Brightness.light
-                                        ? Colors.black
-                                        : Colors.white,
-                                  ),
-                                ),
-                              );
-                            }),
+                        return Center(
+                          child: Text(
+                            '${120 + index}${'cm'.tr}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white,
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ),
                 ],
@@ -86,9 +91,10 @@ class HeightWeightPicker extends StatelessWidget {
                     height: 150,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.white
-                          : Colors.black,
+                      color:
+                          Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : AppColor.darkCard,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: CupertinoPicker(
@@ -98,18 +104,20 @@ class HeightWeightPicker extends StatelessWidget {
                         onWeightKgChanged?.call(kg);
                       },
                       children: List.generate(150, (index) {
-                              return Center(
-                                child: Text(
-                                  '${51 + index} ${'kg'.tr}',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Theme.of(context).brightness == Brightness.light
-                                        ? Colors.black
-                                        : Colors.white,
-                                  ),
-                                ),
-                              );
-                            }),
+                        return Center(
+                          child: Text(
+                            '${51 + index} ${'kg'.tr}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white,
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ),
                 ],

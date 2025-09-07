@@ -29,9 +29,14 @@ class _PasswordFieldState extends State<PasswordField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextFormField(
       controller: widget.controller,
-      decoration: modernInput(widget.label).copyWith(
+      decoration: modernInput(
+        widget.label,
+        // slightly smaller than bodySmall to be unobtrusive
+        errorStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: theme.colorScheme.error),
+      ).copyWith(
         suffixIcon: widget.showToggle
             ? IconButton(
                 icon: Icon(obscure ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye, color: Colors.orange),
