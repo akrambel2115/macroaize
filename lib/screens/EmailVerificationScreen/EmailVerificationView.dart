@@ -16,7 +16,6 @@ class EmailVerificationView extends GetView<EmailVerificationController> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Animated background
             const AnimatedBackground(),
             // Main content
             Positioned.fill(
@@ -37,7 +36,7 @@ class EmailVerificationView extends GetView<EmailVerificationController> {
 
                     const SizedBox(height: 40),
 
-                    // Lottie animation - using existing email animation
+                    // Lottie animation
                     SizedBox(
                       height: 200,
                       child: Lottie.asset(
@@ -49,7 +48,7 @@ class EmailVerificationView extends GetView<EmailVerificationController> {
 
                     const SizedBox(height: 32),
 
-                    // Main content
+                    
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -205,7 +204,7 @@ class EmailVerificationView extends GetView<EmailVerificationController> {
 
                         const SizedBox(height: 24),
 
-                        // Skip button - available in all environments
+                        // Skip button
                         TextButton(
                           onPressed: controller.skipVerification,
                           child: Text(

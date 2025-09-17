@@ -22,8 +22,6 @@ class SharedSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Safely read text; if controller was disposed during rebuilds/theme toggles,
-    // treat as empty to avoid exceptions.
     bool hasText = false;
     try {
       hasText = controller.text.isNotEmpty;

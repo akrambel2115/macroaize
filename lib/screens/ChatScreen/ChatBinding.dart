@@ -5,8 +5,6 @@ import 'package:foodcalorietracker/shared/services/app_user_service.dart';
 class ChatBinding extends Bindings{
   @override
   void dependencies() {
-    // TODO: implement dependencies
-    // Ensure AppUserService is registered before ChatController creation.
     if (!Get.isRegistered<AppUserService>()) {
       final svc = AppUserService();
       Get.put<AppUserService>(svc, permanent: true);

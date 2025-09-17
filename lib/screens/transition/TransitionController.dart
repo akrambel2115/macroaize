@@ -17,10 +17,8 @@ class TransitionController extends GetxController with GetTickerProviderStateMix
     fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
     fadeAnim = CurvedAnimation(parent: fadeController, curve: Curves.easeIn);
 
-    // Lottie controller used by the view and started when composition loads
     lottieController = AnimationController(vsync: this);
 
-    // Start fade in
     fadeController.forward();
   }
 
@@ -28,13 +26,12 @@ class TransitionController extends GetxController with GetTickerProviderStateMix
 
   void _selectAsset() async {
     final onboardingCompleted = await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
-  // If onboarding is completed, show a small loader; otherwise show full transition
+
   assetPath = onboardingCompleted ? AppAssets.loader : AppAssets.transition;
     update();
   }
 
   void onLottieComplete() async {
-    // short pause to let animation settle, then navigate
     await Future.delayed(const Duration(milliseconds: 250));
     final onboardingCompleted = await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
     if (onboardingCompleted) {

@@ -25,8 +25,6 @@ class EnergyOrbs extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Always try to place orbs on a single horizontal line.
-        // Use a horizontal scroll view as a graceful fallback on very narrow devices.
         final children = [
           EnergyOrb(
             labelKey: 'Protein',
@@ -113,7 +111,6 @@ class _EnergyOrbState extends State<EnergyOrb> with TickerProviderStateMixin {
     final goal = widget.goal <= 0 ? 1 : widget.goal;
     final targetProgress = (widget.consumed / goal).clamp(0.0, 1.0);
 
-    // Trigger a short sparkle pulse when just hit 100%
     if (targetProgress >= 1.0 && !_sparkle.isAnimating && _sparkle.value == 0) {
       _sparkle.forward(from: 0);
     }
@@ -131,18 +128,15 @@ class _EnergyOrbState extends State<EnergyOrb> with TickerProviderStateMixin {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Orb container (flat) with optional done overlay when complete
                 Container(
                   width: orbSize,
                   height: orbSize,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    // Glow removed: flat orb
                   ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // base painted orb
                       CustomPaint(
                         size: Size(orbSize, orbSize),
                         painter: _OrbPainter(
@@ -153,13 +147,12 @@ class _EnergyOrbState extends State<EnergyOrb> with TickerProviderStateMixin {
                           isDark: Theme.of(context).brightness == Brightness.dark,
                         ),
                       ),
-                      // show a solid circular badge with a white check when complete
                       if (progress >= 1.0)
                         Container(
                           width: orbSize * 0.54,
                           height: orbSize * 0.54,
                           decoration: BoxDecoration(
-                            color: widget.color, // use orb color for badge background
+                            color: widget.color,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -208,8 +201,8 @@ class _OrbPainter extends CustomPainter {
 
   final double progress; // 0..1
   final Color color;
-  final double t; // 0..1 breathing phase
-  final double sparkle; // 0..1 sparkle pulse
+  final double t;
+  final double sparkle;
   final bool isDark;
 
   @override
@@ -217,30 +210,24 @@ class _OrbPainter extends CustomPainter {
     final center = size.center(Offset.zero);
     final radius = math.min(size.width, size.height) / 2;
 
-  // Base orb body: use a flat solid color with reduced opacity
   final basePaint = Paint()..color = color.withOpacity(0.3);
   canvas.drawCircle(center, radius, basePaint);
 
-  // Inner glow removed — keeping only the colored fill and liquid wave.
+  final liquidHeight = (2 * radius) * progress;
+  final topY = center.dy + radius - liquidHeight;
+  final amp = 4.0;
+  final cycles = 1.2;
 
-    // Liquid fill with wavy top
-    final liquidHeight = (2 * radius) * progress;
-    final topY = center.dy + radius - liquidHeight;
-    final amp = 4.0; // wave amplitude
-    final cycles = 1.2; // waves across width
+  final path = Path();
+  path.addOval(Rect.fromCircle(center: center, radius: radius));
+  canvas.save();
+  canvas.clipPath(path);
 
-    final path = Path();
-    path.addOval(Rect.fromCircle(center: center, radius: radius));
-    canvas.save();
-    canvas.clipPath(path);
-
-  // Use the same flat color for the fill area with reduced opacity so background is less intense.
   final fillPaint = Paint()..color = color.withOpacity(0.3);
 
-    // Draw filled area up to wave top
-    final liquidPath = Path()
-      ..moveTo(center.dx - radius, center.dy + radius)
-      ..lineTo(center.dx - radius, topY);
+  final liquidPath = Path()
+    ..moveTo(center.dx - radius, center.dy + radius)
+    ..lineTo(center.dx - radius, topY);
     for (double x = -radius; x <= radius; x++) {
       final wx = (x + radius) / (2 * radius);
       final y = topY + amp * math.sin((wx * cycles * 2 * math.pi) + t * 2 * math.pi);
@@ -249,33 +236,27 @@ class _OrbPainter extends CustomPainter {
     liquidPath
       ..lineTo(center.dx + radius, center.dy + radius)
       ..close();
-    canvas.drawPath(liquidPath, fillPaint);
+  canvas.drawPath(liquidPath, fillPaint);
 
-  // Specular highlight removed per user request — keeping the orb visuals focused on colored fill and wave.
+  if (progress >= 1.0 && sparkle > 0) {
+    final sOpacity = (1 - sparkle).clamp(0.0, 1.0);
+    final ring = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = AppColor.primaryOrange.withOpacity(0.6 * sOpacity)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+    canvas.drawCircle(center, radius * (1 + 0.15 * sparkle), ring);
 
-    // Sparkle pulse when full
-      if (progress >= 1.0 && sparkle > 0) {
-      final sOpacity = (1 - sparkle).clamp(0.0, 1.0);
-      final ring = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = AppColor.primaryOrange.withOpacity(0.6 * sOpacity)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-      canvas.drawCircle(center, radius * (1 + 0.15 * sparkle), ring);
-
-      // Few sparkles around
-      final sparkCount = 6;
-  for (int i = 0; i < sparkCount; i++) {
-        final angle = (2 * math.pi / sparkCount) * i + sparkle * 2 * math.pi;
-        final r = radius * (0.95 + 0.1 * math.sin(i + sparkle * 2 * math.pi));
-        final pos = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-  canvas.drawCircle(pos, 2.0 + 1.0 * (1 - sparkle), Paint()..color = AppColor.primaryOrange.withOpacity(0.9 * sOpacity));
-      }
+    final sparkCount = 6;
+    for (int i = 0; i < sparkCount; i++) {
+      final angle = (2 * math.pi / sparkCount) * i + sparkle * 2 * math.pi;
+      final r = radius * (0.95 + 0.1 * math.sin(i + sparkle * 2 * math.pi));
+      final pos = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
+      canvas.drawCircle(pos, 2.0 + 1.0 * (1 - sparkle), Paint()..color = AppColor.primaryOrange.withOpacity(0.9 * sOpacity));
     }
+  }
 
-    canvas.restore();
-
-  // Outer rim removed to eliminate subtle shadow/glow.
+  canvas.restore();
   }
 
   @override

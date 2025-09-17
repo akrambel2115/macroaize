@@ -16,12 +16,10 @@ class TransitionView extends GetView<TransitionController> {
           backgroundColor: context.theme.scaffoldBackgroundColor,
           body: Stack(
             children: [
-              // Full-screen Lottie (fills the viewport; preserves aspect ratio via BoxFit.cover)
               FadeTransition(
                 opacity: controller.fadeAnim,
                 child: Builder(builder: (ctx) {
                   if (controller.assetPath == AppAssets.loadingClock || controller.assetPath == AppAssets.loader) {
-                    // Small centered loading clock for returning users
                     return Center(
                       child: SizedBox(
                         width: 180,
@@ -62,7 +60,6 @@ class TransitionView extends GetView<TransitionController> {
                 }),
               ),
 
-              // Keep an empty SafeArea on top in case we want to add overlays later
               SafeArea(child: Container()),
             ],
           ),

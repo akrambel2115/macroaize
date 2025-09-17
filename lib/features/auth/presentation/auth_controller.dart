@@ -10,11 +10,11 @@ class AuthController extends GetxController {
   final AuthRepository repo;
   AuthController(this.repo);
 
-  // Form keys
+  // form keys
   final loginKey = GlobalKey<FormState>();
   final registerKey = GlobalKey<FormState>();
 
-  // Text controllers
+  // text controllers
   final email = TextEditingController();
   final password = TextEditingController();
   final firstName = TextEditingController();
@@ -24,22 +24,22 @@ class AuthController extends GetxController {
   final isLoading = false.obs;
   final tosAccepted = false.obs;
   final errorText = ''.obs;
-  // Holds the last success translation key so callers (e.g. modal) can show it after UI changes
+  // last success translation key for callers to show after UI changes
   final lastSuccessKey = ''.obs;
 
-  // Eye / obscure state for password fields
+  // password obscure toggles
   final loginObscure = true.obs;
   final registerPasswordObscure = true.obs;
   final registerConfirmObscure = true.obs;
 
-  // Whether to show the eye icon (becomes true when user starts typing)
-  final showPasswordEye = false.obs; // for both login & register password field
+  // whether to show the eye icon when typing
+  final showPasswordEye = false.obs;
   final showConfirmEye = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Update eye visibility when the user types
+    // update eye visibility when user types
     password.addListener(() {
       showPasswordEye.value = password.text.isNotEmpty;
     });
@@ -54,7 +54,7 @@ class AuthController extends GetxController {
   void toggleRegisterConfirmObscure() =>
       registerConfirmObscure.value = !registerConfirmObscure.value;
 
-  // Validation
+  // validation
   String? validateEmail(String? v) {
     if (v == null || v.trim().isEmpty) return 'email_required'.tr;
     final ok = RegExp(r'^\S+@\S+\.\S+$').hasMatch(v.trim());
@@ -110,8 +110,7 @@ class AuthController extends GetxController {
       );
       final res = _handle(user, failure);
       if (res != null) {
-        // CRITICAL: After successful registration, redirect to email verification
-        // Don't set success message as we're redirecting to verification screen
+        // redirect to email verification
         lastSuccessKey.value = 'auth_register_verification_required';
       }
       return res;
@@ -132,7 +131,7 @@ class AuthController extends GetxController {
     return res;
   });
 
-  // Facebook sign-in removed; use Google or email/password
+  // facebook removed; use Google or email/password
 
   Future<void> resetPassword() async {
     final v = email.text.trim();

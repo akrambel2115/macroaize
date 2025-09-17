@@ -4,13 +4,18 @@ import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetails
 import 'package:get/get.dart';
 import '../../../constant/FontFamily.dart';
 
+// Widget to pick the user's height in centimeters.
 class HeightUpdate extends GetView<PersonalDetailsController> {
   const HeightUpdate({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom+10,left: 5,right: 5),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + 10,
+        left: 5,
+        right: 5,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -19,16 +24,13 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
             style: context.theme.textTheme.headlineLarge,
           ).paddingOnly(top: 20, bottom: 10, left: 10),
 
-
-          // Height and Weight Pickers
           GetBuilder<PersonalDetailsController>(
             builder: (controller) {
-              int minCm = 121; // Range: 121cm to 250cm
-              int cmInitialItem = controller.selectedCm - minCm;
+              const int minCm = 121;
+              final int cmInitialItem = controller.selectedCm - minCm;
 
-              final scrollController = FixedExtentScrollController(
-                initialItem: cmInitialItem,
-              );
+              final scrollController =
+                  FixedExtentScrollController(initialItem: cmInitialItem);
 
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -36,12 +38,10 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                   Expanded(
                     child: Column(
                       children: [
-                        // Subtitle removed — headline provides the title now
                         Container(
                           height: 150,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            // match CurrentWeightUpdate theme-aware background
                             color: Theme.of(context).brightness == Brightness.dark
                                 ? Colors.grey.shade900
                                 : context.theme.scaffoldBackgroundColor,
@@ -78,7 +78,6 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
               ).marginOnly(left: 10, right: 10);
             },
           ),
-          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );

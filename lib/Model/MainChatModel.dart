@@ -11,7 +11,6 @@ class MainChatModel {
     required this.date,
   });
 
-  // Convert a Art object into a Map object
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -21,7 +20,6 @@ class MainChatModel {
     };
   }
 
-  // Extract a Art object from a Map object
   factory MainChatModel.fromMap(Map<String, dynamic> map) {
     return MainChatModel(
       id: map['id'],

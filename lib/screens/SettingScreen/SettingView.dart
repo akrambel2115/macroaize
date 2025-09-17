@@ -28,10 +28,10 @@ import '../../ThemeService/ThemeController.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'package:intl/intl.dart';
 
-// Configuration class for easy maintenance and updates
+// Configuration for settings menus
 class SettingConfig {
 
-  // Customization menu items - easily add/remove/modify settings
+  // Customization menu items
   static const List<Map<String, dynamic>> customizationItems = [
     {
       'title': 'Personal details',
@@ -54,7 +54,7 @@ class SettingConfig {
     },
   ];
 
-  // Legal menu items - centralized for easy maintenance
+  // Legal menu items
   static const List<Map<String, dynamic>> legalItems = [
     {
       'title': 'Terms and Condition',
@@ -69,14 +69,7 @@ class SettingConfig {
   ];
 }
 
-/// Modern Settings View with clean architecture and maintainable code structure
-///
-/// Features:
-/// - Configuration-driven menu items for easy maintenance
-/// - Modern UI with consistent design system
-/// - Organized sections: Profile, Customization, Legal, App Info
-/// - Responsive design with smooth animations
-/// - Easy to extend and modify through SettingConfig class
+/// Settings view with organized sections and config-driven menus
 class SettingView extends GetView<SettingController> {
   const SettingView({super.key});
 
@@ -87,7 +80,7 @@ class SettingView extends GetView<SettingController> {
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => SettingController());
-    // Ensure AppConfigService is refreshed when Settings opens
+  // Refresh AppConfigService when settings open
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
         Get.find<AppConfigService>().refresh();
@@ -103,13 +96,12 @@ class SettingView extends GetView<SettingController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Premium card or status
-            // Premium card / Subscription status
+            // Premium card / subscription status
             _buildPremiumSection(context),
 
             const SizedBox(height: 16),
 
-            // Daily usage section (conditionally rendered for non-premium users only)
+            // Daily usage (non-premium only)
             StreamBuilder<Subscription?>(
               stream: _subscriptionService.subscriptionStream,
               builder: (context, snap) {
@@ -127,7 +119,7 @@ class SettingView extends GetView<SettingController> {
               },
             ),
 
-            // Influencer section (only show if user is an influencer)
+            // Influencer section
             _buildInfluencerSection(context),
 
             // Profile section

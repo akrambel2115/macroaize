@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:foodcalorietracker/Model/Recipe.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/widgets/CalorieRing.dart';
-// ...existing code...
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -18,15 +17,12 @@ class RecipeDetailScreen extends StatefulWidget {
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   int _servings = 1;
 
-
   List<Map<String, String>> get _ingredients {
-    // convert recipe.ingredients (List<String>) into name/qty pairs when possible
     final lang = Get.locale?.languageCode ?? 'en';
     final base = widget.recipe.localizedIngredients(lang);
     if (base.isEmpty) return [];
     return base.map((s) {
-      // try splitting on two-column separator
-      final parts = s.split(RegExp(r"\s{2,}|\t| - ")); // flexible split
+      final parts = s.split(RegExp(r"\s{2,}|\t| - "));
       if (parts.length >= 2) return {"name": parts[0], "qty": parts[1]};
       return {"name": s, "qty": ""};
     }).toList();
@@ -36,7 +32,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final lang = Get.locale?.languageCode ?? 'en';
     final steps = widget.recipe.localizedInstructions(lang);
     if (steps.isNotEmpty) return steps;
-    // basic fallback sample
     return [
       "Mix all ingredients in a blender until smooth.",
       "Taste and add honey if needed.",
@@ -66,7 +61,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   _buildIngredients(context),
                   const SizedBox(height: 12),
                   _buildDirections(context),
-                  const SizedBox(height: 96), // space for bottom button
+                  const SizedBox(height: 96),
                 ],
               ),
             ),
@@ -78,8 +73,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   }
 
   Widget _buildHero(BuildContext context) {
-    // Mirror the ScanCalorie hero: rounded bottom, image with gradient overlay,
-    // bottom calorie pill and centered title with shadow.
     return Container(
       height: 300,
       width: double.infinity,
@@ -100,7 +93,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Image with cache sizing
             LayoutBuilder(builder: (context, constraints) {
               final dpr = MediaQuery.of(context).devicePixelRatio;
               final targetW = (constraints.maxWidth * dpr).clamp(64, 2048).round();
@@ -117,7 +109,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               );
             }),
 
-            // Gradient overlay (transparent -> darker at bottom)
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -128,7 +119,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
             ),
 
-            // Top-left: white back icon only (no page title)
             Positioned(
               left: 12,
               top: 12,
@@ -141,7 +131,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
             ),
 
-            // Bottom-left: title and small labels aligned to left. Time label placed beside calories.
             Positioned(
               left: 20,
               bottom: 20,
@@ -162,7 +151,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      // Time pill
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
@@ -178,7 +166,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Calorie pill
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
@@ -204,8 +191,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  // _badge removed — ScanCalorie's pill styling is used inline in the hero instead.
-
   Widget _buildDescription(BuildContext context, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -222,8 +207,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               desc,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontSize: 13.0,
-                    color:
-                        isDark ? AppColor.neutralGrey200 : AppColor.neutralGrey600,
+                    color: isDark ? AppColor.neutralGrey200 : AppColor.neutralGrey600,
                   ),
             );
           }),
@@ -285,8 +269,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  // _macroCircle removed in favor of shared CalorieRing via _macroRing
-
   Widget _macroRing({required String label, required String value, required Color color, required double progress}) {
     return Column(
       children: [
@@ -296,7 +278,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Use CalorieRing but limit size via container; progress controls sweep
               CalorieRing(
                 progress: progress,
                 size: 80,
@@ -358,7 +339,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // dotted separator approximation
                   Container(height: 1, width: double.infinity, color: Colors.grey.shade200),
                   const SizedBox(height: 8),
                 ],
@@ -469,17 +449,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   }
 
   Widget _buildBottomButton(BuildContext context) {
-  return Positioned(
+    return Positioned(
       left: 16,
       right: 16,
       bottom: 18,
-            child: PrimaryCTA(
-              label: 'add_to_plan'.tr,
-              onTap: () {
-                // Keep existing behavior; replace later with controller logic
-                Get.snackbar('success'.tr, 'food_added_success'.tr);
-              },
-            ),
+      child: PrimaryCTA(
+        label: 'add_to_plan'.tr,
+        onTap: () {
+          Get.snackbar('success'.tr, 'food_added_success'.tr);
+        },
+      ),
     );
   }
 }

@@ -14,7 +14,7 @@ class MacroCardTile extends StatefulWidget {
     required this.viz,
   });
 
-  final String labelKey; // e.g., 'Protein', 'Carbs', 'Fats'
+  final String labelKey; // Protein, Carbs, Fats
   final int consumed;
   final int goal;
   final Color color;
@@ -57,7 +57,6 @@ class _MacroCardTileState extends State<MacroCardTile>
         duration: const Duration(milliseconds: 800),
         curve: Curves.easeOutCubic,
         builder: (context, progress, child) {
-          // Micro-bounce using a small overshoot at mid-animation
           final scale = 1.0 + 0.03 * math.sin(progress * math.pi);
           return AnimatedScale(
             scale: scale,
@@ -90,7 +89,7 @@ class _MacroCardTileState extends State<MacroCardTile>
                   width: 1,
                 ),
               ),
-              child: Row(
+                child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _MiniViz(progress: progress, color: widget.color, viz: widget.viz, wave: _waveController),

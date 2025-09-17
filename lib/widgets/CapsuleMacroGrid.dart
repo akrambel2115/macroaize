@@ -27,15 +27,14 @@ class CapsuleMacroGrid extends StatefulWidget {
 }
 
 class _CapsuleMacroGridState extends State<CapsuleMacroGrid> with TickerProviderStateMixin {
-  // make mutable so we can refresh values when parent updates
+  // Mutable items list refreshed when parent updates
   late List<_CapsuleItem> _items;
-  bool _hasAnimated = false; // track if animations have been triggered by scroll
+  bool _hasAnimated = false;
 
   @override
   void initState() {
     super.initState();
     _items = [
-      // all boxes use the app's primary orange color per request
       _CapsuleItem(label: 'Calorie'.tr, color: AppColor.primaryOrange, value: widget.calories, unit: 'kcal_unit'.tr),
       _CapsuleItem(label: 'Protein'.tr, color: AppColor.primaryOrange, value: widget.protein, unit: 'protein_unit'.tr),
       _CapsuleItem(label: 'Carbs'.tr, color: AppColor.primaryOrange, value: widget.carbs, unit: 'carbs_unit'.tr),
@@ -46,8 +45,7 @@ class _CapsuleMacroGridState extends State<CapsuleMacroGrid> with TickerProvider
   @override
   void didUpdateWidget(covariant CapsuleMacroGrid oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If any of the numeric props changed, rebuild the internal items so
-    // child cards receive updated values and animate accordingly.
+    // Rebuild items when numeric props change so children update
     if (oldWidget.calories != widget.calories ||
         oldWidget.protein != widget.protein ||
         oldWidget.carbs != widget.carbs ||
@@ -59,7 +57,7 @@ class _CapsuleMacroGridState extends State<CapsuleMacroGrid> with TickerProvider
           _CapsuleItem(label: 'Carbs'.tr, color: AppColor.primaryOrange, value: widget.carbs, unit: 'carbs_unit'.tr),
           _CapsuleItem(label: 'Fats'.tr, color: AppColor.primaryOrange, value: widget.fats, unit: 'fat_unit'.tr),
         ];
-        // reset animation trigger so updates appear animated when grid is visible
+        // reset animation trigger so updates animate when visible
         _hasAnimated = false;
       });
     }
@@ -67,7 +65,7 @@ class _CapsuleMacroGridState extends State<CapsuleMacroGrid> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
-    // development-only debug button widget (declared here to keep children list simple)
+  // Debug-only replay button
     final Widget debugButton = kDebugMode
         ? Align(
             alignment: Alignment.topRight,
@@ -98,7 +96,6 @@ class _CapsuleMacroGridState extends State<CapsuleMacroGrid> with TickerProvider
       VisibilityDetector(
         key: const Key('capsule-macro-grid'),
         onVisibilityChanged: (info) {
-          // trigger animations when half the grid (first two rows) are fully visible
           if (info.visibleFraction >= 0.5 && !_hasAnimated) {
             setState(() => _hasAnimated = true);
           }
@@ -117,9 +114,8 @@ class _CapsuleMacroGridState extends State<CapsuleMacroGrid> with TickerProvider
                 value: item.value,
                 unit: item.unit,
                 color: item.color,
-                // start all capsules at the same time
                 delay: Duration.zero,
-                shouldAnimate: _hasAnimated, // pass scroll trigger state
+                shouldAnimate: _hasAnimated,
               ),
             );
           },
@@ -167,8 +163,7 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
   late final Animation<double> _breathScale;
   late final Animation<double> _dropOffset; // animation for drop position
   bool _numberStarted = false;
-  // when to reveal the number during Lottie playback — lowered further so numbers appear sooner
-  // when to reveal the number during Lottie playback — increased so numbers appear later
+  // Reveal threshold for number during Lottie playback
   static const double _revealThreshold = 0.65;
 
   bool _opened = false;
@@ -184,20 +179,19 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
     _breathScale = Tween<double>(begin: 0.98, end: 1.02).animate(
       CurvedAnimation(parent: _breath, curve: Curves.easeInOut),
     );
-    
-  // drop animation: starts from capsule position and drops to final position below
-  // increased negative begin so number drops from higher (bigger capsule)
-  _dropOffset = Tween<double>(begin: -80.0, end: 0.0).animate(
+
+    // drop animation for number: falls into final position
+    _dropOffset = Tween<double>(begin: -80.0, end: 0.0).animate(
       CurvedAnimation(parent: _drop, curve: Curves.bounceOut),
     );
-    
-    // don't auto-start; wait for scroll trigger
+
+    // wait for scroll trigger
   }
 
   @override
   void didUpdateWidget(covariant _CapsuleCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // trigger animation when shouldAnimate becomes true
+    // trigger when shouldAnimate becomes true
     if (!oldWidget.shouldAnimate && widget.shouldAnimate) {
       Future.delayed(widget.delay, _play);
     }
@@ -237,7 +231,6 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Ensure listener added once — attach here because controller exists after init
     _lottie.addListener(() {
       if (!_numberStarted && _lottie.duration != null && _lottie.value >= _revealThreshold) {
         _numberStarted = true;
@@ -281,7 +274,7 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
     }
 
     return Container(
-      height: 140, // increased height to accommodate larger capsule above number
+      height: 140,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -297,7 +290,7 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          // Nutrition icon (left side)
+          // Nutrition icon
           Container(
             width: 48,
             height: 48,
@@ -312,7 +305,7 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
             ),
           ),
           const SizedBox(width: 16),
-          // Label (left-center)
+          // Label
           Expanded(
             flex: 2,
             child: Text(
@@ -323,7 +316,7 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
               ),
             ),
           ),
-          // Capsule above the number (right side)
+          // Capsule above the number
           Expanded(
             flex: 3,
             child: Column(
@@ -346,7 +339,7 @@ class _CapsuleCardState extends State<_CapsuleCard> with TickerProviderStateMixi
                   ),
                 ),
                 const SizedBox(height: 6),
-                // Animated number below capsule; translate uses _dropOffset so it appears to fall from above
+                // Animated number below capsule; uses _dropOffset for falling effect
                 AnimatedBuilder(
                   animation: _drop,
                   builder: (context, child) {

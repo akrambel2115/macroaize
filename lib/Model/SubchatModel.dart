@@ -17,7 +17,6 @@ class SubChatModel {
     this.image,
   });
 
-  // Convert a Art object into a Map object
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -29,7 +28,6 @@ class SubChatModel {
     };
   }
 
-  // Extract a Art object from a Map object
   factory SubChatModel.fromMap(Map<String, dynamic> map) {
     return SubChatModel(
       id: map['id'],

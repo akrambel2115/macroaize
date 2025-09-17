@@ -7,7 +7,6 @@ import '../Model/openAIModel.dart';
 import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 
 class OpenAiCalling {
-  // New: request a meal breakdown as list of items
   static Future<String> analyzeMealItems(File image) async {
     try {
       final currentLang = _getLanguageName();
@@ -19,7 +18,7 @@ class OpenAiCalling {
           {
             'role': 'system',
             'content':
-                "You are a nutrition analysis assistant with advanced portion estimation capabilities. Given a food photo, you MUST return ONLY compact JSON listing all distinct items with detailed portion analysis. No commentary, no markdown.\n\nJSON shape:\n{\n  \"mealItems\": [\n    {\n      \"name\": <string in $currentLang>,\n      \"english_name\": <string in English>,\n      \"portionType\": \"pieces\" | \"grams\",\n      \"count\": <number, only if portionType is pieces>,\n      \"estimatedWeight\": <number in grams>\n    }\n  ]\n}\n\nCRITICAL: Be conservative with portion estimates. Common food weights:\n- Medium egg ≈ 50g (NOT 65g+)\n- Large egg ≈ 60g maximum\n- Thin bread slice ≈ 25g\n- Thick bread slice ≈ 35g\n- Medium apple ≈ 150g\n- Banana ≈ 120g\n\nFor piece-based items: carefully examine visual size and compare to standard references. Avoid overestimating weights. Always provide count AND realistic total weight in grams.\n\nFor weight-based items: estimate total grams conservatively based on visual portion size.",
+                "You are a nutrition analysis assistant with advanced portion estimation capabilities. Given a food photo, return ONLY compact JSON listing distinct items with portion analysis. No commentary or markdown.\n\nJSON shape:\n{\n  \"mealItems\": [\n    {\n      \"name\": <string in $currentLang>,\n      \"english_name\": <string in English>,\n      \"portionType\": \"pieces\" | \"grams\",\n      \"count\": <number, only if portionType is pieces>,\n      \"estimatedWeight\": <number in grams>\n    }\n  ]\n}\n\nBe conservative with portion estimates. Common references:\n- Medium egg ≈ 50g\n- Large egg ≤ 60g\n- Thin bread slice ≈ 25g\n- Thick bread slice ≈ 35g\n- Medium apple ≈ 150g\n- Banana ≈ 120g\n\nProvide count AND realistic total weight for piece-based items. For weight-based items, estimate total grams conservatively.",
           },
           {
             'role': 'user',
@@ -42,22 +41,20 @@ class OpenAiCalling {
   final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
   final callable = functions.httpsCallable('chatWithOpenRouter');
   final result = await callable.call(parameters);
-  // Normalize to Map<String, dynamic> deeply to avoid nested Map<Object?, Object?> types
+  // normalize to Map<String, dynamic>
   final decodedJson = jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
       OpenAiModel data = OpenAiModel.fromJson(decodedJson);
       return data.choices!.first.message!.content.toString();
     } catch (e) {
-      if (kDebugMode) {
-        print("error analyzeMealItems====> $e");
-      }
+      if (kDebugMode) print("error analyzeMealItems====> $e");
       return "Something Went Wrong";
     }
   }
 
   static Future<String> sentImageApi(File image) async {
     try {
-      // Get current app language for response localization
-      final currentLang = _getLanguageName();
+  // get current app language for localization
+  final currentLang = _getLanguageName();
       final bytes = await image.readAsBytes();
       final base64Image = base64Encode(bytes);
       final parameters = {
@@ -66,7 +63,7 @@ class OpenAiCalling {
           {
             'role': 'system',
             'content':
-                "You are a nutrition analysis assistant. Given a food photo you MUST return ONLY compact JSON with integer values in kcal/grams. No commentary, no markdown. If multiple foods are present, estimate TOTAL combined values. JSON shape: {\\n  \"food_name\": <string>,\\n  \"food_name_english\": <string>,\\n  \"calories\": <int>,\\n  \"protein_g\": <int>,\\n  \"carbohydrates_g\": <int>,\\n  \"fats_g\": <int>\\n}. The food_name should be short, human-friendly, and written in $currentLang (e.g., 'Grilled chicken with salad'). The food_name_english should be the same food name but always in English (e.g., 'Apple', 'Grilled chicken with salad'). If unsure, provide your best reasonable estimate; never output 0 unless clearly no food.",
+                "You are a nutrition analysis assistant. Given a food photo return ONLY compact JSON with integer kcal/gram values. No commentary or markdown. If multiple foods are present, estimate TOTAL combined values. JSON shape: {\\n  \"food_name\": <string>,\\n  \"food_name_english\": <string>,\\n  \"calories\": <int>,\\n  \"protein_g\": <int>,\\n  \"carbohydrates_g\": <int>,\\n  \"fats_g\": <int>\\n}. food_name should be in $currentLang, food_name_english always in English. If unsure, give best estimate; avoid 0 unless clearly no food.",
           },
           {
             'role': 'user',
@@ -89,39 +86,25 @@ class OpenAiCalling {
   final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
   final callable = functions.httpsCallable('chatWithOpenRouter');
   final result = await callable.call(parameters);
-  // Normalize to Map<String, dynamic> deeply to avoid nested Map<Object?, Object?> types
+  // normalize to Map<String, dynamic>
   final decodedJson = jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
       OpenAiModel data = OpenAiModel.fromJson(decodedJson);
       return data.choices!.first.message!.content.toString();
     } catch (e) {
-      if (kDebugMode) {
-        print("error is====> $e");
-      }
+      if (kDebugMode) print("error is====> $e");
       return "Something Went Wrong";
     }
   }
 
-  // Helper method to get readable language name for AI prompts
+  // helper to map language code to name for AI prompts
   static String _getLanguageName() {
     final currentLang = Get.locale?.languageCode.toLowerCase() ?? 'en';
 
-    // Map language codes to full language names for better AI understanding
+    // map language codes to readable names
     final languageMap = {
       'en': 'English',
       'ar': 'Arabic',
       'fr': 'French',
-      'es': 'Spanish',
-      'de': 'German',
-      'it': 'Italian',
-      'pt': 'Portuguese',
-      'ru': 'Russian',
-      'zh': 'Chinese',
-      'ja': 'Japanese',
-      'ko': 'Korean',
-      'hi': 'Hindi',
-      'ur': 'Urdu',
-      'tr': 'Turkish',
-      'nl': 'Dutch',
     };
 
     return languageMap[currentLang] ?? 'English';

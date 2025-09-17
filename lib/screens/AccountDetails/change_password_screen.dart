@@ -14,7 +14,7 @@ class ChangePasswordScreen extends StatefulWidget {
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   late final AccountController controller;
   final _formKey = GlobalKey<FormState>();
-  // Password fields are obscured by default; eye toggles match login/register
+  // password eye toggles (unused here; kept for parity)
   bool obscureCurrent = true;
   bool obscureNew = true;
   bool obscureConfirm = true;
@@ -23,11 +23,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void initState() {
     super.initState();
     controller = widget.controller;
-  // No per-keystroke listeners to avoid rebuilds; validation happens on submit.
+    // validation occurs on submit
   }
   @override
   void dispose() {
-  // No listeners to remove
     super.dispose();
   }
 
@@ -99,8 +98,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     const SizedBox(width: 8),
                     Obx(() {
                       final loading = controller.isLoading.value;
-                      // Button is enabled unless a request is in progress. Validation is
-                      // performed when the user taps the button (same pattern as register).
+                      // Button enabled when not loading; validation happens on tap
                       final enabled = !loading;
                       return AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),

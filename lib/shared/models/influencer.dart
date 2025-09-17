@@ -77,7 +77,7 @@ class Influencer {
 class WithdrawalRecord {
   final String id;
   final double amount;
-  final String ripMasked; // Masked RIP for display (e.g., "••••••••••••1234")
+  final String ripMasked; // Masked RIP
   final DateTime? requestedAt;
   final String status;
   final String? estimatedProcessingDate;
@@ -105,7 +105,6 @@ class WithdrawalRecord {
     return WithdrawalRecord(
       id: data['id']?.toString() ?? '',
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      // Handle backward compatibility: new records have 'ripMasked', old ones have 'rip' or 'ripLast4'
       ripMasked:
           data['ripMasked']?.toString() ??
           _maskRip(data['rip']?.toString() ?? '') ??
@@ -131,7 +130,7 @@ class WithdrawalRecord {
   }
 }
 
-/// Helper function to mask RIP for backward compatibility
+/// Helper function to mask RIP
 String? _maskRip(String rip) {
   if (rip.isEmpty) return null;
   final clean = rip.replaceAll(RegExp(r'\s+'), '');

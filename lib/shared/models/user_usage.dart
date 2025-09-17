@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 
 class UserUsage {
   final int scanCount;
@@ -24,28 +26,36 @@ class UserUsage {
       return null;
     }
 
+    int _toInt(dynamic v) {
+      if (v == null) return 0;
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v) ?? 0;
+      return 0;
+    }
+
+    final cfg = Get.isRegistered<AppConfigService>() ? Get.find<AppConfigService>() : null;
+
     return UserUsage(
       scanCount: (data['scanCount'] as num?)?.toInt() ?? 0,
       chatCount: (data['chatCount'] as num?)?.toInt() ?? 0,
       lastUsageDate: parseDate(data['lastUsageDate']),
-      scanLimit: 2, // Free tier limits
-      chatLimit: 5,
+      scanLimit: _toInt(data['scanLimit']) != 0
+          ? _toInt(data['scanLimit'])
+          : (cfg?.freeScanLimit ?? 2),
+      chatLimit: _toInt(data['chatLimit']) != 0
+          ? _toInt(data['chatLimit'])
+          : (cfg?.freeChatLimit ?? 5),
     );
   }
 
-  /// Returns remaining scans for today
   int get remainingScans => (scanLimit - scanCount).clamp(0, scanLimit);
 
-  /// Returns remaining chats for today
   int get remainingChats => (chatLimit - chatCount).clamp(0, chatLimit);
 
-  /// Check if scan limit has been reached
   bool get scanLimitReached => scanCount >= scanLimit;
 
-  /// Check if chat limit has been reached
   bool get chatLimitReached => chatCount >= chatLimit;
 
-  /// Check if this is usage from today
   bool get isToday {
     if (lastUsageDate == null) return false;
     final now = DateTime.now().toUtc();

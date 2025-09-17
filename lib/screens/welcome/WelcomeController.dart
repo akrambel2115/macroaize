@@ -49,7 +49,7 @@ class WelcomeController extends GetxController with GetTickerProviderStateMixin 
       curve: const Interval(0.3, 0.9, curve: Curves.easeOutCubic),
     ));
     
-    // Subtitle slide up animation (slightly delayed)
+    // Subtitle slide up animation
     subtitleAnimation = Tween<double>(
       begin: 50.0,
       end: 0.0,
@@ -60,13 +60,11 @@ class WelcomeController extends GetxController with GetTickerProviderStateMixin 
   }
   
   void _startAnimationSequence() async {
-    // Start main animation
     mainController.forward();
     
   // Auto-transition after 5 seconds
   await Future.delayed(const Duration(seconds: 5));
 
-  // Optional short fade out before navigating
   await Future.delayed(const Duration(milliseconds: 300));
   _navigateToNext();
   }

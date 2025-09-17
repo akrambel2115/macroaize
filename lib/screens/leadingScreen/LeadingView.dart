@@ -41,14 +41,14 @@ class _LeadingViewState extends State<LeadingView> {
   void initState() {
     super.initState();
     _localIndex = _controller.currentIndex;
-    // initialize index from controller
+    // Initialize index from controller
     _ensurePage(_localIndex);
   }
 
   void _animateTo(int newIndex) {
     if (!mounted) return;
     final oldIndex = _localIndex;
-    // update index; indicator position is computed in the LayoutBuilder for smooth animation
+    // Update index; indicator position computed in LayoutBuilder
     setState(() {
       _localIndex = newIndex;
     });

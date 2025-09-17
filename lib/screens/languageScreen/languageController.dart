@@ -6,9 +6,7 @@ import '../../SharePrefHelper/SharePrefKey.dart';
 class LanguageController extends GetxController {
   RxInt selectedIndex = 0.obs;
   
-  // Language data
-  // Use translation keys here so the UI can localize the language names
-  // Order: Arabic, English, French (show Arabic first in settings)
+  // Language data (keys and locale mappings)
   List<String> languageList = ["language_arabic", "language_english", "language_french"];
   List<String> languageCode = ["ar", "en", "fr"];
   List<String> countryCode = ["SA", "US", "FR"];
@@ -25,13 +23,12 @@ class LanguageController extends GetxController {
   }
 
   void getCurrentLanguage() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Prefer stored languageCode first. If not present, prefer the app's active locale
-    // (Get.locale or device locale). Then fall back to stored translation key, then default.
-    String storedLangKey = prefs.getString(SharePrefKey.language) ?? '';
-    String storedCode = prefs.getString(SharePrefKey.languageCode) ?? '';
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  // Prefer stored languageCode, then app locale, then stored translation key, then default.
+  String storedLangKey = prefs.getString(SharePrefKey.language) ?? '';
+  String storedCode = prefs.getString(SharePrefKey.languageCode) ?? '';
 
-    // 1) If a stored language code exists, use it.
+    // 1) Use stored language code if present.
     if (storedCode.isNotEmpty) {
       final byCode = languageCode.indexOf(storedCode);
       if (byCode != -1) {
@@ -41,8 +38,7 @@ class LanguageController extends GetxController {
       }
     }
 
-    // 2) Else, prefer the app's currently active locale (Get.locale), which may be set
-    // on first run even before prefs are written.
+    // 2) Else, prefer the app's active locale (Get.locale/device locale).
     final appLang = (Get.locale?.languageCode ?? Get.deviceLocale?.languageCode ?? '').toLowerCase();
     if (appLang.isNotEmpty) {
       final appIndex = languageCode.indexOf(appLang);
@@ -53,7 +49,7 @@ class LanguageController extends GetxController {
       }
     }
 
-    // 3) Else, fall back to stored translation-key value (if any).
+    // 3) Else, fall back to stored translation-key value if present.
     if (storedLangKey.isNotEmpty) {
       final idx = languageList.indexOf(storedLangKey);
       if (idx != -1) {
@@ -63,7 +59,7 @@ class LanguageController extends GetxController {
       }
     }
 
-    // 4) Final fallback: default to first entry (Arabic in the new ordering).
+    // 4) Final fallback: default to first entry.
     selectedIndex.value = 0;
     update();
   }
@@ -89,8 +85,8 @@ class LanguageController extends GetxController {
 
   void storeLanguage(int index) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-  // store the translation key (not the localized display string)
-  await prefs.setString(SharePrefKey.language, languageList[index]);
+    // Store the translation key and language/country codes.
+    await prefs.setString(SharePrefKey.language, languageList[index]);
   await prefs.setString(SharePrefKey.languageCode, languageCode[index]);
   await prefs.setString(SharePrefKey.countryCode, countryCode[index]);
   }

@@ -32,7 +32,6 @@ class SetupView extends GetView<SignUpController> {
         textAlign: TextAlign.center,
         style: context.theme.textTheme.titleSmall,
       ).paddingOnly(top: 15),
-        // Use Lottie loader animation
         Lottie.asset(
           'assets/lottie/loader.json',
           width: 80,

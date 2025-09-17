@@ -18,7 +18,7 @@ class LeadingController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // CRITICAL: Check email verification on main screen access
+    // Check email verification on main screen access
     _checkVerificationAsync();
   }
 
@@ -46,7 +46,7 @@ class LeadingController extends GetxController {
   }
 
   void changeTabIndex(int index) async {
-    // Gate access to recipes tab (index 1) for premium users only
+  // Gate access to recipes tab (index 1) for premium users
     if (index == 1) {
       try {
         final appUserService = Get.find<AppUserService>();
@@ -65,8 +65,6 @@ class LeadingController extends GetxController {
     Get.delete<HomeController>();
     Get.delete<RecipesController>();
     Get.delete<AnalyticsController>();
-    // Get.delete<MyGardenController>();
-    // Get.delete<AskBotanistController>();
     update();
   }
 

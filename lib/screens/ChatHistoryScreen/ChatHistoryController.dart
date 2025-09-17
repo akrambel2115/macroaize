@@ -7,7 +7,6 @@ class ChatHistoryController extends GetxController{
   final dbHelper = DatabaseHelper();
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     getHistory();
   }

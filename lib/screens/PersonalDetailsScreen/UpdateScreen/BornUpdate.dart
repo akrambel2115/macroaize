@@ -43,7 +43,7 @@ class BornUpdate extends GetView<PersonalDetailsController> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Month Picker
+              // Month picker
               Expanded(
                 child: Container(
                   height: 150,
@@ -62,7 +62,7 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                         ),
                         onSelectedItemChanged: (index) {
                           controller.selectedMonth = index;
-                          controller.updateDaysInMonth(); // update day list if month changes
+                          controller.updateDaysInMonth(); // refresh days when month changes
                           controller.setHasChanges(true);
                           controller.update();
                         },
@@ -86,7 +86,7 @@ class BornUpdate extends GetView<PersonalDetailsController> {
               ),
               const SizedBox(width: 10),
 
-              // Day Picker
+              // Day picker
               Expanded(
                 child: Container(
                   height: 150,
@@ -128,7 +128,7 @@ class BornUpdate extends GetView<PersonalDetailsController> {
               ),
               const SizedBox(width: 10),
 
-              // Year Picker
+              // Year picker
               Expanded(
                 child: Container(
                   height: 150,
@@ -147,7 +147,7 @@ class BornUpdate extends GetView<PersonalDetailsController> {
                         ),
                         onSelectedItemChanged: (index) {
                           controller.selectedYear = controller.years[index];
-                          controller.updateDaysInMonth(); // in case Feb/Leap year
+                          controller.updateDaysInMonth(); // handle Feb/leap year
                           controller.setHasChanges(true);
                           controller.update();
                         },
@@ -174,7 +174,6 @@ class BornUpdate extends GetView<PersonalDetailsController> {
         },),
 
 
-          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );

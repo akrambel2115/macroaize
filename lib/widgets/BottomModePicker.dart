@@ -36,7 +36,6 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
       initialPage: widget.currentIndex,
       viewportFraction: 0.3, // Shows multiple items with center focus
     );
-    // entrance animation
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -44,7 +43,7 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
     _fadeAnim = CurvedAnimation(parent: _entranceController, curve: Curves.easeInOut);
     _scaleAnim = Tween<double>(begin: 0.97, end: 1.0).animate(CurvedAnimation(parent: _entranceController, curve: Curves.easeOut));
 
-    // small delay so the page view is laid out before animating in
+    // Delay so the page view is laid out before animating in
     Future.delayed(const Duration(milliseconds: 120), () {
       if (mounted) _entranceController.forward();
     });
@@ -69,7 +68,7 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
     }
   }
 
-  // removed unused helper _alignmentXForIndex
+  // helper removed
 
   @override
   Widget build(BuildContext context) {
@@ -94,12 +93,11 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
                       double value = 1.0;
 
                       if (_pageController.hasClients && _pageController.position.haveDimensions) {
-                        // _pageController.page can be null, use current index as fallback
                         final page = _pageController.page ?? widget.currentIndex.toDouble();
                         value = (1.0 - ((page - index).abs() * 0.5)).clamp(0.0, 1.0);
                       }
 
-                      // Calculate scale and opacity based on distance from center
+                      // scale and opacity based on distance from center
                       final scale = 0.7 + (value * 0.3); // Scale from 0.7 to 1.0
                       final opacity = 0.4 + (value * 0.6); // Opacity from 0.4 to 1.0
                       final isCenter = (index == widget.currentIndex);

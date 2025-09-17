@@ -1,11 +1,10 @@
 
 import 'package:flutter/material.dart';
-// ...existing imports...
+// existing imports
 import 'package:get/get.dart';
-
-// AppAssets removed as legacy images are no longer used
+// AppAssets removed
 import '../../../constant/AppColor.dart';
-import '../../../constant/Appkey.dart';
+import '../../../shared/services/app_config_service.dart';
 import '../../../widgets/customText.dart';
 
 class OnBoardingThree extends StatelessWidget {
@@ -59,19 +58,19 @@ class OnBoardingThree extends StatelessWidget {
             ),
           ),
           Align(
-            // Fixed: Used Align instead of Center
+            // center content
             alignment: Alignment.center,
             child: SingleChildScrollView(
-              // Fixed: Prevents overflow
+              // prevents overflow
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                // Important: Prevents infinite height issue
+                // prevent infinite height
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: CustomText(
                       textAlign: TextAlign.center,
-                      text: '${"Welcome".tr} \n$appName',
+                      text: '${"Welcome".tr} \n${Get.find<AppConfigService>().appName}',
                       fontSize: 26.0,
                       fontColor: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -89,7 +88,7 @@ class OnBoardingThree extends StatelessWidget {
                       fontColor: Colors.white,
                     ),
                   ),
-                  // Replaced legacy illustration with neutral placeholder
+                  // Illustration placeholder
                   SizedBox(
                     height: 300,
                     child: Center(

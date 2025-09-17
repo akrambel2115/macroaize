@@ -25,9 +25,9 @@ class AccountDetailsView extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     final theme = Theme.of(context);
 
-    // Controller
-    final repo = FirebaseAuthRepository();
-    final acct = Get.put(AccountController(repo), tag: 'account');
+  // controller
+  final repo = FirebaseAuthRepository();
+  final acct = Get.put(AccountController(repo), tag: 'account');
 
     return Scaffold(
       appBar: AppBar(
@@ -62,7 +62,7 @@ class AccountDetailsView extends StatelessWidget {
             return Column(
               children: [
                 const SizedBox(height: 8),
-                // Avatar
+              // avatar
                 CircleAvatar(
                   radius: 42,
                   backgroundColor: const Color(0xFF4A90E2),
@@ -93,7 +93,7 @@ class AccountDetailsView extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
 
-            // Modern card-based details (clean, spaced, editable)
+      // details card
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -104,7 +104,7 @@ class AccountDetailsView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Name Row (label only)
+                    // name row (label)
                     Row(
                       children: [
                         Icon(Icons.person, size: 20, color: Colors.grey[600]),
@@ -119,13 +119,13 @@ class AccountDetailsView extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8), // Gap adjusted to 8px
-                    // Display name with the edit icon immediately after the name (small gap)
+                    const SizedBox(height: 8),
+                    // display name with inline edit icon
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 6,
                       children: [
-                        // Name text — will wrap naturally if long
+                        // name text
                         ConstrainedBox(
                           constraints: const BoxConstraints(
                             maxWidth: double.infinity,
@@ -142,7 +142,7 @@ class AccountDetailsView extends StatelessWidget {
                             softWrap: true,
                           ),
                         ),
-                        // Small, compact edit icon placed directly after the name
+                        // small inline edit icon
                         GestureDetector(
                           onTap: () async {
                             final res = await showModalBottomSheet<bool>(
@@ -178,7 +178,7 @@ class AccountDetailsView extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // Email Row
+                    // email row
                     Row(
                       children: [
                         Icon(Icons.email, size: 20, color: Colors.grey[600]),
@@ -205,7 +205,7 @@ class AccountDetailsView extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Change Password Button (secondary) — only for email/password accounts
+                    // change password (email/password accounts only)
                     Builder(
                       builder: (context) {
                         final hasPasswordProvider =
@@ -219,7 +219,7 @@ class AccountDetailsView extends StatelessWidget {
                         return Center(
                           child: TextButton(
                             onPressed: () async {
-                              // Navigate to a full-screen Change Password page
+                              // navigate to change password page
                               final res = await Get.to<String?>(
                                 () => ChangePasswordScreen(controller: acct),
                               );
@@ -264,7 +264,7 @@ class AccountDetailsView extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Logout button — prominent
+            // logout button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -303,7 +303,7 @@ class AccountDetailsView extends StatelessWidget {
   }
 }
 
-// --- Edit Display Name Sheet ---
+// edit display name sheet
 class _EditDisplayNameSheet extends StatefulWidget {
   final AccountController controller;
   const _EditDisplayNameSheet({required this.controller});

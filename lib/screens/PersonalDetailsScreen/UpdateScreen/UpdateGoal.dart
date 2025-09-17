@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-// ...existing imports kept; removed unused SharePref imports
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
 import 'package:get/get.dart';
 
@@ -73,7 +72,6 @@ class GoalUpdate extends GetView<PersonalDetailsController> {
             );
           },
         ),
-          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );

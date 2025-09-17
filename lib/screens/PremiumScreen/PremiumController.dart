@@ -21,7 +21,6 @@ class PremiumController extends GetxController {
   int selected = 0;
   bool isPremium = false;
 
-  // Promo code functionality
   String promoCode = '';
   bool isValidatingPromo = false;
   bool isPromoValid = false;
@@ -50,7 +49,6 @@ class PremiumController extends GetxController {
             cfg.iosIapIds['monthly'] ?? '',
             cfg.iosIapIds['yearly'] ?? '',
           };
-    // TODO: implement onInit
     super.onInit();
     getPremium();
     final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
@@ -61,19 +59,15 @@ class PremiumController extends GetxController {
       onDone: () {
         streamSubscription.cancel();
       },
-      onError: (error) {
-        // handle error here.
-      },
+      onError: (error) {},
     );
     initStore();
     _subscribeToFirestore();
   }
 
   void _subscribeToFirestore() {
-    // Cancel existing subscription if any
     _firestoreSubscription?.cancel();
 
-    // Listen to auth changes and restart subscription accordingly
     _authSubscription?.cancel();
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
       _firestoreSubscription?.cancel();
@@ -86,7 +80,6 @@ class PremiumController extends GetxController {
         return;
       }
 
-      // Listen to this user's subscription document
       _firestoreSubscription = FirebaseFirestore.instance
           .collection('subscriptions')
           .doc(user.uid)
@@ -128,7 +121,6 @@ class PremiumController extends GetxController {
         print("product length ${products.length}");
       }
 
-      // Set default selection to yearly plan (12 months) if available
       if (products.isNotEmpty) {
         int yearlyIndex = _findYearlyPlanIndex();
         if (yearlyIndex >= 0) {
@@ -136,11 +128,10 @@ class PremiumController extends GetxController {
         }
       }
 
-      update(['plan_selection']); // Update specific GetBuilder
+      update(['plan_selection']);
     }
   }
 
-  /// Helper method to find the yearly plan index
   int _findYearlyPlanIndex() {
     const yearlyKeywords = ['year', 'annual'];
     return products.indexWhere((p) {
@@ -166,7 +157,6 @@ class PremiumController extends GetxController {
                 : null;
 
         if (purchaseDate != null) {
-          // In legacy flow this stored local entitlement; removed to rely on Firestore
           Fluttertoast.showToast(msg: 'Purchase restored');
         }
       } else if (element.status == PurchaseStatus.purchased) {
@@ -176,13 +166,11 @@ class PremiumController extends GetxController {
   }
 
   Future<void> buy() async {
-    // SECURITY CHECK 1: Block duplicate purchase if already premium
     if (isPremium) {
       Fluttertoast.showToast(msg: 'You are already Premium');
       return;
     }
 
-    // SECURITY CHECK 2: Auth gate - require authentication first
     var user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       final ok = await AuthModal.show();
@@ -197,26 +185,22 @@ class PremiumController extends GetxController {
       }
     }
 
-    // SECURITY CHECK 3: Account activation gating - refresh auth state then check email verification
     try {
       await user.reload();
-      await user.getIdToken(true); // force refresh to update claims like email_verified
+      await user.getIdToken(true);
     } catch (_) {}
-    // Use centralized gating with localization
     if (!_appUserService.checkAccountActivation('premium')) {
       return;
     }
 
-    // SECURITY CHECK 3: After login, verify user doesn't have active premium
     try {
-    // Attempt to read subscription; on permission issues, refresh token once and retry
-    Future<DocumentSnapshot<Map<String, dynamic>>> readSub() => FirebaseFirestore
-      .instance
+      Future<DocumentSnapshot<Map<String, dynamic>>> readSub() => FirebaseFirestore
+          .instance
           .collection('subscriptions')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .get();
 
-    DocumentSnapshot<Map<String, dynamic>> subscriptionDoc;
+      DocumentSnapshot<Map<String, dynamic>> subscriptionDoc;
       try {
         subscriptionDoc = await readSub();
       } catch (e) {
@@ -243,7 +227,6 @@ class PremiumController extends GetxController {
                   true;
 
           if (isPremiumActive) {
-            // Update local state and block purchase
             isPremium = true;
             update();
             Fluttertoast.showToast(
@@ -261,13 +244,11 @@ class PremiumController extends GetxController {
       return;
     }
 
-    // SECURITY CHECK 4: Double-check local state before proceeding
     if (isPremium) {
       Fluttertoast.showToast(msg: 'You are already Premium');
       return;
     }
 
-    // Now show promo code dialog after all security checks pass
     await _showPromoCodeDialog();
   }
 
@@ -354,7 +335,6 @@ class PremiumController extends GetxController {
                     isValidating
                         ? null
                         : () {
-                          // Skip promo code and proceed to checkout
                           Get.back();
                           _proceedToCheckout();
                         },
@@ -457,7 +437,6 @@ class PremiumController extends GetxController {
   }
 
   Future<void> _proceedToCheckout() async {
-    // Map selected index to plan type conservatively (monthly/yearly)
     String planType = 'monthly';
     if (products.isNotEmpty) {
       final p = products[selected];
@@ -472,22 +451,18 @@ class PremiumController extends GetxController {
     }
 
     try {
-      // SECURITY: Call backend function which should also verify user doesn't have active subscription
       final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
       final callable = functions.httpsCallable('createChargilyPayment');
       final result = await callable.call({
         'userId': FirebaseAuth.instance.currentUser!.uid,
         'planType': planType,
-        // Add timestamp for backend validation
         'timestamp': DateTime.now().toUtc().toIso8601String(),
-        // Include promo code if valid
         if (isPromoValid && promoCode.isNotEmpty) 'promoCode': promoCode,
       });
 
       final data = result.data as Map;
       final url = Uri.parse(data['checkoutUrl'] as String);
 
-      // SECURITY CHECK 5: Final check before redirecting to payment
       if (isPremium) {
         Fluttertoast.showToast(
           msg: 'Subscription status changed. Payment cancelled.',
@@ -495,7 +470,6 @@ class PremiumController extends GetxController {
         return;
       }
 
-      // Open checkout in external browser (Chrome on Android, Safari on iOS)
       final launched = await launchUrl(
         url,
         mode: LaunchMode.externalApplication,
@@ -508,27 +482,23 @@ class PremiumController extends GetxController {
         return;
       }
 
-      // Inform the user and rely on Firestore listener to reflect premium status
       Fluttertoast.showToast(
         msg: 'Complete payment in your browser. Return to the app when done.',
       );
     } catch (e) {
       if (kDebugMode) print('createChargilyPayment error: $e');
 
-      // Handle specific error types
       final errorMsg = e.toString().toLowerCase();
       if (errorMsg.contains('already-subscribed') ||
           errorMsg.contains('already') ||
           errorMsg.contains('premium') ||
           errorMsg.contains('active')) {
         Fluttertoast.showToast(msg: 'You already have an active subscription');
-        // Force refresh subscription status from server
         isPremium = true;
         update();
         _subscribeToFirestore();
       } else if (errorMsg.contains('unauthenticated')) {
         Fluttertoast.showToast(msg: 'Please login and try again');
-        // Clear local auth state
         isPremium = false;
         update();
       } else if (errorMsg.contains('permission-denied')) {
@@ -545,36 +515,31 @@ class PremiumController extends GetxController {
 
   onChangeSelectedIndex(int index) {
     selected = index;
-    update(['plan_selection']); // Update specific GetBuilder
+    update(['plan_selection']);
   }
 
-  // Remove client-side entitlement flags; rely on Firestore listener in _subscribeToFirestore
-  // to update isPremium based on server-side subscription document
   getPremium() async {
-    // No-op: isPremium is managed by Firestore subscription stream
     update();
   }
 
   openPrivacy() async {
-  final cfg = Get.find<AppConfigService>();
-  final Uri url = Uri.parse(cfg.privacyLink);
+    final cfg = Get.find<AppConfigService>();
+    final Uri url = Uri.parse(cfg.privacyLink);
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
   }
 
   openTerms() async {
-  final cfg = Get.find<AppConfigService>();
-  final Uri url = Uri.parse(cfg.termsLink);
+    final cfg = Get.find<AppConfigService>();
+    final Uri url = Uri.parse(cfg.termsLink);
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
   }
 
-  // Promo code functionality
   void updatePromoCode(String code) {
     promoCode = code.toUpperCase().trim();
-    // Reset validation state when code changes
     isPromoValid = false;
     discountRate = 0.0;
     promoError = null;
@@ -629,7 +594,6 @@ class PremiumController extends GetxController {
   String getDiscountedPrice(String originalPrice) {
     if (!isPromoValid || discountRate == 0.0) return originalPrice;
 
-    // Extract number from price string (e.g., "3500 DZD" -> 3500)
     final match = RegExp(r'[\d.,]+').stringMatch(originalPrice);
     if (match == null) return originalPrice;
 
@@ -643,7 +607,6 @@ class PremiumController extends GetxController {
   String getOriginalPrice(String currentPrice) {
     if (!isPromoValid || discountRate == 0.0) return '';
 
-    // Extract number from price string
     final match = RegExp(r'[\d.,]+').stringMatch(currentPrice);
     if (match == null) return '';
 
@@ -662,3 +625,4 @@ class PremiumController extends GetxController {
     super.onClose();
   }
 }
+

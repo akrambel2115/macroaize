@@ -1,6 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-// ...existing imports...
 import 'package:foodcalorietracker/routes/app_routes.dart';
 import 'package:get/get.dart';
 import '../../widgets/customButton.dart';
@@ -16,8 +15,6 @@ class OnBoardingView extends GetView<OnBoardingController> {
     return Scaffold(
       body: Stack(
         children: [
-          // Removed legacy background image to eliminate old slider design
-          // Use theme background for a neutral look
           Container(
             height: double.infinity,
             width: double.infinity,

@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
 
-/// Reusable Continue button used across onboarding / plan intro flows.
-///
-/// This wraps `PrimaryCTA` and provides a localized default label so callers
-/// can use a single widget for the 'Continue' CTA.
+/// Continue button with a localized default label.
 class ContinueButton extends StatelessWidget {
-  final String? labelKey; // localization key, default 'continue_cta'
+  final String? labelKey;
   final VoidCallback? onTap;
   final VoidCallback? onTapDown;
   final VoidCallback? onTapUp;
@@ -23,7 +20,7 @@ class ContinueButton extends StatelessWidget {
     this.onTapUp,
     this.onTapCancel,
     this.pressAnimation,
-  this.icon = Icons.arrow_forward_rounded,
+    this.icon = Icons.arrow_forward_rounded,
   });
 
   @override

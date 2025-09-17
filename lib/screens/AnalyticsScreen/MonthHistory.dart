@@ -70,12 +70,9 @@ class MonthHistory extends GetView<AnalyticsController> {
                               isVisible: true,
                               textStyle: context.theme.textTheme.bodySmall?.copyWith(
                                 fontSize: 11,
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors
-                                            .grey[300] // Light gray for dark mode
-                                        : null, // Use default theme color for light mode
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey[300]
+                                    : null,
                               ),
                             ),
                           ),

@@ -49,7 +49,6 @@ class ChatController extends GetxController {
   int mainChatId = 0;
   String selectedReason = "Wrong answer";
   bool isMainChat = true;
-  // Rate limit tracking
   int? rateLimitRemaining;
   DateTime? rateLimitReset;
   bool get isRateLimited =>
@@ -57,16 +56,14 @@ class ChatController extends GetxController {
       rateLimitRemaining! <= 0 &&
       rateLimitReset != null &&
       DateTime.now().isBefore(rateLimitReset!);
-
-  // Add usage service and app user service
+  
+  // Services
   final _usageService = UsageService();
   final _appUserService = AppUserService();
-
-  // Rate-limit headers were only applicable to direct HTTP calls; removed in callable flow
+  
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     if (argument != null) {
       if (argument!['mainChatId'] != null) {
@@ -92,7 +89,6 @@ class ChatController extends GetxController {
   }
 
   Future<void> _initSpeech() async {
-    // Initialize speech only on demand to avoid permission prompt at app start
     try {
       speechEnabled = await speech.initialize();
     } catch (_) {
@@ -103,7 +99,7 @@ class ChatController extends GetxController {
 
   void sendMsg({required String text}) async {
     try {
-      // ACCOUNT ACTIVATION GATING: Check if account is activated before allowing chat
+      
       if (!_appUserService.checkAccountActivation('chat')) {
         return;
       }
@@ -121,9 +117,8 @@ class ChatController extends GetxController {
         return;
       }
 
-      if (text.isNotEmpty) {
-        // SECURE FEATURE GATING: Check chat usage before proceeding
-        // This includes authentication AND email verification checks
+  if (text.isNotEmpty) {
+        
         try {
           final result = await _usageService.incrementUsage('chat');
 
@@ -158,8 +153,7 @@ class ChatController extends GetxController {
 
           NotificationService.showError('unable_to_send_message_try_again');
           return;
-        }
-        // Usage allowed - proceed with chat
+    }
         text = text.trim();
         controller.clear();
         FocusManager.instance.primaryFocus?.unfocus();
@@ -174,7 +168,7 @@ class ChatController extends GetxController {
         messages.insert(0, ChatModel(false, "", imagePath?.path, false));
         update();
 
-        if (imagePath != null) {
+  if (imagePath != null) {
           File imageDemo = imagePath!;
           imagePath = null;
           final bytes = await imageDemo.readAsBytes();
@@ -205,68 +199,53 @@ class ChatController extends GetxController {
           final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
           final callable = functions.httpsCallable('chatWithOpenRouter');
       final responseData = await callable.call(parameters);
-      // Normalize function result: it can be a Map or a JSON string
       final raw = responseData.data;
       final normalized = jsonDecode(jsonEncode(raw));
-      final decodedJson =
-        (normalized is String) ? jsonDecode(normalized) : normalized;
+      final decodedJson = (normalized is String) ? jsonDecode(normalized) : normalized;
 
-      // No HTTP status here; treat as success and handle error field if present
       try {
-              if (decodedJson is Map && decodedJson['error'] != null) {
-                final errMsg =
-                    decodedJson['error']['message'] ?? 'Unknown error';
-                messages.first = ChatModel(
-                  false,
-                  errMsg.toString(),
-                  imageDemo.path,
-                  true,
-                );
-              } else {
-                OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-                final answer =
-                    data.choices?.isNotEmpty == true
-                        ? (data.choices!.first.message?.content ?? "")
-                        : "No response";
-                messages.first = ChatModel(false, answer, imageDemo.path, true);
-                if (answer.isNotEmpty) {
-                  if (isMainChat) {
-                    mainChatId = await dbHelper.insertMainChatModel(
-                      MainChatModel(
-                        question: text,
-                        answer: answer,
-                        date: DateTime.now().toString(),
-                      ),
-                    );
-                  }
-                  await dbHelper.insertSubChatModel(
-                    SubChatModel(
-                      question: text,
-                      answer: answer,
-                      date: DateTime.now().toString(),
-                      mainCharId: mainChatId,
-                      image: imageDemo.path,
-                    ),
-                  );
-                }
-              }
-      } catch (e) {
-              if (kDebugMode) {
-        print('Decode/image branch error: $e');
-        print('Body: $decodedJson');
-              }
-              messages.first = ChatModel(
-                false,
-                'Parse error',
-                imageDemo.path,
-                true,
+        if (decodedJson is Map && decodedJson['error'] != null) {
+          final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
+          messages.first = ChatModel(false, errMsg.toString(), imageDemo.path, true);
+        } else {
+          OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+          final answer = data.choices?.isNotEmpty == true
+              ? (data.choices!.first.message?.content ?? "")
+              : "No response";
+          messages.first = ChatModel(false, answer, imageDemo.path, true);
+          if (answer.isNotEmpty) {
+            if (isMainChat) {
+              mainChatId = await dbHelper.insertMainChatModel(
+                MainChatModel(
+                  question: text,
+                  answer: answer,
+                  date: DateTime.now().toString(),
+                ),
               );
+            }
+            await dbHelper.insertSubChatModel(
+              SubChatModel(
+                question: text,
+                answer: answer,
+                date: DateTime.now().toString(),
+                mainCharId: mainChatId,
+                image: imageDemo.path,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Decode/image branch error: $e');
+          print('Body: $decodedJson');
+        }
+        messages.first = ChatModel(false, 'Parse error', imageDemo.path, true);
       }
           streamedText = "";
           isStreamedText = false;
           update();
         } else {
-          // Text-only messages via OpenRouter HTTP API
+          
           final parameters = {
             'model': Get.find<AppConfigService>().aiModel,
             'messages': [
@@ -284,51 +263,43 @@ class ChatController extends GetxController {
       final result = await callable.call(parameters);
       final raw = result.data;
       final normalized = jsonDecode(jsonEncode(raw));
-      final decodedJson =
-        (normalized is String) ? jsonDecode(normalized) : normalized;
+      final decodedJson = (normalized is String) ? jsonDecode(normalized) : normalized;
       try {
-              if (decodedJson is Map && decodedJson['error'] != null) {
-                final errMsg =
-                    decodedJson['error']['message'] ?? 'Unknown error';
-                messages.first = ChatModel(
-                  false,
-                  errMsg.toString(),
-                  null,
-                  true,
-                );
-              } else {
-                OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-                final answer =
-                    data.choices?.isNotEmpty == true
-                        ? (data.choices!.first.message?.content ?? "")
-                        : "No response";
-                messages.first = ChatModel(false, answer, null, true);
-                if (answer.isNotEmpty) {
-                  if (isMainChat) {
-                    mainChatId = await dbHelper.insertMainChatModel(
-                      MainChatModel(
-                        question: text,
-                        answer: answer,
-                        date: DateTime.now().toString(),
-                      ),
-                    );
-                  }
-                  await dbHelper.insertSubChatModel(
-                    SubChatModel(
-                      question: text,
-                      answer: answer,
-                      date: DateTime.now().toString(),
-                      mainCharId: mainChatId,
-                    ),
-                  );
-                }
-              }
+        if (decodedJson is Map && decodedJson['error'] != null) {
+          final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
+          messages.first = ChatModel(false, errMsg.toString(), null, true);
+        } else {
+          OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+          final answer = data.choices?.isNotEmpty == true
+              ? (data.choices!.first.message?.content ?? "")
+              : "No response";
+          messages.first = ChatModel(false, answer, null, true);
+          if (answer.isNotEmpty) {
+            if (isMainChat) {
+              mainChatId = await dbHelper.insertMainChatModel(
+                MainChatModel(
+                  question: text,
+                  answer: answer,
+                  date: DateTime.now().toString(),
+                ),
+              );
+            }
+            await dbHelper.insertSubChatModel(
+              SubChatModel(
+                question: text,
+                answer: answer,
+                date: DateTime.now().toString(),
+                mainCharId: mainChatId,
+              ),
+            );
+          }
+        }
       } catch (e) {
-              if (kDebugMode) {
-        print('Decode/text branch error: $e');
-        print('Body: $decodedJson');
-              }
-              messages.first = ChatModel(false, 'Parse error', null, true);
+        if (kDebugMode) {
+          print('Decode/text branch error: $e');
+          print('Body: $decodedJson');
+        }
+        messages.first = ChatModel(false, 'Parse error', null, true);
       }
           streamedText = "";
           isStreamedText = false;

@@ -14,7 +14,7 @@ class BornView extends GetView<SignUpController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Back button moved to the SignUp scaffold to keep layout consistent
+        // Back button is in the SignUp scaffold
         Text(
           "Where were you born?".tr,
           style: context.theme.textTheme.headlineLarge,
@@ -26,7 +26,7 @@ class BornView extends GetView<SignUpController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Month Picker
+            // Month picker
             Expanded(
               child: Container(
                 height: 150,
@@ -70,7 +70,7 @@ class BornView extends GetView<SignUpController> {
               ),
             ),
             SizedBox(width: 10),
-            // Day Picker
+            // Day picker
             Expanded(
               child: Container(
                 height: 150,
@@ -163,7 +163,7 @@ class BornView extends GetView<SignUpController> {
         ),
 
         const SizedBox(height: 12),
-        // Birthday Lottie: expand to fill the space between scrollers and footer
+        // Birthday animation
         Expanded(
           child: Center(
             child: Lottie.asset(

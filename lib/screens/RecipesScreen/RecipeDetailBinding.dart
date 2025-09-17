@@ -7,6 +7,5 @@ class RecipeDetailBinding extends Bindings {
 
   @override
   void dependencies() {
-    // No controller needed for now; binding kept for future expansion
   }
 }

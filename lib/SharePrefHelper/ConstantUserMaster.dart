@@ -20,7 +20,6 @@ class ConstantUserMaster{
 
 }
 
-// Helper to calculate macros from TDEE and weight (used when weight/goal change)
 Map<String, int> calculateMacrosFromTDEE(double tdee, int weightKg) {
   final protein = (weightKg * 2.0).toInt();
   final fat = ((tdee * 0.25) / 9).toInt();

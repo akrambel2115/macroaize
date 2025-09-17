@@ -4,7 +4,6 @@ import 'package:foodcalorietracker/screens/LocalFoodScreen/LocalFoodController.d
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
-// ...existing code...
 
 class LocalFoodView extends GetView<LocalFoodController> {
   const LocalFoodView({super.key});
@@ -51,7 +50,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
     showDialog(
       context: context,
       builder: (ctx) {
-        // theme-aware border color for input underline
+  // theme-aware border color for input underline
         final borderColor = ctx.theme.brightness == Brightness.dark
             ? AppColor.neutralGrey700
             : AppColor.neutralGrey300.withOpacity(0.8);
@@ -195,7 +194,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
   }
 
   Widget _buildSearchField(BuildContext context, LocalFoodController controller) {
-    // Simple, flat search bar for clean UI
+  // Search bar
     return Container(
       decoration: BoxDecoration(
         color: context.theme.cardColor,
@@ -210,7 +209,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         children: [
-          // simple prefix icon
+          // prefix icon
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Icon(
@@ -254,7 +253,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
             ),
           ),
 
-          // clear button (simple)
+          // clear button
           if (controller.textController.text.isNotEmpty)
             IconButton(
               onPressed: () {
@@ -349,7 +348,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            // Food icon (rounded square) - soft orange background, slightly smaller
+            // Food icon
             Container(
               width: 42,
               height: 42,
@@ -368,7 +367,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
 
             const SizedBox(width: 14),
 
-            // Food title + meta (quantity + calories)
+            // Food title + meta
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,7 +409,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
 
             const SizedBox(width: 12),
 
-            // Edit mode controls: checkbox + edit button
+            // Edit mode controls
             GetBuilder<LocalFoodController>(
               builder: (controller) {
                 if (!controller.isEditing) return SizedBox.shrink();
@@ -488,7 +487,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Food header (simplified)
+                              // Food header
                               Row(
                                 children: [
                                   Container(
@@ -643,8 +642,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                               ),
                               const SizedBox(height: 16),
                               
-                              // Enhanced nutrition grid
-                              // Nutrition tiles (no wrapper)
+                              // Nutrition grid
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -693,7 +691,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
 
                               const SizedBox(height: 28),
                               
-                              // Enhanced action buttons
+                              // Action buttons
                               Row(
                                 children: [
                                   Expanded(
@@ -833,7 +831,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    // Make the empty state scrollable and constrained to available height
+    // Empty state: scrollable and constrained to available height
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(

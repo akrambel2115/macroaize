@@ -38,11 +38,10 @@ class _ChatViewState extends State<ChatView> {
         backgroundColor: context.theme.scaffoldBackgroundColor,
         title: Text("Ask Coach".tr, style: context.textTheme.headlineMedium),
         actions: [
-          // Persistent lamp icon to indicate/ toggle the chat-history notice
           IconButton(
             tooltip: 'Show chat notice'.tr,
             onPressed: () async {
-              // Always remove existing entry first to avoid duplicates
+              // Remove existing entry first to avoid duplicates
               if (_chatNoticeEntry != null) {
                 AppWidgets.hideTopNotification(_chatNoticeEntry);
                 _chatNoticeEntry = null;
@@ -60,7 +59,6 @@ class _ChatViewState extends State<ChatView> {
                 autoDismissAfter: const Duration(seconds: 10),
                 persistent: true,
                 onDismissed: () {
-                  // clear local reference so next click immediately shows a new banner
                   _chatNoticeEntry = null;
                   if (mounted) setState(() {});
                 },
@@ -76,7 +74,6 @@ class _ChatViewState extends State<ChatView> {
       ),
       body: GetBuilder<ChatController>(
         builder: (_) {
-          // One-time chat history notice: show top notification the first time user opens chat
           Future.microtask(() async {
             final seen =
                 await SharedPref.readBool(
@@ -169,7 +166,6 @@ class _ChatViewState extends State<ChatView> {
                     ),
                   ),
 
-                // New rounded input bar matching the attached design
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12.0,
@@ -177,8 +173,7 @@ class _ChatViewState extends State<ChatView> {
                   ),
                   child: Row(
                     children: [
-                      // Gallery / add button (small)
-                      // Gallery icon (rounded square, subtle border)
+                      // Gallery / add button
                       StreamBuilder<Subscription?>(
                         stream: SubscriptionService().subscriptionStream,
                         builder: (context, snapshot) {
@@ -276,7 +271,6 @@ class _ChatViewState extends State<ChatView> {
                         },
                       ),
 
-                      // Centered rounded input container matching the image
                       Expanded(
                         child: Container(
                           padding: EdgeInsetsDirectional.only(
@@ -300,7 +294,7 @@ class _ChatViewState extends State<ChatView> {
                           ),
                           child: Row(
                             children: [
-                              // Input field (no avatar inside)
+                              // Input field
                               Expanded(
                                 child:
                                     controller.recording == false
@@ -359,9 +353,7 @@ class _ChatViewState extends State<ChatView> {
                                         ),
                               ),
 
-                              // removed internal mic icon per request
-
-                              // Circular send / mic button (black) on the right - no outer padding; container provides the gap
+                              // Circular send / mic button
                               GestureDetector(
                                 onTap: () {
                                   if (controller.recording) {

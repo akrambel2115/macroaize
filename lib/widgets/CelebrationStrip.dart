@@ -38,38 +38,23 @@ class _CelebrationStripState extends State<CelebrationStrip>
   void initState() {
     super.initState();
 
-    // Slide/opacity entrance
-    _entranceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
+    _entranceCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _slide = Tween<Offset>(begin: const Offset(-0.15, 0), end: Offset.zero)
         .chain(CurveTween(curve: Curves.easeOutCubic))
         .animate(_entranceCtrl);
-    _opacity = CurvedAnimation(
-      parent: _entranceCtrl,
-      curve: Curves.easeOut,
-    );
+    _opacity = CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOut);
 
-    // Typewriter controller – speed based on message length
     final typeDuration = Duration(milliseconds: 30 * widget.message.length + 300);
-    _typeCtrl = AnimationController(vsync: this, duration: typeDuration)
-      ..addListener(_updateTypewriter);
+    _typeCtrl = AnimationController(vsync: this, duration: typeDuration)..addListener(_updateTypewriter);
 
-    // Confetti sparkle
-    _confettiCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..addListener(() => setState(() {}));
+    _confettiCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..addListener(() => setState(() {}));
 
-    // Prepare particles once per showing
-  _particles = List.generate(22, (i) => _Particle.random());
+    _particles = List.generate(22, (i) => _Particle.random());
 
-    // Kick off animations after first frame to ensure layout is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _entranceCtrl.forward();
-  _typeCtrl?.forward(from: 0);
+      _typeCtrl?.forward(from: 0);
       if (widget.showConfetti) _confettiCtrl.forward(from: 0);
     });
   }
@@ -78,7 +63,6 @@ class _CelebrationStripState extends State<CelebrationStrip>
   void didUpdateWidget(covariant CelebrationStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.message != widget.message) {
-      // Restart text animation for new messages
       final c = _typeCtrl;
       if (c != null) {
         c.duration = Duration(milliseconds: 30 * widget.message.length + 300);
@@ -86,26 +70,23 @@ class _CelebrationStripState extends State<CelebrationStrip>
       }
       _visibleChars = 0;
     }
-    // Re-burst confetti on rebuild (e.g., new progress)
     _particles = List.generate(22, (i) => _Particle.random());
     if (widget.showConfetti) _confettiCtrl.forward(from: 0);
     _entranceCtrl.forward(from: 0);
   }
 
   void _updateTypewriter() {
-  final t = _typeCtrl?.value ?? 0.0;
+    final t = _typeCtrl?.value ?? 0.0;
     final len = widget.message.characters.length;
     final chars = (len * Curves.easeOut.transform(t)).clamp(0, len).toInt();
-    if (chars != _visibleChars) {
-      setState(() => _visibleChars = chars);
-    }
+    if (chars != _visibleChars) setState(() => _visibleChars = chars);
   }
 
   @override
   void dispose() {
     _entranceCtrl.dispose();
-  _typeCtrl?.removeListener(_updateTypewriter);
-  _typeCtrl?.dispose();
+    _typeCtrl?.removeListener(_updateTypewriter);
+    _typeCtrl?.dispose();
     _confettiCtrl.dispose();
     super.dispose();
   }
@@ -114,9 +95,7 @@ class _CelebrationStripState extends State<CelebrationStrip>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-  final bgColor = AppColor.primaryOrange; // static orange background
-
+    final bgColor = AppColor.primaryOrange;
     final textColor = Colors.white;
 
     return SizedBox(
@@ -143,7 +122,7 @@ class _CelebrationStripState extends State<CelebrationStrip>
                   ],
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
-        alignment: Alignment.center,
+                alignment: Alignment.center,
                 child: _AnimatedWaveUnderline(
                   color: textColor.withOpacity(0.18),
                   child: Text(
@@ -165,10 +144,7 @@ class _CelebrationStripState extends State<CelebrationStrip>
             IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
-                  painter: _ConfettiPainter(
-                    progress: _confettiCtrl.value,
-                    particles: _particles,
-                  ),
+                  painter: _ConfettiPainter(progress: _confettiCtrl.value, particles: _particles),
                   size: Size.infinite,
                 ),
               ),

@@ -26,7 +26,6 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
   late Animation<double> _progressAnim;
   double _prevProgress = 0;
 
-  // Normalize progress similar to previous progress bar implementation
   double get _progress {
     final diff = (widget.goalWeight - widget.currentWeight).abs();
     final denom = widget.currentWeight > widget.goalWeight
@@ -65,7 +64,7 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    final start = widget.currentWeight;
+  final start = widget.currentWeight;
     final end = widget.goalWeight;
     final total = (end - start).abs();
     final maxMilestones = 7;
@@ -90,12 +89,12 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        const lineHeight = 6.0;
-        const avatarSize = 28.0;
-        const paddingH = 8.0;
-        const containerHeight = 99.0;
-        final centerY = 30.0; // position progress line near top since labels are below
+  final width = constraints.maxWidth;
+  const lineHeight = 6.0;
+  const avatarSize = 28.0;
+  const paddingH = 8.0;
+  const containerHeight = 99.0;
+  final centerY = 30.0;
         return SizedBox(
           height: containerHeight,
           child: Stack(
@@ -115,11 +114,9 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
                   ),
                 ),
               ),
-              // Labels placed below the progress line for clearer association
               Positioned(
                 left: 0,
                 right: 0,
-                // add a bit more space between the progress line and the labels
                 top: centerY + 20,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -175,10 +172,9 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
               AnimatedBuilder(
                 animation: _progressAnim,
                 builder: (context, child) {
-                  // Map progress to pixel coordinates, honoring horizontal padding
                   final usableWidth = width - paddingH * 2;
                   final x = (paddingH + usableWidth * _progressAnim.value).clamp(0.0, width);
-                  // position the avatar so its center aligns exactly with the progress line's centerY
+                  
                   final left = (x - (avatarSize / 2)).clamp(0.0, width - avatarSize);
                   final top = (centerY - (avatarSize / 2)).clamp(0.0, containerHeight - avatarSize);
                   return Positioned(
@@ -267,7 +263,6 @@ class _AvatarMarker extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        // Use a simple, flat orb color. Remove shadow/light effect.
         color: AppColor.primaryOrange,
         shape: BoxShape.circle,
       ),

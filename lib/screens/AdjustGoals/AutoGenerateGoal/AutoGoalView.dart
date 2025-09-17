@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsController.dart';
 import 'package:get/get.dart';
-// ...existing imports
 import '../../../widgets/steps/goal_step.dart';
 
 class AutoGoalView extends GetView<AdjustGoalsController> {

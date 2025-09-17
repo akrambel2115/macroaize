@@ -25,10 +25,7 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
   void initState() {
     super.initState();
     _controller.forward();
-    // Auto-dismiss behavior:
-    // - If an explicit autoDismissAfter is provided, use that to dismiss the banner
-    //   regardless of the `persistent` flag.
-    // - Otherwise, if not persistent, dismiss after `duration`.
+    // Auto-dismiss handling
     final auto = widget.autoDismissAfter;
     if (auto != null) {
       Future.delayed(auto, () async {
@@ -56,8 +53,7 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    // Avoid using Positioned here so the notification can be rendered safely
-    // both inside an Overlay (which provides a Stack) and other contexts.
+  // Designed to render safely inside an Overlay or other contexts
     return SafeArea(
       top: true,
       child: SlideTransition(
@@ -84,8 +80,7 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
                         style: TextStyle(color: AppColor.neutralGrey900, fontSize: 14),
                       ),
                     ),
-                    // Note: no close button for persistent banners. Banners should be
-                    // toggled programmatically by the caller using the returned OverlayEntry.
+                    // No close button for persistent banners; caller removes the OverlayEntry
                   ],
                 ),
               ),

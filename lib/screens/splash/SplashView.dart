@@ -17,7 +17,7 @@ class _SplashViewState extends State<SplashView> {
   void initState() {
     super.initState();
     controller = Get.put(SplashController());
-    // Start animations shortly after first frame to ensure visibility
+    // Start animations shortly after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 80));
       controller.startAnimations();
@@ -40,12 +40,11 @@ class _SplashViewState extends State<SplashView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // App Name with Letter Drop Animation
+                // App name letter-drop animation
                 SizedBox(
                   height: 80,
                   child: Row(
-                    // Force left-to-right layout for the animated letters so the app
-                    // name preserves its original ordering even when the app uses RTL locale.
+                    // Force LTR so animated letters keep original ordering
                     textDirection: TextDirection.ltr,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: controller.appNameLetters.map((letterData) {

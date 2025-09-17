@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../constant/AppColor.dart';
 import '../routes/app_routes.dart';
 
-/// Reusable widget to show email verification status throughout the app
+/// Shows email verification status with optional inline actions.
 class EmailVerificationStatusWidget extends StatelessWidget {
   final bool showInlineActions;
   final bool compactMode;
@@ -24,17 +24,8 @@ class EmailVerificationStatusWidget extends StatelessWidget {
       builder: (context, snapshot) {
         final user = snapshot.data;
 
-        // Not authenticated - don't show anything
-        if (user == null) {
-          return const SizedBox.shrink();
-        }
-
-        // Email already verified - show success state
-        if (user.emailVerified) {
-          return _buildVerifiedStatus(context);
-        }
-
-        // Email not verified - show warning/action state
+        if (user == null) return const SizedBox.shrink();
+        if (user.emailVerified) return _buildVerifiedStatus(context);
         return _buildUnverifiedStatus(context, user);
       },
     );
@@ -230,8 +221,6 @@ class EmailVerificationStatusWidget extends StatelessWidget {
     if (user != null) {
       try {
         await user.reload();
-        // Trigger rebuild by calling setState equivalent
-        // The StreamBuilder will automatically rebuild when auth state changes
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -248,7 +237,7 @@ class EmailVerificationStatusWidget extends StatelessWidget {
   }
 }
 
-/// Compact verification badge for AppBars or small spaces
+/// Compact verification badge for AppBars or tight spaces.
 class EmailVerificationBadge extends StatelessWidget {
   const EmailVerificationBadge({super.key});
 
@@ -258,13 +247,8 @@ class EmailVerificationBadge extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         final user = snapshot.data;
+        if (user == null || user.emailVerified) return const SizedBox.shrink();
 
-        // Not authenticated or already verified - don't show badge
-        if (user == null || user.emailVerified) {
-          return const SizedBox.shrink();
-        }
-
-        // Show unverified badge
         return GestureDetector(
           onTap: () => Get.toNamed(Routes.emailVerificationView),
           child: Container(

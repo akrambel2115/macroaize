@@ -4,56 +4,49 @@ import 'package:get/get.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import '../../routes/app_routes.dart';
 
-/// Global email verification guard service
-/// Enforces email verification across the application
-/// SECURITY: Removed persistent skip verification flag to prevent tampering
+/// Email verification guard service
 class EmailVerificationGuard {
   static final EmailVerificationGuard _instance =
       EmailVerificationGuard._internal();
   factory EmailVerificationGuard() => _instance;
   EmailVerificationGuard._internal();
 
-  /// Check if current user needs email verification
-  /// SECURITY: Now only checks server-trusted Firebase Auth state
+  DateTime? _skipUntil;
+  bool _skipActive = false;
+  bool get _isSkipActive => _skipActive || (_skipUntil != null && DateTime.now().isBefore(_skipUntil!));
+
   Future<bool> needsVerification() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
+    if (_isSkipActive) return false;
     return !user.emailVerified;
   }
 
-  /// Synchronous version for cases where async is not possible
-  /// SECURITY: Now only checks server-trusted Firebase Auth state
   bool needsVerificationSync() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
+    if (_isSkipActive) return false;
     return !user.emailVerified;
   }
 
-  /// SECURITY: Skip verification functionality removed for security
-  /// Users must verify their email to access protected features
-  @Deprecated('Skip verification removed for security - users must verify email')
   Future<void> markVerificationSkipped() async {
-    // This method no longer stores persistent skip state
-    // Users must complete email verification to access protected features
-    print('WARNING: Skip verification attempt - redirecting to verification');
-    _redirectToVerification();
+    _skipActive = true; // Session-scoped skip
   }
 
-  /// SECURITY: Reset functionality removed as skip flags no longer exist
-  @Deprecated('Reset skip flag removed - no persistent state to reset')
+  Future<void> markVerificationSkippedFor(Duration duration) async {
+    _skipUntil = DateTime.now().add(duration);
+  }
+
   Future<void> resetSkipFlag([String? userId]) async {
-    // No persistent skip state to reset anymore
-    // This is a no-op for backward compatibility
+    _skipActive = false;
+    _skipUntil = null;
   }
 
-  /// Check if current user is securely authenticated
   bool isSecurelyAuthenticated() {
     final user = FirebaseAuth.instance.currentUser;
     return user != null && user.emailVerified;
   }
 
-  /// Enforce email verification for sensitive operations
-  /// Returns true if user can proceed, false if blocked
   bool checkVerificationOrBlock({
     String? errorMessage,
     bool showError = true,
@@ -61,12 +54,16 @@ class EmailVerificationGuard {
   }) {
     final user = FirebaseAuth.instance.currentUser;
 
-    // Not authenticated at all
+    // Not authenticated
     if (user == null) {
       if (showError) {
         NotificationService.showError('auth_required');
       }
       return false;
+    }
+
+    if (_isSkipActive) {
+      return true;
     }
 
     // Authenticated but not verified
@@ -84,16 +81,15 @@ class EmailVerificationGuard {
       return false;
     }
 
-    // Authenticated and verified - allow access
+    // Authenticated and verified
     return true;
   }
 
-  /// Guard for premium features - requires both email verification AND premium status
   Future<bool> checkPremiumAccessOrBlock({
     String? errorMessage,
     bool showError = true,
   }) async {
-    // First check email verification
+  // First check email verification
     if (!checkVerificationOrBlock(
       errorMessage: 'email_verification_required_for_premium',
       showError: showError,
@@ -103,11 +99,9 @@ class EmailVerificationGuard {
     }
 
     // Then check premium status (existing logic can be kept)
-    // This method should be called before existing premium checks
     return true;
   }
 
-  /// Guard for usage tracking (scans, chats) - requires email verification
   bool checkUsageAccessOrBlock({String? feature}) {
     return checkVerificationOrBlock(
       errorMessage:
@@ -119,15 +113,13 @@ class EmailVerificationGuard {
     );
   }
 
-  /// Check and potentially redirect unverified users on app navigation
-  /// Returns true if user should proceed to intended route, false if blocked
   bool checkRouteAccess(String routeName) {
-    // Allow access to verification-related routes
+    // Allow verification-related routes
     if (_isVerificationRoute(routeName)) {
       return true;
     }
 
-    // Allow access to basic authentication routes
+    // Allow basic authentication routes
     if (_isBasicAuthRoute(routeName)) {
       return true;
     }
@@ -144,7 +136,7 @@ class EmailVerificationGuard {
     return true;
   }
 
-  /// Private method to redirect to verification screen
+  /// Redirect to verification screen
   void _redirectToVerification() {
     // Only redirect if not already on verification screen
     if (Get.currentRoute != Routes.emailVerificationView) {
@@ -155,7 +147,6 @@ class EmailVerificationGuard {
     }
   }
 
-  /// Check if route is verification-related (always allow)
   bool _isVerificationRoute(String routeName) {
     return [
       Routes.emailVerificationView,
@@ -165,7 +156,6 @@ class EmailVerificationGuard {
     ].contains(routeName);
   }
 
-  /// Check if route is basic authentication (allow for unverified users)
   bool _isBasicAuthRoute(String routeName) {
     return [
       Routes.signUpView,
@@ -175,7 +165,6 @@ class EmailVerificationGuard {
     ].contains(routeName);
   }
 
-  /// Check if route requires email verification
   bool _isProtectedRoute(String routeName) {
     return [
       Routes.leadingView, // Main app tabs
@@ -195,7 +184,6 @@ class EmailVerificationGuard {
     ].contains(routeName);
   }
 
-  /// Reload user token to get latest verification status
   Future<void> reloadUserVerificationStatus() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -207,7 +195,6 @@ class EmailVerificationGuard {
     }
   }
 
-  /// Get user verification status for UI display
   Map<String, dynamic> getVerificationStatus() {
     final user = FirebaseAuth.instance.currentUser;
 

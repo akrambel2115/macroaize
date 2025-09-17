@@ -23,7 +23,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => AnalyticsController());
-    return DefaultTabController(
+  return DefaultTabController(
       length: 3,
       child: Scaffold(
         backgroundColor: context.theme.scaffoldBackgroundColor,
@@ -35,17 +35,14 @@ class AnalyticsView extends GetView<AnalyticsController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Combined weight section
                   _buildCombinedWeightSection(context, controller),
-                  
+
                   const SizedBox(height: 24),
-                  
-                  // Analytics tabs
+
                   _buildAnalyticsTabs(context),
-                  
+
                   const SizedBox(height: 20),
-                  
-                  // Tab content
+
                   _buildTabContent(),
                 ],
               ),

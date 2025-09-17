@@ -40,7 +40,7 @@ class LanguageView extends GetView<LanguageController> {
                         Get.find<MainController>().getLanguageCode();
                         },
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10), // adjust the radius value to your liking
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       tileColor: context.theme.cardColor,
                       title: Text(controller.languageList[index].tr,style: context.textTheme.titleSmall,),

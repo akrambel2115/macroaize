@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/constant/Appkey.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 import 'package:foodcalorietracker/routes/app_routes.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
@@ -21,12 +21,12 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
     super.onInit();
     _setupAppName();
     _initializeAnimations();
-    // Do not auto-start here. The view will call startAnimations()
+    // View triggers `startAnimations()` when visible
   }
 
   bool _started = false;
 
-  /// Call from the view after the splash is visible to begin animations.
+  /// Called by the view to begin animations when visible
   void startAnimations() {
     if (_started) return;
     _started = true;
@@ -34,23 +34,24 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
   }
 
   void _setupAppName() {
-    // Use orange color for all letters in the app name
-    for (int i = 0; i < appName.length; i++) {
+    final name = Get.find<AppConfigService>().appName;
+    // Use orange for letters
+    for (int i = 0; i < name.length; i++) {
       appNameLetters.add({
-        'letter': appName[i],
+        'letter': name[i],
         'color': AppColor.primaryOrange,
       });
     }
   }
 
   void _initializeAnimations() {
-    // Main controller for overall timing
+    // Main animation controller
     mainController = AnimationController(
       duration: const Duration(milliseconds: 3000),
       vsync: this,
     );
 
-    // Scale animation for final bounce (stronger pop)
+  // Scale animation for final bounce
     scaleController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -60,16 +61,16 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       CurvedAnimation(parent: scaleController, curve: Curves.elasticOut),
     );
 
-    // Individual letter animations
+  // Individual letter animations (staggered)
     for (int i = 0; i < appNameLetters.length; i++) {
       AnimationController letterController = AnimationController(
-        duration: const Duration(milliseconds: 450), // Faster animation
+  duration: const Duration(milliseconds: 450),
         vsync: this,
       );
 
       Animation<double> letterAnimation = Tween<double>(
-        begin: -60.0, // Start above screen (less distance for smoother feel)
-        end: 0.0, // End at normal position
+  begin: -60.0,
+  end: 0.0,
       ).animate(
         CurvedAnimation(parent: letterController, curve: Curves.easeOutBack),
       );

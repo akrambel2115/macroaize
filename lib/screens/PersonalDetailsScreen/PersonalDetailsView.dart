@@ -11,12 +11,12 @@ import 'package:foodcalorietracker/screens/SettingScreen/SettingController.dart'
 import 'package:foodcalorietracker/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 
+// View displaying and navigating personal detail editing screens.
 class PersonalDetailsView extends GetView<PersonalDetailsController> {
   const PersonalDetailsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: () async {
         if (controller.selectedView == 0) {
@@ -27,7 +27,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
         } else {
           controller.onChangeSelectedView(0);
         }
-        return false; // Prevent default pop behavior
+        return false;
       },
       child: Scaffold(
         backgroundColor: context.theme.scaffoldBackgroundColor,
@@ -53,7 +53,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
             }),
           ],
           leading: AppWidgets.backButton(context, () {
-            if(controller.selectedView == 0) {
+            if (controller.selectedView == 0) {
               if (Get.isRegistered<SettingController>()) {
                 Get.find<SettingController>().update();
               }
@@ -64,12 +64,11 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
           }),
         ),
         body: GetBuilder<PersonalDetailsController>(builder: (controller) {
-          if(controller.selectedView == 0){
+          if (controller.selectedView == 0) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  // Grouped personal details container
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -78,7 +77,6 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                     ),
                     child: Column(
                       children: [
-                        // Goal Weight
                         ListTile(
                           title: Text(
                             "Goal Weight".tr,
@@ -102,7 +100,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                               ),
                               child: Icon(
                                 Icons.edit,
-                              color: AppColor.neutralWhite,
+                                color: AppColor.neutralWhite,
                               ),
                             ),
                           ),
@@ -118,7 +116,6 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                         ),
 
-                        // Current Weight
                         ListTile(
                           onTap: () {
                             controller.onChangeSelectedView(2);
@@ -145,7 +142,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                           ),
                         ),
-                          Center(
+                        Center(
                           child: FractionallySizedBox(
                             widthFactor: 0.92,
                             child: Divider(
@@ -156,7 +153,6 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                         ),
 
-                        // Height
                         ListTile(
                           onTap: () {
                             controller.onChangeSelectedView(3);
@@ -183,7 +179,7 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                           ),
                         ),
-                          Center(
+                        Center(
                           child: FractionallySizedBox(
                             widthFactor: 0.92,
                             child: Divider(
@@ -194,7 +190,6 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                           ),
                         ),
 
-                        // Date of Birth
                         ListTile(
                           onTap: () {
                             controller.onChangeSelectedView(4);
@@ -221,29 +216,24 @@ class PersonalDetailsView extends GetView<PersonalDetailsController> {
                             ),
                           ),
                         ),
-
-                        // Gender editing removed from Personal Details per request
                       ],
                     ),
                   ).paddingOnly(bottom: 10),
                 ],
               ),
             );
-          }else if (controller.selectedView == 1){
+          } else if (controller.selectedView == 1) {
             return GoalUpdate();
-          }else if(controller.selectedView ==2)
-            {
-              return CurrentWeightUpdate();
-            }else if(controller.selectedView ==3)
-            {
-              return HeightUpdate();
-            }else if(controller.selectedView ==4)
-            {
-              return BornUpdate();
-            }else{
-              return GenderView();
+          } else if (controller.selectedView == 2) {
+            return CurrentWeightUpdate();
+          } else if (controller.selectedView == 3) {
+            return HeightUpdate();
+          } else if (controller.selectedView == 4) {
+            return BornUpdate();
+          } else {
+            return GenderView();
           }
-        },)
+        })
       ),
     );
   }

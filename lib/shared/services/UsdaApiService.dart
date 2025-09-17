@@ -29,10 +29,9 @@ class UsdaApiFailure implements Exception {
 
 class UsdaApiService {
 
-  /// Search top results for a food name. Returns up to [limit] items.
   Future<List<UsdaFood>> searchFood(String query, {int limit = 3, String? locale}) async {
     if (query.trim().isEmpty) return [];
-    // Call secure backend proxy to avoid exposing API key in client
+
     final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
     HttpsCallable callable = functions.httpsCallable('searchUsdaFoods');
     dynamic raw;

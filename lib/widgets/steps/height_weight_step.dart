@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
-// Lottie removed for Height/Weight step
 import '../height_weight_picker.dart';
 
 class HeightWeightStep extends StatelessWidget {
@@ -62,7 +61,6 @@ class HeightWeightStep extends StatelessWidget {
                 .tr,
             style: context.theme.textTheme.titleSmall,
           ).paddingOnly(top: 10, bottom: 10),
-          // Make the picker + Lottie scrollable so the footer stays pinned
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),

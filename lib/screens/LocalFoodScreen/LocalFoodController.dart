@@ -1548,14 +1548,12 @@ class LocalFoodController extends GetxController {
   ];
 
   String type = "";
-  // Edit mode state and selection tracking
   bool isEditing = false;
   // selected indices refer to positions in filteredItems
   final Set<int> selectedIndices = {};
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     type = argument['value'];
     if (type == "Breakfast" || type == "BreakFast") {
@@ -1567,13 +1565,12 @@ class LocalFoodController extends GetxController {
     } else {
       filteredItems = dinnerFoods;
     }
-  // Load any persisted modifications (adds/edits/deletes) for this meal type from DB
+  // Load persisted local foods
   _loadPersistedFoodsFromDb();
   }
 
   void toggleEditMode() {
     isEditing = !isEditing;
-    // clear selection when exiting edit mode
     if (!isEditing) selectedIndices.clear();
     update();
   }
@@ -1587,8 +1584,7 @@ class LocalFoodController extends GetxController {
     update();
   }
 
-  /// Put the page into edit/config mode and select a single item.
-  /// Clears existing selection and selects [index]. Useful for long-press flow.
+  /// Enter edit mode and select [index].
   void selectAndEnterEdit(int index) {
     // enter edit mode if not already
     if (!isEditing) isEditing = true;
@@ -1599,7 +1595,7 @@ class LocalFoodController extends GetxController {
   }
 
   void addCustomFood(FoodItem item) async {
-    // Secure check: ask server for current premium status (non-reactive)
+    // Check premium access
     final isPremium = await _appUserService.isPremiumNow();
     if (!isPremium) {
       _showPremiumRequiredDialog();
@@ -1609,7 +1605,6 @@ class LocalFoodController extends GetxController {
     filteredItems.insert(0, item);
     update();
     NotificationService.showSuccess('food_added_success');
-    // persist changes to DB
     _saveCurrentFoodsToDb();
   }
 
@@ -1624,7 +1619,6 @@ class LocalFoodController extends GetxController {
       filteredItems[index] = item;
       update();
       NotificationService.showSuccess('food_updated_success');
-      // persist changes to DB
       _saveCurrentFoodsToDb();
     }
   }
@@ -1674,11 +1668,7 @@ class LocalFoodController extends GetxController {
       selectedIndices.clear();
       isEditing = false;
       update();
-      NotificationService.showSuccess(
-        'food_deleted_success',
-        params: {'count': indices.length.toString()},
-      );
-      // persist changes to DB
+      NotificationService.showSuccess('food_deleted_success', params: {'count': indices.length.toString()});
       _saveCurrentFoodsToDb();
     }
   }
@@ -1686,7 +1676,6 @@ class LocalFoodController extends GetxController {
   Future<void> _saveCurrentFoodsToDb() async {
     try {
       final t = type;
-      // remove existing rows for this type
       await dbHelper.deleteLocalFoodsByType(t);
       // insert current items
       for (final f in filteredItems) {
@@ -1701,7 +1690,7 @@ class LocalFoodController extends GetxController {
         });
       }
     } catch (_) {
-      // ignore DB errors for now
+      // ignore DB errors
     }
   }
 
@@ -1723,23 +1712,17 @@ class LocalFoodController extends GetxController {
       filteredItems = items;
       update();
     } catch (_) {
-      // ignore DB read errors
+      // ignore DB errors
     }
   }
 
-  /// Filters the local food list. Debounces rapid calls by default.
-  ///
-  /// Use `immediate: true` to perform the filter instantly (for submit/clear actions).
+  /// Filter local foods with debounce. Use `immediate: true` to run instantly.
   void searchFilter(String query, {bool immediate = false}) {
-    // cancel any pending debounce
-    if (_searchDebounce?.isActive ?? false) {
-      _searchDebounce!.cancel();
-    }
+    if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
 
-    runFilter() {
+    void runFilter() {
       final q = query.trim().toLowerCase();
       if (q.isEmpty) {
-        // reset to full list depending on type
         if (type == "Breakfast" || type == "BreakFast") {
           filteredItems = breakfastFoods;
         } else if (type == "Lunch") {
@@ -1751,29 +1734,16 @@ class LocalFoodController extends GetxController {
         }
       } else {
         if (type == "Breakfast" || type == "BreakFast") {
-          filteredItems =
-              breakfastFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
+          filteredItems = breakfastFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
         } else if (type == "Lunch") {
-          filteredItems =
-              lunchFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
+          filteredItems = lunchFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
         } else if (type == "snack(s)") {
-          filteredItems =
-              snackFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
+          filteredItems = snackFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
         } else {
-          filteredItems =
-              dinnerFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
+          filteredItems = dinnerFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
         }
       }
 
-      // filter completed
       isFiltering = false;
       update();
     }
@@ -1785,7 +1755,6 @@ class LocalFoodController extends GetxController {
       return;
     }
 
-    // show filtering indicator and debounce
     isFiltering = true;
     update();
     _searchDebounce = Timer(_debounceDuration, runFilter);

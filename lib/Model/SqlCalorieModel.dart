@@ -17,7 +17,6 @@ class SqlCalorieModel {
     required this.fats,
   });
 
-  // Convert a Art object into a Map object
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -30,7 +29,6 @@ class SqlCalorieModel {
     };
   }
 
-  // Extract a Art object from a Map object
   factory SqlCalorieModel.fromMap(Map<String, dynamic> map) {
     return SqlCalorieModel(
       id: map['id'],

@@ -24,22 +24,16 @@ class UsageIndicatorWidget extends StatelessWidget {
       builder: (context, subscriptionSnapshot) {
         final subscription = subscriptionSnapshot.data;
         
-        // If user is premium, don't show usage indicator (unless explicitly requested)
-        if (subscription?.isActive == true && showOnlyWhenLimited) {
+            if (subscription?.isActive == true && showOnlyWhenLimited) {
           return const SizedBox.shrink();
         }
-        
-        if (subscription?.isActive == true) {
-          // Premium user - show premium badge
-          return _buildPremiumBadge(context);
-        }
-        
-        // Non-premium user - show usage limits
+            if (subscription?.isActive == true) {
+              return _buildPremiumBadge(context);
+            }
         return StreamBuilder<UserUsage?>(
           stream: usageService.usageStream,
           builder: (context, usageSnapshot) {
             final usage = usageSnapshot.data ?? const UserUsage(scanCount: 0, chatCount: 0);
-            
             return _buildUsageDisplay(context, usage);
           },
         );
@@ -166,7 +160,6 @@ class UsageIndicatorWidget extends StatelessWidget {
   }) {
     final remaining = (total - current).clamp(0, total);
     final isLimitReached = current >= total;
-    
     return Column(
       children: [
         Row(

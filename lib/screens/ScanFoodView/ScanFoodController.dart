@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:foodcalorietracker/shared/services/usage_service.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
-
 import 'package:foodcalorietracker/shared/services/app_user_service.dart';
 import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
 import 'package:camera/camera.dart';
@@ -12,14 +11,11 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-// ...existing imports
 import '../../widgets/CropperUiSettings.dart';
-
 import '../../routes/app_routes.dart';
 
 class ScanFoodController extends GetxController with WidgetsBindingObserver {
   CameraController? cameraController;
-  // Default to snack(s) so the picker focuses on Snack by default
   String isIdentify = "snack(s)";
   File? imagePath;
   bool isLoading = false;
@@ -32,7 +28,6 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
   @override
   Future<void> onInit() async {
-    // TODO: implement onInit
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     await _ensureCameraReady();
@@ -59,9 +54,6 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           print("Camera error: ${e.description}");
           print("Error code: ${e.code}");
         }
-        // If permission was denied, show a localized alert directing the
-        // user to grant camera access from the device/app settings. Avoid
-        // showing the same dialog repeatedly.
         if (e.code == 'CameraAccessDenied' && !_permissionDialogShown) {
           _permissionDialogShown = true;
           try {
@@ -141,10 +133,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   }
 
   takeImage(ImageSource source, BuildContext context) async {
-    // ACCOUNT ACTIVATION GATING: Check if account is activated before allowing scan
-    if (!_appUserService.checkAccountActivation('scanner')) {
-      return;
-    }
+    if (!_appUserService.checkAccountActivation('scanner')) return;
 
     XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
@@ -162,7 +151,14 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
     isLoading = true;
     update();
-    // ensure camera is initialized before taking a picture
+    if (cameraController == null || cameraController!.value.isInitialized == false) {
+      await _ensureCameraReady();
+      if (cameraController == null || cameraController!.value.isInitialized == false) {
+        isLoading = false;
+        update();
+        return;
+      }
+    }
     if (cameraController == null ||
         cameraController!.value.isInitialized == false) {
       await _ensureCameraReady();
@@ -193,8 +189,8 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       if (croppedFile != null) {
         File image = File(croppedFile.path);
 
-        // SECURE FEATURE GATING: Check usage limits via backend
-        // This includes authentication AND email verification checks
+      isLoading = true;
+      update();
         isLoading = true;
         update();
 
@@ -254,11 +250,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   // usage limit dialog replaced by NotificationService.showError
 
   Future<void> _handleAuthenticationRequired() async {
-    // Show authentication modal
     final success = await AuthModal.show();
 
     if (success) {
-      // User logged in successfully - show success message
       Get.snackbar(
         'Welcome!',
         'You can now use the scanner. Please try scanning again.',
@@ -268,7 +262,6 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
         duration: const Duration(seconds: 3),
       );
     } else {
-      // User cancelled or failed to login
       Get.snackbar(
         'Authentication Required',
         'Please login to use the scanner feature',

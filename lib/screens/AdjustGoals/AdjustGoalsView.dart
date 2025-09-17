@@ -47,7 +47,6 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
             "Adjust Goals".tr,
             style: context.theme.textTheme.headlineMedium,
           ),
-          // No Save button in AppBar; saving occurs in each edit dialog
           actions: const [],
         ),
         body: GetBuilder<AdjustGoalsController>(builder: (controller) {

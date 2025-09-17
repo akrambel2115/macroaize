@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart'; // Optional alternative
+import 'package:get/get.dart';
 
 void showExitConfirmationDialog({required BuildContext context}) {
   Get.dialog(
@@ -32,12 +32,8 @@ void showExitConfirmationDialog({required BuildContext context}) {
             // Close the dialog first
             Get.back();
 
-            // Exit the app
-            // Option 1: Using SystemNavigator (recommended)
-            SystemNavigator.pop();
-
-            // Option 2: Force exit (not recommended)
-            // exit(0);
+                  // Exit the app using SystemNavigator
+                  SystemNavigator.pop();
           },
         ),
       ],

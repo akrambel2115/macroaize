@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
-// no Get dependency required
 
-/// Primary CTA used across onboarding/welcome screens.
-/// - Accepts optional press animation and press handlers so callers can
-///   hook into controller-driven animations.
 class PrimaryCTA extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;

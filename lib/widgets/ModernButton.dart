@@ -243,7 +243,6 @@ class _ModernButtonState extends State<ModernButton>
     final children = <Widget>[];
     final textDirection = Directionality.of(context);
 
-    // Place the icon before the text for LTR, and after the text for RTL
     if (widget.icon != null && textDirection == TextDirection.ltr) {
       children.add(widget.icon!);
       children.add(const SizedBox(width: 8));

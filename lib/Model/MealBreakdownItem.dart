@@ -1,10 +1,10 @@
 
 class MealBreakdownItem {
-  final String name; // localized for display
-  final String englishName; // for USDA search
-  final double amount; // numeric amount as entered or parsed
-  final String unit; // g, ml, cup, slice, piece
-  final double grams; // normalized amount in grams
+  final String name;
+  final String englishName;
+  final double amount;
+  final String unit;
+  final double grams;
 
   // USDA data (per 100g)
   final int? fdcId;
@@ -12,7 +12,6 @@ class MealBreakdownItem {
   final double proteinPer100g;
   final double carbsPer100g;
   final double fatPer100g;
-
   // Derived from grams
   final double kcal;
   final double protein;
@@ -98,30 +97,27 @@ class MealBreakdownItem {
     if (numberMatch != null) {
       value = double.tryParse(numberMatch.group(1)!) ?? 0;
     }
-
-    String unit = 'g'; // default to grams
+    // unit parsing and simple approximations
+    String unit = 'g';
     if (s.contains('piece') || s.contains('pcs') || s.contains('pc')) {
       unit = 'piece';
     } else if (s.contains('g') || s.contains('gram')) {
       unit = 'g';
     } else {
-      // For any other units (ml, cup, slice, etc.), convert to grams and default unit to 'g'
       if (s.contains('ml')) {
-        value = value * 1.0; // 1ml ≈ 1g approximation
+        value = value * 1.0;
       } else if (s.contains('cup')) {
-        value = value * 240; // 1 cup ≈ 240g approximation  
+        value = value * 240;
       } else if (s.contains('slice')) {
-        value = value * 30; // 1 slice ≈ 30g approximation
+        value = value * 30;
       }
-      // Keep unit as 'g' for display
       unit = 'g';
     }
 
     double grams = value;
     switch (unit) {
       case 'piece':
-        // Use a more conservative generic piece weight (e.g. egg ≈ 50g)
-        grams = value * 50; // 1 piece ≈ 50g
+        grams = value * 50;
         break;
       case 'g':
       default:

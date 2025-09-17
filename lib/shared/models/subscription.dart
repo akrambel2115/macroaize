@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Subscription {
 	final bool isPremium;
-	final String? planType; // e.g., 'monthly' | 'yearly'
+	final String? planType; // monthly | yearly
 	final DateTime? startDate;
 	final DateTime? endDate;
 
@@ -19,8 +19,7 @@ class Subscription {
       if (v is Timestamp) return v.toDate().toUtc();
       if (v is DateTime) return v.toUtc();
       if (v is int) {
-        // Handle both epoch seconds and milliseconds
-        final isSeconds = v.abs() < 1000000000000; // 1e12 ~ ms threshold
+        final isSeconds = v.abs() < 1000000000000; // 1e12 ms threshold
         final ms = isSeconds ? v * 1000 : v;
         return DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toUtc();
       }

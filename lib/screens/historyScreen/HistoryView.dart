@@ -5,7 +5,6 @@ import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/historyScreen/DeleteDailog.dart';
 import 'package:foodcalorietracker/screens/historyScreen/HistoryController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-// 'ModernButton' import removed: empty-state now uses ContinueButton.
 import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:foodcalorietracker/widgets/NutritionBadge.dart';
@@ -76,9 +75,8 @@ class HistoryView extends GetView<HistoryController> {
                   ),
                 ),
                 onPressed: () {
-                  // toggle sort order each press
-                  controller.toggleSort();
-                },
+                    controller.toggleSort();
+                  },
               );
             },
           ),
@@ -122,7 +120,7 @@ class HistoryView extends GetView<HistoryController> {
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          children: [
           // Header with meal type and delete button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,16 +129,16 @@ class HistoryView extends GetView<HistoryController> {
               ModernScaleTransition(
                 child: GestureDetector(
                   onTap: () {
-                    showCustomDeleteDialog(
-                      onDelete: () {
-                        controller.dbHelper.deleteCalorieHistory(
-                          historyItem.id!,
-                        );
-                        controller.getHistory();
-                      },
-                      context: context,
-                    );
-                  },
+                      showCustomDeleteDialog(
+                        onDelete: () {
+                          controller.dbHelper.deleteCalorieHistory(
+                            historyItem.id!,
+                          );
+                          controller.getHistory();
+                        },
+                        context: context,
+                      );
+                    },
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -163,8 +161,7 @@ class HistoryView extends GetView<HistoryController> {
           // Show title instead of image for both local and scanned meals
           Center(child: _buildHistoryTitle(context, historyItem.title)),
           const SizedBox(height: 16),
-          // Render nutrition items inline in a single row without scrolling.
-          // Use Expanded so each badge shares available space and reduce gaps to avoid overflow.
+          // Nutrition items rendered inline to avoid overflow.
           Row(
             children: [
               Expanded(
@@ -227,7 +224,6 @@ class HistoryView extends GetView<HistoryController> {
 
           const SizedBox(height: 16),
 
-          // Timestamp
           _buildTimestamp(context),
         ],
       ),
@@ -305,9 +301,7 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  // _buildNutritionGrid removed — nutrition items are now rendered inline in the card
-
-  // Nutrition item logic has been extracted to `NutritionBadge` widget for reuse.
+  // Nutrition logic extracted to `NutritionBadge` widget for reuse.
 
   Widget _buildTimestamp(BuildContext context) {
     return Row(
@@ -319,7 +313,7 @@ class HistoryView extends GetView<HistoryController> {
         ),
         const SizedBox(width: 6),
         Text(
-          DateTime.now().toString().split(' ')[0], // Placeholder timestamp
+    DateTime.now().toString().split(' ')[0],
           style: context.textTheme.labelSmall?.copyWith(
             color: AppColor.neutralGrey500,
           ),
@@ -375,8 +369,6 @@ class HistoryView extends GetView<HistoryController> {
               const SizedBox(height: 32),
 
               ContinueButton(
-                // Use the localized 'Track Food' label instead of the default
-                // 'continue_cta' and hide the arrow icon for this screen.
                 labelKey: 'Track Food',
                 icon: null,
                 onTap: () {

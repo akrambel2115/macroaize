@@ -15,7 +15,6 @@ class DirectionalTransition extends CustomTransition {
   Widget buildTransition(BuildContext context, Curve? curve, Alignment? alignment, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final isRtl = _isRtl(Get.locale ?? Get.deviceLocale);
 
-    // Slide from right->left for LTR, left->right for RTL (so navigation feels natural)
     final begin = isRtl ? const Offset(-1.0, 0.0) : const Offset(1.0, 0.0);
     final end = Offset.zero;
     final tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve ?? Curves.easeInOut));

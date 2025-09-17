@@ -38,13 +38,10 @@ class ModernCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = context.theme.brightness == Brightness.dark;
-    
-  // New default styling to match the modern rounded card from the mockups.
-  // Kept compact and theme-aware so changes propagate app-wide while remaining
-  // easy to override per-use with the existing constructor parameters.
-  final defaultBorderRadius = BorderRadius.circular(18);
-  final defaultPadding = const EdgeInsets.all(16);
-  final defaultMargin = const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
+
+    final defaultBorderRadius = BorderRadius.circular(18);
+    final defaultPadding = const EdgeInsets.all(16);
+    final defaultMargin = const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
 
     Widget cardContent = Container(
       margin: margin ?? defaultMargin,
@@ -86,7 +83,6 @@ class ModernCard extends StatelessWidget {
 
   List<BoxShadow> _getDefaultShadow(bool isDark) {
     if (isDark) {
-      // Dark theme: subtle deep shadow for separation without glow
       return [
         BoxShadow(
           color: Colors.black.withOpacity(0.5),
@@ -96,17 +92,13 @@ class ModernCard extends StatelessWidget {
       ];
     }
 
-    // Light theme: gentle double-layer shadow with a very soft warm tint to
-    // mimic the modern card in the attachment (soft orange halo + neutral shadow).
     return [
       BoxShadow(
-        // warm halo (very subtle)
         color: AppColor.primaryOrange.withOpacity(0.06),
         blurRadius: 20,
         offset: const Offset(0, 8),
       ),
       BoxShadow(
-        // soft neutral shadow for depth
         color: Colors.black.withOpacity(0.04),
         blurRadius: 8,
         offset: const Offset(0, 3),
@@ -138,8 +130,7 @@ class ModernGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = context.theme.brightness == Brightness.dark;
-  final defaultBorderRadius = BorderRadius.circular(18);
-    
+    final defaultBorderRadius = BorderRadius.circular(18);
     Widget glassContent = Container(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

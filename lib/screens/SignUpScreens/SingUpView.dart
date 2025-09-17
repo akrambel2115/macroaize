@@ -27,7 +27,7 @@ class _SignUpViewState extends State<SignUpView> {
         ),
         child: GetBuilder<SignUpController>(
           builder: (controller) {
-            // Map the selectedView into a 6-step progress (gender..stoppingGoal)
+            // Map selectedView into 6-step progress
             final int stepIndex = controller.selectedView.clamp(0, 5);
             final bool forward = stepIndex >= _prevStep;
 
@@ -37,7 +37,7 @@ class _SignUpViewState extends State<SignUpView> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Step progress indicator (6 steps) — show above the back button on all pages
+                // Step progress indicator
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6.0),
                   child: _StepProgressIndicator(
@@ -46,7 +46,7 @@ class _SignUpViewState extends State<SignUpView> {
                     activeColor: AppColor.primaryOrange,
                   ),
                 ),
-                // Top left back button (use shared AppWidgets.backButton for consistent look)
+                // Top-left back button
                 AppWidgets.backButton(context, () {
                   if (controller.selectedView > 0) {
                     controller.selectedView = controller.selectedView - 1;
@@ -57,7 +57,7 @@ class _SignUpViewState extends State<SignUpView> {
                 }),
                 const SizedBox(height: 8),
 
-                // The active screen with smooth animated transitions
+                // Active screen with animated transitions
                 Expanded(
                   child: AnimatedSwitcher(
                     // Increased duration for a slower, smoother transition
@@ -66,14 +66,11 @@ class _SignUpViewState extends State<SignUpView> {
                     switchInCurve: Curves.easeInOut,
                     switchOutCurve: Curves.easeInOut,
                     transitionBuilder: (child, animation) {
-                      // Combine slide + fade for a smoother transition.
-                      // When the app is in RTL (e.g., Arabic) we need to flip the
-                      // slide direction so forward/back navigation feels natural.
+                      // Combine slide + fade and adjust for RTL
                       final textDir = Directionality.of(context);
                       final bool isRtl = textDir == TextDirection.rtl;
 
-                      // Determine the animation start offset based on directionality
-                      // and whether the navigation is forward.
+                      // Determine animation start offset
                       final Offset begin =
                           forward
                               ? (isRtl

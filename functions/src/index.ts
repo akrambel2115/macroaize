@@ -1,6 +1,7 @@
 import { onCall, onRequest, CallableRequest } from 'firebase-functions/v2/https';
 import { Request, Response } from 'express';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { logger } from 'firebase-functions/v2';
 
 import { defineSecret } from 'firebase-functions/params';
@@ -11,8 +12,10 @@ import crypto from 'crypto';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { CHARGILY_SECRET_KEY, OPENROUTER_API_KEY, USDA_API_KEY, getChargilyApiUrl, getPremiumMonthlyDzd, getPremiumYearlyDzd, getWebhookToleranceSeconds, getInfluencerMinWithdrawal, getInfluencerCommissionRate, getInfluencerEarnForCode, getEmailToAddress, getInfluencerWithdrawalProcessingDays, getEmailFromAddress, getSuccessUrl, getFailureUrl, getAiModel, getScanLimit as getScanLimitCfg, getChatLimit as getChatLimitCfg, getAndroidIapIds, getIosIapIds, getTermsLink, getPrivacyLink, getShareUrlAndroid, getShareUrlIos, getMinRequiredAppVersion, getUpdateMessage } from './config';
+import { CHARGILY_SECRET_KEY, OPENROUTER_API_KEY, USDA_API_KEY, getChargilyApiUrl, getWebhookToleranceSeconds, getInfluencerMinWithdrawal, getEmailToAddress, getEmailFromAddress, getAiModel, getAndroidIapIds, getIosIapIds } from './config';
 import { encryptRip, decryptRip, maskRip, isValidRip } from './crypto_rip';
+import { getNotificationService, NotificationPayload } from './notification_service';
+import { getRemoteConfigService, DEFAULT_NOTIFICATION_CONFIG, getPremiumMonthlyDzd, getPremiumYearlyDzd, getInfluencerCommissionRate, getInfluencerEarnForCode, getInfluencerWithdrawalProcessingDays, getSuccessUrl, getFailureUrl, getScanLimitCfg, getChatLimitCfg, getTermsLink, getPrivacyLink, getShareUrlAndroid, getShareUrlIos, getMinRequiredAppVersion, getUpdateMessage } from './remote_config_service';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -307,19 +310,7 @@ function createAuditLog(baseData: any, correlationId: string, duration?: number)
   };
 }
 
-export const testAuth = onCall({ region: 'europe-west1' }, (request: CallableRequest) => {
-  console.log(`--- testAuth running in project: ${process.env.GCLOUD_PROJECT} ---`);
-  if (!request.auth) {
-    console.error('Authentication context is NULL!');
-    throw new Error('authentication-failed');
-  }
-  console.log(`Authentication successful for UID: ${request.auth.uid}`);
-  return {
-    status: 'Success!',
-    message: `Authenticated successfully as UID: ${request.auth.uid}`,
-  };
-});
-
+// testAuth function removed to reduce CPU quota usage
 
 export const createChargilyPayment = onCall({
   region: 'europe-west1',
@@ -656,23 +647,25 @@ export const incrementUsage = onCall({
   }
 });
 
-export const resetAllDailyUsage = onSchedule({
+// Combined daily maintenance job: resets daily usage and expires invalid subscriptions
+export const dailyMaintenance = onSchedule({
   region: 'europe-west1',
-  schedule: '0 0 * * *', // Daily at 00:00 UTC
-  timeZone: 'UTC'
-}, async (event) => {
-  const startTime = Date.now();
+  schedule: '0 0 * * *', // Daily at 00:00 Africa/Algiers
+  timeZone: 'Africa/Algiers'
+}, async () => {
+  const jobStart = Date.now();
   const correlationId = crypto.randomUUID();
-  
-  logger.info('Starting scheduled resetAllDailyUsage job', { correlationId });
-  
+  logger.info('Starting dailyMaintenance job', { correlationId });
+
+  // Phase 1: Reset all daily usage
   try {
+    const startTime = Date.now();
     const collectionRef = db.collection('user_usage');
 
     let processed = 0;
     let page = 0;
     let lastDoc: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData> | null = null;
-  const maxPages = 1000;
+    const maxPages = 1000;
 
     while (page < maxPages) {
       const query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = lastDoc
@@ -694,30 +687,21 @@ export const resetAllDailyUsage = onSchedule({
       });
 
       await batch.commit();
-  page++;
-  lastDoc = snapshot.docs[snapshot.docs.length - 1];
+      page++;
+      lastDoc = snapshot.docs[snapshot.docs.length - 1];
     }
 
-  const duration = Date.now() - startTime;
-  logger.info('Completed resetAllDailyUsage', { correlationId, totalProcessed: processed, totalPages: page, duration });
+    const duration = Date.now() - startTime;
+    logger.info('Completed dailyMaintenance phase: resetAllDailyUsage', { correlationId, totalProcessed: processed, totalPages: page, duration });
   } catch (error) {
-  console.error('Error in scheduled resetAllDailyUsage:', error);
+    console.error('Error in dailyMaintenance resetAllDailyUsage phase:', error);
   }
-});
-// Daily subscription expiry enforcer
-export const expireInvalidSubscriptions = onSchedule({
-  region: 'europe-west1',
-  schedule: '0 0 * * *', // Daily at 00:00 Africa/Algiers
-  timeZone: 'Africa/Algiers'
-}, async () => {
-  const startTime = Date.now();
-  const correlationId = crypto.randomUUID();
-  const now = safeNow();
-  
-  logger.info('Starting expireInvalidSubscriptions job', { correlationId });
-  
+
+  // Phase 2: Expire invalid subscriptions
   try {
+    const startTime = Date.now();
     const collectionRef = db.collection('subscriptions');
+    const now = safeNow();
 
     let processed = 0;
     let updated = 0;
@@ -734,6 +718,7 @@ export const expireInvalidSubscriptions = onSchedule({
       if (snapshot.empty) break;
 
       const batch = db.batch();
+      let writesInBatch = 0;
 
       snapshot.docs.forEach((doc: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>) => {
         const data = doc.data() as SubscriptionData;
@@ -765,25 +750,73 @@ export const expireInvalidSubscriptions = onSchedule({
             updatedAt: FieldValue.serverTimestamp()
           }, { merge: true });
           updated++;
+          writesInBatch++;
         }
         processed++;
       });
 
-      if (updated > 0) {
+      if (writesInBatch > 0) {
         await batch.commit();
       }
       page++;
       lastDoc = snapshot.docs[snapshot.docs.length - 1];
-      
-  logger.info('Expiry batch completed', { correlationId, page, batchSize: snapshot.docs.length, totalProcessed: processed, totalUpdated: updated });
+
+      logger.info('Expiry batch completed', { correlationId, page, batchSize: snapshot.docs.length, totalProcessed: processed, totalUpdated: updated });
     }
 
-  const duration = Date.now() - startTime;
-  logger.info('Completed expireInvalidSubscriptions', { correlationId, totalProcessed: processed, totalUpdated: updated, totalPages: page, duration });
+    const duration = Date.now() - startTime;
+    logger.info('Completed dailyMaintenance phase: expireInvalidSubscriptions', { correlationId, totalProcessed: processed, totalUpdated: updated, totalPages: page, duration });
   } catch (error) {
-    console.error('Error in expireInvalidSubscriptions:', error);
-  // Allow function to succeed to avoid repeated retries
+    console.error('Error in dailyMaintenance expireInvalidSubscriptions phase:', error);
+    // Allow function to succeed to avoid repeated retries of the whole job
   }
+
+  // Phase 3: Send daily reset notification to all users
+  try {
+    const startTime = Date.now();
+    
+    // Get all users for daily reset notification
+    const usersQuery = await db.collection('users')
+      .limit(1000) // Process in batches
+      .get();
+
+    if (!usersQuery.empty) {
+      const remoteConfig = getRemoteConfigService();
+      const notificationService = getNotificationService();
+      
+      // Get daily reset message from Remote Config
+      const resetMessage = await remoteConfig.getNotificationMessage(
+        'notification_daily_reset_msg',
+        DEFAULT_NOTIFICATION_CONFIG.notification_daily_reset_msg
+      );
+
+      const resetPayload: NotificationPayload = {
+        title: 'Daily Limits Reset! ✨',
+        body: resetMessage,
+        data: {
+          type: 'daily_reset'
+        }
+      };
+
+      const userIds = usersQuery.docs.map(doc => doc.id);
+      const successCount = await notificationService.sendNotificationToUsers(userIds, resetPayload);
+      
+      const duration = Date.now() - startTime;
+      logger.info('Completed dailyMaintenance phase: sendDailyResetNotification', { 
+        correlationId, 
+        totalUsers: userIds.length, 
+        successCount, 
+        duration 
+      });
+    } else {
+      logger.info('No users found for daily reset notification', { correlationId });
+    }
+  } catch (error) {
+    console.error('Error in dailyMaintenance sendDailyResetNotification phase:', error);
+    // Allow function to succeed to avoid repeated retries of the whole job
+  }
+
+  logger.info('Finished dailyMaintenance job', { correlationId, totalDuration: Date.now() - jobStart });
 });
  
 // Promo code tracking helpers
@@ -2149,93 +2182,7 @@ export const validatePromoCode = onCall({ region: 'europe-west1' }, async (reque
   }
 });
 
-export const trackPromoUsage = onCall({ region: 'europe-west1' }, async (request: CallableRequest) => {
-  const uid = request.auth?.uid;
-  if (!uid) {
-    throw new Error('unauthenticated');
-  }
-
-  // Verify this is being called from a trusted context (backend function)
-  // In a real implementation, you'd use Firebase Auth custom claims
-  const isBackendCall = request.auth?.token?.admin === true;
-  if (!isBackendCall) {
-    throw new Error('permission-denied');
-  }
-
-  const promoCode = (request.data?.promoCode as string || '').toUpperCase().trim();
-  const subscriptionUserId = request.data?.userId as string;
-  const subscriptionAmount = request.data?.amount as number;
-
-  if (!isValidPromoCode(promoCode) || !subscriptionUserId || !subscriptionAmount || subscriptionAmount <= 0) {
-    throw new Error('invalid-argument');
-  }
-
-  try {
-    // Find the influencer
-    const influencersQuery = await db.collection('influencers')
-      .where('promoCode', '==', promoCode)
-      .where('isActive', '==', true)
-      .limit(1)
-      .get();
-
-    if (influencersQuery.empty) {
-      throw new Error('invalid-code');
-    }
-
-    const influencerDoc = influencersQuery.docs[0];
-    const influencerId = influencerDoc.id;
-
-    // Calculate commission using the fixed amount
-    const commission = getInfluencerEarnForCode();
-
-    // Update influencer earnings in transaction
-    await db.runTransaction(async (transaction) => {
-      const influencerRef = db.collection('influencers').doc(influencerId);
-      const currentData = await transaction.get(influencerRef);
-      
-      if (!currentData.exists) {
-        throw new Error('Influencer not found');
-      }
-
-      const data = currentData.data()!;
-      const newEarnings = (data.earningsDzd || 0) + commission;
-      const newTotalEarnings = (data.totalEarningsDzd || 0) + commission;
-      const newUsersCount = (data.usersCount || 0) + 1;
-
-      transaction.update(influencerRef, {
-        earningsDzd: newEarnings,
-        totalEarningsDzd: newTotalEarnings,
-        usersCount: newUsersCount,
-        updatedAt: FieldValue.serverTimestamp()
-      });
-
-      // Create audit log
-      transaction.create(db.collection('influencer_audit').doc(), {
-        userId: influencerId,
-        action: 'commission_earned',
-        amount: commission,
-        details: {
-          promoCode,
-          subscriptionUserId,
-          subscriptionAmount,
-          earnAmount: commission
-        },
-        timestamp: FieldValue.serverTimestamp(),
-        status: 'completed'
-      });
-    });
-
-    return {
-      success: true,
-      commission,
-      influencerId
-    };
-
-  } catch (error) {
-    console.error('Error tracking promo usage:', error);
-    throw new Error('internal');
-  }
-});
+// trackPromoUsage function removed - redundant with automatic webhook tracking
 
 export const processWithdrawal = onCall({ 
   region: 'europe-west1',
@@ -2627,5 +2574,501 @@ export const adminCompleteWithdrawal = onCall({
     }
     
     throw new Error('Failed to complete withdrawal. Please try again.');
+  }
+});
+
+// =============================================================================
+// NOTIFICATION SYSTEM - PHASE 2 & 3: Auto-Triggered Notifications
+// =============================================================================
+
+/**
+ * Auto-triggered notification: Promo Code Used → Notify Influencer
+ * Trigger: onCreate in promoUses/{docId}
+ * Sends notification to influencer when their promo code is used
+ */
+export const notifyInfluencerOnPromoUse = onDocumentCreated({
+  region: 'europe-west1',
+  document: 'promoUses/{docId}'
+}, async (event) => {
+  const correlationId = `promo_use_${Date.now()}`;
+  
+  try {
+    const promoUseData = event.data?.data();
+    if (!promoUseData) {
+      logger.warn('No promo use data found', { correlationId });
+      return;
+    }
+
+    const promoCodeId = promoUseData.promoCodeId;
+    const userId = promoUseData.userId;
+
+    if (!promoCodeId) {
+      logger.warn('No promo code ID in promo use document', { correlationId });
+      return;
+    }
+
+    logger.info('Processing promo code use notification', {
+      correlationId,
+      promoCodeId,
+      userId
+    });
+
+    // Get promo code document to find the owner
+    const promoCodeDoc = await db.collection('promoCodes').doc(promoCodeId).get();
+    if (!promoCodeDoc.exists) {
+      logger.warn('Promo code document not found', { correlationId, promoCodeId });
+      return;
+    }
+
+    const promoCodeData = promoCodeDoc.data();
+    const ownerUid = promoCodeData?.ownerUid;
+
+    if (!ownerUid) {
+      logger.warn('No owner UID in promo code document', { correlationId, promoCodeId });
+      return;
+    }
+
+    // Get notification message from Remote Config
+    const remoteConfig = getRemoteConfigService();
+    const message = await remoteConfig.getNotificationMessage(
+      'notification_promo_used_msg',
+      DEFAULT_NOTIFICATION_CONFIG.notification_promo_used_msg
+    );
+
+    // Send notification to influencer
+    const notificationService = getNotificationService();
+    const payload: NotificationPayload = {
+      title: 'Promo Code Used! 🎉',
+      body: message,
+      data: {
+        type: 'promo_used',
+        promoCode: promoCodeId,
+        userId: userId || 'unknown'
+      }
+    };
+
+    const success = await notificationService.sendNotificationToUser(ownerUid, payload);
+    
+    logger.info('Promo code use notification sent', {
+      correlationId,
+      ownerUid,
+      success
+    });
+
+  } catch (error) {
+    logger.error('Error sending promo code use notification', {
+      correlationId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+/**
+ * Auto-triggered notification: User Becomes Influencer → Get Personal Promo Code
+ * Trigger: onCreate in promoCodes/{code} with ownerUid
+ * Sends welcome notification when user becomes an influencer
+ */
+export const notifyNewInfluencer = onDocumentCreated({
+  region: 'europe-west1',
+  document: 'promoCodes/{code}'
+}, async (event) => {
+  const correlationId = `new_influencer_${Date.now()}`;
+  
+  try {
+    const promoCodeData = event.data?.data();
+    if (!promoCodeData) {
+      logger.warn('No promo code data found', { correlationId });
+      return;
+    }
+
+    const ownerUid = promoCodeData.ownerUid;
+    const promoCode = event.params.code;
+
+    if (!ownerUid) {
+      logger.warn('No owner UID in new promo code document', { correlationId, promoCode });
+      return;
+    }
+
+    logger.info('Processing new influencer notification', {
+      correlationId,
+      ownerUid,
+      promoCode
+    });
+
+    // Get notification message from Remote Config with code substitution
+    const remoteConfig = getRemoteConfigService();
+    const message = await remoteConfig.getNotificationMessage(
+      'notification_influencer_welcome_msg',
+      DEFAULT_NOTIFICATION_CONFIG.notification_influencer_welcome_msg,
+      { code: promoCode }
+    );
+
+    // Send notification to new influencer
+    const notificationService = getNotificationService();
+    const payload: NotificationPayload = {
+      title: 'Welcome to the Influencer Program! 🌟',
+      body: message,
+      data: {
+        type: 'influencer_welcome',
+        promoCode: promoCode
+      }
+    };
+
+    const success = await notificationService.sendNotificationToUser(ownerUid, payload);
+    
+    logger.info('New influencer notification sent', {
+      correlationId,
+      ownerUid,
+      promoCode,
+      success
+    });
+
+  } catch (error) {
+    logger.error('Error sending new influencer notification', {
+      correlationId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+/**
+ * Auto-triggered notification: User Reaches 50% or 100% of Daily Target
+ * Trigger: onWrite to calorie_history/{date}
+ * Sends progress notifications based on goal achievement
+ */
+export const notifyGoalProgress = onDocumentWritten({
+  region: 'europe-west1',
+  document: 'calorie_history/{date}'
+}, async (event) => {
+  const correlationId = `goal_progress_${Date.now()}`;
+  
+  try {
+    const afterData = event.data?.after?.data();
+    
+    if (!afterData) {
+      logger.warn('No calorie history data found', { correlationId });
+      return;
+    }
+
+    const userId = afterData.userId;
+    const totalCalories = afterData.totalCalories || 0;
+    const targetCalories = afterData.targetCalories || 2000;
+    const notified50 = afterData.notified50 || false;
+    const notified100 = afterData.notified100 || false;
+
+    if (!userId) {
+      logger.warn('No user ID in calorie history document', { correlationId });
+      return;
+    }
+
+    const progress = totalCalories / targetCalories;
+    const progressPercent = Math.round(progress * 100);
+
+    logger.info('Processing goal progress notification', {
+      correlationId,
+      userId,
+      totalCalories,
+      targetCalories,
+      progressPercent,
+      notified50,
+      notified100
+    });
+
+    const remoteConfig = getRemoteConfigService();
+    const notificationService = getNotificationService();
+    
+    // Check for 50% milestone
+    if (progress >= 0.5 && !notified50) {
+      const message = await remoteConfig.getNotificationMessage(
+        'notification_goal_50pct_msg',
+        DEFAULT_NOTIFICATION_CONFIG.notification_goal_50pct_msg
+      );
+
+      const payload: NotificationPayload = {
+        title: 'Halfway There!',
+        body: message,
+        data: {
+          type: 'goal_progress',
+          milestone: '50',
+          progress: progressPercent.toString()
+        }
+      };
+
+      const success = await notificationService.sendNotificationToUser(userId, payload);
+      
+      if (success) {
+        // Update document to mark 50% notification as sent
+        await event.data?.after?.ref.update({
+          notified50: true
+        });
+      }
+      
+      logger.info('50% goal progress notification sent', {
+        correlationId,
+        userId,
+        progressPercent,
+        success
+      });
+    }
+
+    // Check for 100% milestone
+    if (progress >= 1.0 && !notified100) {
+      const message = await remoteConfig.getNotificationMessage(
+        'notification_goal_100pct_msg',
+        DEFAULT_NOTIFICATION_CONFIG.notification_goal_100pct_msg
+      );
+
+      const payload: NotificationPayload = {
+        title: 'Goal Achieved! 🏆',
+        body: message,
+        data: {
+          type: 'goal_progress',
+          milestone: '100',
+          progress: progressPercent.toString()
+        }
+      };
+
+      const success = await notificationService.sendNotificationToUser(userId, payload);
+      
+      if (success) {
+        // Update document to mark 100% notification as sent
+        await event.data?.after?.ref.update({
+          notified100: true
+        });
+      }
+      
+      logger.info('100% goal progress notification sent', {
+        correlationId,
+        userId,
+        progressPercent,
+        success
+      });
+    }
+
+  } catch (error) {
+    logger.error('Error sending goal progress notification', {
+      correlationId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+// =============================================================================
+// NOTIFICATION SYSTEM - PHASE 4: Scheduled Notifications
+// =============================================================================
+
+/**
+ * Scheduled notification: Lunch reminder
+ * Schedule: Daily at 12:00 UTC (13:00 Algeria Time)
+ * Uses Remote Config for timing and message content
+ */
+export const notifyLunchReminder = onSchedule({
+  region: 'europe-west1',
+  schedule: '0 12 * * *', // Daily at 12:00 UTC
+  timeZone: 'UTC'
+}, async () => {
+  const correlationId = `lunch_reminder_${Date.now()}`;
+  
+  try {
+    logger.info('Starting lunch reminder notification job', { correlationId });
+
+    const remoteConfig = getRemoteConfigService();
+    
+    // Get lunch time from Remote Config
+    const lunchTime = await remoteConfig.getNotificationTime(
+      'notification_lunch_time',
+      DEFAULT_NOTIFICATION_CONFIG.notification_lunch_time
+    );
+
+    // Check if current time matches lunch time (within tolerance)
+    if (!remoteConfig.isCurrentTimeMatch(lunchTime, 5)) {
+      logger.info('Current time does not match lunch time, skipping', {
+        correlationId,
+        lunchTime
+      });
+      return;
+    }
+
+    // Get lunch message from Remote Config
+    const message = await remoteConfig.getNotificationMessage(
+      'notification_lunch_msg',
+      DEFAULT_NOTIFICATION_CONFIG.notification_lunch_msg
+    );
+
+    // Get all users who haven't logged a meal since 11:00 AM Algeria time
+    const elevenAM = new Date();
+    elevenAM.setUTCHours(10, 0, 0, 0); // 11:00 Algeria time = 10:00 UTC
+    
+    const usersQuery = await db.collection('users')
+      .where('lastMealLog', '<', elevenAM)
+      .limit(1000) // Process in batches
+      .get();
+
+    if (usersQuery.empty) {
+      logger.info('No users found for lunch reminder', { correlationId });
+      return;
+    }
+
+    const userIds = usersQuery.docs.map(doc => doc.id);
+    
+    // Send notification to all eligible users
+    const notificationService = getNotificationService();
+    const payload: NotificationPayload = {
+      title: 'Lunch Time! 🍽️',
+      body: message,
+      data: {
+        type: 'meal_reminder',
+        mealType: 'lunch'
+      }
+    };
+
+    const successCount = await notificationService.sendNotificationToUsers(userIds, payload);
+    
+    logger.info('Lunch reminder notifications completed', {
+      correlationId,
+      totalUsers: userIds.length,
+      successCount
+    });
+
+  } catch (error) {
+    logger.error('Error in lunch reminder notification job', {
+      correlationId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+/**
+ * Scheduled notification: Evening check-in 
+ * Schedule: Daily at 20:30 UTC (21:30 Algeria Time)
+ * Handles dinner reminder and goal check only
+ */
+export const notifyEveningCheckin = onSchedule({
+  region: 'europe-west1',
+  schedule: '30 20 * * *', // Daily at 20:30 UTC
+  timeZone: 'UTC'
+}, async () => {
+  const correlationId = `evening_checkin_${Date.now()}`;
+  
+  try {
+    logger.info('Starting evening check-in notification job', { correlationId });
+
+    const remoteConfig = getRemoteConfigService();
+    const notificationService = getNotificationService();
+    
+    // Get dinner time from Remote Config
+    const dinnerTime = await remoteConfig.getNotificationTime(
+      'notification_dinner_time',
+      DEFAULT_NOTIFICATION_CONFIG.notification_dinner_time
+    );
+
+    // Check if current time matches dinner time (within tolerance)
+    if (!remoteConfig.isCurrentTimeMatch(dinnerTime, 5)) {
+      logger.info('Current time does not match dinner time, skipping', {
+        correlationId,
+        dinnerTime
+      });
+      return;
+    }
+
+    // Get all users for evening notifications
+    const usersQuery = await db.collection('users')
+      .limit(1000) // Process in batches
+      .get();
+
+    if (usersQuery.empty) {
+      logger.info('No users found for evening check-in', { correlationId });
+      return;
+    }
+
+    let dinnerReminderCount = 0;
+    let goalCheckCount = 0;
+
+    // Process each user
+    for (const userDoc of usersQuery.docs) {
+      const userId = userDoc.id;
+      const userData = userDoc.data();
+      
+      try {
+        // 1. Dinner Reminder (if not logged after 19:00)
+        const sevenPM = new Date();
+        sevenPM.setUTCHours(18, 0, 0, 0); // 19:00 Algeria time = 18:00 UTC
+        
+        if (!userData.lastDinnerLog || userData.lastDinnerLog < sevenPM) {
+          const dinnerMessage = await remoteConfig.getNotificationMessage(
+            'notification_dinner_msg',
+            DEFAULT_NOTIFICATION_CONFIG.notification_dinner_msg
+          );
+
+          const dinnerPayload: NotificationPayload = {
+            title: 'Dinner Time! 🌙',
+            body: dinnerMessage,
+            data: {
+              type: 'meal_reminder',
+              mealType: 'dinner'
+            }
+          };
+
+          const dinnerSuccess = await notificationService.sendNotificationToUser(userId, dinnerPayload);
+          if (dinnerSuccess) dinnerReminderCount++;
+        }
+
+        // 2. End-of-Day Goal Check
+        const today = new Date().toISOString().split('T')[0];
+        const calorieHistoryDoc = await db
+          .collection('calorie_history')
+          .doc(`${userId}_${today}`)
+          .get();
+
+        if (calorieHistoryDoc.exists) {
+          const historyData = calorieHistoryDoc.data();
+          const totalCalories = historyData?.totalCalories || 0;
+          const targetCalories = historyData?.targetCalories || 2000;
+          const progress = totalCalories / targetCalories;
+
+          if (progress < 0.9) { // Less than 90% of goal
+            const goalMessage = await remoteConfig.getNotificationMessage(
+              'notification_end_of_day_msg',
+              DEFAULT_NOTIFICATION_CONFIG.notification_end_of_day_msg
+            );
+
+            const goalPayload: NotificationPayload = {
+              title: 'Almost There! 🎯',
+              body: goalMessage,
+              data: {
+                type: 'goal_check',
+                progress: Math.round(progress * 100).toString()
+              }
+            };
+
+            const goalSuccess = await notificationService.sendNotificationToUser(userId, goalPayload);
+            if (goalSuccess) goalCheckCount++;
+          }
+        }
+
+        // Small delay to avoid overwhelming the system
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+      } catch (userError) {
+        logger.warn('Error processing evening notifications for user', {
+          correlationId,
+          userId,
+          error: userError instanceof Error ? userError.message : String(userError)
+        });
+      }
+    }
+
+    logger.info('Evening check-in notifications completed', {
+      correlationId,
+      totalUsers: usersQuery.docs.length,
+      dinnerReminderCount,
+      goalCheckCount
+    });
+
+  } catch (error) {
+    logger.error('Error in evening check-in notification job', {
+      correlationId,
+      error: error instanceof Error ? error.message : String(error)
+    });
   }
 });

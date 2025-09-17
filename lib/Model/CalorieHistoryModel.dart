@@ -25,7 +25,6 @@ class CalorieHistoryModel {
     this.title,
   });
 
-  // Convert a History object into a Map object
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -42,7 +41,6 @@ class CalorieHistoryModel {
     };
   }
 
-  // Extract a History object from a Map object
   factory CalorieHistoryModel.fromMap(Map<String, dynamic> map) {
     return CalorieHistoryModel(
       id: map['id'],

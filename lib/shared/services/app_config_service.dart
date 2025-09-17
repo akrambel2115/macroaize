@@ -14,7 +14,7 @@ class AppConfigService extends GetxService {
 
   bool get isLoaded => _loaded.value;
 
-  // Getters with safe defaults
+  String get appName => (_config['app']?['name'] as String?) ?? 'macroAize';
   String get aiModel => (_config['aiModel'] as String?) ?? 'google/gemini-2.5-flash-image-preview:free';
   int get freeScanLimit => (_config['limits']?['scan'] as num?)?.toInt() ?? 2;
   int get freeChatLimit => (_config['limits']?['chat'] as num?)?.toInt() ?? 5;
@@ -23,7 +23,7 @@ class AppConfigService extends GetxService {
   String get privacyLink => (_config['links']?['privacy'] as String?) ?? '';
   String get shareUrlAndroid => (_config['links']?['shareAndroid'] as String?) ?? '';
   String get shareUrlIos => (_config['links']?['shareIos'] as String?) ?? '';
-  // Back-compat and explicit names
+
   String get playStoreUrl => (_config['links']?['playStoreUrl'] as String?) ?? shareUrlAndroid;
   String get appStoreUrl => (_config['links']?['appStoreUrl'] as String?) ?? shareUrlIos;
 
@@ -38,12 +38,13 @@ class AppConfigService extends GetxService {
         'yearly': (_config['iap']?['ios']?['yearly'] as String?) ?? '',
       };
 
-  // App update enforcement
+  int get premiumMonthlyPriceDzd => (_config['pricing']?['monthlyDzd'] as num?)?.toInt() ?? 450;
+  int get premiumYearlyPriceDzd => (_config['pricing']?['yearlyDzd'] as num?)?.toInt() ?? 4500;
+
   String get minRequiredAppVersion => (_config['app']?['minRequiredVersion'] as String?) ?? '1.0.0';
   String get updateMessage => (_config['app']?['updateMessage'] as String?) ?? 'A new version is required to continue using MacroAize.';
 
   Future<AppConfigService> load() async {
-    // 1) Try cache first for fast start
     try {
       final prefs = await SharedPreferences.getInstance();
       final cached = prefs.getString(_cacheKey);
@@ -52,12 +53,9 @@ class AppConfigService extends GetxService {
         _config = map['config'] as Map<String, dynamic>? ?? {};
         _loaded.value = true;
       }
-    } catch (_) {
-      // ignore cache errors
-    }
+    } catch (_) {}
 
-    // 2) Refresh from server in background
-  unawaited(_refreshFromServer());
+    unawaited(_refreshFromServer());
     return this;
   }
 
@@ -77,17 +75,11 @@ class AppConfigService extends GetxService {
       _config = config;
       _loaded.value = true;
 
-  // Cache
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_cacheKey, jsonEncode({'config': _config, 'updatedAt': updatedAt}));
         await prefs.setInt(_cacheTsKey, updatedAt);
-      } catch (_) {
-        // ignore cache failures
-      }
-    } catch (_) {
-      // If not loaded yet, keep defaults
-  // no-op
-    }
+      } catch (_) {}
+    } catch (_) {}
   }
 }

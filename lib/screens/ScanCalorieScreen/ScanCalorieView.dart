@@ -18,8 +18,7 @@ import 'package:foodcalorietracker/widgets/UsdaBadge.dart';
 class ScanCalorieView extends GetView<ScanCalorieController> {
   const ScanCalorieView({super.key});
 
-  // Inner horizontal gutter used by small row controls to keep symmetry with
-  // page padding. Change here to tune spacing app-wide for quantity selector.
+  // Page padding symmetry for quantity selector
   static const double _kQuantityInnerGutter = 12.0;
 
   @override
@@ -108,8 +107,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Food image with glass morphism effect (Lottie overlay is embedded so it
-            // always matches the image size responsively)
+            // Food image with glass morphism effect and Lottie overlay
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
@@ -140,7 +138,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                         ),
                       ),
 
-                      // Lottie overlay (fills same area)
+                      // Lottie overlay
                       Positioned.fill(
                         child: ColorFiltered(
                           // Use srcIn to force the animation to take the tint color
@@ -186,6 +184,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
+        // Stack image + animation so the animation always fills this box
                     children: [
                       const ModernLoadingIndicator(
                         size: 16,
@@ -219,13 +218,16 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
       child: Column(
         children: [
           // Hero image section
+        // Hero image section
           _buildHeroImageSection(context, controller),
 
           // Main content
+                // Main content
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
+                // Meal info card
                 // Meal info card
                 if (controller.calorie != 0)
                   _buildMealInfoCard(context, controller),
@@ -233,9 +235,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 const SizedBox(height: 16),
 
                 // Meal Breakdown (if available)
+                // Meal Breakdown (if available)
                 if (controller.hasBreakdown)
                   _buildMealBreakdown(context, controller),
 
+                // Quantity selector (fallback for single item mode)
                 // Quantity selector (fallback for single item mode)
                 if (!controller.hasBreakdown && controller.calorie != 0)
                   _buildQuantitySelector(context, controller),
@@ -243,6 +247,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 const SizedBox(height: 20),
 
                 // Capsule macro grid (animated) — uses totals either from items or single
+                // Capsule macro grid (animated)
                 if (controller.calorie != 0)
                   CapsuleMacroGrid(
                     calories: controller.calorieQuantity,
@@ -254,9 +259,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 const SizedBox(height: 20),
 
                 // AI Chat button
+                // AI Chat button
                 if (controller.calorie != 0)
                   _buildAIChatButton(context, controller),
 
+                // No data state
                 // No data state
                 if (controller.calorie == 0) _buildNoDataState(context),
               ],
@@ -312,6 +319,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               ),
             ),
             // USDA Badge - Top Left
+            // USDA Badge - Top Left
             if (controller.calorie != 0)
               Positioned(
                 top: 16,
@@ -325,6 +333,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                   ),
                 ),
               ),
+            // Content overlay
             // Content overlay
             if (controller.calorie != 0)
               Positioned(
@@ -750,12 +759,14 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                           ),
                         ],
                       ),
+        // Header display with meal kcal and name
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Item header with name and badge
                           Row(
                             children: [
+                              // Enhanced header with spacing and visual hierarchy
                               Container(
                                 width: 4,
                                 height: 24,
@@ -781,6 +792,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                 ),
                               ),
                               const SizedBox(width: 8),
+                              // Enhanced scrollable item list
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -1090,7 +1102,8 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               ),
             ),
             const SizedBox(height: 16),
-            // totals are shown in the capsule macro grid above; removed duplicate totals box
+            const SizedBox(height: 16),
+            // totals shown in capsule macro grid above
           ],
         ),
       ),
@@ -1099,9 +1112,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
 
   // Approximate height for N items (each row ~90 px + padding)
   double itemsHeight(int count) {
-    final per = 100.0; // rough per-item height
-    return count * per + 20.0; // extra padding
+    final per = 100.0;
+    return count * per + 20.0;
   }
-
-  // _buildTotalMacro removed — totals are displayed by the capsule macro grid above.
 }

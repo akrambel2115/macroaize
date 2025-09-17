@@ -46,10 +46,9 @@ class HomeController extends GetxController{
         date.year == today.year
       );
       if (todayIndex != -1) {
-        // Each item is 70px + 12px margin except last
         double itemWidth = 70.0 + 12.0;
         double screenWidth = Get.context?.size?.width ?? 360;
-        double visibleWidth = screenWidth - 40; // 20px padding each side
+        double visibleWidth = screenWidth - 40;
         double offset = (todayIndex * itemWidth) - (visibleWidth - itemWidth) / 2;
         offset = offset.clamp(0.0, scrollController.position.maxScrollExtent);
         scrollController.jumpTo(offset);
@@ -100,7 +99,7 @@ class HomeController extends GetxController{
 
   List<DateTime> getPreviousDays() {
     return List.generate(daysAgo, (index) {
-      return today.subtract(Duration(days: daysAgo - index - 1)); // Adjusted index calculation
+      return today.subtract(Duration(days: daysAgo - index - 1)); 
     });
   }
   void scrollToEnd() {

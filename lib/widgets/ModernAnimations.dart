@@ -101,7 +101,7 @@ class _ModernLoadingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    // Background circle
+  // Background circle
     final backgroundPaint = Paint()
       ..color = color.withOpacity(0.1)
       ..strokeWidth = strokeWidth
@@ -110,7 +110,7 @@ class _ModernLoadingPainter extends CustomPainter {
 
     canvas.drawCircle(center, radius, backgroundPaint);
 
-    // Progress arc
+  // Progress arc
     final progressPaint = Paint()
       ..color = color
       ..strokeWidth = strokeWidth
@@ -198,11 +198,9 @@ class _ModernShimmerLoadingState extends State<ModernShimmerLoading>
       return widget.child;
     }
 
-    final isDark = context.theme.brightness == Brightness.dark;
-    final baseColor = widget.baseColor ?? 
-        (isDark ? AppColor.darkCard : AppColor.neutralGrey200);
-    final highlightColor = widget.highlightColor ?? 
-        (isDark ? AppColor.darkBorder : AppColor.neutralGrey100);
+  final isDark = context.theme.brightness == Brightness.dark;
+  final baseColor = widget.baseColor ?? (isDark ? AppColor.darkCard : AppColor.neutralGrey200);
+  final highlightColor = widget.highlightColor ?? (isDark ? AppColor.darkBorder : AppColor.neutralGrey100);
 
     return AnimatedBuilder(
       animation: _animation,

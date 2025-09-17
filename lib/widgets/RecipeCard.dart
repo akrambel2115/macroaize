@@ -35,12 +35,12 @@ class RecipeCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Recipe Image with overlayed badges
+          
               Expanded(
                 flex: 3,
                 child: _buildImageSection(),
               ),
-              // Recipe Info
+              
               Expanded(
                 flex: 2,
                 child: _buildInfoSection(context),
@@ -74,7 +74,7 @@ class RecipeCard extends StatelessWidget {
                 : _buildPlaceholderImage(),
           ),
         ),
-        // Duration Badge
+        
         Positioned(
           bottom: 8,
           left: 8,
@@ -85,7 +85,7 @@ class RecipeCard extends StatelessWidget {
             textColor: Colors.white,
           ),
         ),
-        // Calories Badge
+        
         Positioned(
           bottom: 8,
           right: 8,
@@ -114,7 +114,7 @@ class RecipeCard extends StatelessWidget {
           cacheHeight: targetH,
           filterQuality: FilterQuality.low,
           gaplessPlayback: true,
-          // Avoid spinners for every tile to reduce jank; rely on grey bg
+          
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return const SizedBox.expand();
@@ -180,7 +180,7 @@ class RecipeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Recipe Title
+          
           Text(
             recipe.title,
             maxLines: 2,
@@ -191,7 +191,7 @@ class RecipeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          // Tags or difficulty
+          
           _buildTags(context),
         ],
       ),
@@ -199,7 +199,7 @@ class RecipeCard extends StatelessWidget {
   }
 
   Widget _buildTags(BuildContext context) {
-    // Removed tag chips per request — always show difficulty with semantic color.
+    
     final color = _difficultyColor(recipe.difficulty);
     return Text(
       recipe.difficulty,
@@ -213,9 +213,9 @@ class RecipeCard extends StatelessWidget {
 
   Color _difficultyColor(String difficulty) {
     final d = difficulty.toLowerCase().trim();
-    if (d.contains('easy')) return AppColor.success; // green
-    if (d.contains('medium') || d.contains('med')) return AppColor.warning; // orange
-    if (d.contains('hard') || d.contains('difficult')) return AppColor.error; // red
+    if (d.contains('easy')) return AppColor.success;
+    if (d.contains('medium') || d.contains('med')) return AppColor.warning;
+    if (d.contains('hard') || d.contains('difficult')) return AppColor.error;
     // fallback: neutral text color
     return AppColor.neutralGrey600;
   }

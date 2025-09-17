@@ -3,11 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
 
-/// Interactive multi-color donut chart for Protein / Carbs / Fats breakdown and progress.
-/// - Segments sized by target grams share of total daily macros.
-/// - Animated sweep for progress.
-/// - Tap/Hover to highlight and show details.
-/// - Center shows remaining grams or title/celebration.
 class MacroDonutChart extends StatefulWidget {
   const MacroDonutChart({
     super.key,
@@ -33,7 +28,6 @@ class MacroDonutChart extends StatefulWidget {
 }
 
 class _MacroDonutChartState extends State<MacroDonutChart> {
-  // 0: Protein, 1: Carbs, 2: Fats, -1: none
   int _hoveredIndex = -1;
   int _selectedIndex = -1;
 
@@ -66,10 +60,9 @@ class _MacroDonutChartState extends State<MacroDonutChart> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxW = constraints.maxWidth;
-        // Keep chart roughly square; limit height sensibly
-  final chartSize = math.min(maxW, 260.0);
-  final stroke = math.max(12.0, chartSize * 0.14); // Responsive thickness
-  final gapRadians = 6 * math.pi / 180; // 6 degrees gaps
+        final chartSize = math.min(maxW, 260.0);
+        final stroke = math.max(12.0, chartSize * 0.14);
+        final gapRadians = 6 * math.pi / 180;
 
         // Details card below center
         Widget details() {
@@ -233,7 +226,7 @@ class _MacroDonutChartState extends State<MacroDonutChart> {
     double a = angle + math.pi / 2;
     if (a < 0) a += 2 * math.pi;
 
-    final totalAngle = 2 * math.pi;
+  final totalAngle = 2 * math.pi;
     // Build segments
     double start = 0;
     for (int i = 0; i < 3; i++) {

@@ -20,15 +20,14 @@ import '../../Model/MealBreakdownItem.dart';
 class ScanCalorieController extends GetxController {
   Map<String, dynamic> argument = Get.arguments;
   late File image;
-  // Minimum and maximum quantity constants for easy future tuning
   static const int kMinQuantity = 1;
-  static const int kMaxQuantity = 100; // safe default upper bound
+  static const int kMaxQuantity = 100;
 
   int quantity = kMinQuantity;
   String response = "";
   String type = "";
   String mealName = "";
-  String mealNameEnglish = ""; // For USDA API search
+  String mealNameEnglish = "";
   bool isLoading = true;
   int calorie = 0;
   int calorieQuantity = 0;
@@ -39,12 +38,11 @@ class ScanCalorieController extends GetxController {
   int fats = 0;
   int fatsQuantity = 0;
   final dbHelper = DatabaseHelper();
-  int? usdaFdcId; // store for history
+  int? usdaFdcId;
   bool usdaVerified = false;
   final _usda = UsdaApiService();
   List<UsdaFood> usdaOptions = const [];
 
-  // Meal breakdown list (reactive pattern simulated via GetBuilder updates)
   final List<MealBreakdownItem> items = [];
 
   bool get hasBreakdown => items.isNotEmpty;
@@ -76,13 +74,10 @@ class ScanCalorieController extends GetxController {
     final currentLang = Get.locale?.languageCode.toLowerCase() ?? 'en';
 
     if (currentLang == 'ar') {
-      // Arabic: improved structure with proper conjunction usage
       return '$containsText $cal $calUnit، $protein $proteinUnit من البروتين، $carbs $carbsUnit من الكربوهيدرات، $andWord $fat $fatUnit من الدهون.';
     } else if (currentLang == 'fr') {
-      // French: improved structure with proper conjunction usage
       return '$containsText $cal $calUnit, $protein $proteinUnit de protéines, $carbs $carbsUnit de glucides $andWord $fat $fatUnit de lipides.';
     } else {
-      // English: improved structure with proper conjunction usage
       return '$containsText $cal $calUnit, $protein $proteinUnit protein, $carbs $carbsUnit carbs $andWord $fat $fatUnit fat.';
     }
   }
@@ -97,7 +92,6 @@ class ScanCalorieController extends GetxController {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return type.tr;
 
-    // First, try direct translation lookup
     final normalized = trimmed
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
@@ -105,29 +99,23 @@ class ScanCalorieController extends GetxController {
         .replaceAll(RegExp(r'^_|_$'), '');
 
     final candidateKeys = <String>[
-      'foods.$normalized', // preferred namespace for food items
-      normalized, // direct key
-      trimmed, // as-is key
+      'foods.$normalized',
+      normalized,
+      trimmed,
     ];
 
     for (final key in candidateKeys) {
       final translated = key.tr;
-      if (translated != key) return translated; // found a translation
+      if (translated != key) return translated;
     }
 
-    // If no direct translation, attempt AI-powered translation
     return _translateMealName(trimmed);
   }
 
   String _translateMealName(String originalName) {
     final currentLang = Get.locale?.languageCode.toLowerCase() ?? 'en';
 
-    // If already in English or no translation needed, return as-is
     if (currentLang == 'en') return originalName;
-
-    // For Arabic and French, provide context-aware translations
-    // This would ideally be powered by AI, but for now we'll use pattern matching
-    // and common food name translations
 
     if (currentLang == 'ar') {
       return _translateToArabic(originalName);
@@ -135,13 +123,12 @@ class ScanCalorieController extends GetxController {
       return _translateToFrench(originalName);
     }
 
-    return originalName; // fallback to original
+    return originalName;
   }
 
   String _translateToArabic(String name) {
     final lowerName = name.toLowerCase();
 
-    // Common food translations to Arabic
     final arabicTranslations = {
       'chicken': 'دجاج',
       'rice': 'أرز',
@@ -171,12 +158,10 @@ class ScanCalorieController extends GetxController {
       'baked': 'مخبوز',
     };
 
-    // Try exact matches first
     if (arabicTranslations.containsKey(lowerName)) {
       return arabicTranslations[lowerName]!;
     }
 
-    // Try partial matches for compound food names
     for (final entry in arabicTranslations.entries) {
       if (lowerName.contains(entry.key)) {
         return name.replaceAll(
@@ -186,13 +171,12 @@ class ScanCalorieController extends GetxController {
       }
     }
 
-    return name; // fallback to original
+    return name;
   }
 
   String _translateToFrench(String name) {
     final lowerName = name.toLowerCase();
 
-    // Common food translations to French
     final frenchTranslations = {
       'chicken': 'poulet',
       'rice': 'riz',
@@ -222,12 +206,10 @@ class ScanCalorieController extends GetxController {
       'baked': 'cuit au four',
     };
 
-    // Try exact matches first
     if (frenchTranslations.containsKey(lowerName)) {
       return frenchTranslations[lowerName]!;
     }
 
-    // Try partial matches for compound food names
     for (final entry in frenchTranslations.entries) {
       if (lowerName.contains(entry.key)) {
         return name.replaceAll(
@@ -237,37 +219,31 @@ class ScanCalorieController extends GetxController {
       }
     }
 
-    return name; // fallback to original
+    return name;
   }
 
   @override
   Future<void> onInit() async {
-    // TODO: implement onInit
     super.onInit();
     image = argument['image'];
     type = argument['type'];
-    // First, attempt multi-item breakdown
     final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image);
     final parsedItems = _parseMealItems(itemsJsonStr);
     if (parsedItems.isNotEmpty) {
-      // Enrich each item with USDA per-100g and compute nutrients
       await _enrichItemsWithUsda(parsedItems);
       items
         ..clear()
         ..addAll(parsedItems);
 
-      // Use totals from items for overall macros
       calorie = totalKcalFromItems;
       protein = totalProteinFromItems;
       carbs = totalCarbsFromItems;
       fats = totalFatFromItems;
       _recalculateTotals();
-      // For header display, build a short composite meal name
       mealName = _buildCompositeName(parsedItems);
-      mealNameEnglish = mealName; // not needed for search when breakdown exists
+      mealNameEnglish = mealName;
       usdaVerified = items.every((it) => it.usdaVerified);
     } else {
-      // Fallback to single-item old flow
       await OpenAiCalling.sentImageApi(image).then((value) async {
         response = value;
         log('RAW_AI_RESPONSE => $response');
@@ -283,10 +259,6 @@ class ScanCalorieController extends GetxController {
         mealNameEnglish =
             (parsed['food_name_english'] as String?)?.trim() ?? '';
 
-        log('PARSED_NUTRITION => $nutrition');
-        log('AI_MEAL_NAME => $mealName');
-        log('AI_MEAL_NAME_ENGLISH => $mealNameEnglish');
-
         calorie = nutrition["calories"] ?? 0;
         calorieQuantity = calorie;
         protein = nutrition["protein"] ?? 0;
@@ -297,7 +269,6 @@ class ScanCalorieController extends GetxController {
         fatsQuantity = fats;
       });
 
-      // Try USDA enrichment if we have an English meal name
       try {
         String searchName =
             mealNameEnglish.trim().isNotEmpty
@@ -314,11 +285,10 @@ class ScanCalorieController extends GetxController {
               );
             }
             usdaOptions = results;
-            final UsdaFood picked = results.first; // always pick first
+            final UsdaFood picked = results.first;
             usdaFdcId = picked.fdcId;
             usdaVerified = true;
             log('USDA_VERIFIED => Using: ${picked.description}');
-            // Overwrite macros with USDA values (rounded)
             calorie = picked.calories.round();
             calorieQuantity = calorie * quantity;
             protein = picked.protein.round();
@@ -328,17 +298,14 @@ class ScanCalorieController extends GetxController {
             fats = picked.fats.round();
             fatsQuantity = fats * quantity;
           } else {
-            // No USDA data found - keep usdaVerified = false
             log('USDA_NO_RESULTS => No results found for: "$searchName"');
             usdaVerified = false;
           }
         } else {
-          // No meal name to search - keep usdaVerified = false
           log('USDA_NO_MEAL_NAME => No meal name to search');
           usdaVerified = false;
         }
       } catch (e) {
-        // Fallback to AI-estimated values
         log('USDA_ERROR => $e');
         usdaVerified = false;
         try {

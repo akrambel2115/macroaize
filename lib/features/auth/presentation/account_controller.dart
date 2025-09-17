@@ -10,10 +10,9 @@ class AccountController extends GetxController {
   final isLoading = false.obs;
   final errorText = ''.obs;
 
-  // Display name editing
   final displayNameController = TextEditingController();
 
-  // Change password fields
+  // password fields
   final currentPassword = TextEditingController();
   final newPassword = TextEditingController();
   final confirmPassword = TextEditingController();
@@ -34,12 +33,11 @@ class AccountController extends GetxController {
     } else {
       errorText.value = '';
       Get.back(result: true);
-      // Success notification is handled by caller
     }
   }
 
   Future<void> changePassword() async {
-    // Validate client-side
+  // client-side validation
     final cur = currentPassword.text;
     final nw = newPassword.text;
     final conf = confirmPassword.text;
@@ -71,7 +69,7 @@ class AccountController extends GetxController {
     if (isLoading.value) return;
     isLoading.value = true;
 
-    // Reauthenticate
+  // reauthenticate
     final reauthFail = await repo.reauthenticateWithPassword(cur);
     if (reauthFail != null) {
       isLoading.value = false;
@@ -79,7 +77,7 @@ class AccountController extends GetxController {
       return;
     }
 
-    // Update password
+  // update password
     final updateFail = await repo.updatePassword(nw);
     isLoading.value = false;
     if (updateFail != null) {
@@ -87,12 +85,12 @@ class AccountController extends GetxController {
       return;
     }
 
-    // Clear sensitive data
+  // clear sensitive data
     currentPassword.text = '';
     newPassword.text = '';
     confirmPassword.text = '';
 
-    // On success, sign out for security and require re-login (recommended)
+  // sign out after password change to require re-login
     await repo.signOut();
     Get.back(result: 'password_changed');
   }

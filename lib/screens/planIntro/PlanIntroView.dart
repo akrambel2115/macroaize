@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
-// ...existing imports...
 import 'package:foodcalorietracker/screens/planIntro/PlanIntroController.dart';
 import 'package:foodcalorietracker/widgets/AnimatedBackground.dart';
 import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 
+// Intro screen for the plan flow with animated visuals and continue CTA.
 class PlanIntroView extends GetView<PlanIntroController> {
   const PlanIntroView({super.key});
 
@@ -19,18 +19,13 @@ class PlanIntroView extends GetView<PlanIntroController> {
           backgroundColor: context.theme.scaffoldBackgroundColor,
           body: Stack(
             children: [
-              // Animated Background
               const AnimatedBackground(),
-              
-              // Main Content
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
                   child: Column(
                     children: [
                       const Spacer(flex: 1),
-                      
-                      // Diet Lottie Animation
                       AnimatedBuilder(
                         animation: controller.lottieAnimation,
                         builder: (context, child) {
@@ -54,10 +49,7 @@ class PlanIntroView extends GetView<PlanIntroController> {
                           );
                         },
                       ),
-                      
                       const SizedBox(height: 40),
-                      
-                      // Main Heading
                       AnimatedBuilder(
                         animation: controller.headingAnimation,
                         builder: (context, child) {
@@ -80,10 +72,7 @@ class PlanIntroView extends GetView<PlanIntroController> {
                           );
                         },
                       ),
-                      
                       const SizedBox(height: 24),
-                      
-                      // Subtitle
                       AnimatedBuilder(
                         animation: controller.subtitleAnimation,
                         builder: (context, child) {
@@ -106,10 +95,7 @@ class PlanIntroView extends GetView<PlanIntroController> {
                           );
                         },
                       ),
-                      
                       const Spacer(flex: 2),
-                      
-                      // Continue Button (shared PrimaryCTA)
                       AnimatedBuilder(
                         animation: controller.buttonAnimation,
                         builder: (context, child) {
@@ -128,7 +114,6 @@ class PlanIntroView extends GetView<PlanIntroController> {
                           );
                         },
                       ),
-                      
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -140,6 +125,4 @@ class PlanIntroView extends GetView<PlanIntroController> {
       },
     );
   }
-
-  // Continue button extracted to widgets/PrimaryCTA.dart
 }

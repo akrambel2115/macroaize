@@ -2,14 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 
-/// A reusable dialog that prompts the user to upgrade to Premium.
-///
-/// Parameters:
-/// - [title]: dialog title (shown in the title row).
-/// - [message]: the text shown above the badge.
-/// - [badge]: a widget displayed inside the orange badge area (customizable).
-/// - [onUpgrade]: optional callback when the user taps Upgrade/Go Premium.
-/// - [onCancel]: optional callback when the user taps Maybe Later.
 class PremiumRequiredDialog extends StatelessWidget {
   final String title;
   final String message;

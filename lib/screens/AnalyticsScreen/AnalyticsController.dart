@@ -1,5 +1,3 @@
-
-
 import 'package:foodcalorietracker/Model/SqlCalorieModel.dart';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
 import 'package:get/get.dart';
@@ -17,7 +15,6 @@ class AnalyticsController extends GetxController {
 
   @override
   Future<void> onInit() async {
-    // TODO: implement onInit
     super.onInit();
     calorieList = await dbHelper.getCalorieData();
     await getWeeklyData();
@@ -57,8 +54,7 @@ class AnalyticsController extends GetxController {
 
     for (var dayData in filteredData) {
       DateTime dataDate = DateFormat('dd-MM-yyyy').parse(dayData.date);
-      // Use weekday integer to pick a stable English key regardless of locale.
-      // DateTime.weekday: 1 = Monday, ..., 7 = Sunday
+  // Use weekday integer to pick a stable English key (1=Mon,7=Sun)
       const dowMap = {
         1: 'Mon',
         2: 'Tue',
@@ -153,14 +149,9 @@ class AnalyticsController extends GetxController {
       }
     }
 
-    // Clear existing yearly data
-    yourYearGoal = 0;
-
-    // Add new yearly data
+  // reset and add yearly data
     yearlyConsumption.forEach((month, amount) {
-      String monthName = DateFormat.MMMM().format(
-        DateTime(today.year, month),
-      ); // Convert month number to name (e.g., January)
+      String monthName = DateFormat.MMMM().format(DateTime(today.year, month));
       yearData.add(SalesData(monthName.substring(0,3), amount));
       yourYearGoal = yourYearGoal + amount;
     });

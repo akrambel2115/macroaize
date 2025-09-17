@@ -14,7 +14,6 @@ class DailyCalorieModel {
     required this.date,
   });
 
-  // Convert a Art object into a Map object
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -25,7 +24,6 @@ class DailyCalorieModel {
     };
   }
 
-  // Extract a Art object from a Map object
   factory DailyCalorieModel.fromMap(Map<String, dynamic> map) {
     return DailyCalorieModel(
       id: map['id'],

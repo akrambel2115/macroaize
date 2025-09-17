@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../features/auth/presentation/auth_theme.dart';
 
-/// Reusable password field with optional eye toggle and standard styling.
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
@@ -34,7 +33,6 @@ class _PasswordFieldState extends State<PasswordField> {
       controller: widget.controller,
       decoration: modernInput(
         widget.label,
-        // slightly smaller than bodySmall to be unobtrusive
         errorStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: theme.colorScheme.error),
       ).copyWith(
         suffixIcon: widget.showToggle

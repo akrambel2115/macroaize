@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:get/utils.dart';
 
-/// Reusable scanner overlay widget.
-/// Draws a darkened backdrop with a centered rounded scanning frame.
 class ScannerOverlay extends StatelessWidget {
   final double width;
   final double height;
@@ -22,14 +20,12 @@ class ScannerOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Soft dark backdrop
         Positioned.fill(
           child: Container(
             color: Colors.black.withOpacity(0.42),
           ),
         ),
 
-        // Center scanning frame — rounded and smooth (no square corner blocks)
         Center(
           child: Container(
             width: width,
@@ -53,7 +49,6 @@ class ScannerOverlay extends StatelessWidget {
               borderRadius: BorderRadius.circular(borderRadius),
               child: Stack(
                 children: [
-                  // subtle inner tint to indicate active area
                   Positioned.fill(
                     child: Container(
                       margin: const EdgeInsets.all(6),
@@ -68,17 +63,14 @@ class ScannerOverlay extends StatelessWidget {
                     ),
                   ),
 
-                  // Center icon / affordance
-                  const Center(
-                    child: SizedBox.shrink(),
-                  ),
+                  const Center(child: SizedBox.shrink()),
                 ],
               ),
             ),
           ),
         ),
 
-        // Instruction pill
+        
         Positioned(
           top: 100,
           left: 0,

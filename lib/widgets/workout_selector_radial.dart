@@ -34,12 +34,10 @@ class WorkoutSelectorRadial extends StatelessWidget {
       required String id,
       required List<Color> gradient,
     }) {
-      final isSelected = selectedId == id;
-      final hasSelection = selectedId.isNotEmpty;
-      final scale = isSelected ? 1.15 : (hasSelection ? 0.85 : 1.0);
-      // determine a simple numeric label for each id
-  // show workout ranges instead of simple numbers
-  final String indexLabel = id == '0-2' ? '0-1' : id == '3-5' ? '2-4' : '+5';
+    final isSelected = selectedId == id;
+    final hasSelection = selectedId.isNotEmpty;
+    final scale = isSelected ? 1.15 : (hasSelection ? 0.85 : 1.0);
+    final String indexLabel = id == '0-2' ? '0-1' : id == '3-5' ? '2-4' : '+5';
 
       return AnimatedAlign(
         alignment: pos(id),
@@ -119,7 +117,7 @@ class WorkoutSelectorRadial extends StatelessWidget {
                 id: '6+',
                 gradient: const [Colors.green, Colors.lightGreenAccent],
               ),
-              // label is rendered inside each circle so it moves with the circle
+              
             ],
           ),
         );

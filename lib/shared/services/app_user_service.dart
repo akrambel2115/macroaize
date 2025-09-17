@@ -6,7 +6,7 @@ import 'package:foodcalorietracker/shared/services/usage_service.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'dart:async';
 
-/// Unified model combining user authentication, subscription, and usage data
+/// User combined authentication, subscription, and usage data
 class AppUser {
   final User? firebaseUser;
   final Subscription? subscription;
@@ -14,19 +14,11 @@ class AppUser {
 
   const AppUser({this.firebaseUser, this.subscription, this.usage});
 
-  /// Check if user is authenticated
   bool get isAuthenticated => firebaseUser != null;
-
-  /// Check if user's email is verified
   bool get isEmailVerified => firebaseUser?.emailVerified == true;
-
-  /// Check if user has an active premium subscription
   bool get isPremium => subscription?.isActive == true;
-
-  /// Check if user is authenticated AND email verified (secure authentication state)
   bool get isSecurelyAuthenticated => isAuthenticated && isEmailVerified;
 
-  /// User's display name or email
   String get displayName {
     if (firebaseUser?.displayName?.isNotEmpty == true) {
       return firebaseUser!.displayName!;
@@ -37,22 +29,11 @@ class AppUser {
     return 'User';
   }
 
-  /// User's email
   String? get email => firebaseUser?.email;
-
-  /// User ID
   String? get uid => firebaseUser?.uid;
-
-  /// Remaining scans for free users
   int get remainingScans => isPremium ? -1 : (usage?.remainingScans ?? 2);
-
-  /// Remaining chats for free users
   int get remainingChats => isPremium ? -1 : (usage?.remainingChats ?? 5);
-
-  /// Check if scan limit is reached
   bool get scanLimitReached => !isPremium && (usage?.scanLimitReached == true);
-
-  /// Check if chat limit is reached
   bool get chatLimitReached => !isPremium && (usage?.chatLimitReached == true);
 
   AppUser copyWith({
@@ -68,26 +49,18 @@ class AppUser {
   }
 }
 
-/// Unified service for managing user authentication, subscription, and usage state
 class AppUserService {
   static final AppUserService _instance = AppUserService._internal();
   factory AppUserService() => _instance;
   AppUserService._internal();
 
-  // Delay creating Firebase-backed services until initialize() is called.
   SubscriptionService? _subscriptionService;
   UsageService? _usageService;
-
   Stream<AppUser>? _userStream;
 
-  // Safe getter: returns a simple empty AppUser stream if the service hasn't been
-  // initialized yet. This prevents runtime failures in tests or views that call
-  // Get.find<AppUserService>() before Firebase is available.
-  Stream<AppUser> get userStream =>
-      _userStream ?? Stream.value(const AppUser());
+  Stream<AppUser> get userStream => _userStream ?? Stream.value(const AppUser());
 
-  /// Initialize the service (call this in main or app startup). You can provide
-  /// optional mock services for testing.
+  /// Initialize the service; optional mocks for testing
   void initialize({
     SubscriptionService? subscriptionService,
     UsageService? usageService,
@@ -99,22 +72,12 @@ class AppUserService {
   }
 
   Stream<AppUser> _createUserStream({Stream? authStateStream}) {
-    final authStream =
-        authStateStream ?? FirebaseAuth.instance.authStateChanges();
+    final authStream = authStateStream ?? FirebaseAuth.instance.authStateChanges();
 
     return authStream.asyncMap((firebaseUser) async {
-      if (firebaseUser == null) {
-        return const AppUser();
-      }
+      if (firebaseUser == null) return const AppUser();
+      if (_subscriptionService == null || _usageService == null) return AppUser(firebaseUser: firebaseUser);
 
-      // If services are not initialized, return a partial AppUser to avoid
-      // crashing the app. initialize() should be called on app startup to
-      // enable full behavior.
-      if (_subscriptionService == null || _usageService == null) {
-        return AppUser(firebaseUser: firebaseUser);
-      }
-
-      // Wait for subscription and usage data to be available
       final subscription = await _subscriptionService!.subscriptionStream.first;
       final usage = await _usageService!.usageStream.first;
 
@@ -126,18 +89,10 @@ class AppUserService {
     });
   }
 
-  /// Get current user snapshot (for non-reactive usage)
   Future<AppUser> getCurrentUser() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser == null) {
-      return const AppUser();
-    }
-
-    // If services aren't initialized, return partial user data instead of
-    // trying to access Firebase-backed streams.
-    if (_subscriptionService == null || _usageService == null) {
-      return AppUser(firebaseUser: firebaseUser);
-    }
+    if (firebaseUser == null) return const AppUser();
+    if (_subscriptionService == null || _usageService == null) return AppUser(firebaseUser: firebaseUser);
 
     final subscription = await _subscriptionService!.subscriptionStream.first;
     final usage = await _usageService!.usageStream.first;
@@ -149,65 +104,40 @@ class AppUserService {
     );
   }
 
-  /// Convenience method to check if user is premium
   Future<bool> isPremiumUser() async {
     final user = await getCurrentUser();
     return user.isPremium;
   }
 
-  /// Non-reactive server-checked premium flag. Useful for gating where
-  /// streams may not have emitted yet. Returns `false` on errors (fail closed).
   Future<bool> isPremiumNow() async {
     try {
       if (_subscriptionService == null) return false;
       final sub = await _subscriptionService!.getSubscriptionOnce();
       return sub?.isActive == true;
     } catch (_) {
-      // Fail closed to avoid granting access on errors.
       return false;
     }
   }
 
-  /// Convenience method to check if user is authenticated
-  bool isAuthenticated() {
-    return FirebaseAuth.instance.currentUser != null;
-  }
-
-  /// Check if current user's email is verified
-  bool isEmailVerified() {
-    return FirebaseAuth.instance.currentUser?.emailVerified == true;
-  }
-
-  /// Check if user is securely authenticated (authenticated AND email verified)
+  bool isAuthenticated() => FirebaseAuth.instance.currentUser != null;
+  bool isEmailVerified() => FirebaseAuth.instance.currentUser?.emailVerified == true;
   bool isSecurelyAuthenticated() {
     final user = FirebaseAuth.instance.currentUser;
     return user != null && user.emailVerified;
   }
 
-  /// Check if user needs email verification (authenticated but not verified)
   bool needsEmailVerification() {
     final user = FirebaseAuth.instance.currentUser;
     return user != null && !user.emailVerified;
   }
 
-  /// ACCOUNT ACTIVATION GATING
-  /// Central method to check if user's account is activated (email verified)
-  /// and show appropriate warnings if not. Returns true if user can proceed.
-  ///
-  /// [feature] - The feature being accessed ('chat', 'scanner', 'premium')
-  /// [showWarning] - Whether to show a warning notification (default: true)
+  /// Check activation (email verified) and optionally show warnings
   bool checkAccountActivation(String feature, {bool showWarning = true}) {
     final user = FirebaseAuth.instance.currentUser;
-
-    // If user is not authenticated at all
     if (user == null) {
-      if (showWarning) {
-        NotificationService.showError('auth_required');
-      }
+      if (showWarning) NotificationService.showError('auth_required');
       return false;
     }
-
-    // If user is authenticated but email is not verified
     if (!user.emailVerified) {
       if (showWarning) {
         String messageKey;
@@ -228,13 +158,8 @@ class AppUserService {
       }
       return false;
     }
-
-    // Account is activated (email verified)
     return true;
   }
 
-  /// Quick check if account is activated without showing warnings
-  bool isAccountActivated() {
-    return checkAccountActivation('', showWarning: false);
-  }
+  bool isAccountActivated() => checkAccountActivation('', showWarning: false);
 }

@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MainController extends GetxController {
   String countryCode = "";
   String languageCode = "";
-  // translation key for the language (e.g. language_arabic)
+  // translation key for the language
   String languageKey = "";
   // localized display for UI
   String language = "";
@@ -15,7 +15,6 @@ class MainController extends GetxController {
   bool needsEmailVerification = false;
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     getData();
     getLanguageCode();
@@ -23,11 +22,8 @@ class MainController extends GetxController {
 
   getLanguageCode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Default to Arabic for first-time users
     languageCode = prefs.getString(SharePrefKey.languageCode) ?? "ar";
-    // stored language is the translation key (e.g. language_arabic)
-    final storedLangKey =
-        prefs.getString(SharePrefKey.language) ?? 'language_arabic';
+    final storedLangKey = prefs.getString(SharePrefKey.language) ?? 'language_arabic';
     languageKey = storedLangKey;
     language = storedLangKey.tr;
     countryCode = prefs.getString('countryCode') ?? "SA";
@@ -37,8 +33,6 @@ class MainController extends GetxController {
 
   getData() async {
     isLogin = await SharedPref.readBool(SharePrefKey.isLogin) ?? false;
-
-    // Gender migration: remove legacy third gender option
     final storedGender = await SharedPref.readString(SharePrefKey.gender);
     if (storedGender != null && storedGender.isNotEmpty) {
       final lower = storedGender.toLowerCase();

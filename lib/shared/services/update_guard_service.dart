@@ -7,9 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'app_config_service.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 
-/// UpdateGuardService
-/// - Compares installed app version with Remote Config's minRequiredVersion
-/// - If installed < required, shows a blocking dialog that deep-links to store
+/// Enforces minimum app version with a blocking update dialog
 class UpdateGuardService extends GetxService {
   Future<void> enforceMinimumVersion() async {
     try {
@@ -28,13 +26,12 @@ class UpdateGuardService extends GetxService {
         await _showBlockingDialog(message, storeUrl);
       }
     } catch (_) {
-      // Fail open: if we can't determine version, don't block the user
     }
   }
 
+  /// Compare versions ignoring pre-release/build labels
   bool _isOutdated(String current, String required) {
     List<int> parse(String v) {
-      // Keep only numeric components, ignore pre-release labels
       final core = v.split('+').first.split('-').first.trim();
       return core
           .split('.')
@@ -51,14 +48,13 @@ class UpdateGuardService extends GetxService {
     for (var i = 0; i < len; i++) {
       final cv = i < c.length ? c[i] : 0;
       final rv = i < r.length ? r[i] : 0;
-      if (cv < rv) return true;  // current < required -> outdated
-      if (cv > rv) return false; // current > required -> ok
+      if (cv < rv) return true;
+      if (cv > rv) return false;
     }
     return false; // equal
   }
 
   Future<void> _showBlockingDialog(String message, String storeUrl) async {
-    // Use custom dialog that respects theme
     await Get.dialog(
       WillPopScope(
         onWillPop: () async => false,

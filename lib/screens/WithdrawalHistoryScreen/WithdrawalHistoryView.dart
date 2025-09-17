@@ -147,7 +147,7 @@ class WithdrawalHistoryView extends GetView<WithdrawalHistoryController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with amount and status
+            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -192,8 +192,7 @@ class WithdrawalHistoryView extends GetView<WithdrawalHistoryController> {
             ),
 
             const SizedBox(height: 12),
-
-            // Details section
+            // Details
             _buildDetailRow(
               context,
               'request_id_short'.tr,
@@ -332,7 +331,7 @@ class WithdrawalHistoryView extends GetView<WithdrawalHistoryController> {
   }
 
   String _formatDate(DateTime date) {
-    // Return date in dd-MM-yyyy format with zero-padded day and month
+    // Format date as dd-MM-yyyy
     String two(int n) => n.toString().padLeft(2, '0');
     final d = two(date.day);
     final m = two(date.month);
@@ -341,7 +340,7 @@ class WithdrawalHistoryView extends GetView<WithdrawalHistoryController> {
   }
 
   String _formatDateString(String dateStr) {
-    // Try to parse ISO timestamp or simple date strings and format as dd-MM-yyyy
+    // Parse various date string formats and return dd-MM-yyyy
     try {
       final parsed = DateTime.tryParse(dateStr);
       if (parsed != null) return _formatDate(parsed.toLocal());
@@ -355,15 +354,15 @@ class WithdrawalHistoryView extends GetView<WithdrawalHistoryController> {
       final parts = dateStr.split('-');
       if (parts.length >= 3) return '${parts[2]}-${parts[1]}-${parts[0]}';
     } catch (_) {}
-    // If all else fails, return the original string (caller may display unknown_date instead)
+    // If parsing fails, return original string
     return dateStr;
   }
 
+  // ignore: unused_element
   String _maskRip(String rip) {
     if (rip.isEmpty) return '';
-    if (rip.length <= 4) return rip; // If it's already short, don't mask
-
-    // Show only the last 4 digits for security, mask the rest
+    if (rip.length <= 4) return rip;
+    // Mask all but last 4 digits
     final lastFour = rip.substring(rip.length - 4);
     final masked = '*' * (rip.length - 4);
     return '$masked$lastFour';

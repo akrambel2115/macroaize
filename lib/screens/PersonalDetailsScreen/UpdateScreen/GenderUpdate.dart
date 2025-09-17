@@ -77,9 +77,7 @@ class GenderUpdate extends GetView<PersonalDetailsController> {
               },
             ),
           ),
-          // Removed legacy 'Other' gender option (policy update Aug 2025).
           Spacer(),
-          // bottom Update button removed; use Save in AppBar
         ],
       ),
     );

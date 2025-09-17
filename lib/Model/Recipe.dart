@@ -2,17 +2,16 @@ class Recipe {
   final String id;
   final String title;
   final String imageUrl;
-  final int duration; // in minutes
+  final int duration;
   final int calories;
-  final int carbs; // grams
-  final int protein; // grams
-  final int fat; // grams
+  final int carbs;
+  final int protein;
+  final int fat;
   final String difficulty;
   final List<String> tags;
   final String description;
   final List<String> ingredients;
   final List<String> instructions;
-  // Optional localized fields per language code (e.g., 'en', 'ar', 'fr')
   final Map<String, String>? descriptionL10n;
   final Map<String, List<String>>? ingredientsL10n;
   final Map<String, List<String>>? instructionsL10n;
@@ -37,7 +36,7 @@ class Recipe {
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
-    // Build localized maps when provided (backwards compatible)
+    // build localized maps when provided
     Map<String, String>? descL10n;
     Map<String, List<String>>? ingL10n;
     Map<String, List<String>>? instrL10n;
@@ -124,8 +123,7 @@ class Recipe {
       },
     };
   }
-
-  // Convenience getters for localized content
+  // convenience getters for localized content
   String localizedDescription(String langCode) {
     return descriptionL10n != null && descriptionL10n![langCode]?.isNotEmpty == true
         ? descriptionL10n![langCode]!

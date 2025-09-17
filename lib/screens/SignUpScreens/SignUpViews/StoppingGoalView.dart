@@ -13,7 +13,6 @@ class StoppingGoalView extends GetView<SignUpController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Back button handled by the SignUp scaffold
         Text(
           "What's stopping you from reaching your goals?".tr,
           style: context.theme.textTheme.headlineLarge,
@@ -84,7 +83,6 @@ class StoppingGoalView extends GetView<SignUpController> {
         }),
 
         const SizedBox(height: 14),
-        // Lottie preview that expands to fill the remaining space
         GetBuilder<SignUpController>(builder: (c) {
           final items = <Map<String, dynamic>>[
             {"label": "Lack of consistency".tr, "asset": 'assets/lottie/inconsistence.json'},
@@ -113,7 +111,6 @@ class StoppingGoalView extends GetView<SignUpController> {
             );
         }),
 
-          // Removed Spacer() so Expanded Lottie area can occupy available space
         GetBuilder<SignUpController>(
           builder: (controller) {
             final enabled = controller.selectedStoppingGoal.isNotEmpty;

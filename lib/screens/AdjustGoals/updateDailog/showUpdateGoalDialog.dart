@@ -40,8 +40,8 @@ void showUpdateGoalDialog(
             ),
             disabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: Colors.grey.shade400,
-              ), // Disabled color
+                color: const Color.fromRGBO(189, 189, 189, 1),
+              ),
             ),
           ),
         ),

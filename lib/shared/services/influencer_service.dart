@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/influencer.dart';
 import 'dart:async';
 
+/// Influencer service
 class InfluencerService {
   InfluencerService({
     FirebaseFirestore? firestore,
@@ -15,7 +16,6 @@ class InfluencerService {
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
 
-  /// Real-time stream of the current user's influencer data.
   Stream<Influencer?> get influencerStream {
     return _authAwareInfluencerStream();
   }
@@ -38,7 +38,6 @@ class InfluencerService {
     }
   }
 
-  /// Check if current user is an influencer
   Future<bool> isInfluencer() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
@@ -52,7 +51,6 @@ class InfluencerService {
     }
   }
 
-  /// Get current user's influencer data once
   Future<Influencer?> getInfluencerOnce() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw StateError('Not authenticated');
@@ -66,7 +64,6 @@ class InfluencerService {
     return Influencer.fromFirestore(data);
   }
 
-  /// Validate a promo code
   Future<PromoCodeValidationResult> validatePromoCode(String promoCode) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw StateError('Not authenticated');
@@ -89,7 +86,6 @@ class InfluencerService {
     }
   }
 
-  /// Process a withdrawal request
   Future<WithdrawalResult> processWithdrawal(double amount, String rip) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw StateError('Not authenticated');
@@ -109,8 +105,6 @@ class InfluencerService {
     }
   }
 
-  /// Admin only: Get decrypted RIP for a withdrawal
-  /// Requires admin role in Firebase custom claims
   Future<AdminWithdrawalDetails> adminGetWithdrawalRip(
     String withdrawalId,
   ) async {
@@ -135,8 +129,6 @@ class InfluencerService {
     }
   }
 
-  /// Admin only: Mark withdrawal as completed or failed
-  /// Requires admin role in Firebase custom claims
   Future<AdminActionResult> adminCompleteWithdrawal(
     String withdrawalId,
     String status,
@@ -193,7 +185,7 @@ class WithdrawalResult {
 class AdminWithdrawalDetails {
   final bool success;
   final String withdrawalId;
-  final String rip; // Decrypted RIP - only for admin use
+  final String rip;
   final String userId;
   final double amount;
   final String status;

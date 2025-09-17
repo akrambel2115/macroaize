@@ -6,44 +6,36 @@ import 'package:foodcalorietracker/Model/Recipe.dart';
 import 'package:foodcalorietracker/screens/RecipesScreen/RecipeDetailScreen.dart';
 
 class RecipesController extends GetxController {
-  // Observable state - use RxList for better performance
   final RxBool _isLoading = false.obs;
   final RxBool _isLoadingPage = false.obs;
   final RxList<Recipe> _topRecipes = <Recipe>[].obs;
   final RxList<Recipe> _allRecipes = <Recipe>[].obs;
   final RxInt _currentPageIndex = 0.obs;
 
-  // Cached data to avoid re-computation
   List<Recipe>? _cachedTopRecipes;
   List<Recipe>? _cachedAllRecipes;
   DateTime? _lastLoadTime;
 
-  // Cache duration - 5 minutes
   static const Duration _cacheTimeout = Duration(minutes: 5);
-
-  // Pagination configuration
   static const int _recipesPerPage = 8;
 
-  // Getters
   bool get isLoading => _isLoading.value;
   bool get isLoadingPage => _isLoadingPage.value;
   List<Recipe> get topRecipes => _topRecipes;
   List<Recipe> get allRecipes => _allRecipes;
   int get currentPageIndex => _currentPageIndex.value;
   int get currentPageNumber => _currentPageIndex.value + 1;
-  int get totalPages => _cachedAllRecipes != null 
-    ? ((_cachedAllRecipes!.length - 1) ~/ _recipesPerPage) + 1 
-    : 0;
+  int get totalPages => _cachedAllRecipes != null
+      ? ((_cachedAllRecipes!.length - 1) ~/ _recipesPerPage) + 1
+      : 0;
   bool get hasPreviousPage => _currentPageIndex.value > 0;
   bool get hasNextPage => _currentPageIndex.value < totalPages - 1;
 
-  // Search state
   Timer? _debounce;
 
   @override
   void onInit() {
     super.onInit();
-    // Load recipes asynchronously to avoid blocking UI
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadRecipes();
     });
@@ -51,7 +43,6 @@ class RecipesController extends GetxController {
 
   @override
   void onClose() {
-    // Clean up resources
     _isLoading.close();
     _isLoadingPage.close();
     _topRecipes.close();
@@ -62,7 +53,6 @@ class RecipesController extends GetxController {
   }
 
   void filterRecipes(String query, {bool immediate = false}) {
-    // Debounce to avoid filtering on every keystroke
     _debounce?.cancel();
     if (immediate) {
       _applyFilter(query);
@@ -81,7 +71,6 @@ class RecipesController extends GetxController {
     if (_cachedAllRecipes == null) return;
     final q = query.trim().toLowerCase();
     if (q.isEmpty) {
-      // restore current page
       _loadCurrentPage();
     } else {
       final filtered = _cachedAllRecipes!.where((r) {
@@ -92,12 +81,10 @@ class RecipesController extends GetxController {
     try {
       update();
     } catch (_) {
-      // Controller may have been disposed, ignore
     }
   }
 
   Future<void> loadRecipes({bool forceRefresh = false}) async {
-    // Check cache validity
     if (!forceRefresh && _isCacheValid()) {
       _topRecipes.assignAll(_cachedTopRecipes!);
       _loadCurrentPage();
@@ -107,26 +94,22 @@ class RecipesController extends GetxController {
 
     try {
       _isLoading(true);
-      update(); // Notify UI of loading state
-      
-      // Simulate network delay - shorter for better UX
+      update();
+
       await Future.delayed(const Duration(milliseconds: 500));
-      
-      // Load and cache data
+
       await _loadAndCacheData();
 
-      // Initialize pagination state and load first page
       _currentPageIndex(0);
       _loadCurrentPage();
-      
+
     } catch (e, st) {
-      // Enhanced error handling with stack trace logging for debugging
       debugPrint('Error loading recipes: $e');
       debugPrint(st.toString());
       _handleLoadingError(e, st);
     } finally {
       _isLoading(false);
-      update(); // Notify GetBuilder widgets
+      update();
     }
   }
 
@@ -151,17 +134,16 @@ class RecipesController extends GetxController {
 
   Future<void> _changePage(int newPageIndex) async {
     if (_isLoadingPage.value) return;
-    
+
     try {
       _isLoadingPage(true);
       update();
-      
-      // Simulate small loading delay for UX
+
       await Future.delayed(const Duration(milliseconds: 200));
-      
+
       _currentPageIndex(newPageIndex);
       _loadCurrentPage();
-      
+
     } catch (e) {
       debugPrint('Error changing page: $e');
     } finally {
@@ -172,10 +154,10 @@ class RecipesController extends GetxController {
 
   void _loadCurrentPage() {
     if (_cachedAllRecipes == null) return;
-    
+
     final start = _currentPageIndex.value * _recipesPerPage;
     final end = (start + _recipesPerPage).clamp(0, _cachedAllRecipes!.length);
-    
+
     if (start < _cachedAllRecipes!.length) {
       final pageRecipes = _cachedAllRecipes!.sublist(start, end);
       _allRecipes.assignAll(pageRecipes);
@@ -185,11 +167,8 @@ class RecipesController extends GetxController {
   }
 
   void openRecipeDetails(Recipe recipe) {
-  // Navigate to full-screen recipe detail page
-  Get.to(() => RecipeDetailScreen(recipe: recipe));
+    Get.to(() => RecipeDetailScreen(recipe: recipe));
   }
-
-  // ...existing code...
 
   bool _isCacheValid() {
     return _cachedTopRecipes != null &&

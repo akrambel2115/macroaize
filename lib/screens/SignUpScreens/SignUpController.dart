@@ -66,7 +66,7 @@ class SignUpController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Default the stopping goal to 'Lack of consistency' so it's selected when user reaches the step
+    // Default stopping goal selection
     selectedStoppingGoal = 'Lack of consistency'.tr;
   }
 
@@ -115,10 +115,9 @@ class SignUpController extends GetxController {
       selectedView = 6;
       saveOnSql();
       Future.delayed(Duration(seconds: 3)).then((value) {
-        // Mark onboarding as completed
         SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
         Get.toNamed(Routes.leadingView);
-      },);
+      });
     }
     update();
   }
@@ -128,11 +127,9 @@ class SignUpController extends GetxController {
       selectedCm = ((selectedFeet * 30.48) + (selectedInches * 2.54)).toInt();
       selectedWeightKg = (selectedWeightLb * 0.453592).toInt();
     }
-    DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+  DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
     String formattedDate = "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
-    print(selectedCm);
-    print(selectedWeightKg);
-    print(selectedWGoal);
+  // Persist user selections
     SharedPref.saveString(SharePrefKey.gender, selectedGender);
     SharedPref.saveString(SharePrefKey.workOutDay, selectedWorkOut);
     SharedPref.saveInt(SharePrefKey.height, selectedCm);
@@ -156,9 +153,6 @@ class SignUpController extends GetxController {
 
     if (kDebugMode) {
       print("Daily Calories: ${macros["calories"]?.toStringAsFixed(2)} kcal");
-      print("Protein: ${macros["protein"]?.toStringAsFixed(2)} g");
-      print("Fat: ${macros["fat"]?.toStringAsFixed(2)} g");
-      print("Carbs: ${macros["carbs"]?.toStringAsFixed(2)} g");
     }
     SharedPref.saveInt(SharePrefKey.calorie, macros["calories"]);
     SharedPref.saveInt(SharePrefKey.protein, macros["protein"]);
@@ -210,10 +204,10 @@ class SignUpController extends GetxController {
     }
   }
 
-  // Get number of days in a given month & year
+  // Days in month helper
   int getDaysInMonth(int month, int year) {
     if (month == 1) {
-      // February (check leap year)
+      // February (leap year check)
       if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
         return 29;
       } else {

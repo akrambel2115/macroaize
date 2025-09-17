@@ -47,7 +47,7 @@ class EmailVerificationController extends GetxController {
 
   Future<void> _checkVerificationStatus() async {
     try {
-      // Reload user to get latest email verification status
+      // Reload user to refresh email verification state
       final failure = await authRepo.reloadUser();
       if (failure == null) {
         final isVerified = await authRepo.isEmailVerified();
@@ -57,7 +57,7 @@ class EmailVerificationController extends GetxController {
         }
       }
     } catch (e) {
-      // Silent fail - don't interrupt user experience
+      // Silent fail to avoid disrupting UX
       print('Verification check error: $e');
     }
   }
@@ -117,13 +117,13 @@ class EmailVerificationController extends GetxController {
     _resendCooldownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (nextResendTime.value.isBefore(DateTime.now())) {
         _resendCooldownTimer?.cancel();
-        update(); // Update UI
+        update();
       }
     });
   }
 
   void skipVerification() {
-    // Mark that user has explicitly skipped verification for this session
+    // Mark that user skipped verification for this session
     final guard = EmailVerificationGuard();
     guard.markVerificationSkipped();
 

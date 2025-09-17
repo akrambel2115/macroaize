@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class VoiceVisualizer extends StatefulWidget {
-  final double level; // expected 0.0 - ~1.0 (or speech package's native range)
+  final double level;
   final double width;
   final double height;
   final Color color;
@@ -24,14 +24,13 @@ class _VoiceVisualizerState extends State<VoiceVisualizer> with SingleTickerProv
   @override
   void didUpdateWidget(covariant VoiceVisualizer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Smooth the level change
     _displayLevel = widget.level;
   }
 
   @override
   Widget build(BuildContext context) {
-    final bars = 5;
-    final spacing = 2.0;
+  final bars = 5;
+  final spacing = 2.0;
     return SizedBox(
       width: widget.width,
       height: widget.height,

@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 
 class GoalAndWeightPicker extends StatelessWidget {
-  final String selectedGoal; // "Gain Weight" or "Lose Weight" or ''
+  final String selectedGoal;
   final ValueChanged<String> onSelectGoal;
   final int minKg;
   final int count;
@@ -87,10 +87,8 @@ class _SplitGoalCard extends StatelessWidget {
     final bool isLose = selectedGoal == 'Lose Weight';
     final bool hasSel = selectedGoal.isNotEmpty;
 
-    // Further reduce heights to avoid scrolling on most devices
-    final double topH = hasSel ? (isGain ? 120 : 60) : 80;
-    final double botH = hasSel ? (isLose ? 120 : 60) : 80;
-    // animations use individual curves per widget
+  final double topH = hasSel ? (isGain ? 120 : 60) : 80;
+  final double botH = hasSel ? (isLose ? 120 : 60) : 80;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -107,16 +105,13 @@ class _SplitGoalCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Diagonal divider
             IgnorePointer(
               child: Align(
                 alignment: Alignment.center,
                 child: Transform.rotate(
-                  angle: -0.785398, // -45 degrees
+                  angle: -0.785398,
                   child: Container(
                     width: 2,
-                    // make divider height exactly match the two tiles so the
-                    // Stack doesn't leave extra space under the lower tile
                     height: topH + botH,
                     color: Colors.white.withOpacity(
                       Theme.of(context).brightness == Brightness.light
@@ -214,7 +209,6 @@ class _HalfTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      // Prefer explicit assetIcon if provided (avoids matching localized labels)
                       if (assetIcon != null)
                         Image.asset(assetIcon!, width: 28, height: 28)
                       else

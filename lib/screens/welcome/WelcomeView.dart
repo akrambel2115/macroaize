@@ -18,10 +18,8 @@ class WelcomeView extends GetView<WelcomeController> {
           backgroundColor: context.theme.scaffoldBackgroundColor,
           body: Stack(
             children: [
-              // Animated Background
               const AnimatedBackground(),
               
-              // Main Content
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
@@ -52,7 +50,6 @@ class WelcomeView extends GetView<WelcomeController> {
                       
                       const SizedBox(height: 40),
                       
-                      // Main Heading
                       AnimatedBuilder(
                         animation: controller.textAnimation,
                         builder: (context, child) {
@@ -78,7 +75,6 @@ class WelcomeView extends GetView<WelcomeController> {
                       
                       const SizedBox(height: 24),
                       
-                      // Subtitle with highlight
                       AnimatedBuilder(
                         animation: controller.subtitleAnimation,
                         builder: (context, child) {
@@ -118,7 +114,6 @@ class WelcomeView extends GetView<WelcomeController> {
                       
                       const Spacer(flex: 2),
 
-                      // Continue CTA removed per request
                     ],
                   ),
                 ),

@@ -5,7 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:foodcalorietracker/screens/PremiumScreen/PremiumController.dart';
 import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 import 'package:get/get.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 
 class PremiumView extends GetView<PremiumController> {
   const PremiumView({super.key});
@@ -13,7 +13,6 @@ class PremiumView extends GetView<PremiumController> {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    // Increased header height multiplier so the "Go Premium" wrapper is taller
     final headerHeight = media.size.height * 0.55;
     final overlap = headerHeight * 0.18;
 
@@ -93,7 +92,7 @@ class PremiumView extends GetView<PremiumController> {
 
                           // Plans
                           GetBuilder<PremiumController>(
-                            id: 'plan_selection', // Add specific ID for this builder
+                            id: 'plan_selection',
                             builder: (c) {
                               final products = c.products;
 
@@ -118,29 +117,20 @@ class PremiumView extends GetView<PremiumController> {
 
                               // Graceful fallbacks if not found
                               if (yearlyIndex < 0 && products.isNotEmpty) {
-                                yearlyIndex = products.length - 1; // often last
+                                yearlyIndex = products.length - 1;
                               }
                               if (monthlyIndex < 0 && products.length > 1) {
-                                monthlyIndex = 0; // often first
+                                monthlyIndex = 0;
                               }
 
                               final hasData =
                                   products.isNotEmpty &&
                                   (monthlyIndex >= 0 || yearlyIndex >= 0);
 
-                              // Read prices from env with sensible defaults
-                              final monthlyRaw =
-                                  int.tryParse(
-                                    dotenv.env['PREMIUM_MONTHLY_PRICE_DZD'] ??
-                                        '',
-                                  ) ??
-                                  350;
-                              final yearlyRaw =
-                                  int.tryParse(
-                                    dotenv.env['PREMIUM_YEARLY_PRICE_DZD'] ??
-                                        '',
-                                  ) ??
-                                  3500;
+                // Read prices from AppConfigService
+                final cfg = Get.find<AppConfigService>();
+                final monthlyRaw = cfg.premiumMonthlyPriceDzd;
+                final yearlyRaw = cfg.premiumYearlyPriceDzd;
 
                               final originalYearlyRaw = monthlyRaw * 12;
                               final savePercent =
@@ -167,10 +157,10 @@ class PremiumView extends GetView<PremiumController> {
                                         return _PlanCard(
                                           title: 'months_12'.tr,
                                           subtitle: 'billed_annually'.tr,
-                                          originalPrice:
-                                              controller.isPromoValid
-                                                  ? basePrice // Show original price when promo applied
-                                                  : '${originalYearlyRaw.toString()} DZD',
+                      originalPrice:
+                          controller.isPromoValid
+                            ? basePrice
+                            : '${originalYearlyRaw.toString()} DZD',
                                           discountedPrice: discountedPrice,
                                           perMonthText: 'per_month'.tr,
                                           chipText: 'best_value'.tr,
@@ -220,8 +210,8 @@ class PremiumView extends GetView<PremiumController> {
                                         );
                                       },
                                     ),
-                                  ] else ...[
-                                    // Loading/placeholder cards - show 12-month as selected by default
+                                    ] else ...[
+                                    // Loading/placeholder cards
                                     _PlanCard(
                                       title: 'months_12'.tr,
                                       subtitle: 'billed_annually'.tr,
@@ -236,10 +226,7 @@ class PremiumView extends GetView<PremiumController> {
                                       }),
                                       monthlyBreakdownText:
                                           '≈ $perMonthFromYearly DZD',
-                                      // Show as selected in placeholder state (c.selected defaults to 0)
-                                      isSelected:
-                                          c.selected ==
-                                          0, // Assume yearly is at index 0 in placeholder
+                                      isSelected: c.selected == 0,
                                       highlighted: true,
                                       onTap: () {
                                         // Set to index 0 for yearly in placeholder
@@ -252,9 +239,7 @@ class PremiumView extends GetView<PremiumController> {
                                       subtitle: 'billed_monthly'.tr,
                                       priceText: '${monthlyRaw.toString()} DZD',
                                       perMonthText: 'per_month'.tr,
-                                      isSelected:
-                                          c.selected ==
-                                          1, // Assume monthly is at index 1 in placeholder
+                                      isSelected: c.selected == 1,
                                       highlighted: false,
                                       onTap: () {
                                         // Set to index 1 for monthly in placeholder
@@ -285,7 +270,7 @@ class PremiumView extends GetView<PremiumController> {
                                           ?.copyWith(color: Colors.white70),
                                     ),
                                     const SizedBox(height: 12),
-                                    // Removed Manage button
+                                    
                                   ],
                                 );
                               }
@@ -347,7 +332,7 @@ class PremiumView extends GetView<PremiumController> {
                   ],
                 ),
               ),
-              // Top-level close button positioned above the header/scroll content so taps are reliable
+              // Close button positioned above the header/scroll content
               Positioned(
                 top: 12,
                 right: 12,
@@ -384,7 +369,7 @@ class PremiumView extends GetView<PremiumController> {
   }
 }
 
-// Header with dark background, decorative circles and close button
+// Header with dark background and decorative icons
 class _PremiumHeader extends StatelessWidget {
   const _PremiumHeader({required this.height});
   final double height;
@@ -413,7 +398,7 @@ class _PremiumHeader extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Decorative images (replacing previous blur circles)
+          // Decorative images
           Positioned(
             top: 40,
             left: 14,
@@ -474,7 +459,7 @@ class _PremiumHeader extends StatelessWidget {
               ),
             ),
           ),
-          // Symmetric decorative icon to the chatbot on the bottom-right
+          // Symmetric decorative icon on bottom-right
           Positioned(
             bottom: 40,
             right: 20,
@@ -484,8 +469,6 @@ class _PremiumHeader extends StatelessWidget {
               child: _AnimatedDahabia(width: 180, height: 180, opacity: 0.55),
             ),
           ),
-
-          // Close button removed from header to keep it above scroll content in parent Stack.
 
           // Center content
           Align(
@@ -539,7 +522,7 @@ class _PremiumHeader extends StatelessWidget {
     );
   }
 
-  // ... decorative blur helper removed; images are used instead
+  // Decorative helpers removed
 }
 
 class _FeatureRow extends StatelessWidget {

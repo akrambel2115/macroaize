@@ -3,9 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 void showUpdateWeightDialog(BuildContext context, String initialValue, Function(String) onUpdate) {
-  // Use a wheel picker similar to the onboarding/selectors
   const int minWeight = 20; // kg
-  const int maxWeight = 150; // kg (capped to 150)
+  const int maxWeight = 150; // kg (cap)
 
   int initial = int.tryParse(initialValue) ?? minWeight;
   initial = initial.clamp(minWeight, maxWeight);
@@ -69,7 +68,7 @@ void showUpdateWeightDialog(BuildContext context, String initialValue, Function(
               ),
               TextButton(
                 onPressed: () {
-                  // selected already within range by construction
+                  // selected is within range
                   onUpdate(selected.toString());
                   Navigator.of(context).pop();
                 },

@@ -6,7 +6,7 @@ import 'package:foodcalorietracker/constant/AppColor.dart';
 class HeightWeightPicker extends StatelessWidget {
   final void Function(int cm)? onHeightCmChanged;
   final void Function(int feet, int inches)?
-  onHeightFeetInchesChanged; // kept for compatibility but not used
+  onHeightFeetInchesChanged;
   final void Function(int kg)? onWeightKgChanged;
 
   const HeightWeightPicker({
@@ -21,8 +21,7 @@ class HeightWeightPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 20),
-        // Two pickers row
+  const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [

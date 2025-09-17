@@ -3,7 +3,7 @@ import '../constant/AppColor.dart';
 import '../constant/FontFamily.dart';
 
 class AppTheme {
-  // Enhanced Dark Theme with Modern Orange Design
+  /// App theme definitions (light and dark)
   static final dark = ThemeData.dark().copyWith(
     scaffoldBackgroundColor: AppColor.darkBackground,
     primaryColor: AppColor.darkText,
@@ -55,10 +55,9 @@ class AppTheme {
       ),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     ),
-  // Note: global ink overlay handled via splashColor/highlightColor/hoverColor for compatibility
+  // global ink overlay handled via splashColor/highlightColor/hoverColor
   );
 
-  // Enhanced Light Theme with Modern Orange Design
   static final light = ThemeData.light().copyWith(
     scaffoldBackgroundColor: AppColor.neutralWhite,
     primaryColor: AppColor.neutralGrey900,
@@ -111,17 +110,16 @@ class AppTheme {
       ),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     ),
-  // Note: global ink overlay handled via splashColor/highlightColor/hoverColor for compatibility
+  // global ink overlay handled via splashColor/highlightColor/hoverColor
   );
 
-  // Enhanced Typography System with Arabic Support
+  /// Typography with Arabic font fallbacks
   static TextTheme _textTheme({bool isDark = false}) {
     final color = isDark ? AppColor.darkText : AppColor.neutralGrey900;
     final secondaryColor = isDark ? AppColor.darkTextSecondary : AppColor.neutralGrey600;
     final inverseColor = isDark ? AppColor.neutralGrey900 : AppColor.neutralWhite;
     
     return TextTheme(
-      // Display styles for major headings
       displayLarge: TextStyle(
         color: color,
         fontSize: 32,
@@ -149,7 +147,6 @@ class AppTheme {
         height: 1.3,
       ),
       
-      // Headline styles (updated for modern hierarchy)
       headlineLarge: TextStyle(
         color: color,
         fontSize: 22,
@@ -175,7 +172,6 @@ class AppTheme {
         height: 1.4,
       ),
       
-      // Title styles (enhanced)
       titleLarge: TextStyle(
         color: color,
         fontSize: 16,
@@ -201,7 +197,6 @@ class AppTheme {
         height: 1.4,
       ),
       
-      // Body styles (enhanced)
       bodyLarge: TextStyle(
         color: color,
         fontSize: 16,
@@ -226,7 +221,6 @@ class AppTheme {
         fontFamilyFallback: const [notoSansArabicSemiBold, notoSansArabic],
       ),
       
-      // Label styles (new)
       labelLarge: TextStyle(
         color: color,
         fontSize: 14,

@@ -6,8 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:crypto/crypto.dart';
+import 'package:get/get.dart';
 
 import '../../../shared/services/email_verification_guard.dart';
+import '../../../shared/services/firebase_messaging_service.dart';
 import '../domain/auth_failure.dart';
 import '../domain/auth_repository.dart';
 
@@ -53,8 +55,6 @@ class FirebaseAuthRepository implements AuthRepository {
         password: password,
       );
       await cred.user?.updateDisplayName('$firstName $lastName');
-
-      // CRITICAL: Send email verification immediately after registration
       if (cred.user != null) {
         await cred.user!.sendEmailVerification();
       }
@@ -83,7 +83,7 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<(User?, AuthFailure?)> signInWithGoogle() async {
     try {
       if (Platform.isIOS) {
-        // Default scopes fine
+    // default scopes fine
       }
       final account = await _google.signIn();
       if (account == null) {
@@ -96,7 +96,7 @@ class FirebaseAuthRepository implements AuthRepository {
       );
       final res = await _auth.signInWithCredential(oauthCred);
       final user = res.user;
-      // Ensure displayName is set
+  // ensure displayName is set
       if (user != null &&
           (user.displayName == null || user.displayName!.trim().isEmpty)) {
         final g = await _google.signInSilently();
@@ -126,11 +126,11 @@ class FirebaseAuthRepository implements AuthRepository {
         );
       }
 
-      // 1) Create a secure random nonce and its SHA256 hash
+  // create a secure random nonce and its SHA256 hash
       final rawNonce = _generateNonce(32);
       final hashedNonce = _sha256ofString(rawNonce);
 
-      // 2) Ask Apple for credential (request email/fullName scopes on first sign-in)
+  // request email/fullName scopes on first sign-in
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -139,16 +139,16 @@ class FirebaseAuthRepository implements AuthRepository {
         nonce: hashedNonce,
       );
 
-      // 3) Create OAuth credential for Firebase including the raw (unhashed) nonce
+      // create OAuth credential for Firebase including the raw nonce
       final oauth = OAuthProvider(
         'apple.com',
       ).credential(idToken: credential.identityToken, rawNonce: rawNonce);
 
-      // 4) Sign-in (or link) with Firebase
+  // sign-in with Firebase
       final res = await _auth.signInWithCredential(oauth);
       final user = res.user;
 
-      // Best-effort: update display name if provided
+  // update display name if provided
       final fullName =
           [
             credential.givenName,
@@ -162,7 +162,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
       return (user, null);
     } on SignInWithAppleAuthorizationException catch (e) {
-      // Map Apple errors to auth failures
+      // map Apple errors to auth failures
       final code = switch (e.code) {
         AuthorizationErrorCode.canceled => 'canceled',
         AuthorizationErrorCode.failed => 'failed',
@@ -181,15 +181,24 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    // Get current user ID before signing out
+  // get current user ID before signing out
     final currentUserId = _auth.currentUser?.uid;
 
-    // Reset email verification skip flag for this user on logout
+  // reset email verification skip flag for this user on logout
     final guard = EmailVerificationGuard();
     await guard.resetSkipFlag(currentUserId);
 
+    // remove FCM token from Firestore before signing out
     try {
-      // Sign out of Google if previously used (ignore errors)
+      if (Get.isRegistered<FirebaseMessagingService>()) {
+        final fcmService = Get.find<FirebaseMessagingService>();
+        await fcmService.removeTokenFromFirestore();
+      }
+    } catch (_) {
+      // Continue if FCM service fails - don't block logout
+    }
+
+    try {
       await _google.signOut();
     } catch (_) {}
     await _auth.signOut();

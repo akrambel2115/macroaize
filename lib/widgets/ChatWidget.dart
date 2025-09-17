@@ -8,6 +8,7 @@ import '../constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import '../screens/ChatScreen/ChatController.dart';
 
+/// Chat message bubble widget
 class ChatWidget extends StatelessWidget {
   const ChatWidget({
     super.key,
@@ -15,7 +16,7 @@ class ChatWidget extends StatelessWidget {
     required this.isUser,
     required this.file,
     required this.isFeed,
-    required this.index
+    required this.index,
   });
 
   final String msg;
@@ -26,19 +27,18 @@ class ChatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  const double kTypingIndicatorSize = 16.0;
-    // Right-aligned for user messages, left-aligned for AI messages
+    const double kTypingIndicatorSize = 16.0;
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-  final bgColor = isUser
-  ? (context.theme.brightness == Brightness.dark
-    ? AppColor.neutralGrey800
-    : AppColor.neutralGrey100)
-  : context.theme.cardColor;
-  final textColor = isUser
-    ? (context.theme.brightness == Brightness.dark
-      ? AppColor.neutralWhite
-      : AppColor.neutralGrey900)
-    : context.textTheme.bodyLarge?.color;
+    final bgColor = isUser
+        ? (context.theme.brightness == Brightness.dark
+            ? AppColor.neutralGrey800
+            : AppColor.neutralGrey100)
+        : context.theme.cardColor;
+    final textColor = isUser
+        ? (context.theme.brightness == Brightness.dark
+            ? AppColor.neutralWhite
+            : AppColor.neutralGrey900)
+        : context.textTheme.bodyLarge?.color;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -46,7 +46,6 @@ class ChatWidget extends StatelessWidget {
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            // avatar for AI (coach)
             Image.asset(AppAssets.coachIcon, height: 28, width: 28),
             const SizedBox(width: 10),
           ],

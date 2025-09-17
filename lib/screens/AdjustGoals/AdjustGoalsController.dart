@@ -1,5 +1,4 @@
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-// AppColor import removed (unused) after centralizing notifications
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import '../../SharePrefHelper/SharePref.dart';
@@ -26,10 +25,9 @@ class AdjustGoalsController extends GetxController{
   }
 
   void showSaveNotification() {
-  NotificationService.showSuccess('Goal updated successfully');
+    NotificationService.showSuccess('Goal updated successfully');
   }
 
-  // Immediate save helpers for manual edits
   void updateCalorieGoal(int value) async {
     ConstantUserMaster.calorieGoal = value;
     await SharedPref.saveInt(SharePrefKey.calorie, ConstantUserMaster.calorieGoal);
@@ -63,34 +61,34 @@ class AdjustGoalsController extends GetxController{
     selectedWorkOut = value;
   setHasChanges(true);
   }
-  onChangeAutoGenerate(bool value)
-  {
+  onChangeAutoGenerate(bool value) {
     isAutoGenerate = value;
     update();
   }
 
-  onChangeView(int value)
-  {
+  onChangeView(int value) {
     selectedUpdateGoalView = value;
     update();
   }
 
   onChangeMetric(bool value) {
     isMetric = value;
-  setHasChanges(true);
+    setHasChanges(true);
   }
+
   onChangeGoal(String value) {
     selectedWGoal = value;
-  setHasChanges(true);
+    setHasChanges(true);
   }
+
   onChangeDesiredWeight(int value) {
     selectedDesiredWeight = value;
-  setHasChanges(true);
+    setHasChanges(true);
   }
 
   saveOnSql() {
     if (isAutoGenerate) {
-      // Auto-generate flow: recalculate all macros based on user parameters
+      // auto-generate: recalculate macros from user params
       if (!isMetric) {
         selectedCm = ((selectedFeet * 30.48) + (selectedInches * 2.54)).toInt();
         selectedWeightKg = (selectedWeightLb * 0.453592).toInt();
@@ -102,10 +100,10 @@ class AdjustGoalsController extends GetxController{
       SharedPref.saveString(SharePrefKey.goalWeight, selectedWGoal);
       SharedPref.saveInt(SharePrefKey.desiredWeight,selectedDesiredWeight);
 
-      double bmr = calculateBMR(selectedCm, selectedWeightKg, ConstantUserMaster.age, ConstantUserMaster.gender);
-      double activityFactor = getActivityFactor(selectedWorkOut);
-      double tdee = bmr * activityFactor;
-      Map<String, int> macros = calculateMacros(tdee, selectedWeightKg);
+  double bmr = calculateBMR(selectedCm, selectedWeightKg, ConstantUserMaster.age, ConstantUserMaster.gender);
+  double activityFactor = getActivityFactor(selectedWorkOut);
+  double tdee = bmr * activityFactor;
+  Map<String, int> macros = calculateMacros(tdee, selectedWeightKg);
       SharedPref.saveInt(SharePrefKey.calorie, macros["calories"]);
       SharedPref.saveInt(SharePrefKey.protein, macros["protein"]);
       SharedPref.saveInt(SharePrefKey.carbs, macros["carbs"]);
@@ -123,14 +121,13 @@ class AdjustGoalsController extends GetxController{
       
       onChangeAutoGenerate(false);
     } else {
-      // Manual edit flow: just save the current goal values
+      // manual edits: save current goal values
       SharedPref.saveInt(SharePrefKey.calorie, ConstantUserMaster.calorieGoal);
       SharedPref.saveInt(SharePrefKey.protein, ConstantUserMaster.proteinGoal);
       SharedPref.saveInt(SharePrefKey.carbs, ConstantUserMaster.carbGoal);
       SharedPref.saveInt(SharePrefKey.fat, ConstantUserMaster.fatsGoal);
     }
-
-    // Show success notification and reset changes flag
+    // show success and reset changes flag
     showSaveNotification();
     setHasChanges(false);
     update();

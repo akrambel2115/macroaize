@@ -25,7 +25,6 @@ class WithdrawalHistoryController extends GetxController {
             influencer.withdrawHistory.reversed.toList(); // Show newest first
       }
     } catch (e) {
-      // Handle error - could show a snackbar or error state
       print('Error loading withdrawal history: $e');
     } finally {
       isLoading = false;

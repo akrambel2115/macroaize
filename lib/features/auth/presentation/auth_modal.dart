@@ -20,32 +20,26 @@ class AuthModal extends StatelessWidget {
   static Future<bool> show() async {
     final repo = FirebaseAuthRepository();
     Get.put(AuthController(repo), tag: 'auth');
-    // Push a full-screen route so the auth flows take the entire screen.
-    final res = await Get.to<bool?>(() => const AuthModal(isFullScreen: true));
-    // If the controller set a success key, show it after the screen has closed so the snackbar is visible
+  // open full-screen auth
+  final res = await Get.to<bool?>(() => const AuthModal(isFullScreen: true));
+  // if controller set a success key, show it after the screen closes
     final controller =
         Get.isRegistered<AuthController>(tag: 'auth')
             ? Get.find<AuthController>(tag: 'auth')
             : null;
     final successKey = controller?.lastSuccessKey.value ?? '';
-    // Delete the controller after the current frame so widgets that still
-    // depend on it can finish their teardown. This avoids the
-    // '_dependents.isEmpty' assertion when disposing controllers too early.
+    // delete controller after current frame to avoid dispose timing issues
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<AuthController>(tag: 'auth')) {
         Get.delete<AuthController>(tag: 'auth', force: true);
       }
     });
     if (res == true) {
-      // Persist isLogin for legacy code paths
+      // persist legacy login flag
       await AuthService.syncLoginFlag();
     }
     if (successKey.isNotEmpty) {
-      // show translated success
       NotificationService.showSuccess(successKey);
-      // clear it for next time
-      // ignore: cascade_invocations
-      // controller may have been deleted, but lastSuccessKey already captured
     }
     return res ?? false;
   }
@@ -90,13 +84,12 @@ class AuthModal extends StatelessWidget {
             ),
             Builder(
               builder: (context) {
-                // Compute available height after keyboard is shown and constrain modal to a sensible size.
+                // compute available height (account for keyboard) and clamp
                 final media = MediaQuery.of(context);
                 final screenH = media.size.height;
                 final keyboardH = media.viewInsets.bottom;
                 final availableH = (screenH - keyboardH).clamp(360.0, screenH);
-
-                // Use up to 85% of available height for the modal body, but clamp to avoid tiny or huge sizes.
+                // use up to 85% of available height for the modal body
                 final double bodyHeight = (availableH * 0.85).clamp(
                   360.0,
                   720.0,
@@ -251,7 +244,7 @@ class _LoginTab extends GetView<AuthController> {
                       c.isLoading.value
                           ? null
                           : () async {
-                            // Validate on press, not during build
+              // validate on press
                             if (!(c.loginKey.currentState?.validate() ??
                                 false)) {
                               c.errorText.value = 'please_fix_errors'.tr;
@@ -488,7 +481,7 @@ class _RegisterTab extends GetView<AuthController> {
                             final user = await c.registerEmail();
                             if (user != null) {
                               Get.back(result: true);
-                              // Navigate to email verification screen
+                              // navigate to email verification screen
                               Get.offAllNamed('/EmailVerificationView');
                             }
                           },
@@ -522,7 +515,7 @@ class _SocialButtons extends GetView<AuthController> {
   Widget build(BuildContext context) {
     final c = controller;
     return Obx(() {
-      // Ensure reactive reads are inside Obx to avoid GetX misuse errors
+  // ensure reactive reads are inside Obx
       final loading = c.isLoading.value;
       return Column(
         children: [

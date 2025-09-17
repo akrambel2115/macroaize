@@ -25,23 +25,19 @@ class ScanFoodView extends GetView<ScanFoodController> {
 
             return Stack(
               children: [
-                // Camera preview (only when initialized)
+                // Camera preview
                 if (controller.cameraController?.value.isInitialized == true)
                   Positioned.fill(
                     child: CameraPreview(controller.cameraController!),
                   ),
 
-                // Overlay with scanning frame (rounded). Make it tappable when
-                // the camera is not initialized so the user can trigger the
-                // permission prompt on-demand. A localized message is shown
-                // inside the scanning square when camera access isn't granted.
+                // Scanning overlay and permission prompt
                 Positioned.fill(
                   child: Center(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
-                        // If camera isn't initialized, try to activate it which
-                        // will trigger the native permission dialog.
+                        // Activate camera to trigger permission prompt
                         if (controller.cameraController?.value.isInitialized != true) {
                           controller.ensureCameraActive();
                         }
@@ -77,8 +73,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                   ),
                 ),
 
-                // Combined controls + picker placed at the bottom. The picker
-                // appears under the central capture button.
+                // Controls + meal picker at bottom
                 if (!controller.isLoading)
                   Positioned(
                     bottom: 12,
@@ -87,10 +82,10 @@ class ScanFoodView extends GetView<ScanFoodController> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // control buttons row (gallery, capture, tips)
+                        // control buttons row
                         _buildControlButtons(context, controller),
                         const SizedBox(height: 6),
-                        // picker under the snap button
+                        // meal picker
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: BottomModePicker(

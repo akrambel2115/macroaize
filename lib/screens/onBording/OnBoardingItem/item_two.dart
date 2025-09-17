@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-// AppAssets removed as legacy images are no longer used
-import 'package:foodcalorietracker/constant/Appkey.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 import 'package:foodcalorietracker/screens/onBording/OnBoardingController.dart';
 import 'package:get/get.dart';
 import '../../../constant/AppColor.dart';
@@ -66,7 +65,7 @@ class OnBoardingTwo extends GetView<OnBoardingController> {
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: CustomText(
                       textAlign: TextAlign.center,
-                      text: '${"Welcome".tr} \n$appName',
+                      text: '${"Welcome".tr} \n${Get.find<AppConfigService>().appName}',
                       fontSize: 26.0,
                       fontColor: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -84,7 +83,6 @@ class OnBoardingTwo extends GetView<OnBoardingController> {
                       fontColor: Colors.white,
                     ),
                   ),
-                  // Replaced legacy decorated image area with a simple neutral placeholder
                   SizedBox(
                     height: 300,
                     child: Center(

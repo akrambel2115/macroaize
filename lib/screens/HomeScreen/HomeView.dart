@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-// removed unused 'dart:math' import — ring painter moved to shared widget
+// Ring painter moved to a shared widget; unused imports removed.
 // ...existing code...
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/constant/Appkey.dart';
+import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 import 'package:foodcalorietracker/routes/app_routes.dart';
 import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
@@ -20,10 +20,7 @@ import 'package:foodcalorietracker/Model/Recipe.dart';
 import '../../widgets/VerifyEmailButton.dart';
 
 class HomeView extends GetView<HomeController> {
-  // Centralized spacing for meal cards in the history section.
-  // Keep this configurable for easy future tweaks.
-  // Spacing between meal history cards. Increased for better visual separation.
-  // Centralized control makes future adjustments or responsiveness easy.
+  // Spacing between meal history cards; keep configurable for tweaks.
   static const double _kMealCardSpacing = 8.0;
   const HomeView({super.key});
 
@@ -41,7 +38,7 @@ class HomeView extends GetView<HomeController> {
         color: AppColor.primaryOrange,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          // Slightly reduce horizontal padding to give cards more room without affecting overall layout
+          // Layout padding
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 20,
@@ -95,7 +92,7 @@ class HomeView extends GetView<HomeController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            appName.tr,
+            Get.find<AppConfigService>().appName.tr,
             style: context.theme.textTheme.headlineLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -200,8 +197,7 @@ class HomeView extends GetView<HomeController> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    // Use translation keys for weekdays so the labels come from language JSON
-                                    // Keys used: 'Mon','Tue','Wed','Thu','Fri','Sat','Sun'
+                                    // Use translation keys for weekdays; keep English uppercase short names
                                     (() {
                                       final weekdayKeys = [
                                         'Mon',
@@ -330,8 +326,7 @@ class HomeView extends GetView<HomeController> {
 
                     const SizedBox(height: 24),
 
-                    // Redesigned calorie block: left shows goal + nutrient bars, right shows
-                    // circular 'cal left' indicator — layout mirrors the provided mockup.
+                    // Calorie block: goal + nutrient rows and circular remaining calories
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -400,6 +395,7 @@ class HomeView extends GetView<HomeController> {
                         const SizedBox(width: 16),
 
                         // Right column: Circular remaining calories — use shared CalorieRing widget
+                        // Right column: Circular remaining calories using shared `CalorieRing`
                         Expanded(
                           flex: 2,
                           child: Center(
@@ -460,7 +456,7 @@ class HomeView extends GetView<HomeController> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    // Modern, compact add button below goal calories
+                    // Add button below goal calories
                     Center(
                       child: Material(
                         color: AppColor.neutralGrey800,
@@ -504,7 +500,7 @@ class HomeView extends GetView<HomeController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Energy Orbs (rendered directly, no surrounding card)
+              // Energy Orbs
               EnergyOrbs(
                 proteinConsumed: controller.consumedProtein,
                 carbsConsumed: controller.consumedCarbs,
@@ -854,7 +850,8 @@ class HomeView extends GetView<HomeController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Make the left column flexible so the subtitle can wrap/ellipsis
+            // Left column flexible so subtitle can wrap/ellipsis
+                // Keep horizontal gutters; reduce vertical gap so cards touch visually.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -939,6 +936,7 @@ class HomeView extends GetView<HomeController> {
                       margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
                         // Keep card background consistent with theme so title area doesn't show a contrasting band
+                        // Keep card background consistent with theme
                         color: context.theme.cardColor,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
@@ -950,6 +948,7 @@ class HomeView extends GetView<HomeController> {
                         ],
                       ),
                       // Render image as background and overlay title on top so there's no separate info strip
+                      // Render image as background and overlay title
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Stack(
@@ -972,12 +971,14 @@ class HomeView extends GetView<HomeController> {
                                   ),
                                 ),
                             // Dim overlay (optional for readability) - keep fully transparent if you want no overlay
+                            // Dim overlay (optional for readability)
                             Positioned.fill(
                               child: Container(
                                 // Transparent overlay to remove any visible band — change to Colors.black.withOpacity(0.25) if you want subtle readabilty
                                 color: Colors.transparent,
                               ),
                             ),
+                            // Badges
                             // Badges
                             Positioned(
                               bottom: 8,
@@ -1106,8 +1107,6 @@ class HomeView extends GetView<HomeController> {
     ];
   }
 }
-
-// Legend widget removed — energy orbs are the sole macro visualization now.
 
 // Minimal inline edit icon used in the Track Food header.
 class _InlineEditIcon extends StatefulWidget {
