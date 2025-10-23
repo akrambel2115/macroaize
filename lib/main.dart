@@ -7,6 +7,7 @@ import 'MainController.dart';
 import 'shared/services/app_user_service.dart';
 import 'shared/services/app_config_service.dart';
 import 'shared/services/update_guard_service.dart';
+import 'shared/services/revenuecat_service.dart';
 import 'shared/services/firebase_messaging_service.dart';
 import 'ThemeService/AppTheme.dart';
 import 'ThemeService/ThemeController.dart';
@@ -32,6 +33,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: ".env");
+    try { await dotenv.load(fileName: ".env.macroaize"); } catch (_) {}
   } catch (_) {}
   HttpOverrides.global = MyHttpOverrides();
   try {
@@ -52,6 +54,11 @@ Future<void> main() async {
     await Get.putAsync<AppConfigService>(() async => AppConfigService().load());
   } catch (_) {}
   try {
+    // init RevenueCat
+    await RevenueCatService().init();
+    await RevenueCatService().identifyWithFirebaseUser();
+  } catch (_) {}
+  try {
     if (!Get.isRegistered<UpdateGuardService>()) {
       Get.put<UpdateGuardService>(UpdateGuardService(), permanent: true);
     }
@@ -68,15 +75,16 @@ Future<void> main() async {
         // initialization may fail in test or missing-Firebase environments
       }
     }
-  } catch (e) {
-  }
+  } catch (e) {}
 
   try {
     if (!Get.isRegistered<FirebaseMessagingService>()) {
-      Get.put<FirebaseMessagingService>(FirebaseMessagingService(), permanent: true);
+      Get.put<FirebaseMessagingService>(
+        FirebaseMessagingService(),
+        permanent: true,
+      );
     }
-  } catch (_) {
-  }
+  } catch (_) {}
 
   final fcmToken = await FirebaseMessaging.instance.getToken();
   print('🔥 FCM Token: $fcmToken');
@@ -114,19 +122,18 @@ class _MyAppState extends State<MyApp> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    Get.put(MainController());
     Get.put(PremiumController());
 
-  return GetBuilder<MainController>(
+    return GetBuilder<MainController>(
       builder: (mc) {
         return GetMaterialApp(
           translations: LocalString(),
-          // Default to Arabic for first-time users if MainController hasn't loaded a saved locale yet
+          // Default to English for first-time users if MainController hasn't loaded a saved locale yet
           locale: Locale(
-            mc.languageCode.isNotEmpty ? mc.languageCode : 'ar',
-            mc.countryCode.isNotEmpty ? mc.countryCode : 'SA',
+            mc.languageCode.isNotEmpty ? mc.languageCode : 'en',
+            mc.countryCode.isNotEmpty ? mc.countryCode : 'US',
           ),
-          fallbackLocale: const Locale('ar', 'SA'),
+          fallbackLocale: const Locale('en', 'US'),
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode:
@@ -153,7 +160,7 @@ class _MyAppState extends State<MyApp> {
             );
           },
           debugShowCheckedModeBanner: false,
-          initialRoute: mc.isLogin ? AppPages.home : AppPages.initial,
+          initialRoute: AppPages.initial,
           getPages: AppPages.routes,
         );
       },
