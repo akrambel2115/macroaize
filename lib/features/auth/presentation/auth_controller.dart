@@ -98,7 +98,8 @@ class AuthController extends GetxController {
   }
 
   Future<User?> registerEmail() async {
-    if (!(registerKey.currentState?.validate() ?? false) || !tosAccepted.value) {
+    if (!(registerKey.currentState?.validate() ?? false) ||
+        !tosAccepted.value) {
       return null;
     }
     return _guard(() async {
