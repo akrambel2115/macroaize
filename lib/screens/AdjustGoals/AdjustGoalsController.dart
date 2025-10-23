@@ -103,7 +103,8 @@ class AdjustGoalsController extends GetxController{
   double bmr = calculateBMR(selectedCm, selectedWeightKg, ConstantUserMaster.age, ConstantUserMaster.gender);
   double activityFactor = getActivityFactor(selectedWorkOut);
   double tdee = bmr * activityFactor;
-  Map<String, int> macros = calculateMacros(tdee, selectedWeightKg);
+  double adjusted = adjustCaloriesForGoal(tdee, selectedWeightKg, selectedDesiredWeight, selectedWGoal);
+  Map<String, int> macros = calculateMacros(adjusted, selectedWeightKg);
       SharedPref.saveInt(SharePrefKey.calorie, macros["calories"]);
       SharedPref.saveInt(SharePrefKey.protein, macros["protein"]);
       SharedPref.saveInt(SharePrefKey.carbs, macros["carbs"]);
