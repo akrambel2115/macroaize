@@ -12,10 +12,10 @@ import crypto from 'crypto';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { CHARGILY_SECRET_KEY, OPENROUTER_API_KEY, USDA_API_KEY, getChargilyApiUrl, getWebhookToleranceSeconds, getInfluencerMinWithdrawal, getEmailToAddress, getEmailFromAddress, getAiModel, getAndroidIapIds, getIosIapIds } from './config';
+import { OPENROUTER_API_KEY, USDA_API_KEY, getEmailToAddress, getEmailFromAddress, getAiModel, getAndroidIapIds, getIosIapIds, REVENUECAT_WEBHOOK_SECRET } from './config';
 import { encryptRip, decryptRip, maskRip, isValidRip } from './crypto_rip';
 import { getNotificationService, NotificationPayload } from './notification_service';
-import { getRemoteConfigService, DEFAULT_NOTIFICATION_CONFIG, getPremiumMonthlyDzd, getPremiumYearlyDzd, getInfluencerCommissionRate, getInfluencerEarnForCode, getInfluencerWithdrawalProcessingDays, getSuccessUrl, getFailureUrl, getScanLimitCfg, getChatLimitCfg, getTermsLink, getPrivacyLink, getShareUrlAndroid, getShareUrlIos, getMinRequiredAppVersion, getUpdateMessage } from './remote_config_service';
+import { getRemoteConfigService, DEFAULT_NOTIFICATION_CONFIG, getPremiumMonthlyDzd, getPremiumYearlyDzd, getInfluencerCommissionRate, getInfluencerEarnForCode, getInfluencerWithdrawalProcessingDays, getInfluencerMinWithdrawal, getSuccessUrl, getFailureUrl, getScanLimitCfg, getChatLimitCfg, getTermsLink, getPrivacyLink, getShareUrlAndroid, getShareUrlIos, getMinRequiredAppVersion, getUpdateMessage, getSubscriptionsEnabled } from './remote_config_service';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -48,7 +48,7 @@ interface SubscriptionData {
   updatedAt?: FirebaseFirestore.FieldValue;
 }
 
-interface InfluencerData {
+export interface InfluencerData {
   promoCode?: string;
   isActive?: boolean;
   earningsDzd?: number;
@@ -56,24 +56,25 @@ interface InfluencerData {
   expirationDate?: FirebaseFirestore.Timestamp | string;
 }
 
-interface WebhookEvent {
-  id?: string;
-  type?: string;
-  event?: string;
-  payload?: any;
-  data?: {
-    id?: string;
-    amount?: number;
-    currency?: string;
-    status?: string;
-    metadata?: {
-      userId?: string;
-      planType?: string;
-      promoCode?: string;
-      originalAmount?: number;
-    };
-  };
-}
+// Unused interface - keeping for potential future use
+// interface WebhookEvent {
+//   id?: string;
+//   type?: string;
+//   event?: string;
+//   payload?: any;
+//   data?: {
+//     id?: string;
+//     amount?: number;
+//     currency?: string;
+//     status?: string;
+//     metadata?: {
+//       userId?: string;
+//       planType?: string;
+//       promoCode?: string;
+//       originalAmount?: number;
+//     };
+//   };
+// }
 
 interface WithdrawalRecord {
   id: string;
@@ -102,28 +103,30 @@ function toDayjs(dateValue: FirebaseFirestore.Timestamp | string | Date | null |
 }
 
 // Helpers and other functions remain the same...
-function planAmountDzd(planType: string): number {
-  if (planType === 'yearly') return getPremiumYearlyDzd();
-  return getPremiumMonthlyDzd();
-}
+// Unused function - keeping for potential future use
+// function planAmountDzd(planType: string): number {
+//   if (planType === 'yearly') return getPremiumYearlyDzd();
+//   return getPremiumMonthlyDzd();
+// }
 export function addDuration(start: dayjs.Dayjs, planType: string): dayjs.Dayjs {
   return planType === 'yearly' ? start.add(1, 'year') : start.add(1, 'month');
 }
 function safeNow(): dayjs.Dayjs {
   return dayjs().utc();
 }
-function verifyHmac(signatureHeader: string | undefined, payload: string, secret: string): boolean {
-  if (!signatureHeader) return false;
-  try {
-    const expected = crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
-    const sigBuf = Buffer.from(signatureHeader, 'hex');
-    const expBuf = Buffer.from(expected, 'hex');
-    if (sigBuf.length !== expBuf.length) return false;
-    return crypto.timingSafeEqual(sigBuf, expBuf);
-  } catch (e) {
-    return false;
-  }
-}
+// Unused function - keeping for potential future use
+// function verifyHmac(signatureHeader: string | undefined, payload: string, secret: string): boolean {
+//   if (!signatureHeader) return false;
+//   try {
+//     const expected = crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
+//     const sigBuf = Buffer.from(signatureHeader, 'hex');
+//     const expBuf = Buffer.from(expected, 'hex');
+//     if (sigBuf.length !== expBuf.length) return false;
+//     return crypto.timingSafeEqual(sigBuf, expBuf);
+//   } catch (e) {
+//     return false;
+//   }
+// }
 
 /**
  * Validates that the request is from an authenticated admin user
@@ -297,21 +300,24 @@ function validateMealItemsSchema(data: any): any {
   };
 }
 
-/**
- * Creates enhanced audit log with performance metrics
- */
-function createAuditLog(baseData: any, correlationId: string, duration?: number) {
-  return {
-    ...baseData,
-    timestamp: FieldValue.serverTimestamp(),
-    correlationId,
-    duration,
-    region: 'europe-west1'
-  };
-}
+// Unused function - keeping for potential future use
+// /**
+//  * Creates enhanced audit log with performance metrics
+//  */
+// function createAuditLog(baseData: any, correlationId: string, duration?: number) {
+//   return {
+//     ...baseData,
+//     timestamp: FieldValue.serverTimestamp(),
+//     correlationId,
+//     duration,
+//     region: 'europe-west1'
+//   };
+// }
 
 // testAuth function removed to reduce CPU quota usage
 
+/*
+// CHARGILY PAYMENT CREATION - COMMENTED OUT FOR REVENUECAT-ONLY IMPLEMENTATION
 export const createChargilyPayment = onCall({
   region: 'europe-west1',
   secrets: [CHARGILY_SECRET_KEY]
@@ -526,6 +532,7 @@ export const createChargilyPayment = onCall({
     throw new Error('internal');
   }
 });
+*/
 
 
 // Usage tracking
@@ -821,24 +828,27 @@ export const dailyMaintenance = onSchedule({
  
 // Promo code tracking helpers
 
-// Helper for promo code validation
-function validatePromoCodeForTracking(promoCode: string, influencerData: InfluencerData): boolean {
-  // Validate promo code format
-  if (!isValidPromoCode(promoCode)) {
-    console.warn(`Invalid promo code format: ${promoCode}`);
-    return false;
-  }
+// Unused function - keeping for potential future use
+// // Helper for promo code validation
+// function validatePromoCodeForTracking(promoCode: string, influencerData: InfluencerData): boolean {
+//   // Validate promo code format
+//   if (!isValidPromoCode(promoCode)) {
+//     console.warn(`Invalid promo code format: ${promoCode}`);
+//     return false;
+//   }
+// 
+//   // Check expiration
+//   const expirationDate = toDate(influencerData.expirationDate);
+//   if (expirationDate && expirationDate < new Date()) {
+//     console.warn(`Expired promo code: ${promoCode}`);
+//     return false;
+//   }
+// 
+//   return true;
+// }
 
-  // Check expiration
-  const expirationDate = toDate(influencerData.expirationDate);
-  if (expirationDate && expirationDate < new Date()) {
-    console.warn(`Expired promo code: ${promoCode}`);
-    return false;
-  }
-
-  return true;
-}
-
+/*
+// CHARGILY WEBHOOK - COMMENTED OUT FOR REVENUECAT-ONLY IMPLEMENTATION
 // Chargily webhook
 
 export const chargilyWebhook = onRequest({
@@ -1121,6 +1131,212 @@ export const chargilyWebhook = onRequest({
     res.status(500).send('error');
   }
 });
+*/
+// END CHARGILY WEBHOOK COMMENT BLOCK
+
+// RevenueCat webhook (Phase 3 skeleton): validates signature and records event
+export const revenuecatWebhook = onRequest(
+  {
+    region: 'europe-west1',
+    secrets: [REVENUECAT_WEBHOOK_SECRET],
+  },
+  async (req: Request, res: Response) => {
+    if (req.method !== 'POST') {
+      res.status(405).send('Method Not Allowed');
+      return;
+    }
+
+    const authHeader = req.get('Authorization') || req.headers['authorization'];
+    const expected = `Bearer ${REVENUECAT_WEBHOOK_SECRET.value()}`;
+
+    if (authHeader !== expected) {
+      logger.warn('RevenueCat invalid authorization');
+      res.status(403).send('Forbidden');
+      return;
+    }
+
+    let event: any;
+    try {
+      event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch (e) {
+      res.status(400).send('Bad Request');
+      return;
+    }
+
+    const eventId: string = String(
+      event?.event_timestamp_ms ||
+        event?.event?.id ||
+        event?.id ||
+        crypto.randomUUID()
+    );
+
+    try {
+      const processedRef = db.collection('webhook_events').doc(`rc_${eventId}`);
+      const processedSnap = await processedRef.get();
+      if (processedSnap.exists) {
+        res.status(200).send('duplicate');
+        return;
+      }
+      await processedRef.set(
+        {
+          receivedAt: FieldValue.serverTimestamp(),
+          provider: 'revenuecat',
+          type: (event?.event?.type || event?.type || 'unknown').toString(),
+        },
+        { merge: true }
+      );
+    } catch (e) {
+      logger.error('Failed to store RevenueCat event', e as any);
+      res.status(500).send('error');
+      return;
+    }
+
+    try {
+      const ev = event?.event || event || {};
+      const typeRaw = String(ev?.type || event?.type || 'unknown').toUpperCase();
+      const uidRaw: string | undefined =
+        ev?.app_user_id || event?.app_user_id || ev?.appUserId || event?.appUserId;
+      const uid = uidRaw && typeof uidRaw === 'string' ? uidRaw : undefined;
+      if (!uid || uid.startsWith('$RCAnonymousID')) {
+        res.status(200).send('ignored');
+        return;
+      }
+
+      const productId: string = String(
+        ev?.product_id ||
+          ev?.productIdentifier ||
+          ev?.transaction?.product_id ||
+          ''
+      );
+      const purchasedAtMs: number | null =
+        Number(
+          ev?.purchased_at_ms ||
+            ev?.purchase_date_ms ||
+            event?.event_timestamp_ms ||
+            event?.sent_at_ms ||
+            0
+        ) || null;
+      const expirationAtMs: number | null =
+        Number(
+          ev?.expiration_at_ms ||
+            ev?.expires_at_ms ||
+            ev?.expiration_ms ||
+            0
+        ) || null;
+
+      const startIso = purchasedAtMs
+        ? new Date(purchasedAtMs).toISOString()
+        : new Date().toISOString();
+      let endIso: string | null = expirationAtMs
+        ? new Date(expirationAtMs).toISOString()
+        : null;
+
+      const guessPlanFromProduct = (pid: string): string => {
+        const p = pid.toLowerCase();
+        if (p.includes('year') || p.includes('annual') || p.includes('yr'))
+          return 'yearly';
+        return 'monthly';
+      };
+      const guessPlanFromDuration = (
+        startMs: number | null,
+        endMs: number | null
+      ): string => {
+        if (!startMs || !endMs) return 'monthly';
+        const days = Math.max(
+          0,
+          Math.round((endMs - startMs) / (1000 * 60 * 60 * 24))
+        );
+        if (days >= 300) return 'yearly';
+        if (days >= 27) return 'monthly';
+        return 'monthly';
+      };
+
+      const planType = endIso
+        ? guessPlanFromDuration(purchasedAtMs, expirationAtMs)
+        : guessPlanFromProduct(productId);
+
+      if (!endIso) {
+        const start = purchasedAtMs ? dayjs(purchasedAtMs).utc() : safeNow();
+        endIso = addDuration(start, planType).toISOString();
+      }
+
+      const now = safeNow();
+      const end = dayjs(endIso).utc();
+      const isActiveNow = end.isAfter(now);
+
+      const subRef = db.collection('subscriptions').doc(uid);
+
+      const writeActive = async (status: string) => {
+        await subRef.set(
+          {
+            userId: uid,
+            isPremium: isActiveNow,
+            planType,
+            startDate: startIso,
+            endDate: endIso,
+            provider: 'revenuecat',
+            status,
+            productId: productId || null,
+            updatedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+      };
+
+      const writeStatusOnly = async (status: string) => {
+        await subRef.set(
+          {
+            provider: 'revenuecat',
+            status,
+            isPremium: isActiveNow,
+            updatedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+      };
+
+      switch (typeRaw) {
+        case 'INITIAL_PURCHASE':
+        case 'RENEWAL':
+        case 'PRODUCT_CHANGE':
+        case 'UNCANCELLATION':
+        case 'NON_RENEWING_PURCHASE':
+          await writeActive('active');
+          break;
+        case 'CANCELLATION':
+          await writeStatusOnly('canceled');
+          break;
+        case 'EXPIRATION':
+          await subRef.set(
+            {
+              provider: 'revenuecat',
+              status: 'expired',
+              isPremium: false,
+              updatedAt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+          break;
+        case 'BILLING_ISSUE':
+        case 'SUBSCRIPTION_PAUSED':
+          await writeStatusOnly('past_due');
+          break;
+        case 'REFUND':
+        case 'UNCANCELLATION_FAILURE':
+        default:
+          await writeStatusOnly('updated');
+          break;
+      }
+
+      res.status(200).send('ok');
+    } catch (e) {
+      logger.error('RevenueCat mapping failed', {
+        error: e instanceof Error ? e.message : String(e),
+      });
+      res.status(500).send('error');
+    }
+  }
+);
 
 // Usage hydration and sync
 
@@ -1204,6 +1420,9 @@ export const getAppConfig = onCall({ region: 'europe-west1' }, async (_request: 
     limits: {
       scan: getScanLimitCfg(),
       chat: getChatLimitCfg()
+    },
+    features: {
+      subscriptionsEnabled: getSubscriptionsEnabled()
     },
     // IAP IDs are public identifiers, safe to expose
     iap: {
