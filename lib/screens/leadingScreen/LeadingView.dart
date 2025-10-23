@@ -14,6 +14,12 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
 class LeadingView extends StatefulWidget {
+  // Tutorial GlobalKeys for interactive onboarding
+  static final GlobalKey scannerTabKey = GlobalKey();
+  static final GlobalKey analyticsTabKey = GlobalKey();
+  static final GlobalKey profileTabKey = GlobalKey();
+  static final GlobalKey aiCoachButtonKey = GlobalKey();
+  
   const LeadingView({super.key});
 
   @override
@@ -120,6 +126,7 @@ class _LeadingViewState extends State<LeadingView> {
             }
 
             return FloatingActionButton(
+              key: LeadingView.aiCoachButtonKey, // Add GlobalKey for tutorial
               onPressed: () {
                 Get.toNamed(Routes.chatView);
               },
@@ -248,30 +255,39 @@ class _LeadingViewState extends State<LeadingView> {
                                 ),
                               ),
                               Expanded(
-                                child: _buildNavItem(
-                                  context,
-                                  controller,
-                                  2,
-                                  Icons.camera_alt_rounded,
-                                  Icons.camera_alt_outlined,
+                                child: Container(
+                                  key: LeadingView.scannerTabKey, // Add GlobalKey for tutorial
+                                  child: _buildNavItem(
+                                    context,
+                                    controller,
+                                    2,
+                                    Icons.camera_alt_rounded,
+                                    Icons.camera_alt_outlined,
+                                  ),
                                 ),
                               ),
                               Expanded(
-                                child: _buildNavItem(
-                                  context,
-                                  controller,
-                                  3,
-                                  Icons.bar_chart_rounded,
-                                  Icons.bar_chart_outlined,
+                                child: Container(
+                                  key: LeadingView.analyticsTabKey, // Add GlobalKey for tutorial
+                                  child: _buildNavItem(
+                                    context,
+                                    controller,
+                                    3,
+                                    Icons.bar_chart_rounded,
+                                    Icons.bar_chart_outlined,
+                                  ),
                                 ),
                               ),
                               Expanded(
-                                child: _buildNavItem(
-                                  context,
-                                  controller,
-                                  4,
-                                  Icons.person_rounded,
-                                  Icons.person_outline_rounded,
+                                child: Container(
+                                  key: LeadingView.profileTabKey, // Add GlobalKey for tutorial
+                                  child: _buildNavItem(
+                                    context,
+                                    controller,
+                                    4,
+                                    Icons.person_rounded,
+                                    Icons.person_outline_rounded,
+                                  ),
                                 ),
                               ),
                             ],
