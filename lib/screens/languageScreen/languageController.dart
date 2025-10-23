@@ -7,12 +7,12 @@ class LanguageController extends GetxController {
   RxInt selectedIndex = 0.obs;
   
   // Language data (keys and locale mappings)
-  List<String> languageList = ["language_arabic", "language_english", "language_french"];
-  List<String> languageCode = ["ar", "en", "fr"];
-  List<String> countryCode = ["SA", "US", "FR"];
+  List<String> languageList = ["language_english", "language_arabic", "language_french"];
+  List<String> languageCode = ["en", "ar", "fr"];
+  List<String> countryCode = ["US", "SA", "FR"];
   List<Locale> local = [
-    Locale('ar', 'SA'),
     Locale('en', 'US'),
+    Locale('ar', 'SA'),
     Locale('fr', 'FR'),
   ];
 
