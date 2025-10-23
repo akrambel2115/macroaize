@@ -4,6 +4,9 @@ import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
+import 'package:foodcalorietracker/shared/services/tutorial_coach_service.dart';
+import 'package:foodcalorietracker/screens/HomeScreen/HomeView.dart';
+import 'package:foodcalorietracker/screens/leadingScreen/LeadingView.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -33,9 +36,59 @@ class HomeController extends GetxController{
     dates = getPreviousDays();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scrollToTodayCentered();
+      // Show app tips if first time user - increased delay to ensure rendering
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        _showAppTipsIfNeeded();
+      });
     });
     isLoading = false;
     update();
+  }
+
+  Future<void> _showAppTipsIfNeeded() async {
+    final context = Get.context;
+    if (context != null) {
+      // Define interactive tutorial steps with actual UI element targets
+      final tutorialSteps = [
+        TutorialStep(
+          targetKey: HomeView.addFoodButtonKey,
+          titleKey: 'tutorial_add_food_title',
+          descriptionKey: 'tutorial_add_food_description',
+          position: TooltipPosition.top,
+          icon: Icons.add_circle_outline,
+        ),
+        TutorialStep(
+          targetKey: LeadingView.scannerTabKey,
+          titleKey: 'tutorial_scanner_title',
+          descriptionKey: 'tutorial_scanner_description',
+          position: TooltipPosition.top,
+          icon: Icons.camera_alt_rounded,
+        ),
+        TutorialStep(
+          targetKey: LeadingView.aiCoachButtonKey,
+          titleKey: 'tutorial_ai_coach_title',
+          descriptionKey: 'tutorial_ai_coach_description',
+          position: TooltipPosition.top,
+          icon: Icons.psychology_rounded,
+        ),
+        TutorialStep(
+          targetKey: LeadingView.analyticsTabKey,
+          titleKey: 'tutorial_analytics_title',
+          descriptionKey: 'tutorial_analytics_description',
+          position: TooltipPosition.top,
+          icon: Icons.analytics_rounded,
+        ),
+        TutorialStep(
+          targetKey: LeadingView.profileTabKey,
+          titleKey: 'tutorial_profile_title',
+          descriptionKey: 'tutorial_profile_description',
+          position: TooltipPosition.top,
+          icon: Icons.person_rounded,
+        ),
+      ];
+      
+      await TutorialCoachService().showTutorialIfNeeded(context, tutorialSteps);
+    }
   }
 
   void scrollToTodayCentered() {
