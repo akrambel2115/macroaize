@@ -8,6 +8,8 @@ class Recipe {
   final int protein;
   final int fat;
   final String difficulty;
+  final Map<String, String>? titleL10n;
+  final Map<String, String>? difficultyL10n;
   final List<String> tags;
   final String description;
   final List<String> ingredients;
@@ -33,6 +35,8 @@ class Recipe {
   this.descriptionL10n,
   this.ingredientsL10n,
   this.instructionsL10n,
+  this.titleL10n,
+  this.difficultyL10n,
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -71,6 +75,30 @@ class Recipe {
       if (stFr != null) instrL10n['fr'] = List<String>.from(stFr);
     }
 
+    // localized title
+    Map<String, String>? titleL10n;
+    String? tEn = json['title_en'];
+    String? tAr = json['title_ar'];
+    String? tFr = json['title_fr'];
+    if (tEn != null || tAr != null || tFr != null) {
+      titleL10n = {};
+      if (tEn != null) titleL10n['en'] = tEn;
+      if (tAr != null) titleL10n['ar'] = tAr;
+      if (tFr != null) titleL10n['fr'] = tFr;
+    }
+
+    // localized difficulty
+    Map<String, String>? difficultyL10n;
+    String? dEn = json['difficulty_en'];
+    String? dAr = json['difficulty_ar'];
+    String? dFr = json['difficulty_fr'];
+    if (dEn != null || dAr != null || dFr != null) {
+      difficultyL10n = {};
+      if (dEn != null) difficultyL10n['en'] = dEn;
+      if (dAr != null) difficultyL10n['ar'] = dAr;
+      if (dFr != null) difficultyL10n['fr'] = dFr;
+    }
+
     return Recipe(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
@@ -88,6 +116,8 @@ class Recipe {
       descriptionL10n: descL10n,
       ingredientsL10n: ingL10n,
       instructionsL10n: instrL10n,
+      titleL10n: titleL10n,
+      difficultyL10n: difficultyL10n,
     );
   }
 
@@ -121,6 +151,16 @@ class Recipe {
         'instructions_ar': instructionsL10n!['ar'],
         'instructions_fr': instructionsL10n!['fr'],
       },
+      if (titleL10n != null) ...{
+        'title_en': titleL10n!['en'],
+        'title_ar': titleL10n!['ar'],
+        'title_fr': titleL10n!['fr'],
+      },
+      if (difficultyL10n != null) ...{
+        'difficulty_en': difficultyL10n!['en'],
+        'difficulty_ar': difficultyL10n!['ar'],
+        'difficulty_fr': difficultyL10n!['fr'],
+      },
     };
   }
   // convenience getters for localized content
@@ -128,6 +168,18 @@ class Recipe {
     return descriptionL10n != null && descriptionL10n![langCode]?.isNotEmpty == true
         ? descriptionL10n![langCode]!
         : description;
+  }
+
+  String localizedTitle(String langCode) {
+    return titleL10n != null && titleL10n![langCode]?.isNotEmpty == true
+        ? titleL10n![langCode]!
+        : title;
+  }
+
+  String localizedDifficulty(String langCode) {
+    return difficultyL10n != null && difficultyL10n![langCode]?.isNotEmpty == true
+        ? difficultyL10n![langCode]!
+        : difficulty;
   }
 
   List<String> localizedIngredients(String langCode) {
