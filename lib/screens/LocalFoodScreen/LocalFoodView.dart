@@ -387,7 +387,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Flexible(
+                      Expanded(
                         child: Text(
                           food.quantity,
                           style: context.textTheme.bodyMedium?.copyWith(
@@ -399,7 +399,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      // calories chip
+                      // calories chip fixed to right
                       _buildCalorieChip(context, food.calories),
                     ],
                   ),
