@@ -17,11 +17,16 @@ import 'package:foodcalorietracker/shared/widgets/PremiumRequiredDialog.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:foodcalorietracker/Model/Recipe.dart';
+import 'package:foodcalorietracker/screens/RecipesScreen/RecipesController.dart';
 import '../../widgets/VerifyEmailButton.dart';
 
 class HomeView extends GetView<HomeController> {
   // Spacing between meal history cards; keep configurable for tweaks.
   static const double _kMealCardSpacing = 8.0;
+  
+  // Tutorial GlobalKeys for interactive onboarding
+  static final GlobalKey addFoodButtonKey = GlobalKey();
+  
   const HomeView({super.key});
 
   @override
@@ -637,6 +642,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildModernFAB(BuildContext context) {
     return FloatingActionButton(
+      key: addFoodButtonKey, // Add GlobalKey for tutorial
       onPressed: () => showMealSelectionSheet(context),
       backgroundColor: AppColor.primaryOrange,
       shape: const CircleBorder(),
@@ -901,11 +907,28 @@ class HomeView extends GetView<HomeController> {
         const SizedBox(height: 16),
         SizedBox(
           height: 200,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            children:
-                _getMockRecipes().map((recipe) {
+          child: Builder(builder: (ctx) {
+            if (!Get.isRegistered<RecipesController>()) {
+              Get.put(RecipesController());
+            }
+            return GetBuilder<RecipesController>(
+              builder: (rc) {
+              final list = rc.topRecipes.isNotEmpty
+                  ? rc.topRecipes
+                  : _getMockRecipes().map((m) => Recipe(
+                        id: m['title'] as String,
+                        title: m['title'] as String,
+                        imageUrl: (m['imageUrl'] as String?) ?? '',
+                        duration: m['duration'] as int,
+                        calories: m['calories'] as int,
+                      )).toList();
+
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final recipe = list[index];
                   return GestureDetector(
                     onTap: () async {
                       try {
@@ -917,15 +940,7 @@ class HomeView extends GetView<HomeController> {
                         }
                         Get.toNamed(
                           Routes.recipeDetailView,
-                          arguments: {
-                            'recipe': Recipe(
-                              id: recipe['title'] as String,
-                              title: recipe['title'] as String,
-                              imageUrl: (recipe['imageUrl'] as String?) ?? '',
-                              duration: recipe['duration'] as int,
-                              calories: recipe['calories'] as int,
-                            ),
-                          },
+                          arguments: {'recipe': recipe},
                         );
                       } catch (_) {
                         _showPremiumRequiredDialog();
@@ -933,10 +948,8 @@ class HomeView extends GetView<HomeController> {
                     },
                     child: Container(
                       width: 160,
-                      margin: const EdgeInsets.only(right: 12),
+                      margin: EdgeInsets.only(right: index == list.length - 1 ? 0 : 12),
                       decoration: BoxDecoration(
-                        // Keep card background consistent with theme so title area doesn't show a contrasting band
-                        // Keep card background consistent with theme
                         color: context.theme.cardColor,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
@@ -947,68 +960,38 @@ class HomeView extends GetView<HomeController> {
                           ),
                         ],
                       ),
-                      // Render image as background and overlay title on top so there's no separate info strip
-                      // Render image as background and overlay title
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            // Background image covers whole card
-                            recipe['imageUrl'] != null
-                                ? Image.network(
-                                  recipe['imageUrl']!,
-                                  fit: BoxFit.cover,
-                                )
+                            recipe.imageUrl.isNotEmpty
+                                ? Image.network(recipe.imageUrl, fit: BoxFit.cover)
                                 : Container(
-                                  color: context.theme.cardColor,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.restaurant_rounded,
-                                      size: 32,
-                                      color: AppColor.neutralGrey500,
+                                    color: context.theme.cardColor,
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.restaurant_rounded,
+                                        size: 32,
+                                        color: AppColor.neutralGrey500,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            // Dim overlay (optional for readability) - keep fully transparent if you want no overlay
-                            // Dim overlay (optional for readability)
                             Positioned.fill(
-                              child: Container(
-                                // Transparent overlay to remove any visible band — change to Colors.black.withOpacity(0.25) if you want subtle readabilty
-                                color: Colors.transparent,
-                              ),
+                              child: Container(color: Colors.transparent),
                             ),
-                            // Badges
-                            // Badges
                             Positioned(
                               bottom: 8,
                               left: 8,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.7),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.7), borderRadius: BorderRadius.circular(10)),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
-                                      Icons.access_time_rounded,
-                                      size: 10,
-                                      color: Colors.white,
-                                    ),
+                                    const Icon(Icons.access_time_rounded, size: 10, color: Colors.white),
                                     const SizedBox(width: 2),
-                                    Text(
-                                      '${recipe['duration']} ${'min'.tr}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                                    Text('${recipe.duration} ${'min'.tr}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600)),
                                   ],
                                 ),
                               ),
@@ -1017,58 +1000,27 @@ class HomeView extends GetView<HomeController> {
                               bottom: 8,
                               right: 8,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColor.primaryOrange.withOpacity(
-                                    0.9,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  '${recipe['calories']} ${'cal'.tr}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(color: AppColor.primaryOrange.withOpacity(0.9), borderRadius: BorderRadius.circular(10)),
+                                child: Text('${recipe.calories} ${'cal'.tr}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600)),
                               ),
                             ),
-                            // Title overlay (no background)
                             Positioned(
                               left: 12,
                               right: 12,
                               bottom: 36,
-                              child: Text(
-                                recipe['title']!,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.theme.textTheme.titleSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                      height: 1.2,
-                                      color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black.withOpacity(0.6),
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 4,
-                                        ),
-                                      ],
-                                    ),
-                              ),
+                              child: Text(recipe.localizedTitle(Get.locale?.languageCode ?? 'en'), maxLines: 2, overflow: TextOverflow.ellipsis, style: context.theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 12, height: 1.2, color: Colors.white, shadows: [Shadow(color: Colors.black.withOpacity(0.6), offset: const Offset(0,1), blurRadius: 4)])),
                             ),
                           ],
                         ),
                       ),
                     ),
                   );
-                }).toList(),
-          ),
+                },
+              );
+              },
+            );
+          }),
         ),
       ],
     );
