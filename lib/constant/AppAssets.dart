@@ -28,6 +28,7 @@ class AppAssets {
   static String protein = "${basePathIcons}protein.png";
   static String carb = "${basePathIcons}carb.png";
   static String fat = "${basePathIcons}fat.png";
+  static String calorie = "${basePathIcons}calorie.png";
 
   ///App lottie
   static String loadingChat = "${basePathLottie}dot.json";
@@ -40,6 +41,7 @@ class AppAssets {
   static String loadingClock = "${basePathLottie}loadingClock.json";
   // Generic loader used after splash for returning users
   static String loader = "${basePathLottie}loader.json";
+  // Orange branded loader (previously used) - removed from flow
 
   static String ediIcon =
       '''<svg stroke="#FFF" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
