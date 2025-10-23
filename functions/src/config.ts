@@ -8,6 +8,10 @@ export const USDA_API_KEY = defineSecret('USDA_API_KEY');
 
 export const RIP_ENCRYPTION_KEY_V1 = defineSecret('RIP_ENCRYPTION_KEY_V1');
 
+// RevenueCat secrets (server-to-server)
+export const REVENUECAT_REST_API_KEY = defineSecret('REVENUECAT_REST_API_KEY');
+export const REVENUECAT_WEBHOOK_SECRET = defineSecret('REVENUECAT_WEBHOOK_SECRET');
+
 // Shared runtime configuration for Cloud Functions (Gen 2)
 export const REGION = 'europe-west1';
 
@@ -35,13 +39,6 @@ export function getChargilyApiUrl(): string {
  */
 export function getWebhookToleranceSeconds(): number {
   return Number(process.env.WEBHOOK_TOLERANCE_SECONDS) || 300;
-}
-
-/**
- * Get minimum withdrawal amount for influencers from environment
- */
-export function getInfluencerMinWithdrawal(): number {
-  return Number(process.env.INFLUENCER_MIN_WITHDRAWAL) || 0;
 }
 
 /**
