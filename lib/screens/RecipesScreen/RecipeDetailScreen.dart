@@ -15,7 +15,6 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
-  int _servings = 1;
 
   List<Map<String, String>> get _ingredients {
     final lang = Get.locale?.languageCode ?? 'en';
@@ -100,12 +99,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               final imageUrl = widget.recipe.imageUrl.isNotEmpty
                   ? widget.recipe.imageUrl
                   : 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1200';
+              if (imageUrl.isEmpty) {
+                return _buildPlaceholderImage();
+              }
               return Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
                 cacheWidth: targetW,
                 cacheHeight: targetH,
                 filterQuality: FilterQuality.low,
+                errorBuilder: (context, error, stack) => _buildPlaceholderImage(),
               );
             }),
 
@@ -138,7 +141,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.recipe.title,
+                    widget.recipe.localizedTitle(Get.locale?.languageCode ?? 'en'),
                     textAlign: TextAlign.left,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           color: Colors.white,
@@ -180,6 +183,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           ],
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white70,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.speed, size: 14, color: Colors.black87),
+                            const SizedBox(width: 6),
+                            Text(widget.recipe.localizedDifficulty(Get.locale?.languageCode ?? 'en'), style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.black87, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -197,7 +215,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('description'.tr, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 8),
           Builder(builder: (_) {
             final lang = Get.locale?.languageCode ?? 'en';
@@ -324,11 +341,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: _buildServingSelector(context),
-          ),
-          const SizedBox(height: 8),
           ..._ingredients.map((it) => Column(
                 children: [
                   Row(
@@ -345,52 +357,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ))
         ],
       ),
-    );
-  }
-
-  Widget _buildServingSelector(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColor.primaryGradient,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: () => setState(() { if (_servings > 1) _servings--; }),
-            child: _quantityButton(context, Icons.remove),
-          ),
-          Container(
-            width: 60,
-            alignment: Alignment.center,
-            child: Text(
-              '$_servings',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () => setState(() => _servings++),
-            child: _quantityButton(context, Icons.add),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _quantityButton(BuildContext context, IconData icon) {
-    return Container(
-      width: 40,
-      height: 40,
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, size: 20, color: AppColor.primaryGreen),
     );
   }
 
@@ -444,6 +410,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             );
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderImage() {
+    return const Center(
+      child: Icon(
+        Icons.restaurant_rounded,
+        size: 48,
+        color: AppColor.neutralGrey500,
       ),
     );
   }
