@@ -13,7 +13,6 @@ import 'package:foodcalorietracker/screens/AnalyticsScreen/WeekHistory.dart';
 import 'package:foodcalorietracker/screens/AnalyticsScreen/YearHistory.dart';
 import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-// ModernCard no longer used in this view
 import 'package:foodcalorietracker/widgets/WeightJourney.dart';
 import 'package:foodcalorietracker/widgets/CelebrationStrip.dart';
 
@@ -81,7 +80,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with title and progress indicator
           Row(
             children: [
               Expanded(
@@ -124,7 +122,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
 
           const SizedBox(height: 16),
 
-          // Celebration strip (animated banner)
           CelebrationStrip(
             message: difference == 0
                 ? "goal_achieved_message".tr
@@ -136,7 +133,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
 
           const SizedBox(height: 0),
 
-          // Journey path visualization replacing the two cards and progress bar
           WeightJourney(
             currentWeight: currentWeight,
             goalWeight: goalWeight,
@@ -152,14 +148,11 @@ class AnalyticsView extends GetView<AnalyticsController> {
                     SharePrefKey.weight,
                     ConstantUserMaster.weight,
                   );
-                  // recalc macros using stored user data (approx BMR/activity)
                   final bmr = _estimateBMR(ConstantUserMaster.height, newWeight, ConstantUserMaster.age, ConstantUserMaster.gender);
                   final activity = _getActivityFactor(ConstantUserMaster.workOutDay);
                   final tdee = bmr * activity;
-                  // adjust calorie target based on user's desired goal (deficit for loss, surplus for gain)
-                  final adjustedCalories = _adjustCaloriesForGoal(tdee, newWeight, ConstantUserMaster.desiredGoal);
+                  final adjustedCalories = adjustCaloriesForGoal(tdee, newWeight, ConstantUserMaster.desiredGoal, ConstantUserMaster.goalWeight);
                   final macros = CUM.calculateMacrosFromTDEE(adjustedCalories.toDouble(), newWeight);
-                  // persist
                   await SharedPref.saveInt(SharePrefKey.calorie, macros['calories']);
                   await SharedPref.saveInt(SharePrefKey.protein, macros['protein']);
                   await SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']);
@@ -168,13 +161,10 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   ConstantUserMaster.proteinGoal = macros['protein']!;
                   ConstantUserMaster.carbGoal = macros['carbs']!;
                   ConstantUserMaster.fatsGoal = macros['fat']!;
-                  // notify user (localized)
                   NotificationService.showSuccess('update_targets_body');
-                  // Refresh Home screen data if HomeController is available so UI updates immediately
                   try {
                     Get.find<HomeController>().getAllData();
                   } catch (_) {
-                    // HomeController not registered; nothing to do. Home will pick up values on next load.
                   }
                 },
               );
@@ -191,11 +181,10 @@ class AnalyticsView extends GetView<AnalyticsController> {
                     SharePrefKey.desiredWeight,
                     ConstantUserMaster.desiredGoal,
                   );
-                  // For goal changes we recompute macros based on current weight for guidance
                   final bmr = _estimateBMR(ConstantUserMaster.height, ConstantUserMaster.weight, ConstantUserMaster.age, ConstantUserMaster.gender);
                   final activity = _getActivityFactor(ConstantUserMaster.workOutDay);
                   final tdee = bmr * activity;
-                  final adjustedCalories = _adjustCaloriesForGoal(tdee, ConstantUserMaster.weight, newGoal);
+                  final adjustedCalories = adjustCaloriesForGoal(tdee, ConstantUserMaster.weight, newGoal, ConstantUserMaster.goalWeight);
                   final macros = CUM.calculateMacrosFromTDEE(adjustedCalories.toDouble(), ConstantUserMaster.weight);
                   await SharedPref.saveInt(SharePrefKey.calorie, macros['calories']);
                   await SharedPref.saveInt(SharePrefKey.protein, macros['protein']);
@@ -206,11 +195,9 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   ConstantUserMaster.carbGoal = macros['carbs']!;
                   ConstantUserMaster.fatsGoal = macros['fat']!;
                   NotificationService.showSuccess('update_targets_body');
-                  // Refresh Home screen data if HomeController is available so UI updates immediately
                   try {
                     Get.find<HomeController>().getAllData();
                   } catch (_) {
-                    // HomeController not registered; nothing to do.
                   }
                 },
               );
@@ -229,7 +216,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
         child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          // Match the diagram/card background so the toggle visually sits on the same surface
           color: context.theme.cardColor,
           borderRadius: BorderRadius.circular(20),
         ),
@@ -313,7 +299,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
   }
 
   Widget _wrapWithCard(Widget child) {
-    // Return child directly; no card wrapper required for the overview calorie diagrams
     return Padding(
       padding: const EdgeInsets.all(16),
       child: child,
@@ -321,7 +306,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
   }
 }
 
-// Private helpers used by the Analytics view to estimate BMR and activity factor.
+// estimate BMR and activity factor.
 double _estimateBMR(int heightCm, int weightKg, int age, String gender) {
   if (gender.toLowerCase() == 'male') {
     return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
@@ -342,23 +327,3 @@ double _getActivityFactor(String workOutDays) {
   }
 }
 
-// Adjust TDEE calories towards user's goal. Returns target daily calories.
-double _adjustCaloriesForGoal(double tdee, int currentWeight, int desiredGoal) {
-  // If goal is lower than current, create a modest deficit (e.g., 15-20% of TDEE)
-  if (desiredGoal < currentWeight) {
-    // scale deficit by how far the goal is (small changes -> small deficit)
-    final diff = (currentWeight - desiredGoal).abs();
-    final pct = (diff >= 10) ? 0.20 : 0.15; // 20% for >=10kg, else 15%
-    return (tdee * (1 - pct)).clamp(1200, double.infinity);
-  }
-
-  // If goal is higher (user wants to gain), add a small surplus
-  if (desiredGoal > currentWeight) {
-    final diff = (desiredGoal - currentWeight).abs();
-    final pct = (diff >= 10) ? 0.20 : 0.10; // larger surplus for bigger gains
-    return (tdee * (1 + pct));
-  }
-
-  // If equal, return maintenance
-  return tdee;
-}
