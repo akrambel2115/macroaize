@@ -438,7 +438,7 @@ export function getInfluencerCommissionRate(): number {
  * Get influencer earn amount for code from Remote Config
  */
 export function getInfluencerEarnForCode(): number {
-  return getRcNumber('influencer_earn_for_code', Number(process.env.INFLUENCER_EARN_FOR_CODE) || 100);
+  return getRcNumber('influencer_earn_for_code', Number(process.env.INFLUENCER_EARN_FOR_CODE) || 25);
 }
 
 /**
@@ -446,6 +446,13 @@ export function getInfluencerEarnForCode(): number {
  */
 export function getInfluencerWithdrawalProcessingDays(): number {
   return getRcNumber('influencer_withdrawal_processing_days', Number(process.env.INFLUENCER_WITHDRAWAL_PROCESSING_DAYS) || 3);
+}
+
+/**
+ * Get minimum withdrawal amount for influencers from Remote Config
+ */
+export function getInfluencerMinWithdrawal(): number {
+  return getRcNumber('influencer_min_withdrawal', Number(process.env.INFLUENCER_MIN_WITHDRAWAL) || 2500);
 }
 
 /**
@@ -540,4 +547,13 @@ export function getScanLimitCfg(): number {
  */
 export function getChatLimitCfg(): number {
   return getChatLimit();
+}
+
+/**
+ * Feature flag: subscriptions enabled
+ */
+export function getSubscriptionsEnabled(): boolean {
+  // default false if not set
+  const val = getRcString('subscriptions_enabled', process.env.SUBSCRIPTIONS_ENABLED || 'false');
+  return String(val).toLowerCase() === 'true';
 }
