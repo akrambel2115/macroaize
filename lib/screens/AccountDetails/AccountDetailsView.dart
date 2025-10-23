@@ -51,6 +51,19 @@ class AccountDetailsView extends StatelessWidget {
             padding: EdgeInsets.only(right: 8),
             child: VerifyEmailButton(),
           ),
+          // logout icon button
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              try {
+                await FirebaseAuth.instance.signOut();
+                Get.back();
+                NotificationService.showSuccess('auth_logout_success');
+              } catch (e) {
+                NotificationService.showError('auth_logout_failed');
+              }
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -241,9 +254,6 @@ class AccountDetailsView extends StatelessWidget {
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                side: BorderSide(
-                                  color: _kAccent.withOpacity(0.25),
-                                ),
                               ),
                             ),
                             child: Text(
@@ -264,35 +274,7 @@ class AccountDetailsView extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // logout button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await FirebaseAuth.instance.signOut();
-                    Get.back();
-                    NotificationService.showSuccess('auth_logout_success');
-                  } catch (e) {
-                    NotificationService.showError('auth_logout_failed');
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _kAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  shadowColor: _kAccent.withOpacity(0.3),
-                  elevation: 6,
-                ),
-                child: Text(
-                  'logout'.tr,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
+            // ...logout moved to AppBar as an IconButton
             const SizedBox(height: 24),
           ],
         );
