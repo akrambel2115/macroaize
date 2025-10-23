@@ -52,9 +52,11 @@ class _RecipesViewState extends State<RecipesView> {
   }
   @override
   Widget build(BuildContext context) {
-    // Ensure controller is properly initialized
+    // Ensure a shared RecipesController is registered; use it without re-initializing
+    if (!Get.isRegistered<RecipesController>()) {
+      Get.put(RecipesController());
+    }
     return GetBuilder<RecipesController>(
-      init: RecipesController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: context.theme.scaffoldBackgroundColor,
