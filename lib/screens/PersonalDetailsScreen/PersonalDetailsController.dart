@@ -148,8 +148,8 @@ class PersonalDetailsController extends GetxController {
           ConstantUserMaster.height, ConstantUserMaster.weight, ConstantUserMaster.age, ConstantUserMaster.gender);
       final activity = _getActivityFactor(ConstantUserMaster.workOutDay);
       final tdee = bmr * activity;
-      final adjustedCalories = _adjustCaloriesForGoal(tdee, ConstantUserMaster.weight, ConstantUserMaster.desiredGoal);
-      final macros = calculateMacrosFromTDEE(adjustedCalories.toDouble(), ConstantUserMaster.weight);
+  final adjustedCalories = adjustCaloriesForGoal(tdee, ConstantUserMaster.weight, ConstantUserMaster.desiredGoal, ConstantUserMaster.goalWeight);
+  final macros = calculateMacrosFromTDEE(adjustedCalories.toDouble(), ConstantUserMaster.weight);
       SharedPref.saveInt(SharePrefKey.calorie, macros['calories']!);
       SharedPref.saveInt(SharePrefKey.protein, macros['protein']!);
       SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']!);
@@ -187,19 +187,6 @@ class PersonalDetailsController extends GetxController {
     }
   }
 
-  double _adjustCaloriesForGoal(double tdee, int currentWeight, int desiredGoal) {
-    if (desiredGoal < currentWeight) {
-      final diff = (currentWeight - desiredGoal).abs();
-      final pct = (diff >= 10) ? 0.20 : 0.15;
-      return (tdee * (1 - pct)).clamp(1200, double.infinity);
-    }
-    if (desiredGoal > currentWeight) {
-      final diff = (desiredGoal - currentWeight).abs();
-      final pct = (diff >= 10) ? 0.20 : 0.10;
-      return (tdee * (1 + pct));
-    }
-    return tdee;
-  }
 
   void updateDaysInMonth() {
     int daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
