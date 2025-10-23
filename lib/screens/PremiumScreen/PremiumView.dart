@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:flutter/services.dart';
@@ -6,9 +7,44 @@ import 'package:foodcalorietracker/screens/PremiumScreen/PremiumController.dart'
 import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:foodcalorietracker/shared/services/subscription_service.dart';
+import 'package:foodcalorietracker/shared/models/subscription.dart' as sub_model;
+import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
 
-class PremiumView extends GetView<PremiumController> {
+class PremiumView extends StatefulWidget {
   const PremiumView({super.key});
+
+  @override
+  State<PremiumView> createState() => _PremiumViewState();
+}
+
+class _PremiumViewState extends State<PremiumView> {
+  final PremiumController controller = Get.find();
+  bool showCloseLocal = true; // ui
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final args = Get.arguments as Map?;
+    final delayClose = args != null && args['delayClose'] == true;
+    controller.fromOnboarding = args != null && args['fromOnboarding'] == true;
+    if (delayClose) {
+      showCloseLocal = false;
+      _timer = Timer(const Duration(seconds: 3), () {
+        if (mounted) setState(() => showCloseLocal = true);
+      });
+    }
+    controller.processArgs(args);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +58,19 @@ class PremiumView extends GetView<PremiumController> {
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),
-      child: Scaffold(
-        backgroundColor: AppColor.darkBackground,
-        body: SafeArea(
-          child: Stack(
-            children: <Widget>[
+      child: PopScope(
+        canPop: showCloseLocal, // Only allow back when close button is visible
+        onPopInvoked: (didPop) {
+          // If back was pressed and close button is visible, treat it like close button
+          if (didPop && showCloseLocal) {
+            controller.onClosePressed();
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppColor.darkBackground,
+          body: SafeArea(
+            child: Stack(
+              children: <Widget>[
               _PremiumHeader(height: headerHeight),
               SingleChildScrollView(
                 child: Column(
@@ -258,6 +302,8 @@ class PremiumView extends GetView<PremiumController> {
                           GetBuilder<PremiumController>(
                             builder: (c) {
                               if (c.isPremium) {
+                                final cfg = Get.find<AppConfigService>();
+                                final rcEnabled = cfg.subscriptionsEnabled && (Platform.isAndroid || Platform.isIOS);
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
@@ -270,13 +316,63 @@ class PremiumView extends GetView<PremiumController> {
                                           ?.copyWith(color: Colors.white70),
                                     ),
                                     const SizedBox(height: 12),
-                                    
+                                    if (rcEnabled)
+                                      StreamBuilder<sub_model.Subscription?>(
+                                        stream: SubscriptionService().subscriptionStream,
+                                        builder: (context, snap) {
+                                          final sub = snap.data;
+                                          final provider = (sub?.provider ?? '').toLowerCase();
+                                          if (provider != 'revenuecat') return const SizedBox.shrink();
+                                          final storeName = Platform.isIOS ? 'App Store' : 'Google Play';
+                                          final url = Platform.isIOS ? cfg.appStoreUrl : cfg.playStoreUrl;
+                                          return Wrap(
+                                            spacing: 8,
+                                            runSpacing: 8,
+                                            alignment: WrapAlignment.center,
+                                            children: [
+                                              OutlinedButton.icon(
+                                                onPressed: () async {
+                                                  final uri = Uri.parse(url);
+                                                  if (await canLaunchUrl(uri)) {
+                                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                  }
+                                                },
+                                                icon: const Icon(Icons.manage_accounts, color: Colors.white),
+                                                label: Text('Manage on $storeName', style: const TextStyle(color: Colors.white)),
+                                                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white24)),
+                                              ),
+                                              OutlinedButton.icon(
+                                                onPressed: () async {
+                                                  await RevenueCatService().restorePurchases();
+                                                },
+                                                icon: const Icon(Icons.restore, color: Colors.white),
+                                                label: const Text('Restore', style: TextStyle(color: Colors.white)),
+                                                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white24)),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
                                   ],
                                 );
                               }
-                              return ContinueButton(
-                                onTap: () => controller.buy(),
-                                icon: null,
+                              final cfg = Get.find<AppConfigService>();
+                              final rcEnabled = cfg.subscriptionsEnabled;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  ContinueButton(
+                                    onTap: () => controller.buy(),
+                                    icon: null,
+                                  ),
+                                  if (rcEnabled && (Platform.isAndroid || Platform.isIOS)) ...[
+                                    const SizedBox(height: 8),
+                                    TextButton(
+                                      onPressed: () => controller.restorePurchases(),
+                                      child: Text('Restore purchases'.tr),
+                                    ),
+                                  ]
+                                ],
                               );
                             },
                           ),
@@ -333,39 +429,40 @@ class PremiumView extends GetView<PremiumController> {
                 ),
               ),
               // Close button positioned above the header/scroll content
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Semantics(
-                  label: 'close',
-                  button: true,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => Get.back(),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white10
-                                : Colors.white24,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
+              if (showCloseLocal)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Semantics(
+                    label: 'close',
+                    button: true,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: controller.onClosePressed,
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white10
+                              : Colors.white24,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-    );
+        ), // End of Scaffold
+      ), // End of PopScope
+    ); // End of AnnotatedRegion
   }
 }
 
