@@ -300,6 +300,7 @@ const Map<String, String> french = {
   "This helps is generate a plan for your calorie intake.":
       "Cela nous aide à créer un plan pour votre apport calorique.",
   "Gain Weight": "Prendre du poids",
+    "Maintain Weight": "Maintenir le poids",
   "Lose Weight": "Perdre du poids",
   "Update Calorie Goal": "Mettre à jour l'objectif de calories",
   "Calorie goal": "Objectif de calories",
@@ -568,9 +569,6 @@ const Map<String, String> french = {
   "top_recipes": "Top recettes",
   "all_recipes": "Toutes les recettes",
   // Recipe Detail specific keys
-  "recipe_title": "Smoothie myrtille et amande",
-  "description":
-      "Commencez votre journée avec ce smoothie riche en antioxydants, délicieux et facile à préparer !",
   "less_text": "Moins ^",
   "macronutrients": "Macronutriments",
   "ingredients": "Ingrédients",
@@ -665,6 +663,40 @@ const Map<String, String> french = {
   "promo_code_dialog_title": "Vous avez un code promo ?",
   "promo_code_dialog_subtitle":
       "Entrez votre code promo pour bénéficier d'une réduction sur votre abonnement",
+
+  // Promo Code View (Sign Up)
+  "Have a Promo Code?": "Avez-vous un code promo ?",
+  "Enter your promo code to get 3 days free trial": "Entrez votre code promo pour obtenir 3 jours d'essai gratuit",
+  "ENTER CODE": "ENTREZ LE CODE",
+  "Validate Code": "Valider le code",
+  "Promo code applied successfully!": "Code promo appliqué avec succès !",
+  "Please enter a promo code": "Veuillez entrer un code promo",
+  "Invalid promo code": "Code promo invalide",
+
+  // Plan review page translations
+  "Your Plan is Ready!": "Votre plan est prêt !",
+  "We have customized your nutrition plan based on your goals": "Nous avons personnalisé votre plan nutritionnel en fonction de vos objectifs",
+  "Daily Calorie Goal": "Objectif calorique quotidien",
+  "Macronutrients Breakdown": "Répartition des macronutriments",
+  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.": "Ce plan est basé sur votre âge, poids, taille, niveau d'activité et objectifs. Vous pouvez ajuster votre apport quotidien dans les paramètres à tout moment.",
+  "Continue to Premium": "Continuer vers Premium",
+
+  // App Tips/Tutorial translations
+  "app_tips": "Conseils d'utilisation",
+  "skip": "Passer",
+  "next": "Suivant",
+  "previous": "Précédent",
+  "get_started": "Commencer",
+  "tip_welcome_title": "Bienvenue sur macroAize !",
+  "tip_welcome_description": "Votre tracker nutritionnel personnel alimenté par l'IA. Faisons une visite rapide pour vous aider à démarrer votre parcours santé.",
+  "tip_track_food_title": "Suivez vos repas",
+  "tip_track_food_description": "Appuyez sur le bouton + sur l'écran d'accueil pour enregistrer vos repas. Choisissez entre petit-déjeuner, déjeuner, dîner ou collations pour garder des registres précis.",
+  "tip_scan_food_title": "Scanner avec l'IA",
+  "tip_scan_food_description": "Prenez une photo de votre nourriture et notre IA analysera et calculera instantanément les calories, protéines, glucides et lipides pour vous.",
+  "tip_ai_coach_title": "Discutez avec le Coach IA",
+  "tip_ai_coach_description": "Obtenez des conseils nutritionnels personnalisés, des suggestions de repas et des réponses à vos questions de santé de notre coach IA à tout moment.",
+  "tip_analytics_title": "Suivez vos progrès",
+  "tip_analytics_description": "Consultez des analyses détaillées de vos tendances nutritionnelles, de vos progrès de poids et de la répartition des macros pour rester sur la bonne voie vers vos objectifs.",
 
   // Email verification translations
   "email_verification_title": "Vérifiez votre e-mail",
@@ -856,4 +888,18 @@ const Map<String, String> french = {
   // Registration Success
   "auth_register_verification_required":
       "Compte créé ! Veuillez consulter vos e-mails pour vérifier votre compte.",
+
+  // Interactive Tutorial
+  "tutorial_tap_to_continue": "Appuyez n'importe où pour continuer",
+  "tutorial_step": "Étape",
+  "tutorial_add_food_title": "Suivez vos repas",
+  "tutorial_add_food_description": "Appuyez sur le bouton '+' pour ajouter des aliments à votre journal quotidien. Vous pouvez rechercher, scanner ou ajouter des aliments personnalisés.",
+  "tutorial_scanner_title": "Scanner alimentaire IA",
+  "tutorial_scanner_description": "Utilisez notre scanner alimentaire IA pour analyser instantanément vos aliments et obtenir des informations nutritionnelles précises.",
+  "tutorial_ai_coach_title": "Coach nutritionnel IA",
+  "tutorial_ai_coach_description": "Chattez avec votre coach IA personnel pour des conseils personnalisés, des suggestions de repas et des orientations nutritionnelles.",
+  "tutorial_analytics_title": "Suivez vos progrès",
+  "tutorial_analytics_description": "Consultez vos analyses nutritionnelles, vos progrès de poids et vos tendances quotidiennes pour rester sur la bonne voie avec vos objectifs.",
+  "tutorial_profile_title": "Votre profil",
+  "tutorial_profile_description": "Accédez à vos paramètres, ajustez vos objectifs et personnalisez votre expérience dans la section profil.",
 };

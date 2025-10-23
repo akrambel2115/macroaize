@@ -299,6 +299,7 @@ const Map<String, String> english = {
   "This helps is generate a plan for your calorie intake.":
       "This helps us create a plan for your calorie intake.",
   "Gain Weight": "Gain Weight",
+    "Maintain Weight": "Maintain Weight",
   "Lose Weight": "Lose Weight",
   "Update Calorie Goal": "Update Calorie Goal",
   "Calorie goal": "Calorie goal",
@@ -567,9 +568,6 @@ const Map<String, String> english = {
   "top_recipes": "Top Recipes",
   "all_recipes": "All Recipes",
   // Recipe Detail specific keys
-  "recipe_title": "Blueberry Almond Smoothie",
-  "description":
-      "Kickstart your day with this antioxidant-packed, super delicious, and easy-to-make smoothie!",
   "less_text": "Less ^",
   "macronutrients": "Macronutrients",
   "ingredients": "Ingredients",
@@ -664,6 +662,40 @@ const Map<String, String> english = {
   "promo_code_dialog_title": "Have a promo code?",
   "promo_code_dialog_subtitle":
       "Enter your promo code to get a discount on your subscription",
+  
+  // Promo Code View (Sign Up)
+  "Have a Promo Code?": "Have a Promo Code?",
+  "Enter your promo code to get 3 days free trial": "Enter your promo code to get 3 days free trial",
+  "ENTER CODE": "ENTER CODE",
+  "Validate Code": "Validate Code",
+  "Promo code applied successfully!": "Promo code applied successfully!",
+  "Please enter a promo code": "Please enter a promo code",
+  "Invalid promo code": "Invalid promo code",
+
+  // Plan review page translations
+  "Your Plan is Ready!": "Your Plan is Ready!",
+  "We have customized your nutrition plan based on your goals": "We have customized your nutrition plan based on your goals",
+  "Daily Calorie Goal": "Daily Calorie Goal",
+  "Macronutrients Breakdown": "Macronutrients Breakdown",
+  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.": "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.",
+  "Continue to Premium": "Continue to Premium",
+
+  // App Tips/Tutorial translations
+  "app_tips": "App Tips",
+  "skip": "Skip",
+  "next": "Next",
+  "previous": "Previous",
+  "get_started": "Get Started",
+  "tip_welcome_title": "Welcome to macroAize!",
+  "tip_welcome_description": "Your personal AI-powered nutrition tracker. Let's take a quick tour to help you get started on your health journey.",
+  "tip_track_food_title": "Track Your Meals",
+  "tip_track_food_description": "Tap the + button on the home screen to log your meals. Choose between breakfast, lunch, dinner, or snacks to keep accurate records.",
+  "tip_scan_food_title": "Scan with AI",
+  "tip_scan_food_description": "Take a photo of your food and our AI will instantly analyze and calculate calories, protein, carbs, and fats for you.",
+  "tip_ai_coach_title": "Chat with AI Coach",
+  "tip_ai_coach_description": "Get personalized nutrition advice, meal suggestions, and answers to your health questions from our AI coach anytime.",
+  "tip_analytics_title": "Track Your Progress",
+  "tip_analytics_description": "View detailed analytics of your nutrition trends, weight progress, and macro distribution to stay on track with your goals.",
 
   // Email verification translations
   "email_verification_title": "Verify Your Email",
@@ -855,4 +887,18 @@ const Map<String, String> english = {
   // Registration Success
   "auth_register_verification_required":
       "Account created! Please check your email to verify your account.",
+
+  // Interactive Tutorial
+  "tutorial_tap_to_continue": "Tap anywhere to continue",
+  "tutorial_step": "Step",
+  "tutorial_add_food_title": "Track Your Meals",
+  "tutorial_add_food_description": "Tap the '+' button to add food to your daily log. You can search, scan, or add custom foods.",
+  "tutorial_scanner_title": "AI Food Scanner",
+  "tutorial_scanner_description": "Use our AI-powered scanner to instantly analyze your food and get accurate nutrition information.",
+  "tutorial_ai_coach_title": "AI Nutrition Coach",
+  "tutorial_ai_coach_description": "Chat with your personal AI coach for personalized advice, meal suggestions, and nutrition guidance.",
+  "tutorial_analytics_title": "Track Your Progress",
+  "tutorial_analytics_description": "View your nutrition analytics, weight progress, and daily trends to stay on track with your goals.",
+  "tutorial_profile_title": "Your Profile",
+  "tutorial_profile_description": "Access your settings, adjust your goals, and customize your experience in the profile section.",
 };

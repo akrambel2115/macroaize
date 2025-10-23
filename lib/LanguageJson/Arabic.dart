@@ -298,6 +298,7 @@ const Map<String, String> arabic = {
   "This helps is generate a plan for your calorie intake.":
       "هذا يساعد في إنشاء خطة لاستهلاكك من السعرات الحرارية.",
   "Gain Weight": "زيادة الوزن",
+    "Maintain Weight": "الحفاظ على الوزن",
   "Lose Weight": "خسارة الوزن",
   "Update Calorie Goal": "تحديث هدف السعرات",
   "Calorie goal": "هدف السعرات",
@@ -524,6 +525,43 @@ const Map<String, String> arabic = {
   "promo_code_invalid": "رمز الخصم غير صالح",
   "promo_code_dialog_title": "هل لديك رمز خصم؟",
   "promo_code_dialog_subtitle": "أدخل رمز الخصم للاستفادة من الخصم",
+  
+  // Promo Code View (Sign Up)
+  "Have a Promo Code?": "هل لديك رمز خصم؟",
+  "Enter your promo code to get 3 days free trial": "أدخل رمز الخصم للحصول على 3 أيام تجربة مجانية",
+  "ENTER CODE": "أدخل الرمز",
+  "Validate Code": "تحقق من الرمز",
+  "Promo code applied successfully!": "تم تطبيق رمز الخصم بنجاح!",
+  "Please enter a promo code": "الرجاء إدخال رمز الخصم",
+    "Invalid promo code": "رمز الخصم غير صالح",
+
+  // Plan review page translations
+  "Your Plan is Ready!": "خطتك جاهزة!",
+  "We have customized your nutrition plan based on your goals": "لقد قمنا بتخصيص خطة التغذية الخاصة بك بناءً على أهدافك",
+  "Daily Calorie Goal": "هدف السعرات الحرارية اليومية",
+  "Macronutrients Breakdown": "توزيع المغذيات الكبرى",
+  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.": "تعتمد هذه الخطة على عمرك ووزنك وطولك ومستوى نشاطك وأهدافك. يمكنك تعديل كمية الطعام اليومية في الإعدادات في أي وقت.",
+  "Continue to Premium": "الاستمرار إلى Premium",
+
+  // App Tips/Tutorial translations
+  "app_tips": "نصائح التطبيق",
+  "skip": "تخطي",
+  "next": "التالي",
+  "previous": "السابق",
+  "get_started": "ابدأ الآن",
+  "tip_welcome_title": "مرحباً بك في macroAize!",
+  "tip_welcome_description": "متتبع التغذية الشخصي الخاص بك المدعوم بالذكاء الاصطناعي. لنقم بجولة سريعة لمساعدتك على البدء في رحلتك الصحية.",
+  "tip_track_food_title": "تتبع وجباتك",
+  "tip_track_food_description": "اضغط على زر + في الشاشة الرئيسية لتسجيل وجباتك. اختر بين الإفطار أو الغداء أو العشاء أو الوجبات الخفيفة للحفاظ على سجلات دقيقة.",
+  "tip_scan_food_title": "المسح بالذكاء الاصطناعي",
+  "tip_scan_food_description": "التقط صورة لطعامك وسيقوم الذكاء الاصطناعي الخاص بنا بتحليل وحساب السعرات الحرارية والبروتين والكربوهيدرات والدهون على الفور.",
+  "tip_ai_coach_title": "تحدث مع المدرب الذكي",
+  "tip_ai_coach_description": "احصل على نصائح غذائية مخصصة واقتراحات للوجبات وإجابات على أسئلتك الصحية من مدربنا الذكي في أي وقت.",
+  "tip_analytics_title": "تتبع تقدمك",
+  "tip_analytics_description": "اعرض تحليلات مفصلة لاتجاهات التغذية الخاصة بك، وتقدم الوزن، وتوزيع الماكروز للبقاء على المسار الصحيح نحو أهدافك.",
+
+  // Email verification translations
+  
   "available_balance": "الرصيد المتاح",
   "withdrawal_amount": "مبلغ السحب",
   "enter_amount": "أدخل المبلغ",
@@ -628,9 +666,6 @@ const Map<String, String> arabic = {
   "top_recipes": "أفضل الوصفات",
   "all_recipes": "كل الوصفات",
   // Recipe Detail specific keys
-  "recipe_title": "سموذي التوت الأزرق واللوز",
-  "description":
-      "ابدأ يومك بهذا السموذي المليء بمضادات الأكسدة، لذيذ وسهل التحضير!",
   "less_text": "أقل ^",
   "macronutrients": "المغذيات الكبرى",
   "ingredients": "المكونات",
@@ -848,5 +883,19 @@ const Map<String, String> arabic = {
   "must_differ_from_current": "يجب أن تكون مختلفة عن الحالية",
   "does_not_match": "غير متطابق",
   "change_password_cta": "تغيير كلمة المرور",
+
+  // Interactive Tutorial
+  "tutorial_tap_to_continue": "اضغط في أي مكان للمتابعة",
+  "tutorial_step": "خطوة",
+  "tutorial_add_food_title": "تتبع وجباتك",
+  "tutorial_add_food_description": "اضغط على زر '+' لإضافة طعام إلى سجلك اليومي. يمكنك البحث أو المسح أو إضافة أطعمة مخصصة.",
+  "tutorial_scanner_title": "ماسح الطعام بالذكاء الاصطناعي",
+  "tutorial_scanner_description": "استخدم الماسح الضوئي المدعوم بالذكاء الاصطناعي لتحليل طعامك على الفور والحصول على معلومات غذائية دقيقة.",
+  "tutorial_ai_coach_title": "مدرب التغذية بالذكاء الاصطناعي",
+  "tutorial_ai_coach_description": "تحدث مع مدربك الشخصي بالذكاء الاصطناعي للحصول على نصائح مخصصة واقتراحات وجبات وإرشادات غذائية.",
+  "tutorial_analytics_title": "تتبع تقدمك",
+  "tutorial_analytics_description": "اعرض تحليلاتك الغذائية وتقدم وزنك واتجاهاتك اليومية لتبقى على المسار الصحيح نحو أهدافك.",
+  "tutorial_profile_title": "ملفك الشخصي",
+  "tutorial_profile_description": "الوصول إلى إعداداتك، وضبط أهدافك، وتخصيص تجربتك في قسم الملف الشخصي.",
 };
 
