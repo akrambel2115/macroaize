@@ -2,24 +2,28 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart'; // COMMENTED OUT - unused after refactor
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+// import 'package:cloud_functions/cloud_functions.dart'; // COMMENTED OUT - Chargily removed
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
 import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
 
 import 'package:foodcalorietracker/shared/services/app_config_service.dart';
-import '../../constant/AppColor.dart';
+// import '../../constant/AppColor.dart'; // COMMENTED OUT - unused after dialog removal
 import '../../shared/services/influencer_service.dart';
+import '../../routes/app_routes.dart';
 
 class PremiumController extends GetxController {
   int selected = 0;
   bool isPremium = false;
+  bool showClose = true; // ui
+  bool fromOnboarding = false; // source
 
   String promoCode = '';
   bool isValidatingPromo = false;
@@ -63,6 +67,51 @@ class PremiumController extends GetxController {
     );
     initStore();
     _subscribeToFirestore();
+  }
+
+  bool _argsProcessed = false;
+
+  void processArgs(Map? args) {
+    if (_argsProcessed) return; // once
+    _argsProcessed = true;
+    final delayClose = args is Map && args['delayClose'] == true;
+    fromOnboarding = args is Map && args['fromOnboarding'] == true;
+    
+    // Extract promo code from signup flow if provided
+    if (args is Map && args['promoCode'] != null) {
+      promoCode = args['promoCode'] as String;
+      isPromoValid = true; // Already validated in signup
+      if (kDebugMode) {
+        print('Promo code from signup: $promoCode');
+      }
+    }
+    
+    if (delayClose) {
+      showClose = false;
+      update(['close_btn']);
+      Future.delayed(const Duration(seconds: 3), () {
+        showClose = true;
+        update(['close_btn']);
+      });
+    }
+  }
+
+  void onClosePressed() {
+    if (fromOnboarding) {
+      // navigate
+      try {
+        Get.offAllNamed(Routes.leadingView);
+      } catch (_) {}
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (Get.currentRoute != Routes.leadingView) {
+          try {
+            Get.toNamed(Routes.leadingView);
+          } catch (_) {}
+        }
+      });
+    } else {
+      Get.back();
+    }
   }
 
   void _subscribeToFirestore() {
@@ -249,9 +298,65 @@ class PremiumController extends GetxController {
       return;
     }
 
-    await _showPromoCodeDialog();
+    final cfg = Get.find<AppConfigService>();
+    final rcEnabled = cfg.subscriptionsEnabled && (Platform.isAndroid || Platform.isIOS);
+
+    // NEW FLOW: Direct to Apple Pay (iOS) or Google Pay (Android)
+    // No promo code dialog, no payment method selection
+    if (rcEnabled) {
+      try {
+        await RevenueCatService().identifyWithFirebaseUser();
+        
+        // Determine plan type from selected product
+        String planType = 'monthly';
+        if (products.isNotEmpty) {
+          final p = products[selected];
+          final id = p.id.toLowerCase();
+          final title = p.title.toLowerCase();
+          if (id.contains('year') ||
+              id.contains('annual') ||
+              title.contains('year') ||
+              title.contains('annual')) {
+            planType = 'yearly';
+          }
+        }
+        
+        // Purchase directly via RevenueCat (Apple Pay on iOS, Google Pay on Android)
+        // Pass promo code if available from signup flow
+        final ok = await RevenueCatService().purchasePlan(
+          planType,
+          promoCode: promoCode.isNotEmpty ? promoCode : null,
+        );
+        if (ok) {
+          Fluttertoast.showToast(msg: 'Purchase successful');
+          return;
+        } else {
+          Fluttertoast.showToast(msg: 'Purchase cancelled');
+          return;
+        }
+      } catch (e) {
+        if (kDebugMode) print('RevenueCat purchase error: $e');
+        Fluttertoast.showToast(msg: 'Purchase failed. Please try again.');
+        return;
+      }
+    }
+
+    // Fallback for non-mobile platforms (should not happen in production)
+    Fluttertoast.showToast(msg: 'Subscriptions are only available on mobile devices');
+    
+    // COMMENTED OUT: Old Chargily flow
+    // await _showPromoCodeDialog();
   }
 
+  Future<void> restorePurchases() async {
+    try {
+      await RevenueCatService().restorePurchases();
+    } catch (_) {}
+  }
+
+  // COMMENTED OUT: Promo code dialog moved to signup flow
+  // This method is no longer used in the premium purchase flow
+  /*
   Future<void> _showPromoCodeDialog() async {
     final promoController = TextEditingController();
     bool isValidating = false;
@@ -336,7 +441,8 @@ class PremiumController extends GetxController {
                         ? null
                         : () {
                           Get.back();
-                          _proceedToCheckout();
+                          // Proceed with Dahabia (Chargily) after skipping promo
+                          _proceedToCheckout('chargily');
                         },
                 child: Text(
                   'skip_promo_code'.tr,
@@ -375,7 +481,8 @@ class PremiumController extends GetxController {
                             Fluttertoast.showToast(
                               msg: 'promo_code_applied'.tr,
                             );
-                            _proceedToCheckout();
+                            // Proceed with Dahabia (Chargily) after applying promo
+                            _proceedToCheckout('chargily');
                           } catch (e) {
                             setState(() {
                               isValidating = false;
@@ -413,7 +520,10 @@ class PremiumController extends GetxController {
       ),
     );
   }
+  */
 
+  // COMMENTED OUT: Promo code validation moved to signup flow
+  /*
   Future<void> _validatePromoCodeForDialog(String code) async {
     if (code.isEmpty) {
       throw Exception('Please enter a promo code');
@@ -435,8 +545,11 @@ class PremiumController extends GetxController {
       throw Exception('Invalid promo code');
     }
   }
+  */
 
-  Future<void> _proceedToCheckout() async {
+  // COMMENTED OUT: Old checkout flow with Chargily integration
+  /*
+  Future<void> _proceedToCheckout([String? methodOverride]) async {
     String planType = 'monthly';
     if (products.isNotEmpty) {
       final p = products[selected];
@@ -447,6 +560,33 @@ class PremiumController extends GetxController {
           title.contains('year') ||
           title.contains('annual')) {
         planType = 'yearly';
+      }
+    }
+
+    final cfg = Get.find<AppConfigService>();
+    final rcEnabled = cfg.subscriptionsEnabled && (Platform.isAndroid || Platform.isIOS);
+
+    if (rcEnabled) {
+      final method = methodOverride ?? await _choosePaymentMethod();
+      if (method == 'store') {
+        try {
+          await RevenueCatService().identifyWithFirebaseUser();
+          final ok = await RevenueCatService().purchasePlan(planType);
+          if (ok) {
+            Fluttertoast.showToast(msg: 'Purchase successful');
+            return;
+          } else {
+            Fluttertoast.showToast(msg: 'Purchase cancelled');
+            return;
+          }
+        } catch (_) {
+          Fluttertoast.showToast(msg: 'Purchase failed');
+          return;
+        }
+      } else if (method == 'chargily') {
+        // Proceed to Chargily flow below
+      } else {
+        return;
       }
     }
 
@@ -512,6 +652,117 @@ class PremiumController extends GetxController {
       }
     }
   }
+  */
+
+  // COMMENTED OUT: Payment method chooser dialog - no longer needed
+  /*
+  Future<String?> _choosePaymentMethod() async {
+    final isIOS = Platform.isIOS;
+    final storePaymentName = isIOS ? 'Apple Pay' : 'Google Pay subscription';
+    final storeIcon = isIOS ? Icons.apple : Icons.android;
+    
+    return Get.dialog<String>(
+      AlertDialog(
+        backgroundColor: AppColor.darkBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'Choose Payment Method'.tr,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Get.back(result: 'store'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColor.primaryOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 20,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: Icon(storeIcon, size: 24),
+                label: Text(
+                  storePaymentName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => Get.back(result: 'chargily'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white54, width: 1),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 20,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.credit_card, size: 24),
+                label: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Dahabia (External)'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'external browser checkout outside the app'.tr,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Cancel'.tr,
+              style: const TextStyle(
+                color: Colors.white54,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+  }
+  */
 
   onChangeSelectedIndex(int index) {
     selected = index;
