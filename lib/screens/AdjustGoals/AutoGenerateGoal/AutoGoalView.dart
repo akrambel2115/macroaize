@@ -14,6 +14,7 @@ class AutoGoalView extends GetView<AdjustGoalsController> {
           (c) => GoalStep(
             selectedGoal: c.selectedWGoal,
             onSelectGoal: c.onChangeGoal,
+            initialWeight: c.selectedWeightKg,
             onDesiredWeightChanged: (kg) => c.onChangeDesiredWeight(kg),
             onBack: () => c.onChangeView(2),
             onContinue: () {
