@@ -5,15 +5,18 @@ import 'package:foodcalorietracker/constant/AppColor.dart';
 
 class HeightWeightPicker extends StatelessWidget {
   final void Function(int cm)? onHeightCmChanged;
-  final void Function(int feet, int inches)?
-  onHeightFeetInchesChanged;
+  final void Function(int feet, int inches)? onHeightFeetInchesChanged;
   final void Function(int kg)? onWeightKgChanged;
+  final int? initialHeightCm;
+  final int? initialWeightKg;
 
   const HeightWeightPicker({
     super.key,
     this.onHeightCmChanged,
     this.onHeightFeetInchesChanged,
     this.onWeightKgChanged,
+    this.initialHeightCm,
+    this.initialWeightKg,
   });
 
   @override
@@ -21,7 +24,7 @@ class HeightWeightPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-  const SizedBox(height: 20),
+        const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -49,6 +52,12 @@ class HeightWeightPicker extends StatelessWidget {
                     ),
                     child: CupertinoPicker(
                       itemExtent: 40,
+                      scrollController: FixedExtentScrollController(
+                        initialItem:
+                            (initialHeightCm != null && initialHeightCm! >= 120)
+                                ? (initialHeightCm! - 120).clamp(0, 129)
+                                : 50, // default visual start ~170cm
+                      ),
                       onSelectedItemChanged: (index) {
                         final cm = 120 + index;
                         onHeightCmChanged?.call(cm);
@@ -98,6 +107,12 @@ class HeightWeightPicker extends StatelessWidget {
                     ),
                     child: CupertinoPicker(
                       itemExtent: 40,
+                      scrollController: FixedExtentScrollController(
+                        initialItem:
+                            (initialWeightKg != null && initialWeightKg! >= 51)
+                                ? (initialWeightKg! - 51).clamp(0, 149)
+                                : 9, // default visual start ~60kg
+                      ),
                       onSelectedItemChanged: (index) {
                         final kg = 51 + index;
                         onWeightKgChanged?.call(kg);

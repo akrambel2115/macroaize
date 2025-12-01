@@ -21,9 +21,7 @@ class ScannerOverlay extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: Container(
-            color: Colors.black.withOpacity(0.42),
-          ),
+          child: Container(color: Colors.black.withOpacity(0.42)),
         ),
 
         Center(
@@ -33,10 +31,7 @@ class ScannerOverlay extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(
-                color: borderColor,
-                width: 3,
-              ),
+              border: Border.all(color: borderColor, width: 3),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.4),
@@ -70,7 +65,6 @@ class ScannerOverlay extends StatelessWidget {
           ),
         ),
 
-        
         Positioned(
           top: 100,
           left: 0,
@@ -85,9 +79,9 @@ class ScannerOverlay extends StatelessWidget {
               child: Text(
                 'Center food in the frame and tap to scan'.tr,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),

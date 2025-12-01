@@ -5,6 +5,7 @@ import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
 /// Continue button with a localized default label.
 class ContinueButton extends StatelessWidget {
   final String? labelKey;
+  final String? text; // Custom text override
   final VoidCallback? onTap;
   final VoidCallback? onTapDown;
   final VoidCallback? onTapUp;
@@ -15,6 +16,7 @@ class ContinueButton extends StatelessWidget {
   const ContinueButton({
     super.key,
     this.labelKey,
+    this.text,
     this.onTap,
     this.onTapDown,
     this.onTapUp,
@@ -25,7 +27,7 @@ class ContinueButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = (labelKey ?? 'continue_cta').tr;
+    final label = text ?? (labelKey ?? 'continue_cta').tr;
     return PrimaryCTA(
       label: label,
       onTap: onTap,

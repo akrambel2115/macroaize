@@ -16,8 +16,8 @@ class SharedSearchBar extends StatelessWidget {
     required this.onChanged,
     this.onSubmitted,
     this.onClear,
-  this.hint = '',
-  this.focusNode,
+    this.hint = '',
+    this.focusNode,
   });
 
   @override
@@ -34,7 +34,10 @@ class SharedSearchBar extends StatelessWidget {
         color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColor.neutralGrey800 : AppColor.neutralGrey200.withOpacity(0.6),
+          color:
+              isDark
+                  ? AppColor.neutralGrey800
+                  : AppColor.neutralGrey200.withOpacity(0.6),
           width: 1,
         ),
       ),

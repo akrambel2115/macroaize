@@ -8,6 +8,7 @@ class GoalAndWeightPicker extends StatelessWidget {
   final ValueChanged<String> onSelectGoal;
   final int minKg;
   final int count;
+  final int? initialWeight;
   final ValueChanged<int> onDesiredWeightChanged;
 
   const GoalAndWeightPicker({
@@ -17,6 +18,7 @@ class GoalAndWeightPicker extends StatelessWidget {
     required this.onDesiredWeightChanged,
     this.minKg = 50,
     this.count = 40,
+    this.initialWeight,
   });
 
   @override
@@ -48,6 +50,12 @@ class GoalAndWeightPicker extends StatelessWidget {
           ),
           child: CupertinoPicker(
             itemExtent: 40,
+            scrollController: FixedExtentScrollController(
+              initialItem:
+                  (initialWeight != null && initialWeight! >= minKg)
+                      ? (initialWeight! - minKg).clamp(0, count - 1)
+                      : 0,
+            ),
             onSelectedItemChanged: (index) {
               onDesiredWeightChanged(minKg + index);
             },
@@ -85,10 +93,11 @@ class _SplitGoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isGain = selectedGoal == 'Gain Weight';
     final bool isLose = selectedGoal == 'Lose Weight';
+    final bool isMaintain = selectedGoal == 'Maintain Weight';
     final bool hasSel = selectedGoal.isNotEmpty;
-
-  final double topH = hasSel ? (isGain ? 120 : 60) : 80;
-  final double botH = hasSel ? (isLose ? 120 : 60) : 80;
+    final double topH = hasSel ? (isGain ? 120 : 60) : 80;
+    final double midH = hasSel ? (isMaintain ? 120 : 60) : 80;
+    final double botH = hasSel ? (isLose ? 120 : 60) : 80;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -136,6 +145,15 @@ class _SplitGoalCard extends StatelessWidget {
                   ],
                   selected: isGain,
                   onTap: () => onSelectGoal('Gain Weight'),
+                ),
+                _HalfTile(
+                  height: midH,
+                  label: 'Maintain Weight'.tr,
+                  icon: Icons.horizontal_rule,
+                  assetIcon: 'assets/icons/maintain.png',
+                  gradient: const [Colors.grey, Colors.green],
+                  selected: isMaintain,
+                  onTap: () => onSelectGoal('Maintain Weight'),
                 ),
                 _HalfTile(
                   height: botH,

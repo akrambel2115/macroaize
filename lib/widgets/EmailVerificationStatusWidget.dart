@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../constant/AppColor.dart';
 import '../routes/app_routes.dart';
 
-/// Shows email verification status with optional inline actions.
+/// email verification status with optional inline actions.
 class EmailVerificationStatusWidget extends StatelessWidget {
   final bool showInlineActions;
   final bool compactMode;

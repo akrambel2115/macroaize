@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/FontFamily.dart';
 
@@ -36,11 +35,9 @@ class CustomButtom extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                child: prefixicon,
-              ),
+              Container(child: prefixicon),
               Center(
-                  child: Text(
+                child: Text(
                   btntext,
                   style: TextStyle(
                     fontFamily: poppins,
@@ -48,10 +45,9 @@ class CustomButtom extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: btncolor,
                   ),
-                )),
-              Container(
-                child: sufixicon,
-              )
+                ),
+              ),
+              Container(child: sufixicon),
             ],
           ),
         ),

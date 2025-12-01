@@ -18,7 +18,7 @@ class PrimaryCTA extends StatelessWidget {
     this.onTapUp,
     this.onTapCancel,
     this.pressAnimation,
-  this.icon,
+    this.icon,
   });
 
   @override

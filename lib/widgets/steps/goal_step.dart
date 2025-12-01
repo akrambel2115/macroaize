@@ -3,12 +3,13 @@ import 'package:get/get.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
 import '../goal_and_weight_picker.dart';
 
-class GoalStep extends StatelessWidget {
+class GoalStep extends StatefulWidget {
   final String? title;
   final String? subtitle;
   final String selectedGoal;
   final void Function(String id) onSelectGoal;
   final ValueChanged<int> onDesiredWeightChanged;
+  final int? initialWeight;
   final VoidCallback onContinue;
   final VoidCallback? onBack;
   final bool showHeaderBack;
@@ -22,6 +23,7 @@ class GoalStep extends StatelessWidget {
     required this.selectedGoal,
     required this.onSelectGoal,
     required this.onDesiredWeightChanged,
+    this.initialWeight,
     required this.onContinue,
     this.onBack,
     this.showHeaderBack = false,
@@ -30,56 +32,85 @@ class GoalStep extends StatelessWidget {
   });
 
   @override
+  State<GoalStep> createState() => _GoalStepState();
+}
+
+class _GoalStepState extends State<GoalStep> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _handleGoalSelection(String id) {
+    widget.onSelectGoal(id);
+    // Auto-scroll to bottom to reveal the Continue button
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final hasSelection = selectedGoal.isNotEmpty;
+    final hasSelection = widget.selectedGoal.isNotEmpty;
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Padding(
-        padding: padding ?? const EdgeInsets.all(8.0),
+        padding: widget.padding ?? const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showHeaderBack && onBack != null)
+            if (widget.showHeaderBack && widget.onBack != null)
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
-                  onPressed: onBack,
+                  onPressed: widget.onBack,
                 ),
               ),
             Text(
-              (title ?? 'What is your goal?').tr,
+              (widget.title ?? 'What is your goal?').tr,
               style: context.theme.textTheme.headlineLarge,
             ).paddingOnly(top: 20),
             Text(
-              (subtitle ??
+              (widget.subtitle ??
                       'This helps is generate a plan for your calorie intake.')
                   .tr,
               style: context.theme.textTheme.titleSmall,
             ).paddingOnly(top: 10, bottom: 10),
             GoalAndWeightPicker(
-              selectedGoal: selectedGoal,
-              onSelectGoal: onSelectGoal,
-              onDesiredWeightChanged: onDesiredWeightChanged,
+              selectedGoal: widget.selectedGoal,
+              onSelectGoal: _handleGoalSelection,
+              onDesiredWeightChanged: widget.onDesiredWeightChanged,
+              initialWeight: widget.initialWeight,
             ),
             Row(
               children: [
-                if (showFooterPrevious && onBack != null)
+                if (widget.showFooterPrevious && widget.onBack != null)
                   Expanded(
                     child: ModernButton(
                       text: 'Previous'.tr,
-                      onPressed: onBack,
+                      onPressed: widget.onBack,
                       style: ModernButtonStyle.secondary,
                       size: ModernButtonSize.medium,
                       borderRadius: BorderRadius.circular(30),
                       height: 50,
                     ),
                   ),
-                if (showFooterPrevious && onBack != null)
+                if (widget.showFooterPrevious && widget.onBack != null)
                   const SizedBox(width: 10),
                 Expanded(
                   child: ModernButton(
                     text: 'Continue'.tr,
-                    onPressed: hasSelection ? onContinue : null,
+                    onPressed: hasSelection ? widget.onContinue : null,
                     style: ModernButtonStyle.primary,
                     size: ModernButtonSize.medium,
                     borderRadius: BorderRadius.circular(30),

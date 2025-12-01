@@ -7,11 +7,7 @@ class RecipeCard extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback? onTap;
 
-  const RecipeCard({
-    super.key,
-    required this.recipe,
-    this.onTap,
-  });
+  const RecipeCard({super.key, required this.recipe, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -35,16 +31,9 @@ class RecipeCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          
-              Expanded(
-                flex: 3,
-                child: _buildImageSection(),
-              ),
-              
-              Expanded(
-                flex: 2,
-                child: _buildInfoSection(context),
-              ),
+              Expanded(flex: 3, child: _buildImageSection()),
+
+              Expanded(flex: 2, child: _buildInfoSection(context)),
             ],
           ),
         ),
@@ -69,12 +58,13 @@ class RecipeCard extends StatelessWidget {
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
             ),
-            child: recipe.imageUrl.isNotEmpty
-                ? _buildNetworkImage()
-                : _buildPlaceholderImage(),
+            child:
+                recipe.imageUrl.isNotEmpty
+                    ? _buildNetworkImage()
+                    : _buildPlaceholderImage(),
           ),
         ),
-        
+
         Positioned(
           bottom: 8,
           left: 8,
@@ -85,7 +75,7 @@ class RecipeCard extends StatelessWidget {
             textColor: Colors.white,
           ),
         ),
-        
+
         Positioned(
           bottom: 8,
           right: 8,
@@ -114,7 +104,7 @@ class RecipeCard extends StatelessWidget {
           cacheHeight: targetH,
           filterQuality: FilterQuality.low,
           gaplessPlayback: true,
-          
+
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return const SizedBox.expand();
@@ -153,11 +143,7 @@ class RecipeCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              size: 12,
-              color: textColor,
-            ),
+            Icon(icon, size: 12, color: textColor),
             const SizedBox(width: 4),
           ],
           Text(
@@ -180,9 +166,8 @@ class RecipeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          
           Text(
-            recipe.title,
+            recipe.localizedTitle(Get.locale?.languageCode ?? 'en'),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: context.theme.textTheme.titleSmall?.copyWith(
@@ -191,7 +176,7 @@ class RecipeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          
+
           _buildTags(context),
         ],
       ),
@@ -199,10 +184,9 @@ class RecipeCard extends StatelessWidget {
   }
 
   Widget _buildTags(BuildContext context) {
-    
     final color = _difficultyColor(recipe.difficulty);
     return Text(
-      recipe.difficulty,
+      recipe.localizedDifficulty(Get.locale?.languageCode ?? 'en'),
       style: context.theme.textTheme.bodySmall?.copyWith(
         color: color,
         fontSize: 12,
