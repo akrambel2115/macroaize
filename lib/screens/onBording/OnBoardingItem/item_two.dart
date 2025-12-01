@@ -65,7 +65,8 @@ class OnBoardingTwo extends GetView<OnBoardingController> {
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: CustomText(
                       textAlign: TextAlign.center,
-                      text: '${"Welcome".tr} \n${Get.find<AppConfigService>().appName}',
+                      text:
+                          '${"Welcome".tr} \n${Get.find<AppConfigService>().appName}',
                       fontSize: 26.0,
                       fontColor: Colors.white,
                       fontWeight: FontWeight.bold,

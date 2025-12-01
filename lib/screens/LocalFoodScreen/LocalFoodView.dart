@@ -19,9 +19,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
             children: [
               _buildSearchSection(context, controller),
               _buildResultsCount(context, controller),
-              Expanded(
-                child: _buildFoodList(context, controller),
-              ),
+              Expanded(child: _buildFoodList(context, controller)),
             ],
           );
         },
@@ -29,7 +27,11 @@ class LocalFoodView extends GetView<LocalFoodController> {
     );
   }
 
-  void _showAddEditDialog(BuildContext context, LocalFoodController controller, {int? editIndex}) {
+  void _showAddEditDialog(
+    BuildContext context,
+    LocalFoodController controller, {
+    int? editIndex,
+  }) {
     final nameCtrl = TextEditingController();
     final qtyCtrl = TextEditingController();
     final calCtrl = TextEditingController();
@@ -37,7 +39,9 @@ class LocalFoodView extends GetView<LocalFoodController> {
     final carbsCtrl = TextEditingController();
     final fatsCtrl = TextEditingController();
 
-    if (editIndex != null && editIndex >= 0 && editIndex < controller.filteredItems.length) {
+    if (editIndex != null &&
+        editIndex >= 0 &&
+        editIndex < controller.filteredItems.length) {
       final existing = controller.filteredItems[editIndex];
       nameCtrl.text = existing.name;
       qtyCtrl.text = existing.quantity;
@@ -50,34 +54,58 @@ class LocalFoodView extends GetView<LocalFoodController> {
     showDialog(
       context: context,
       builder: (ctx) {
-  // theme-aware border color for input underline
-        final borderColor = ctx.theme.brightness == Brightness.dark
-            ? AppColor.neutralGrey700
-            : AppColor.neutralGrey300.withOpacity(0.8);
+        final borderColor =
+            ctx.theme.brightness == Brightness.dark
+                ? AppColor.neutralGrey700
+                : AppColor.neutralGrey300.withOpacity(0.8);
 
         InputDecoration inputDecoration(String label) => InputDecoration(
-              labelText: label,
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: borderColor),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 2),
-              ),
-            );
+          labelText: label,
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: borderColor),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: borderColor, width: 2),
+          ),
+        );
 
         return AlertDialog(
           backgroundColor: ctx.theme.cardColor,
-          title: Text(editIndex == null ? 'add_custom_food'.tr : 'edit_food'.tr),
+          title: Text(
+            editIndex == null ? 'add_custom_food'.tr : 'edit_food'.tr,
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: nameCtrl, decoration: inputDecoration('name'.tr)),
-                TextField(controller: qtyCtrl, decoration: inputDecoration('quantity'.tr)),
-                TextField(controller: calCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('calories'.tr)),
-                TextField(controller: proteinCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('proteins'.tr)),
-                TextField(controller: carbsCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('carbs'.tr)),
-                TextField(controller: fatsCtrl, keyboardType: TextInputType.number, decoration: inputDecoration('fats'.tr)),
+                TextField(
+                  controller: nameCtrl,
+                  decoration: inputDecoration('name'.tr),
+                ),
+                TextField(
+                  controller: qtyCtrl,
+                  decoration: inputDecoration('quantity'.tr),
+                ),
+                TextField(
+                  controller: calCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: inputDecoration('calories'.tr),
+                ),
+                TextField(
+                  controller: proteinCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: inputDecoration('proteins'.tr),
+                ),
+                TextField(
+                  controller: carbsCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: inputDecoration('carbs'.tr),
+                ),
+                TextField(
+                  controller: fatsCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: inputDecoration('fats'.tr),
+                ),
               ],
             ),
           ),
@@ -117,7 +145,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                 }
 
                 Navigator.of(ctx).pop();
-                },
+              },
               child: Text(
                 editIndex == null ? 'add'.tr : 'save'.tr,
                 style: TextStyle(
@@ -150,16 +178,20 @@ class LocalFoodView extends GetView<LocalFoodController> {
         'Local Food'.tr,
         style: context.textTheme.headlineLarge?.copyWith(
           fontWeight: FontWeight.bold,
-        color: context.theme.brightness == Brightness.dark
-          ? AppColor.darkText
-          : AppColor.neutralGrey900,
+          color:
+              context.theme.brightness == Brightness.dark
+                  ? AppColor.darkText
+                  : AppColor.neutralGrey900,
         ),
       ),
-  actions: [],
+      actions: [],
     );
   }
 
-  Widget _buildSearchSection(BuildContext context, LocalFoodController controller) {
+  Widget _buildSearchSection(
+    BuildContext context,
+    LocalFoodController controller,
+  ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
@@ -169,9 +201,10 @@ class LocalFoodView extends GetView<LocalFoodController> {
             'Search Food'.tr,
             style: context.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-          color: context.theme.brightness == Brightness.dark
-            ? AppColor.darkText
-            : AppColor.neutralGrey900,
+              color:
+                  context.theme.brightness == Brightness.dark
+                      ? AppColor.darkText
+                      : AppColor.neutralGrey900,
             ),
           ),
           const SizedBox(height: 12),
@@ -183,7 +216,9 @@ class LocalFoodView extends GetView<LocalFoodController> {
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 minHeight: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColor.primaryOrange),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColor.primaryOrange,
+                ),
                 backgroundColor: AppColor.neutralGrey200.withOpacity(0.3),
               ),
             ),
@@ -193,23 +228,25 @@ class LocalFoodView extends GetView<LocalFoodController> {
     );
   }
 
-  Widget _buildSearchField(BuildContext context, LocalFoodController controller) {
-  // Search bar
+  Widget _buildSearchField(
+    BuildContext context,
+    LocalFoodController controller,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: context.theme.brightness == Brightness.dark
-              ? AppColor.neutralGrey800
-              : AppColor.neutralGrey200.withOpacity(0.6),
+          color:
+              context.theme.brightness == Brightness.dark
+                  ? AppColor.neutralGrey800
+                  : AppColor.neutralGrey200.withOpacity(0.6),
           width: 1,
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         children: [
-          // prefix icon
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Icon(
@@ -219,7 +256,6 @@ class LocalFoodView extends GetView<LocalFoodController> {
             ),
           ),
 
-          // input
           Expanded(
             child: TextField(
               controller: controller.textController,
@@ -233,17 +269,19 @@ class LocalFoodView extends GetView<LocalFoodController> {
                 controller.searchFilter(value);
               },
               style: context.textTheme.bodyLarge?.copyWith(
-          color: context.theme.brightness == Brightness.dark
-            ? AppColor.darkText
-            : AppColor.neutralGrey900,
+                color:
+                    context.theme.brightness == Brightness.dark
+                        ? AppColor.darkText
+                        : AppColor.neutralGrey900,
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 hintText: 'Search by Food Name/Dish'.tr,
                 hintStyle: context.textTheme.bodyLarge?.copyWith(
-            color: context.theme.brightness == Brightness.dark
-              ? AppColor.darkTextSecondary
-              : AppColor.neutralGrey500,
+                  color:
+                      context.theme.brightness == Brightness.dark
+                          ? AppColor.darkTextSecondary
+                          : AppColor.neutralGrey500,
                   fontWeight: FontWeight.w500,
                 ),
                 border: InputBorder.none,
@@ -253,7 +291,6 @@ class LocalFoodView extends GetView<LocalFoodController> {
             ),
           ),
 
-          // clear button
           if (controller.textController.text.isNotEmpty)
             IconButton(
               onPressed: () {
@@ -267,16 +304,18 @@ class LocalFoodView extends GetView<LocalFoodController> {
               ),
             ),
 
-          // spacing reserved where action button used to be
           const SizedBox(width: 8),
         ],
       ),
     );
   }
 
-  Widget _buildResultsCount(BuildContext context, LocalFoodController controller) {
+  Widget _buildResultsCount(
+    BuildContext context,
+    LocalFoodController controller,
+  ) {
     if (controller.filteredItems.isEmpty) return const SizedBox.shrink();
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -296,27 +335,41 @@ class LocalFoodView extends GetView<LocalFoodController> {
               ),
             ),
           ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(controller.isEditing ? Icons.close_rounded : Icons.tune_rounded, color: AppColor.neutralGrey700),
-                  onPressed: () => controller.toggleEditMode(),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(
+                  controller.isEditing
+                      ? Icons.close_rounded
+                      : Icons.tune_rounded,
+                  color: AppColor.neutralGrey700,
                 ),
-                if (controller.isEditing) ...[
-                  IconButton(
-                    tooltip: 'add_custom_food'.tr,
-                    icon: Icon(Icons.add_rounded, color: AppColor.neutralGrey700),
-                    onPressed: () => _showAddEditDialog(context, controller),
+                onPressed: () => controller.toggleEditMode(),
+              ),
+              if (controller.isEditing) ...[
+                IconButton(
+                  tooltip: 'add_custom_food'.tr,
+                  icon: Icon(Icons.add_rounded, color: AppColor.neutralGrey700),
+                  onPressed: () => _showAddEditDialog(context, controller),
+                ),
+                IconButton(
+                  tooltip: 'delete_selected'.tr,
+                  icon: Icon(
+                    Icons.delete_rounded,
+                    color:
+                        controller.selectedIndices.isNotEmpty
+                            ? Colors.red
+                            : AppColor.neutralGrey500,
                   ),
-                  IconButton(
-                    tooltip: 'delete_selected'.tr,
-                    icon: Icon(Icons.delete_rounded, color: controller.selectedIndices.isNotEmpty ? Colors.red : AppColor.neutralGrey500),
-                    onPressed: controller.selectedIndices.isNotEmpty ? () => controller.deleteSelected(context) : null,
-                  ),
-                ],
+                  onPressed:
+                      controller.selectedIndices.isNotEmpty
+                          ? () => controller.deleteSelected(context)
+                          : null,
+                ),
               ],
-            ),
+            ],
+          ),
         ],
       ),
     );
@@ -338,17 +391,20 @@ class LocalFoodView extends GetView<LocalFoodController> {
     );
   }
 
-  Widget _buildFoodItem(BuildContext context, LocalFoodController controller, int index) {
+  Widget _buildFoodItem(
+    BuildContext context,
+    LocalFoodController controller,
+    int index,
+  ) {
     final food = controller.filteredItems[index];
     return GestureDetector(
       onTap: () => _showNutritionDetails(context, controller, food),
-  onLongPress: () => controller.selectAndEnterEdit(index),
+      onLongPress: () => controller.selectAndEnterEdit(index),
       child: ModernCard(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            // Food icon
             Container(
               width: 42,
               height: 42,
@@ -367,7 +423,6 @@ class LocalFoodView extends GetView<LocalFoodController> {
 
             const SizedBox(width: 14),
 
-            // Food title + meta
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,9 +432,10 @@ class LocalFoodView extends GetView<LocalFoodController> {
                     food.name,
                     style: context.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: context.theme.brightness == Brightness.dark
-                          ? AppColor.darkText
-                          : AppColor.neutralGrey900,
+                      color:
+                          context.theme.brightness == Brightness.dark
+                              ? AppColor.darkText
+                              : AppColor.neutralGrey900,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -399,7 +455,6 @@ class LocalFoodView extends GetView<LocalFoodController> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      // calories chip fixed to right
                       _buildCalorieChip(context, food.calories),
                     ],
                   ),
@@ -409,7 +464,6 @@ class LocalFoodView extends GetView<LocalFoodController> {
 
             const SizedBox(width: 12),
 
-            // Edit mode controls
             GetBuilder<LocalFoodController>(
               builder: (controller) {
                 if (!controller.isEditing) return SizedBox.shrink();
@@ -422,8 +476,17 @@ class LocalFoodView extends GetView<LocalFoodController> {
                       onChanged: (_) => controller.toggleSelect(idx),
                     ),
                     IconButton(
-                      icon: Icon(Icons.edit_rounded, size: 18, color: AppColor.neutralGrey700),
-                      onPressed: () => _showAddEditDialog(context, controller, editIndex: idx),
+                      icon: Icon(
+                        Icons.edit_rounded,
+                        size: 18,
+                        color: AppColor.neutralGrey700,
+                      ),
+                      onPressed:
+                          () => _showAddEditDialog(
+                            context,
+                            controller,
+                            editIndex: idx,
+                          ),
                     ),
                   ],
                 );
@@ -435,27 +498,31 @@ class LocalFoodView extends GetView<LocalFoodController> {
     );
   }
 
-  void _showNutritionDetails(BuildContext context, LocalFoodController controller, FoodItem food) {
+  void _showNutritionDetails(
+    BuildContext context,
+    LocalFoodController controller,
+    FoodItem food,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        int quantity = 1;
+        double quantity = 1.0;
         return StatefulBuilder(
           builder: (context, setState) {
             return DraggableScrollableSheet(
               expand: false,
-              // Open slightly taller by default so more content is visible
               initialChildSize: 0.55,
-              // Allow a slightly larger minimum when dragged down
               minChildSize: 0.30,
               maxChildSize: 0.85,
               builder: (context, scrollController) {
                 return Container(
                   decoration: BoxDecoration(
                     color: context.theme.cardColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -469,7 +536,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Handle bar
+                        // drag handle
                         Center(
                           child: Container(
                             margin: const EdgeInsets.only(top: 12, bottom: 8),
@@ -481,20 +548,21 @@ class LocalFoodView extends GetView<LocalFoodController> {
                             ),
                           ),
                         ),
-                        
+
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Food header
                               Row(
                                 children: [
                                   Container(
                                     width: 56,
                                     height: 56,
                                     decoration: BoxDecoration(
-                                      color: AppColor.primaryOrange.withOpacity(0.12),
+                                      color: AppColor.primaryOrange.withOpacity(
+                                        0.12,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
@@ -508,143 +576,175 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           food.name,
-                                          style: context.textTheme.headlineSmall?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                            color: context.theme.brightness == Brightness.dark
-                                                ? AppColor.darkText
-                                                : AppColor.neutralGrey900,
-                                          ),
+                                          style: context.textTheme.headlineSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color:
+                                                    context.theme.brightness ==
+                                                            Brightness.dark
+                                                        ? AppColor.darkText
+                                                        : AppColor
+                                                            .neutralGrey900,
+                                              ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          quantity == 1 ? food.quantity : '${food.quantity} × $quantity',
-                                          style: context.textTheme.bodyMedium?.copyWith(
-                                            color: context.theme.brightness == Brightness.dark
-                                                ? AppColor.darkTextSecondary
-                                                : AppColor.neutralGrey600,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          quantity == 1.0
+                                              ? food.quantity
+                                              : '${food.quantity} × ${quantity % 1 == 0 ? quantity.toInt() : quantity}',
+                                          style: context.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color:
+                                                    context.theme.brightness ==
+                                                            Brightness.dark
+                                                        ? AppColor
+                                                            .darkTextSecondary
+                                                        : AppColor
+                                                            .neutralGrey600,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                         ),
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
-                              
+
                               const SizedBox(height: 24),
-                              
-                              // Quantity selector
+
                               Text(
                                 "Quantity".tr,
                                 style: context.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: context.theme.brightness == Brightness.dark
-                                      ? AppColor.darkText
-                                      : AppColor.neutralGrey900,
+                                  color:
+                                      context.theme.brightness ==
+                                              Brightness.dark
+                                          ? AppColor.darkText
+                                          : AppColor.neutralGrey900,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: context.theme.brightness == Brightness.dark
-                                      ? AppColor.neutralGrey800.withOpacity(0.3)
-                                      : AppColor.neutralGrey50,
+                                  color:
+                                      context.theme.brightness ==
+                                              Brightness.dark
+                                          ? AppColor.neutralGrey800.withOpacity(
+                                            0.3,
+                                          )
+                                          : AppColor.neutralGrey50,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     GestureDetector(
                                       onTap: () {
-                                        if (quantity > 1) {
-                                          setState(() => quantity--);
+                                        if (quantity > 0.25) {
+                                          setState(() => quantity -= 0.25);
                                         }
                                       },
                                       child: Container(
-                                          width: 36,
-                                          height: 36,
-                                          decoration: BoxDecoration(
-                      color: quantity > 1
-                        ? AppColor.primaryOrange
-                        : AppColor.neutralGrey700,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.remove_rounded,
-                                              color: quantity > 1
-                                                  ? Colors.white
-                                                  : AppColor.neutralGrey500,
-                                              size: 20,
-                                            ),
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              quantity > 0.25
+                                                  ? AppColor.primaryOrange
+                                                  : AppColor.neutralGrey700,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.remove_rounded,
+                                            color:
+                                                quantity > 0.25
+                                                    ? Colors.white
+                                                    : AppColor.neutralGrey500,
+                                            size: 20,
                                           ),
                                         ),
+                                      ),
                                     ),
                                     const SizedBox(width: 20),
                                     Text(
-                                      quantity.toString(),
-                                      style: context.textTheme.headlineSmall?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: context.theme.brightness == Brightness.dark
-                                            ? AppColor.darkText
-                                            : AppColor.neutralGrey900,
-                                      ),
+                                      quantity % 1 == 0
+                                          ? quantity.toInt().toString()
+                                          : quantity.toString(),
+                                      style: context.textTheme.headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color:
+                                                context.theme.brightness ==
+                                                        Brightness.dark
+                                                    ? AppColor.darkText
+                                                    : AppColor.neutralGrey900,
+                                          ),
                                     ),
                                     const SizedBox(width: 20),
                                     GestureDetector(
                                       onTap: () {
                                         if (quantity < 20) {
-                                          setState(() => quantity++);
+                                          setState(() => quantity += 0.25);
                                         }
                                       },
                                       child: Container(
-                                          width: 36,
-                                          height: 36,
-                                          decoration: BoxDecoration(
-                      color: quantity < 20
-                        ? AppColor.primaryOrange
-                        : (context.theme.brightness == Brightness.dark
-                          ? AppColor.neutralGrey700
-                          : AppColor.neutralGrey300),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.add_rounded,
-                        color: quantity < 20
-                          ? Colors.white
-                          : AppColor.neutralGrey500,
-                                              size: 20,
-                                            ),
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              quantity < 20
+                                                  ? AppColor.primaryOrange
+                                                  : (context.theme.brightness ==
+                                                          Brightness.dark
+                                                      ? AppColor.neutralGrey700
+                                                      : AppColor
+                                                          .neutralGrey300),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.add_rounded,
+                                            color:
+                                                quantity < 20
+                                                    ? Colors.white
+                                                    : AppColor.neutralGrey500,
+                                            size: 20,
                                           ),
                                         ),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 24),
-                              
-                              // Nutrition title
+
                               Text(
                                 "nutrition_details".tr,
                                 style: context.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: context.theme.brightness == Brightness.dark
-                                      ? AppColor.darkText
-                                      : AppColor.neutralGrey900,
+                                  color:
+                                      context.theme.brightness ==
+                                              Brightness.dark
+                                          ? AppColor.darkText
+                                          : AppColor.neutralGrey900,
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              
-                              // Nutrition grid
+
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   _nutrientTile(
                                     context,
@@ -654,7 +754,9 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                       height: 24,
                                     ),
                                     '',
-                                    (food.calories * quantity).toString(),
+                                    (food.calories * quantity)
+                                        .round()
+                                        .toString(),
                                   ),
                                   _nutrientTile(
                                     context,
@@ -664,7 +766,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                       height: 24,
                                     ),
                                     '',
-                                    '${(food.protein * quantity).toStringAsFixed(1)} ${"protein_unit".tr}',
+                                    '${(food.protein * quantity).round().toStringAsFixed(1)} ${"protein_unit".tr}',
                                   ),
                                   _nutrientTile(
                                     context,
@@ -674,7 +776,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                       height: 24,
                                     ),
                                     '',
-                                    '${(food.carbs * quantity).toStringAsFixed(1)} ${"carbs_unit".tr}',
+                                    '${(food.carbs * quantity).round().toStringAsFixed(1)} ${"carbs_unit".tr}',
                                   ),
                                   _nutrientTile(
                                     context,
@@ -684,14 +786,13 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                       height: 24,
                                     ),
                                     '',
-                                    '${(food.fats * quantity).toStringAsFixed(1)} ${"fat_unit".tr}',
+                                    '${(food.fats * quantity).round().toStringAsFixed(1)} ${"fat_unit".tr}',
                                   ),
                                 ],
                               ),
 
                               const SizedBox(height: 28),
-                              
-                              // Action buttons
+
                               Row(
                                 children: [
                                   Expanded(
@@ -699,18 +800,28 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                     child: ElevatedButton.icon(
                                       onPressed: () {
                                         Navigator.of(context).pop();
-                                        // Create modified food item with updated quantities
                                         final modifiedFood = FoodItem(
                                           name: food.name,
-                                          calories: food.calories * quantity,
-                                          protein: food.protein * quantity,
-                                          carbs: food.carbs * quantity,
-                                          fats: food.fats * quantity,
-                                          quantity: '${food.quantity} × $quantity',
+                                          calories:
+                                              (food.calories * quantity)
+                                                  .round(),
+                                          protein:
+                                              (food.protein * quantity).round(),
+                                          carbs:
+                                              (food.carbs * quantity).round(),
+                                          fats: (food.fats * quantity).round(),
+                                          quantity:
+                                              '${food.quantity} × ${quantity % 1 == 0 ? quantity.toInt() : quantity}',
                                         );
-                                        controller.onAddButton(context, modifiedFood);
+                                        controller.onAddButton(
+                                          context,
+                                          modifiedFood,
+                                        );
                                       },
-                                      icon: const Icon(Icons.add_rounded, size: 20),
+                                      icon: const Icon(
+                                        Icons.add_rounded,
+                                        size: 20,
+                                      ),
                                       label: Text(
                                         "log".tr,
                                         style: const TextStyle(
@@ -721,9 +832,13 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: AppColor.primaryOrange,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -732,25 +847,34 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                   Expanded(
                                     flex: 1,
                                     child: OutlinedButton(
-                                      onPressed: () => Navigator.of(context).pop(),
+                                      onPressed:
+                                          () => Navigator.of(context).pop(),
                                       style: OutlinedButton.styleFrom(
                                         side: BorderSide(
-                                          color: context.theme.brightness == Brightness.dark
-                                              ? AppColor.neutralGrey700
-                                              : AppColor.neutralGrey300,
+                                          color:
+                                              context.theme.brightness ==
+                                                      Brightness.dark
+                                                  ? AppColor.neutralGrey700
+                                                  : AppColor.neutralGrey300,
                                         ),
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                       ),
                                       child: Text(
                                         'close'.tr,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
-                                          color: context.theme.brightness == Brightness.dark
-                                              ? AppColor.darkText
-                                              : AppColor.neutralGrey700,
+                                          color:
+                                              context.theme.brightness ==
+                                                      Brightness.dark
+                                                  ? AppColor.darkText
+                                                  : AppColor.neutralGrey700,
                                         ),
                                       ),
                                     ),
@@ -772,7 +896,12 @@ class LocalFoodView extends GetView<LocalFoodController> {
     );
   }
 
-  Widget _nutrientTile(BuildContext context, Widget iconWidget, String? label, String value) {
+  Widget _nutrientTile(
+    BuildContext context,
+    Widget iconWidget,
+    String? label,
+    String value,
+  ) {
     return Expanded(
       child: Column(
         children: [
@@ -780,19 +909,37 @@ class LocalFoodView extends GetView<LocalFoodController> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: context.theme.brightness == Brightness.dark ? AppColor.darkCard : AppColor.neutralGrey50,
+              color:
+                  context.theme.brightness == Brightness.dark
+                      ? AppColor.darkCard
+                      : AppColor.neutralGrey50,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Center(
-              child: iconWidget,
-            ),
+            child: Center(child: iconWidget),
           ),
           const SizedBox(height: 8),
           if (label != null && label.isNotEmpty) ...[
-            Text(label, style: context.textTheme.bodySmall?.copyWith(color: context.theme.brightness == Brightness.dark ? AppColor.darkTextSecondary : AppColor.neutralGrey600)),
+            Text(
+              label,
+              style: context.textTheme.bodySmall?.copyWith(
+                color:
+                    context.theme.brightness == Brightness.dark
+                        ? AppColor.darkTextSecondary
+                        : AppColor.neutralGrey600,
+              ),
+            ),
             const SizedBox(height: 6),
           ],
-          Text(value, style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: context.theme.brightness == Brightness.dark ? AppColor.darkText : AppColor.neutralGrey900)),
+          Text(
+            value,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color:
+                  context.theme.brightness == Brightness.dark
+                      ? AppColor.darkText
+                      : AppColor.neutralGrey900,
+            ),
+          ),
         ],
       ),
     );
@@ -831,12 +978,14 @@ class LocalFoodView extends GetView<LocalFoodController> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    // Empty state: scrollable and constrained to available height
+    // scrollable empty state
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Center(
@@ -859,9 +1008,9 @@ class LocalFoodView extends GetView<LocalFoodController> {
                           color: Colors.white,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       Text(
                         'No Food Found'.tr,
                         style: context.textTheme.headlineMedium?.copyWith(
@@ -869,21 +1018,21 @@ class LocalFoodView extends GetView<LocalFoodController> {
                           color: AppColor.neutralGrey800,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 12),
-                      
+
                       Text(
-                        'Try searching with different keywords or browse our local food database'.tr,
+                        'Try searching with different keywords or browse our local food database'
+                            .tr,
                         textAlign: TextAlign.center,
                         style: context.textTheme.bodyMedium?.copyWith(
                           color: AppColor.neutralGrey600,
                           height: 1.5,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
-                      // Clear search: soft orange circular background (no outline)
+
                       Container(
                         width: 44,
                         height: 44,

@@ -1,10 +1,9 @@
-
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
 import 'package:get/get.dart';
 
-class PersonalDetailsBinding extends Bindings{
+class PersonalDetailsBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => PersonalDetailsController(),);
+    Get.lazyPut(() => PersonalDetailsController());
   }
 }

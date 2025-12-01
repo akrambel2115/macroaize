@@ -2,90 +2,117 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-// import 'package:flutter/material.dart'; // COMMENTED OUT - unused after refactor
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:cloud_functions/cloud_functions.dart'; // COMMENTED OUT - Chargily removed
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:foodcalorietracker/shared/services/app_user_service.dart';
 import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
 import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
 
 import 'package:foodcalorietracker/shared/services/app_config_service.dart';
-// import '../../constant/AppColor.dart'; // COMMENTED OUT - unused after dialog removal
 import '../../shared/services/influencer_service.dart';
 import '../../routes/app_routes.dart';
 
 class PremiumController extends GetxController {
   int selected = 0;
   bool isPremium = false;
-  bool showClose = true; // ui
-  bool fromOnboarding = false; // source
+  bool showClose = true;
+  bool fromOnboarding = false;
 
   String promoCode = '';
   bool isValidatingPromo = false;
   bool isPromoValid = false;
   double discountRate = 0.0;
   String? promoError;
+
+  Offerings? offerings;
+  bool isLoading = true;
+  String? errorMessage;
+
   final _influencerService = InfluencerService();
   final _appUserService = AppUserService();
-  InAppPurchase inAppPurchase = InAppPurchase.instance;
-  late StreamSubscription<dynamic> streamSubscription;
+
   StreamSubscription<DocumentSnapshot>? _firestoreSubscription;
   StreamSubscription<User?>? _authSubscription;
-  late Set<String> ids;
-  List<ProductDetails> products = [];
 
   @override
   void onInit() {
-    final cfg = Get.find<AppConfigService>();
-    ids = Platform.isAndroid
-        ? {
-            cfg.androidIapIds['weekly'] ?? '',
-            cfg.androidIapIds['monthly'] ?? '',
-            cfg.androidIapIds['yearly'] ?? '',
-          }
-        : {
-            cfg.iosIapIds['weekly'] ?? '',
-            cfg.iosIapIds['monthly'] ?? '',
-            cfg.iosIapIds['yearly'] ?? '',
-          };
     super.onInit();
     getPremium();
-    final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
-    streamSubscription = purchaseUpdated.listen(
-      (purchaseDetailsList) {
-        listenToPurchase(purchaseDetailsList);
-      },
-      onDone: () {
-        streamSubscription.cancel();
-      },
-      onError: (error) {},
-    );
-    initStore();
+    fetchOfferings();
     _subscribeToFirestore();
+  }
+
+  Future<void> fetchOfferings() async {
+    isLoading = true;
+    errorMessage = null;
+    update();
+
+    try {
+      offerings = await RevenueCatService().getOfferings();
+
+      if (offerings == null ||
+          offerings!.current == null ||
+          offerings!.current!.availablePackages.isEmpty) {
+        errorMessage = 'No offers available at the moment.';
+      } else {
+        int trialIndex = _findTrialPlanIndex();
+        if (trialIndex >= 0) {
+          selected = trialIndex;
+        } else {
+          int yearlyIndex = _findYearlyPlanIndex();
+          if (yearlyIndex >= 0) {
+            selected = yearlyIndex;
+          }
+        }
+      }
+    } catch (e) {
+      errorMessage = 'Failed to load offers. Please try again.';
+      if (kDebugMode) {
+        print('Error fetching offerings: $e');
+      }
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  int _findTrialPlanIndex() {
+    if (offerings?.current == null) return -1;
+    final packages = offerings!.current!.availablePackages;
+    return packages.indexWhere(
+      (p) =>
+          p.storeProduct.introductoryPrice != null &&
+          p.storeProduct.introductoryPrice!.price == 0,
+    );
+  }
+
+  int _findYearlyPlanIndex() {
+    if (offerings?.current == null) return -1;
+    final packages = offerings!.current!.availablePackages;
+    return packages.indexWhere((p) => p.packageType == PackageType.annual);
   }
 
   bool _argsProcessed = false;
 
   void processArgs(Map? args) {
-    if (_argsProcessed) return; // once
+    if (_argsProcessed) return;
     _argsProcessed = true;
     final delayClose = args is Map && args['delayClose'] == true;
     fromOnboarding = args is Map && args['fromOnboarding'] == true;
-    
-    // Extract promo code from signup flow if provided
+
     if (args is Map && args['promoCode'] != null) {
       promoCode = args['promoCode'] as String;
-      isPromoValid = true; // Already validated in signup
+      isPromoValid = true;
       if (kDebugMode) {
         print('Promo code from signup: $promoCode');
       }
     }
-    
+
     if (delayClose) {
       showClose = false;
       update(['close_btn']);
@@ -98,7 +125,6 @@ class PremiumController extends GetxController {
 
   void onClosePressed() {
     if (fromOnboarding) {
-      // navigate
       try {
         Get.offAllNamed(Routes.leadingView);
       } catch (_) {}
@@ -151,72 +177,15 @@ class PremiumController extends GetxController {
     });
   }
 
-  initStore() async {
-    bool isAvailable = await InAppPurchase.instance.isAvailable();
-    if (kDebugMode) {
-      print(isAvailable);
-    }
-    ProductDetailsResponse productDetailsResponse = await inAppPurchase
-        .queryProductDetails(ids);
-    if (productDetailsResponse.error == null) {
-      if (kDebugMode) {
-        print("loading Product$productDetailsResponse");
-        print(productDetailsResponse.error);
-        print(productDetailsResponse.notFoundIDs);
-        print(productDetailsResponse.productDetails.length);
-      }
-      products = productDetailsResponse.productDetails;
-      if (kDebugMode) {
-        print("product length ${products.length}");
-      }
-
-      if (products.isNotEmpty) {
-        int yearlyIndex = _findYearlyPlanIndex();
-        if (yearlyIndex >= 0) {
-          selected = yearlyIndex;
-        }
-      }
-
-      update(['plan_selection']);
-    }
-  }
-
-  int _findYearlyPlanIndex() {
-    const yearlyKeywords = ['year', 'annual'];
-    return products.indexWhere((p) {
-      final id = p.id.toLowerCase();
-      final title = p.title.toLowerCase();
-      return yearlyKeywords.any((k) => id.contains(k) || title.contains(k));
-    });
-  }
-
-  listenToPurchase(List<PurchaseDetails> purchaseDetailsList) {
-    for (var element in purchaseDetailsList) {
-      if (element.status == PurchaseStatus.pending) {
-        Fluttertoast.showToast(msg: "pending");
-      } else if (element.status == PurchaseStatus.error) {
-        Fluttertoast.showToast(msg: "Something went wrong");
-      } else if (element.status == PurchaseStatus.restored) {
-        Fluttertoast.showToast(msg: "Restored");
-        DateTime? purchaseDate =
-            element.transactionDate != null
-                ? DateTime.fromMillisecondsSinceEpoch(
-                  int.parse(element.transactionDate!),
-                )
-                : null;
-
-        if (purchaseDate != null) {
-          Fluttertoast.showToast(msg: 'Purchase restored');
-        }
-      } else if (element.status == PurchaseStatus.purchased) {
-        Fluttertoast.showToast(msg: "purchased");
-      }
-    }
-  }
-
   Future<void> buy() async {
     if (isPremium) {
       Fluttertoast.showToast(msg: 'You are already Premium');
+      return;
+    }
+
+    if (offerings?.current == null ||
+        offerings!.current!.availablePackages.isEmpty) {
+      Fluttertoast.showToast(msg: 'No offers available');
       return;
     }
 
@@ -243,11 +212,11 @@ class PremiumController extends GetxController {
     }
 
     try {
-      Future<DocumentSnapshot<Map<String, dynamic>>> readSub() => FirebaseFirestore
-          .instance
-          .collection('subscriptions')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .get();
+      Future<DocumentSnapshot<Map<String, dynamic>>> readSub() =>
+          FirebaseFirestore.instance
+              .collection('subscriptions')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .get();
 
       DocumentSnapshot<Map<String, dynamic>> subscriptionDoc;
       try {
@@ -298,54 +267,42 @@ class PremiumController extends GetxController {
       return;
     }
 
-    final cfg = Get.find<AppConfigService>();
-    final rcEnabled = cfg.subscriptionsEnabled && (Platform.isAndroid || Platform.isIOS);
+    try {
+      await RevenueCatService().identifyWithFirebaseUser();
 
-    // NEW FLOW: Direct to Apple Pay (iOS) or Google Pay (Android)
-    // No promo code dialog, no payment method selection
-    if (rcEnabled) {
-      try {
-        await RevenueCatService().identifyWithFirebaseUser();
-        
-        // Determine plan type from selected product
-        String planType = 'monthly';
-        if (products.isNotEmpty) {
-          final p = products[selected];
-          final id = p.id.toLowerCase();
-          final title = p.title.toLowerCase();
-          if (id.contains('year') ||
-              id.contains('annual') ||
-              title.contains('year') ||
-              title.contains('annual')) {
-            planType = 'yearly';
-          }
-        }
-        
-        // Purchase directly via RevenueCat (Apple Pay on iOS, Google Pay on Android)
-        // Pass promo code if available from signup flow
-        final ok = await RevenueCatService().purchasePlan(
-          planType,
-          promoCode: promoCode.isNotEmpty ? promoCode : null,
-        );
-        if (ok) {
-          Fluttertoast.showToast(msg: 'Purchase successful');
-          return;
-        } else {
-          Fluttertoast.showToast(msg: 'Purchase cancelled');
-          return;
-        }
-      } catch (e) {
-        if (kDebugMode) print('RevenueCat purchase error: $e');
-        Fluttertoast.showToast(msg: 'Purchase failed. Please try again.');
+      final package = offerings!.current!.availablePackages[selected];
+
+      final result = await Purchases.purchasePackage(package);
+
+      if (result.entitlements.active.isNotEmpty) {
+        Fluttertoast.showToast(msg: 'Purchase successful');
+        return;
+      } else {
+        Fluttertoast.showToast(msg: 'Purchase cancelled');
         return;
       }
-    }
+    } catch (e) {
+      if (kDebugMode) {
+        print('RevenueCat purchase error: $e');
+        if (e is PlatformException) {
+          print('Error Code: ${e.code}');
+          print('Error Message: ${e.message}');
+          print('Error Details: ${e.details}');
+        }
+      }
+      // user cancelled
+      if (e.toString().contains('User cancelled')) {
+        return;
+      }
 
-    // Fallback for non-mobile platforms (should not happen in production)
-    Fluttertoast.showToast(msg: 'Subscriptions are only available on mobile devices');
-    
-    // COMMENTED OUT: Old Chargily flow
-    // await _showPromoCodeDialog();
+      String errorMsg = 'Purchase failed. Please try again.';
+      if (e is PlatformException) {
+        errorMsg = 'Error: ${e.message ?? "Unknown error"}';
+      }
+
+      Fluttertoast.showToast(msg: errorMsg);
+      return;
+    }
   }
 
   Future<void> restorePurchases() async {
@@ -354,8 +311,7 @@ class PremiumController extends GetxController {
     } catch (_) {}
   }
 
-  // COMMENTED OUT: Promo code dialog moved to signup flow
-  // This method is no longer used in the premium purchase flow
+  // promo dialog removed
   /*
   Future<void> _showPromoCodeDialog() async {
     final promoController = TextEditingController();
@@ -441,7 +397,6 @@ class PremiumController extends GetxController {
                         ? null
                         : () {
                           Get.back();
-                          // Proceed with Dahabia (Chargily) after skipping promo
                           _proceedToCheckout('chargily');
                         },
                 child: Text(
@@ -481,7 +436,6 @@ class PremiumController extends GetxController {
                             Fluttertoast.showToast(
                               msg: 'promo_code_applied'.tr,
                             );
-                            // Proceed with Dahabia (Chargily) after applying promo
                             _proceedToCheckout('chargily');
                           } catch (e) {
                             setState(() {
@@ -522,7 +476,7 @@ class PremiumController extends GetxController {
   }
   */
 
-  // COMMENTED OUT: Promo code validation moved to signup flow
+  // promo validation removed
   /*
   Future<void> _validatePromoCodeForDialog(String code) async {
     if (code.isEmpty) {
@@ -547,7 +501,7 @@ class PremiumController extends GetxController {
   }
   */
 
-  // COMMENTED OUT: Old checkout flow with Chargily integration
+  // chargily checkout removed
   /*
   Future<void> _proceedToCheckout([String? methodOverride]) async {
     String planType = 'monthly';
@@ -584,7 +538,6 @@ class PremiumController extends GetxController {
           return;
         }
       } else if (method == 'chargily') {
-        // Proceed to Chargily flow below
       } else {
         return;
       }
@@ -654,7 +607,7 @@ class PremiumController extends GetxController {
   }
   */
 
-  // COMMENTED OUT: Payment method chooser dialog - no longer needed
+  // payment chooser removed
   /*
   Future<String?> _choosePaymentMethod() async {
     final isIOS = Platform.isIOS;
@@ -870,10 +823,8 @@ class PremiumController extends GetxController {
 
   @override
   void onClose() {
-    streamSubscription.cancel();
     _firestoreSubscription?.cancel();
     _authSubscription?.cancel();
     super.onClose();
   }
 }
-

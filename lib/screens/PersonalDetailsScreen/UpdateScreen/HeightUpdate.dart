@@ -4,7 +4,8 @@ import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetails
 import 'package:get/get.dart';
 import '../../../constant/FontFamily.dart';
 
-// Widget to pick the user's height in centimeters.
+import 'package:foodcalorietracker/constant/AppColor.dart';
+
 class HeightUpdate extends GetView<PersonalDetailsController> {
   const HeightUpdate({super.key});
 
@@ -29,8 +30,9 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
               const int minCm = 121;
               final int cmInitialItem = controller.selectedCm - minCm;
 
-              final scrollController =
-                  FixedExtentScrollController(initialItem: cmInitialItem);
+              final scrollController = FixedExtentScrollController(
+                initialItem: cmInitialItem,
+              );
 
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -42,9 +44,10 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                           height: 150,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey.shade900
-                                : context.theme.scaffoldBackgroundColor,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppColor.darkCard
+                                    : context.theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: CupertinoPicker(
@@ -61,9 +64,11 @@ class HeightUpdate extends GetView<PersonalDetailsController> {
                                   "${minCm + index} ${"cm".tr}",
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: Theme.of(context).brightness == Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.white
+                                            : Colors.black,
                                     fontFamily: poppins,
                                   ),
                                 ),

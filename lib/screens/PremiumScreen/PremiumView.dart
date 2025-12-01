@@ -10,8 +10,10 @@ import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:foodcalorietracker/shared/services/subscription_service.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart' as sub_model;
+import 'package:foodcalorietracker/shared/models/subscription.dart'
+    as sub_model;
 import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 class PremiumView extends StatefulWidget {
   const PremiumView({super.key});
@@ -22,7 +24,7 @@ class PremiumView extends StatefulWidget {
 
 class _PremiumViewState extends State<PremiumView> {
   final PremiumController controller = Get.find();
-  bool showCloseLocal = true; // ui
+  bool showCloseLocal = true;
   Timer? _timer;
 
   @override
@@ -59,9 +61,8 @@ class _PremiumViewState extends State<PremiumView> {
         statusBarBrightness: Brightness.dark,
       ),
       child: PopScope(
-        canPop: showCloseLocal, // Only allow back when close button is visible
+        canPop: showCloseLocal,
         onPopInvoked: (didPop) {
-          // If back was pressed and close button is visible, treat it like close button
           if (didPop && showCloseLocal) {
             controller.onClosePressed();
           }
@@ -71,402 +72,515 @@ class _PremiumViewState extends State<PremiumView> {
           body: SafeArea(
             child: Stack(
               children: <Widget>[
-              _PremiumHeader(height: headerHeight),
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    SizedBox(height: headerHeight - overlap),
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(24),
-                          topRight: Radius.circular(24),
+                _PremiumHeader(height: headerHeight),
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SizedBox(height: headerHeight - overlap),
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(24),
+                            topRight: Radius.circular(24),
+                          ),
                         ),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 24,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          // Features
-                          _FeatureRow(
-                            iconWidget: Lottie.asset(
-                              'assets/lottie/scan.json',
-                              width: 36,
-                              height: 36,
-                              fit: BoxFit.contain,
-                              repeat: true,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 24,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            // features
+                            _FeatureRow(
+                              iconWidget: Lottie.asset(
+                                'assets/lottie/scan.json',
+                                width: 36,
+                                height: 36,
+                                fit: BoxFit.contain,
+                                repeat: true,
+                              ),
+                              title: 'feature_ai_scan_title'.tr,
+                              subtitle: 'feature_ai_scan_subtitle'.tr,
+                              color: AppColor.info,
                             ),
-                            title: 'feature_ai_scan_title'.tr,
-                            subtitle: 'feature_ai_scan_subtitle'.tr,
-                            color: AppColor.info,
-                          ),
-                          const SizedBox(height: 16),
-                          _FeatureRow(
-                            iconWidget: Lottie.asset(
-                              'assets/lottie/chatbot.json',
-                              width: 28,
-                              height: 28,
-                              fit: BoxFit.contain,
-                              repeat: true,
+                            const SizedBox(height: 16),
+                            _FeatureRow(
+                              iconWidget: Lottie.asset(
+                                'assets/lottie/chatbot.json',
+                                width: 28,
+                                height: 28,
+                                fit: BoxFit.contain,
+                                repeat: true,
+                              ),
+                              title: 'feature_chatbot_title'.tr,
+                              subtitle: 'feature_chatbot_subtitle'.tr,
+                              color: AppColor.warning,
                             ),
-                            title: 'feature_chatbot_title'.tr,
-                            subtitle: 'feature_chatbot_subtitle'.tr,
-                            color: AppColor.warning,
-                          ),
-                          const SizedBox(height: 16),
-                          _FeatureRow(
-                            iconWidget: Lottie.asset(
-                              'assets/lottie/recipes.json',
-                              width: 28,
-                              height: 28,
-                              fit: BoxFit.contain,
-                              repeat: true,
+                            const SizedBox(height: 16),
+                            _FeatureRow(
+                              iconWidget: Lottie.asset(
+                                'assets/lottie/recipes.json',
+                                width: 28,
+                                height: 28,
+                                fit: BoxFit.contain,
+                                repeat: true,
+                              ),
+                              title: 'feature_recipes_title'.tr,
+                              subtitle: 'feature_recipes_subtitle'.tr,
+                              color: AppColor.accent,
                             ),
-                            title: 'feature_recipes_title'.tr,
-                            subtitle: 'feature_recipes_subtitle'.tr,
-                            color: AppColor.accent,
-                          ),
 
-                          const SizedBox(height: 24),
+                            const SizedBox(height: 24),
 
-                          // Plans
-                          GetBuilder<PremiumController>(
-                            id: 'plan_selection',
-                            builder: (c) {
-                              final products = c.products;
-
-                              int indexOfKeyword(List<String> kws) {
-                                final lowerKws =
-                                    kws.map((e) => e.toLowerCase()).toList();
-                                int idx = products.indexWhere((p) {
-                                  final id = p.id.toLowerCase();
-                                  final title = p.title.toLowerCase();
-                                  return lowerKws.any(
-                                    (k) => id.contains(k) || title.contains(k),
-                                  );
-                                });
-                                return idx;
-                              }
-
-                              int yearlyIndex = indexOfKeyword([
-                                'year',
-                                'annual',
-                              ]);
-                              int monthlyIndex = indexOfKeyword(['month']);
-
-                              // Graceful fallbacks if not found
-                              if (yearlyIndex < 0 && products.isNotEmpty) {
-                                yearlyIndex = products.length - 1;
-                              }
-                              if (monthlyIndex < 0 && products.length > 1) {
-                                monthlyIndex = 0;
-                              }
-
-                              final hasData =
-                                  products.isNotEmpty &&
-                                  (monthlyIndex >= 0 || yearlyIndex >= 0);
-
-                // Read prices from AppConfigService
-                final cfg = Get.find<AppConfigService>();
-                final monthlyRaw = cfg.premiumMonthlyPriceDzd;
-                final yearlyRaw = cfg.premiumYearlyPriceDzd;
-
-                              final originalYearlyRaw = monthlyRaw * 12;
-                              final savePercent =
-                                  originalYearlyRaw > 0
-                                      ? (((originalYearlyRaw - yearlyRaw) /
-                                                  originalYearlyRaw) *
-                                              100)
-                                          .round()
-                                      : 0;
-                              final perMonthFromYearly = (yearlyRaw / 12)
-                                  .toStringAsFixed(0);
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  if (hasData) ...[
-                                    GetBuilder<PremiumController>(
-                                      builder: (controller) {
-                                        final basePrice =
-                                            '${yearlyRaw.toString()} DZD';
-                                        final discountedPrice = controller
-                                            .getDiscountedPrice(basePrice);
-
-                                        return _PlanCard(
-                                          title: 'months_12'.tr,
-                                          subtitle: 'billed_annually'.tr,
-                      originalPrice:
-                          controller.isPromoValid
-                            ? basePrice
-                            : '${originalYearlyRaw.toString()} DZD',
-                                          discountedPrice: discountedPrice,
-                                          perMonthText: 'per_month'.tr,
-                                          chipText: 'best_value'.tr,
-                                          saveText: 'save_percent'.trParams({
-                                            'percent': savePercent.toString(),
-                                          }),
-                                          monthlyBreakdownText:
-                                              '≈ $perMonthFromYearly DZD',
-                                          isSelected:
-                                              yearlyIndex >= 0 &&
-                                              c.selected == yearlyIndex,
-                                          highlighted: true,
-                                          onTap: () {
-                                            if (yearlyIndex >= 0) {
-                                              c.onChangeSelectedIndex(
-                                                yearlyIndex,
-                                              );
-                                            }
-                                          },
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(height: 12),
-                                    GetBuilder<PremiumController>(
-                                      builder: (controller) {
-                                        final basePrice =
-                                            '${monthlyRaw.toString()} DZD';
-                                        final discountedPrice = controller
-                                            .getDiscountedPrice(basePrice);
-
-                                        return _PlanCard(
-                                          title: 'month_1'.tr,
-                                          subtitle: 'billed_monthly'.tr,
-                                          priceText: discountedPrice,
-                                          perMonthText: 'per_month'.tr,
-                                          isSelected:
-                                              monthlyIndex >= 0 &&
-                                              c.selected == monthlyIndex,
-                                          highlighted: false,
-                                          onTap: () {
-                                            if (monthlyIndex >= 0) {
-                                              c.onChangeSelectedIndex(
-                                                monthlyIndex,
-                                              );
-                                            }
-                                          },
-                                        );
-                                      },
-                                    ),
-                                    ] else ...[
-                                    // Loading/placeholder cards
-                                    _PlanCard(
-                                      title: 'months_12'.tr,
-                                      subtitle: 'billed_annually'.tr,
-                                      originalPrice:
-                                          '${originalYearlyRaw.toString()} DZD',
-                                      discountedPrice:
-                                          '${yearlyRaw.toString()} DZD',
-                                      perMonthText: 'per_month'.tr,
-                                      chipText: 'best_value'.tr,
-                                      saveText: 'save_percent'.trParams({
-                                        'percent': savePercent.toString(),
-                                      }),
-                                      monthlyBreakdownText:
-                                          '≈ $perMonthFromYearly DZD',
-                                      isSelected: c.selected == 0,
-                                      highlighted: true,
-                                      onTap: () {
-                                        // Set to index 0 for yearly in placeholder
-                                        c.onChangeSelectedIndex(0);
-                                      },
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _PlanCard(
-                                      title: 'month_1'.tr,
-                                      subtitle: 'billed_monthly'.tr,
-                                      priceText: '${monthlyRaw.toString()} DZD',
-                                      perMonthText: 'per_month'.tr,
-                                      isSelected: c.selected == 1,
-                                      highlighted: false,
-                                      onTap: () {
-                                        // Set to index 1 for monthly in placeholder
-                                        c.onChangeSelectedIndex(1);
-                                      },
-                                    ),
-                                  ],
-                                ],
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Continue CTA or status if already premium
-                          GetBuilder<PremiumController>(
-                            builder: (c) {
-                              if (c.isPremium) {
-                                final cfg = Get.find<AppConfigService>();
-                                final rcEnabled = cfg.subscriptionsEnabled && (Platform.isAndroid || Platform.isIOS);
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'You are already Premium',
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(color: Colors.white70),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    if (rcEnabled)
-                                      StreamBuilder<sub_model.Subscription?>(
-                                        stream: SubscriptionService().subscriptionStream,
-                                        builder: (context, snap) {
-                                          final sub = snap.data;
-                                          final provider = (sub?.provider ?? '').toLowerCase();
-                                          if (provider != 'revenuecat') return const SizedBox.shrink();
-                                          final storeName = Platform.isIOS ? 'App Store' : 'Google Play';
-                                          final url = Platform.isIOS ? cfg.appStoreUrl : cfg.playStoreUrl;
-                                          return Wrap(
-                                            spacing: 8,
-                                            runSpacing: 8,
-                                            alignment: WrapAlignment.center,
-                                            children: [
-                                              OutlinedButton.icon(
-                                                onPressed: () async {
-                                                  final uri = Uri.parse(url);
-                                                  if (await canLaunchUrl(uri)) {
-                                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                                  }
-                                                },
-                                                icon: const Icon(Icons.manage_accounts, color: Colors.white),
-                                                label: Text('Manage on $storeName', style: const TextStyle(color: Colors.white)),
-                                                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white24)),
-                                              ),
-                                              OutlinedButton.icon(
-                                                onPressed: () async {
-                                                  await RevenueCatService().restorePurchases();
-                                                },
-                                                icon: const Icon(Icons.restore, color: Colors.white),
-                                                label: const Text('Restore', style: TextStyle(color: Colors.white)),
-                                                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white24)),
-                                              ),
-                                            ],
-                                          );
-                                        },
+                            // plans
+                            GetBuilder<PremiumController>(
+                              builder: (c) {
+                                if (c.isLoading) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(32.0),
+                                      child: CircularProgressIndicator(
+                                        color: AppColor.primaryOrange,
                                       ),
+                                    ),
+                                  );
+                                }
+
+                                if (c.errorMessage != null) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            c.errorMessage!,
+                                            style: const TextStyle(
+                                              color: Colors.red,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          ElevatedButton(
+                                            onPressed: c.fetchOfferings,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  AppColor.primaryOrange,
+                                            ),
+                                            child: const Text('Retry'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final packages =
+                                    c.offerings?.current?.availablePackages ??
+                                    [];
+                                if (packages.isEmpty) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        'No offers available',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                double? getMonthlyPrice(List<Package> pkgs) {
+                                  final monthly = pkgs.firstWhereOrNull(
+                                    (p) => p.packageType == PackageType.monthly,
+                                  );
+                                  return monthly?.storeProduct.price;
+                                }
+
+                                final monthlyPrice = getMonthlyPrice(packages);
+
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children:
+                                      packages.asMap().entries.map((entry) {
+                                        final index = entry.key;
+                                        final package = entry.value;
+                                        final product = package.storeProduct;
+                                        final isAnnual =
+                                            package.packageType ==
+                                            PackageType.annual;
+                                        final isMonthly =
+                                            package.packageType ==
+                                            PackageType.monthly;
+
+                                        String? trialText;
+                                        if (product.introductoryPrice != null &&
+                                            product.introductoryPrice!.price ==
+                                                0) {
+                                          final intro =
+                                              product.introductoryPrice!;
+                                          final count =
+                                              intro.periodNumberOfUnits;
+                                          final unit = intro.periodUnit;
+
+                                          String unitText = '';
+                                          switch (unit) {
+                                            case PeriodUnit.day:
+                                              unitText =
+                                                  count == 1 ? 'Day' : 'Days';
+                                              break;
+                                            case PeriodUnit.week:
+                                              unitText =
+                                                  count == 1 ? 'Week' : 'Weeks';
+                                              break;
+                                            case PeriodUnit.month:
+                                              unitText =
+                                                  count == 1
+                                                      ? 'Month'
+                                                      : 'Months';
+                                              break;
+                                            case PeriodUnit.year:
+                                              unitText =
+                                                  count == 1 ? 'Year' : 'Years';
+                                              break;
+                                            case PeriodUnit.unknown:
+                                              unitText = 'Days';
+                                              break;
+                                          }
+                                          trialText = '$count $unitText Free';
+                                        }
+
+                                        String? saveText;
+                                        String? monthlyBreakdown;
+                                        String? originalPriceFormatted;
+
+                                        String getSymbol(String priceString) {
+                                          return priceString.replaceAll(
+                                            RegExp(r'[0-9.,\s]'),
+                                            '',
+                                          );
+                                        }
+
+                                        final symbol = getSymbol(
+                                          product.priceString,
+                                        );
+
+                                        if (isAnnual && monthlyPrice != null) {
+                                          final yearlyPrice = product.price;
+                                          final yearlyMonthlyPrice =
+                                              yearlyPrice / 12;
+                                          final savings =
+                                              (monthlyPrice * 12) - yearlyPrice;
+                                          final savingsPercent =
+                                              (savings / (monthlyPrice * 12)) *
+                                              100;
+
+                                          if (savingsPercent > 0) {
+                                            saveText =
+                                                'Save ${savingsPercent.round()}%';
+                                            originalPriceFormatted =
+                                                '$symbol${(monthlyPrice * 12).toStringAsFixed(2)}';
+                                          }
+                                          monthlyBreakdown =
+                                              '$symbol${yearlyMonthlyPrice.toStringAsFixed(2)}';
+                                        }
+
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 12,
+                                          ),
+                                          child: _PlanCard(
+                                            title:
+                                                isAnnual
+                                                    ? 'months_12'.tr
+                                                    : (isMonthly
+                                                        ? 'month_1'.tr
+                                                        : product.title),
+                                            subtitle:
+                                                isAnnual
+                                                    ? 'billed_annually'.tr
+                                                    : (isMonthly
+                                                        ? 'billed_monthly'.tr
+                                                        : product.description),
+                                            priceText: product.priceString,
+                                            perMonthText: 'per_month'.tr,
+                                            isSelected: c.selected == index,
+                                            highlighted: isAnnual,
+                                            chipText:
+                                                isAnnual
+                                                    ? 'best_value'.tr
+                                                    : null,
+                                            saveText: saveText,
+                                            originalPrice:
+                                                originalPriceFormatted,
+                                            discountedPrice:
+                                                isAnnual
+                                                    ? c.getDiscountedPrice(
+                                                      product.priceString,
+                                                    )
+                                                    : null,
+                                            monthlyBreakdownText:
+                                                monthlyBreakdown,
+                                            freeTrialText: trialText,
+                                            onTap: () {
+                                              c.onChangeSelectedIndex(index);
+                                            },
+                                          ),
+                                        );
+                                      }).toList(),
+                                );
+                              },
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // cta button
+                            GetBuilder<PremiumController>(
+                              builder: (c) {
+                                if (c.isPremium) {
+                                  final cfg = Get.find<AppConfigService>();
+                                  final rcEnabled =
+                                      cfg.subscriptionsEnabled &&
+                                      (Platform.isAndroid || Platform.isIOS);
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'You are already Premium',
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(color: Colors.white70),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      if (rcEnabled)
+                                        StreamBuilder<sub_model.Subscription?>(
+                                          stream:
+                                              SubscriptionService()
+                                                  .subscriptionStream,
+                                          builder: (context, snap) {
+                                            final sub = snap.data;
+                                            final provider =
+                                                (sub?.provider ?? '')
+                                                    .toLowerCase();
+                                            if (provider != 'revenuecat')
+                                              return const SizedBox.shrink();
+                                            final storeName =
+                                                Platform.isIOS
+                                                    ? 'App Store'
+                                                    : 'Google Play';
+                                            final url =
+                                                Platform.isIOS
+                                                    ? cfg.appStoreUrl
+                                                    : cfg.playStoreUrl;
+                                            return Wrap(
+                                              spacing: 8,
+                                              runSpacing: 8,
+                                              alignment: WrapAlignment.center,
+                                              children: [
+                                                OutlinedButton.icon(
+                                                  onPressed: () async {
+                                                    final uri = Uri.parse(url);
+                                                    if (await canLaunchUrl(
+                                                      uri,
+                                                    )) {
+                                                      await launchUrl(
+                                                        uri,
+                                                        mode:
+                                                            LaunchMode
+                                                                .externalApplication,
+                                                      );
+                                                    }
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.manage_accounts,
+                                                    color: Colors.white,
+                                                  ),
+                                                  label: Text(
+                                                    'Manage on $storeName',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  style:
+                                                      OutlinedButton.styleFrom(
+                                                        side: const BorderSide(
+                                                          color: Colors.white24,
+                                                        ),
+                                                      ),
+                                                ),
+                                                OutlinedButton.icon(
+                                                  onPressed: () async {
+                                                    await RevenueCatService()
+                                                        .restorePurchases();
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.restore,
+                                                    color: Colors.white,
+                                                  ),
+                                                  label: const Text(
+                                                    'Restore',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  style:
+                                                      OutlinedButton.styleFrom(
+                                                        side: const BorderSide(
+                                                          color: Colors.white24,
+                                                        ),
+                                                      ),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                    ],
+                                  );
+                                }
+                                final cfg = Get.find<AppConfigService>();
+                                final rcEnabled = cfg.subscriptionsEnabled;
+
+                                final packages =
+                                    c.offerings?.current?.availablePackages ??
+                                    [];
+                                bool hasTrial = false;
+                                if (packages.isNotEmpty &&
+                                    c.selected < packages.length) {
+                                  final p = packages[c.selected];
+                                  hasTrial =
+                                      p.storeProduct.introductoryPrice !=
+                                          null &&
+                                      p.storeProduct.introductoryPrice!.price ==
+                                          0;
+                                }
+
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    ContinueButton(
+                                      onTap: () => controller.buy(),
+                                      text:
+                                          hasTrial
+                                              ? 'Continue for Free'
+                                              : 'Continue',
+                                      icon: null,
+                                    ),
+                                    if (rcEnabled &&
+                                        (Platform.isAndroid ||
+                                            Platform.isIOS)) ...[
+                                      const SizedBox(height: 8),
+                                      TextButton(
+                                        onPressed:
+                                            () => controller.restorePurchases(),
+                                        child: Text('Restore purchases'.tr),
+                                      ),
+                                    ],
                                   ],
                                 );
-                              }
-                              final cfg = Get.find<AppConfigService>();
-                              final rcEnabled = cfg.subscriptionsEnabled;
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  ContinueButton(
-                                    onTap: () => controller.buy(),
-                                    icon: null,
-                                  ),
-                                  if (rcEnabled && (Platform.isAndroid || Platform.isIOS)) ...[
-                                    const SizedBox(height: 8),
-                                    TextButton(
-                                      onPressed: () => controller.restorePurchases(),
-                                      child: Text('Restore purchases'.tr),
-                                    ),
-                                  ]
-                                ],
-                              );
-                            },
-                          ),
+                              },
+                            ),
 
-                          const SizedBox(height: 16),
-                          // Legal links
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              InkWell(
-                                onTap: () => controller.openPrivacy(),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(6.0),
-                                  child: Text(
-                                    'Privacy Policy'.tr,
-                                    style: context.textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: AppColor.neutralGrey600,
-                                          decoration: TextDecoration.underline,
-                                          fontSize: 12,
-                                        ),
+                            const SizedBox(height: 16),
+                            // legal links
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                  onTap: () => controller.openPrivacy(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6.0),
+                                    child: Text(
+                                      'Privacy Policy'.tr,
+                                      style: context.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: AppColor.neutralGrey600,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            fontSize: 12,
+                                          ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 12,
-                                color: AppColor.neutralGrey300,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => controller.openTerms(),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(6.0),
-                                  child: Text(
-                                    'Terms of Condition'.tr,
-                                    style: context.textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: AppColor.neutralGrey600,
-                                          decoration: TextDecoration.underline,
-                                          fontSize: 12,
-                                        ),
+                                Container(
+                                  width: 1,
+                                  height: 12,
+                                  color: AppColor.neutralGrey300,
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 8,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Close button positioned above the header/scroll content
-              if (showCloseLocal)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Semantics(
-                    label: 'close',
-                    button: true,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: controller.onClosePressed,
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white10
-                              : Colors.white24,
-                          shape: BoxShape.circle,
+                                InkWell(
+                                  onTap: () => controller.openTerms(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6.0),
+                                    child: Text(
+                                      'Terms of Condition'.tr,
+                                      style: context.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: AppColor.neutralGrey600,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            fontSize: 12,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.close_rounded,
-                          color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+                if (showCloseLocal)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Semantics(
+                      label: 'close',
+                      button: true,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: controller.onClosePressed,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white10
+                                    : Colors.white24,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
-        ), // End of Scaffold
-      ), // End of PopScope
-    ); // End of AnnotatedRegion
+        ),
+      ),
+    );
   }
 }
 
-// Header with dark background and decorative icons
+// premium header
 class _PremiumHeader extends StatelessWidget {
   const _PremiumHeader({required this.height});
   final double height;
@@ -495,7 +609,7 @@ class _PremiumHeader extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Decorative images
+          // decorative icons
           Positioned(
             top: 40,
             left: 14,
@@ -556,7 +670,6 @@ class _PremiumHeader extends StatelessWidget {
               ),
             ),
           ),
-          // Symmetric decorative icon on bottom-right
           Positioned(
             bottom: 40,
             right: 20,
@@ -567,7 +680,7 @@ class _PremiumHeader extends StatelessWidget {
             ),
           ),
 
-          // Center content
+          // center content
           Align(
             alignment: Alignment.center,
             child: Padding(
@@ -618,8 +731,6 @@ class _PremiumHeader extends StatelessWidget {
       ),
     );
   }
-
-  // Decorative helpers removed
 }
 
 class _FeatureRow extends StatelessWidget {
@@ -697,6 +808,7 @@ class _PlanCard extends StatelessWidget {
     this.originalPrice,
     this.discountedPrice,
     this.monthlyBreakdownText,
+    this.freeTrialText,
   });
 
   final String title;
@@ -711,6 +823,7 @@ class _PlanCard extends StatelessWidget {
   final String? originalPrice;
   final String? discountedPrice;
   final String? monthlyBreakdownText;
+  final String? freeTrialText;
 
   @override
   Widget build(BuildContext context) {
@@ -719,7 +832,6 @@ class _PlanCard extends StatelessWidget {
     return Semantics(
       container: true,
       button: true,
-      // Announce selection state for accessibility
       selected: isSelected,
       child: InkWell(
         onTap: onTap,
@@ -729,9 +841,8 @@ class _PlanCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(
               0xFF1C1C1E,
-            ), // Dark card background to match reference
+            ),
             borderRadius: BorderRadius.circular(12),
-            // Orange outline only when the card is selected
             border:
                 isSelected
                     ? Border.all(color: AppColor.primaryOrange, width: 2)
@@ -747,7 +858,7 @@ class _PlanCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top row: title and chip
+              // title row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -758,46 +869,69 @@ class _PlanCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  if (chipText != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColor.primaryOrange,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        chipText!,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
+                  Row(
+                    children: [
+                      if (freeTrialText != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          margin: const EdgeInsets.only(right: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade600,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            freeTrialText!.toUpperCase(),
+                            style: textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      if (chipText != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColor.primaryOrange,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            chipText!,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
 
               const SizedBox(height: 16),
 
-              // Price section
+              // price section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Left side: prices
+                  // prices
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // For annual plan, prefer explicit originalPrice/discountedPrice fields
                         if (highlighted &&
                             originalPrice != null &&
                             discountedPrice != null) ...[
                           Text(
-                            originalPrice!, // Original price crossed out
+                            originalPrice!,
                             style: textTheme.titleMedium?.copyWith(
                               color: Colors.white.withOpacity(0.6),
                               decoration: TextDecoration.lineThrough,
@@ -807,7 +941,7 @@ class _PlanCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            discountedPrice!, // Discounted price
+                            discountedPrice!,
                             style: textTheme.headlineMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -815,7 +949,6 @@ class _PlanCard extends StatelessWidget {
                             ),
                           ),
                         ] else ...[
-                          // For monthly plan, just show the priceText
                           Text(
                             priceText,
                             style: textTheme.headlineMedium?.copyWith(
@@ -837,7 +970,7 @@ class _PlanCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Right side: per month info (only show for highlighted annual plan)
+                  // per month info
                   if (highlighted)
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -851,7 +984,6 @@ class _PlanCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          // For annual plan, show monthly breakdown; prefer provided text, fallback to derived
                           Text(
                             (() {
                               if (monthlyBreakdownText != null &&
@@ -891,7 +1023,7 @@ class _PlanCard extends StatelessWidget {
                 ],
               ),
 
-              // Save strip for annual plan: show dynamic discount amount when original+discounted provided
+              // save badge
               if ((originalPrice != null && discountedPrice != null) ||
                   saveText != null) ...[
                 const SizedBox(height: 16),
@@ -904,7 +1036,6 @@ class _PlanCard extends StatelessWidget {
                   ),
                   child: Builder(
                     builder: (_) {
-                      // Helper to parse numeric value from strings like '4200 DZD' or '4,200.00 DZD'
                       double? parseAmount(String s) {
                         final match = RegExp(r'[\d.,]+').stringMatch(s);
                         if (match == null) return null;
@@ -949,7 +1080,7 @@ class _PlanCard extends StatelessWidget {
   }
 }
 
-// A small, subtle floating + scale animation for the dahabia decorative icon so it matches the liveliness of Lottie assets.
+// animated dahabia icon
 class _AnimatedDahabia extends StatefulWidget {
   const _AnimatedDahabia({
     this.width = 140,
@@ -978,13 +1109,11 @@ class _AnimatedDahabiaState extends State<_AnimatedDahabia>
       duration: const Duration(milliseconds: 2400),
     )..repeat(reverse: true);
 
-    // Gentle vertical float: -6 -> +6 px
     _translateY = Tween(
       begin: -6.0,
       end: 6.0,
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
 
-    // Slight scale pulse: 0.985 -> 1.02
     _scale = Tween(
       begin: 0.985,
       end: 1.02,

@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:get/get.dart';
 
 import '../../../constant/FontFamily.dart';
 
-// Widget to pick the user's current weight.
 class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
   const CurrentWeightUpdate({super.key});
 
@@ -32,11 +32,12 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
 
               final int kgCount = maxKg - minKg + 1;
 
-              final int initialItem = controller.selectedWeightKg < minKg
-                  ? 0
-                  : (controller.selectedWeightKg > maxKg
-                      ? kgCount - 1
-                      : controller.selectedWeightKg - minKg);
+              final int initialItem =
+                  controller.selectedWeightKg < minKg
+                      ? 0
+                      : (controller.selectedWeightKg > maxKg
+                          ? kgCount - 1
+                          : controller.selectedWeightKg - minKg);
 
               final FixedExtentScrollController scrollController =
                   FixedExtentScrollController(initialItem: initialItem);
@@ -51,9 +52,10 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
                           height: 150,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey.shade900
-                                : context.theme.scaffoldBackgroundColor,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppColor.darkCard
+                                    : context.theme.scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: CupertinoPicker(
@@ -71,9 +73,11 @@ class CurrentWeightUpdate extends GetView<PersonalDetailsController> {
                                   "$value${"kg".tr}",
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: Theme.of(context).brightness == Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.white
+                                            : Colors.black,
                                     fontFamily: poppins,
                                   ),
                                 ),

@@ -9,15 +9,18 @@ class GenderUpdate extends GetView<PersonalDetailsController> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  EdgeInsets.only(bottom:MediaQuery.of(context).padding.bottom+10,right: 8,left: 8),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + 10,
+        right: 8,
+        left: 8,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Text(
             "Update Your Gender".tr,
             style: context.theme.textTheme.headlineLarge,
-          ).paddingOnly(top: 20,bottom: 20),
+          ).paddingOnly(top: 20, bottom: 20),
 
           GestureDetector(
             onTap: () {
@@ -29,9 +32,9 @@ class GenderUpdate extends GetView<PersonalDetailsController> {
                   padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color:
-                    controller.selectedGender == "Male"
-                        ? context.theme.focusColor
-                        : context.theme.cardColor,
+                        controller.selectedGender == "Male"
+                            ? context.theme.focusColor
+                            : context.theme.cardColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: ListTile(
@@ -58,9 +61,9 @@ class GenderUpdate extends GetView<PersonalDetailsController> {
                   padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color:
-                    controller.selectedGender == "Female"
-                        ? context.theme.focusColor
-                        : context.theme.cardColor,
+                        controller.selectedGender == "Female"
+                            ? context.theme.focusColor
+                            : context.theme.cardColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: ListTile(

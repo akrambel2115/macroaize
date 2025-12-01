@@ -14,12 +14,12 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
 class LeadingView extends StatefulWidget {
-  // Tutorial GlobalKeys for interactive onboarding
+  // tutorial global keys
   static final GlobalKey scannerTabKey = GlobalKey();
   static final GlobalKey analyticsTabKey = GlobalKey();
   static final GlobalKey profileTabKey = GlobalKey();
   static final GlobalKey aiCoachButtonKey = GlobalKey();
-  
+
   const LeadingView({super.key});
 
   @override
@@ -29,43 +29,36 @@ class LeadingView extends StatefulWidget {
 class _LeadingViewState extends State<LeadingView> {
   final LeadingController _controller = Get.find();
   int _localIndex = 0;
-  // indicator now only moves horizontally; no stretching state needed
   final GlobalKey _stackKey = GlobalKey();
   final double _indicatorWidth = 48.0;
-  // indicator position is computed from layout (slot-based) to avoid measuring and jank
-  // Lazy pages: build tabs only when first visited to avoid early permission prompts
+  // lazy tab pages
   final List<Widget?> _pages = [
     const HomeView(),
-    null, // RecipesView — build on demand
-    null, // ScanFoodView (camera) — build on demand
-    null, // AnalyticsView — build on demand
-    null, // SettingView — build on demand
+    null,
+    null,
+    null,
+    null,
   ];
-  // icons are passed inline to _buildNavItem; no persistent list needed
 
   @override
   void initState() {
     super.initState();
     _localIndex = _controller.currentIndex;
-    // Initialize index from controller
     _ensurePage(_localIndex);
   }
 
   void _animateTo(int newIndex) {
     if (!mounted) return;
     final oldIndex = _localIndex;
-    // Update index; indicator position computed in LayoutBuilder
     setState(() {
       _localIndex = newIndex;
     });
-    // ensure destination page is created lazily
     _ensurePage(newIndex);
-    // manage camera lifecycle when switching in/out of scanner tab
     _handleScannerLifecycle(oldIndex, newIndex);
   }
 
   void _handleScannerLifecycle(int oldIndex, int newIndex) {
-    // If leaving scanner (2) -> release camera
+    // release camera
     if (oldIndex == 2 && newIndex != 2) {
       try {
         final c =
@@ -75,7 +68,7 @@ class _LeadingViewState extends State<LeadingView> {
         c?.releaseCamera();
       } catch (_) {}
     }
-    // If entering scanner (2) -> ensure camera active
+    // activate camera
     if (newIndex == 2) {
       try {
         final c =
@@ -120,13 +113,13 @@ class _LeadingViewState extends State<LeadingView> {
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: GetBuilder<LeadingController>(
           builder: (controller) {
-            // Hide chat button when scanner is active for distraction-free experience
+            // hide on scanner
             if (controller.currentIndex == 2) {
               return const SizedBox.shrink();
             }
 
             return FloatingActionButton(
-              key: LeadingView.aiCoachButtonKey, // Add GlobalKey for tutorial
+              key: LeadingView.aiCoachButtonKey,
               onPressed: () {
                 Get.toNamed(Routes.chatView);
               },
@@ -153,14 +146,13 @@ class _LeadingViewState extends State<LeadingView> {
         ),
         bottomNavigationBar: GetBuilder<LeadingController>(
           builder: (controller) {
-            // detect external index changes and trigger animation sequence
+            // sync external changes
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (_localIndex != controller.currentIndex) {
                 _animateTo(controller.currentIndex);
               }
             });
             return Container(
-              // standard bottom nav height (reverted) — camera will sit inline with other icons
               height: 76 + MediaQuery.of(context).padding.bottom,
               decoration: BoxDecoration(
                 color: context.theme.scaffoldBackgroundColor,
@@ -177,20 +169,15 @@ class _LeadingViewState extends State<LeadingView> {
               ),
               child: SafeArea(
                 child: Padding(
-                  // reverted vertical padding to original value
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 6,
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      // compute indicator position using layout slots to avoid measuring
                       final navCount = 5;
                       final slotWidth = constraints.maxWidth / navCount;
-                      // On RTL layouts the Row paints children right-to-left, so
-                      // map the logical index to the visual slot index. This keeps
-                      // the floating indicator aligned with the painted nav item
-                      // and ensures taps/select state remain consistent in RTL.
+                      // rtl support
                       final isRtl =
                           Directionality.of(context) == TextDirection.rtl;
                       final visualIndex =
@@ -203,9 +190,8 @@ class _LeadingViewState extends State<LeadingView> {
                       return Stack(
                         key: _stackKey,
                         children: [
-                          // animated positioned indicator (pixel-perfect)
+                          // tab indicator
                           AnimatedPositioned(
-                            // shorter, smooth movement
                             duration: const Duration(milliseconds: 220),
                             curve: Curves.easeInOut,
                             left: left,
@@ -213,12 +199,10 @@ class _LeadingViewState extends State<LeadingView> {
                             width: _indicatorWidth,
                             height: _indicatorWidth,
                             child: AnimatedContainer(
-                              // minimal decoration animation
                               duration: const Duration(milliseconds: 180),
                               curve: Curves.easeOut,
                               decoration: BoxDecoration(
                                 color: AppColor.primaryOrange,
-                                // fixed rounded circle so the indicator doesn't change shape
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(
@@ -233,7 +217,7 @@ class _LeadingViewState extends State<LeadingView> {
                             ),
                           ),
 
-                          // actual nav row (icons only)
+                          // nav items
                           Row(
                             children: [
                               Expanded(
@@ -256,7 +240,7 @@ class _LeadingViewState extends State<LeadingView> {
                               ),
                               Expanded(
                                 child: Container(
-                                  key: LeadingView.scannerTabKey, // Add GlobalKey for tutorial
+                                  key: LeadingView.scannerTabKey,
                                   child: _buildNavItem(
                                     context,
                                     controller,
@@ -268,7 +252,7 @@ class _LeadingViewState extends State<LeadingView> {
                               ),
                               Expanded(
                                 child: Container(
-                                  key: LeadingView.analyticsTabKey, // Add GlobalKey for tutorial
+                                  key: LeadingView.analyticsTabKey,
                                   child: _buildNavItem(
                                     context,
                                     controller,
@@ -280,7 +264,7 @@ class _LeadingViewState extends State<LeadingView> {
                               ),
                               Expanded(
                                 child: Container(
-                                  key: LeadingView.profileTabKey, // Add GlobalKey for tutorial
+                                  key: LeadingView.profileTabKey,
                                   child: _buildNavItem(
                                     context,
                                     controller,
@@ -304,7 +288,6 @@ class _LeadingViewState extends State<LeadingView> {
 
         body: GetBuilder<LeadingController>(
           builder: (controller) {
-            // Use IndexedStack with lazy pages to avoid early camera/mic initialization
             final children = List<Widget>.generate(
               5,
               (i) => _pages[i] ?? const SizedBox.shrink(),
@@ -334,8 +317,6 @@ class _LeadingViewState extends State<LeadingView> {
     return Expanded(
       child: Semantics(
         button: true,
-        // Use visualIndex for the spoken label so screen readers match
-        // the visual ordering in RTL locales.
         label: 'Bottom navigation item $visualIndex',
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -346,12 +327,11 @@ class _LeadingViewState extends State<LeadingView> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Circular icon container (icon-only layout)
                 Builder(
                   builder: (context) {
                     final isCamera = index == 2;
                     if (isCamera) {
-                      // Camera uses a custom asset (scan icon) and sits inline with other icons
+                      // scan icon
                       return SizedBox(
                         width: 48,
                         height: 48,
@@ -360,7 +340,6 @@ class _LeadingViewState extends State<LeadingView> {
                             duration: const Duration(milliseconds: 120),
                             child: Image.asset(
                               AppAssets.scanHomeIcon,
-                              // preserve original asset colors (do not tint)
                               width: 22,
                               height: 22,
                               key: ValueKey(isSelected),
@@ -370,14 +349,12 @@ class _LeadingViewState extends State<LeadingView> {
                       );
                     }
 
-                    // Default small icon for other nav items
                     return SizedBox(
                       width: 48,
                       height: 48,
-                      child: Center(
-                        child: AnimatedSwitcher(
-                          // shorter icon switch for snappier feedback
-                          duration: const Duration(milliseconds: 120),
+                        child: Center(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 120),
                           child: Icon(
                             isSelected ? activeIcon : inactiveIcon,
                             color:

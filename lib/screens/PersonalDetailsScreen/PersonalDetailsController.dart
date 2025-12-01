@@ -6,7 +6,7 @@ import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
 import 'package:intl/intl.dart';
 
-/// Controller managing personal details editing (weight, height, DOB, gender, goal).
+/// managing personal details editing (weight, height, DOB, gender, goal).
 class PersonalDetailsController extends GetxController {
   int selectedDesiredWeight = 51;
   int selectedView = 0;
@@ -105,7 +105,11 @@ class PersonalDetailsController extends GetxController {
   }
 
   void updateBornDay() {
-    DateTime selectedDate = DateTime(selectedYear, selectedMonth + 1, selectedDay);
+    DateTime selectedDate = DateTime(
+      selectedYear,
+      selectedMonth + 1,
+      selectedDay,
+    );
     String formattedDate =
         "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
     ConstantUserMaster.bornDay = formattedDate;
@@ -124,12 +128,15 @@ class PersonalDetailsController extends GetxController {
     update();
   }
 
-  /// Save the currently edited view and reset change state.
+  /// Save the currently edited view and reset change state
   void saveCurrentView() {
     switch (selectedView) {
       case 1:
         ConstantUserMaster.desiredGoal = selectedDesiredWeight;
-        SharedPref.saveInt(SharePrefKey.desiredWeight, ConstantUserMaster.desiredGoal);
+        SharedPref.saveInt(
+          SharePrefKey.desiredWeight,
+          ConstantUserMaster.desiredGoal,
+        );
         break;
       case 2:
         updateWeight();
@@ -145,11 +152,23 @@ class PersonalDetailsController extends GetxController {
 
     if (selectedView == 2 || selectedView == 1) {
       final bmr = _estimateBMR(
-          ConstantUserMaster.height, ConstantUserMaster.weight, ConstantUserMaster.age, ConstantUserMaster.gender);
+        ConstantUserMaster.height,
+        ConstantUserMaster.weight,
+        ConstantUserMaster.age,
+        ConstantUserMaster.gender,
+      );
       final activity = _getActivityFactor(ConstantUserMaster.workOutDay);
       final tdee = bmr * activity;
-  final adjustedCalories = adjustCaloriesForGoal(tdee, ConstantUserMaster.weight, ConstantUserMaster.desiredGoal, ConstantUserMaster.goalWeight);
-  final macros = calculateMacrosFromTDEE(adjustedCalories.toDouble(), ConstantUserMaster.weight);
+      final adjustedCalories = adjustCaloriesForGoal(
+        tdee,
+        ConstantUserMaster.weight,
+        ConstantUserMaster.desiredGoal,
+        ConstantUserMaster.goalWeight,
+      );
+      final macros = calculateMacrosFromTDEE(
+        adjustedCalories.toDouble(),
+        ConstantUserMaster.weight,
+      );
       SharedPref.saveInt(SharePrefKey.calorie, macros['calories']!);
       SharedPref.saveInt(SharePrefKey.protein, macros['protein']!);
       SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']!);
@@ -186,7 +205,6 @@ class PersonalDetailsController extends GetxController {
         return 1.2;
     }
   }
-
 
   void updateDaysInMonth() {
     int daysInMonth = getDaysInMonth(selectedMonth, selectedYear);

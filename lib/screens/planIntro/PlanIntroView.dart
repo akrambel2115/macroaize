@@ -6,7 +6,6 @@ import 'package:foodcalorietracker/screens/planIntro/PlanIntroController.dart';
 import 'package:foodcalorietracker/widgets/AnimatedBackground.dart';
 import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 
-// Intro screen for the plan flow with animated visuals and continue CTA.
 class PlanIntroView extends GetView<PlanIntroController> {
   const PlanIntroView({super.key});
 
@@ -22,7 +21,10 @@ class PlanIntroView extends GetView<PlanIntroController> {
               const AnimatedBackground(),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 40,
+                  ),
                   child: Column(
                     children: [
                       const Spacer(flex: 1),
@@ -54,7 +56,10 @@ class PlanIntroView extends GetView<PlanIntroController> {
                         animation: controller.headingAnimation,
                         builder: (context, child) {
                           return Transform.translate(
-                            offset: Offset(0, controller.headingAnimation.value),
+                            offset: Offset(
+                              0,
+                              controller.headingAnimation.value,
+                            ),
                             child: Opacity(
                               opacity: controller.fadeAnimation.value,
                               child: Text(
@@ -77,7 +82,10 @@ class PlanIntroView extends GetView<PlanIntroController> {
                         animation: controller.subtitleAnimation,
                         builder: (context, child) {
                           return Transform.translate(
-                            offset: Offset(0, controller.subtitleAnimation.value),
+                            offset: Offset(
+                              0,
+                              controller.subtitleAnimation.value,
+                            ),
                             child: Opacity(
                               opacity: controller.fadeAnimation.value,
                               child: Text(
@@ -87,7 +95,12 @@ class PlanIntroView extends GetView<PlanIntroController> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'Poppins',
-                                  color: context.theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
+                                  color: context
+                                      .theme
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color
+                                      ?.withOpacity(0.8),
                                   height: 1.4,
                                 ),
                               ),

@@ -1,9 +1,9 @@
 import 'package:foodcalorietracker/screens/LocalFoodScreen/LocalFoodController.dart';
 import 'package:get/get.dart';
 
-class LocalFoodBinding extends Bindings{
+class LocalFoodBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => LocalFoodController(),);
+    Get.lazyPut(() => LocalFoodController());
   }
 }

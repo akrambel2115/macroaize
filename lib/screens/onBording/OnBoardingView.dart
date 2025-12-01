@@ -20,27 +20,29 @@ class OnBoardingView extends GetView<OnBoardingController> {
             width: double.infinity,
             color: context.theme.scaffoldBackgroundColor,
           ),
-          GetBuilder<OnBoardingController>(builder: (controller) {
-            return Center(
-              child: CarouselSlider(
-                items: controller.screens,
-                carouselController: controller.buttonCarouselController,
-                options: CarouselOptions(
-                  height: height * 0.8,
-                  viewportFraction: 1,
-                  initialPage: controller.selectedIndex.value,
-                  enableInfiniteScroll: true,
-                  onPageChanged: (index, reason) {
-                    index;
-                    controller.selectedIndex.value = index;
-                  },
-                  scrollDirection: Axis.horizontal,
+          GetBuilder<OnBoardingController>(
+            builder: (controller) {
+              return Center(
+                child: CarouselSlider(
+                  items: controller.screens,
+                  carouselController: controller.buttonCarouselController,
+                  options: CarouselOptions(
+                    height: height * 0.8,
+                    viewportFraction: 1,
+                    initialPage: controller.selectedIndex.value,
+                    enableInfiniteScroll: true,
+                    onPageChanged: (index, reason) {
+                      index;
+                      controller.selectedIndex.value = index;
+                    },
+                    scrollDirection: Axis.horizontal,
+                  ),
                 ),
-              ),
-            );
-          },),
+              );
+            },
+          ),
           Positioned(
-            bottom: MediaQuery.of(context).padding.bottom+10,
+            bottom: MediaQuery.of(context).padding.bottom + 10,
             right: 10,
             left: 10,
             child: CustomButtom(

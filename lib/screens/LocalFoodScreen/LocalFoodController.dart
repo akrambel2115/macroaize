@@ -15,6 +15,8 @@ import '../../constant/FontFamily.dart';
 import '../../routes/app_routes.dart';
 import '../../shared/services/notification_service.dart';
 import '../../shared/widgets/PremiumRequiredDialog.dart';
+import '../../shared/services/rate_us_service.dart';
+import '../../shared/services/widget_promotion_service.dart';
 
 class LocalFoodController extends GetxController {
   Map<String, dynamic> argument = Get.arguments;
@@ -33,39 +35,39 @@ class LocalFoodController extends GetxController {
 
   List<FoodItem> dinnerFoods = [];
 
-  // load library
+  // load food library
   Future<void> _loadFoodLibrary() async {
     try {
-      final jsonStr = await rootBundle.loadString('lib/constant/foodLibrary.json');
+      final jsonStr = await rootBundle.loadString(
+        'lib/constant/foodLibrary.json',
+      );
       final List<dynamic> data = json.decode(jsonStr) as List<dynamic>;
       final locale = Get.locale?.languageCode ?? 'en';
 
-      // Map entries to FoodItem
-      final mapped = data.map((e) {
-        final m = e as Map<String, dynamic>;
-        String name = _pickByLocale(m, 'name', locale);
-        String quantity = _pickByLocale(m, 'quantity', locale);
-        int calories = _toInt(m['calories']);
-        int carbs = _toInt(m['carbs']);
-        int protein = _toInt(m['protein']);
-        int fats = _toInt(m['fats']);
-        return FoodItem(
-          name: name,
-          calories: calories,
-          carbs: carbs,
-          protein: protein,
-          fats: fats,
-          quantity: quantity,
-        );
-      }).toList();
+      final mapped =
+          data.map((e) {
+            final m = e as Map<String, dynamic>;
+            String name = _pickByLocale(m, 'name', locale);
+            String quantity = _pickByLocale(m, 'quantity', locale);
+            int calories = _toInt(m['calories']);
+            int carbs = _toInt(m['carbs']);
+            int protein = _toInt(m['protein']);
+            int fats = _toInt(m['fats']);
+            return FoodItem(
+              name: name,
+              calories: calories,
+              carbs: carbs,
+              protein: protein,
+              fats: fats,
+              quantity: quantity,
+            );
+          }).toList();
 
       final List<FoodItem> all = mapped;
-      // assign all to breakfast/lunch/snack/dinner as fallback
       breakfastFoods = all;
       lunchFoods = all;
       snackFoods = all;
       dinnerFoods = all;
-      // apply to current filter
       if (type == "Breakfast" || type == "BreakFast") {
         filteredItems = breakfastFoods;
       } else if (type == "Lunch") {
@@ -76,9 +78,7 @@ class LocalFoodController extends GetxController {
         filteredItems = dinnerFoods;
       }
       update();
-    } catch (_) {
-      // ignore
-    }
+    } catch (_) {}
   }
 
   String _pickByLocale(Map<String, dynamic> m, String key, String locale) {
@@ -103,10 +103,9 @@ class LocalFoodController extends GetxController {
     return double.tryParse(s)?.round() ?? 0;
   }
 
-
   String type = "";
   bool isEditing = false;
-  // selected indices refer to positions in filteredItems
+  // selected items
   final Set<int> selectedIndices = {};
 
   @override
@@ -114,17 +113,16 @@ class LocalFoodController extends GetxController {
     super.onInit();
     type = argument['value'];
     if (type == "Breakfast" || type == "BreakFast") {
-        filteredItems = breakfastFoods;
+      filteredItems = breakfastFoods;
     } else if (type == "Lunch") {
-          filteredItems = lunchFoods;
+      filteredItems = lunchFoods;
     } else if (type == "snack(s)") {
-          filteredItems = snackFoods;
+      filteredItems = snackFoods;
     } else {
       filteredItems = dinnerFoods;
     }
-  // Load persisted local foods
-  await _loadFoodLibrary();
-  await _loadPersistedFoodsFromDb();
+    await _loadFoodLibrary();
+    await _loadPersistedFoodsFromDb();
   }
 
   void toggleEditMode() {
@@ -142,18 +140,15 @@ class LocalFoodController extends GetxController {
     update();
   }
 
-  /// Enter edit mode and select [index].
+  /// enter edit mode
   void selectAndEnterEdit(int index) {
-    // enter edit mode if not already
     if (!isEditing) isEditing = true;
-    // clear any previous selections and select this index
     selectedIndices.clear();
     selectedIndices.add(index);
     update();
   }
 
   void addCustomFood(FoodItem item) async {
-    // Check premium access
     final isPremium = await _appUserService.isPremiumNow();
     if (!isPremium) {
       _showPremiumRequiredDialog();
@@ -194,31 +189,30 @@ class LocalFoodController extends GetxController {
       context: context,
       builder:
           (ctx) => AlertDialog(
-        backgroundColor: ctx.theme.cardColor,
-        title: Text('delete_items_title'.tr),
+            backgroundColor: ctx.theme.cardColor,
+            title: Text('delete_items_title'.tr),
             content: Text(
               'delete_items_message'.trParams({
                 'count': selectedIndices.length.toString(),
               }),
             ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('cancel'.tr),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text('cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
                 child: Text(
                   'delete'.tr,
                   style: TextStyle(color: Theme.of(ctx).colorScheme.error),
                 ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirm == true) {
-      // remove by index descending to avoid reindexing issues
       final indices = selectedIndices.toList()..sort((a, b) => b.compareTo(a));
       for (final i in indices) {
         filteredItems.removeAt(i);
@@ -226,7 +220,10 @@ class LocalFoodController extends GetxController {
       selectedIndices.clear();
       isEditing = false;
       update();
-      NotificationService.showSuccess('food_deleted_success', params: {'count': indices.length.toString()});
+      NotificationService.showSuccess(
+        'food_deleted_success',
+        params: {'count': indices.length.toString()},
+      );
       _saveCurrentFoodsToDb();
     }
   }
@@ -235,7 +232,6 @@ class LocalFoodController extends GetxController {
     try {
       final t = type;
       await dbHelper.deleteLocalFoodsByType(t);
-      // insert current items
       for (final f in filteredItems) {
         await dbHelper.insertLocalFood({
           'name': f.name,
@@ -247,9 +243,7 @@ class LocalFoodController extends GetxController {
           'type': t,
         });
       }
-    } catch (_) {
-      // ignore DB errors
-    }
+    } catch (_) {}
   }
 
   Future<void> _loadPersistedFoodsFromDb() async {
@@ -269,12 +263,10 @@ class LocalFoodController extends GetxController {
       }
       filteredItems = items;
       update();
-    } catch (_) {
-      // ignore DB errors
-    }
+    } catch (_) {}
   }
 
-  /// Filter local foods with debounce. Use `immediate: true` to run instantly.
+  /// filter with debounce
   void searchFilter(String query, {bool immediate = false}) {
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
 
@@ -292,13 +284,25 @@ class LocalFoodController extends GetxController {
         }
       } else {
         if (type == "Breakfast" || type == "BreakFast") {
-          filteredItems = breakfastFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+          filteredItems =
+              breakfastFoods
+                  .where((item) => item.name.toLowerCase().contains(q))
+                  .toList();
         } else if (type == "Lunch") {
-          filteredItems = lunchFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+          filteredItems =
+              lunchFoods
+                  .where((item) => item.name.toLowerCase().contains(q))
+                  .toList();
         } else if (type == "snack(s)") {
-          filteredItems = snackFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+          filteredItems =
+              snackFoods
+                  .where((item) => item.name.toLowerCase().contains(q))
+                  .toList();
         } else {
-          filteredItems = dinnerFoods.where((item) => item.name.toLowerCase().contains(q)).toList();
+          filteredItems =
+              dinnerFoods
+                  .where((item) => item.name.toLowerCase().contains(q))
+                  .toList();
         }
       }
 
@@ -356,6 +360,8 @@ class LocalFoodController extends GetxController {
         ),
       );
       Get.offAllNamed(Routes.leadingView);
+      RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
+      WidgetPromotionService().showPromotionIfNeeded();
     } else {
       if (calorieData.last.date ==
           DateFormat('dd-MM-yyyy').format(DateTime.now())) {
@@ -383,6 +389,8 @@ class LocalFoodController extends GetxController {
             ),
           );
           Get.offAllNamed(Routes.leadingView);
+          RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
+          WidgetPromotionService().showPromotionIfNeeded();
         }
       } else {
         int id = await dbHelper.insertCalorie(
@@ -404,15 +412,17 @@ class LocalFoodController extends GetxController {
           ),
         );
         Get.offAllNamed(Routes.leadingView);
+        RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
+        WidgetPromotionService().showPromotionIfNeeded();
       }
     }
   }
 
   showCalorieCompleteDialog(
-      BuildContext context,
-      List<SqlCalorieModel> calorieData,
+    BuildContext context,
+    List<SqlCalorieModel> calorieData,
     FoodItem item,
-      ) {
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -464,6 +474,8 @@ class LocalFoodController extends GetxController {
                 );
 
                 Get.offAllNamed(Routes.leadingView);
+                RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
+                WidgetPromotionService().showPromotionIfNeeded();
               },
               child: Text(
                 "Add More Calories".tr,
@@ -479,7 +491,7 @@ class LocalFoodController extends GetxController {
       },
     );
   }
-  
+
   void _showPremiumRequiredDialog() {
     Get.dialog(
       PremiumRequiredDialog(
