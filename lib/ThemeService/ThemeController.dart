@@ -6,7 +6,6 @@ import '../SharePrefHelper/SharePrefKey.dart';
 import 'AppTheme.dart';
 
 
-/// Controller for app theme and system UI overlays
 class ThemeController extends GetxController {
 
   bool isDarkMode = true;

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 
-/// Small reusable UI helpers.
-/// Provides a top notification banner similar to iOS transient banners.
 class _TopNotification extends StatefulWidget {
   final String message;
   final Duration duration;
@@ -11,21 +9,34 @@ class _TopNotification extends StatefulWidget {
   final VoidCallback onDismiss;
   final bool persistent;
 
-  const _TopNotification({required this.message, required this.duration, this.autoDismissAfter, required this.onDismiss, this.persistent = false});
+  const _TopNotification({
+    required this.message,
+    required this.duration,
+    this.autoDismissAfter,
+    required this.onDismiss,
+    this.persistent = false,
+  });
 
   @override
   State<_TopNotification> createState() => _TopNotificationState();
 }
 
-class _TopNotificationState extends State<_TopNotification> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-  late final Animation<Offset> _animation = Tween(begin: const Offset(0, -1), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+class _TopNotificationState extends State<_TopNotification>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+  );
+  late final Animation<Offset> _animation = Tween(
+    begin: const Offset(0, -1),
+    end: Offset.zero,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
   @override
   void initState() {
     super.initState();
     _controller.forward();
-    // Auto-dismiss handling
+    // auto dismiss handling
     final auto = widget.autoDismissAfter;
     if (auto != null) {
       Future.delayed(auto, () async {
@@ -53,7 +64,7 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-  // Designed to render safely inside an Overlay or other contexts
+    // safe in overlay
     return SafeArea(
       top: true,
       child: SlideTransition(
@@ -65,11 +76,20 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
             child: Material(
               color: Colors.transparent,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppColor.neutralWhite,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -77,10 +97,12 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
                     Expanded(
                       child: Text(
                         widget.message,
-                        style: TextStyle(color: AppColor.neutralGrey900, fontSize: 14),
+                        style: TextStyle(
+                          color: AppColor.neutralGrey900,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                    // No close button for persistent banners; caller removes the OverlayEntry
                   ],
                 ),
               ),
@@ -95,37 +117,45 @@ class _TopNotificationState extends State<_TopNotification> with SingleTickerPro
 class AppWidgets {
   static Widget backButton(BuildContext context, VoidCallback onTap) {
     return IconButton(
-        padding: EdgeInsets.all(0),
-        onPressed: onTap,
-        icon: Icon(Icons.arrow_back_ios, color: context.theme.primaryColor,));
+      padding: EdgeInsets.all(0),
+      onPressed: onTap,
+      icon: Icon(Icons.arrow_back_ios, color: context.theme.primaryColor),
+    );
   }
 
-  /// Show a transient top notification using an OverlayEntry.
-  /// Message will animate from the top and dismiss after [duration].
-  /// Show a top notification and return its [OverlayEntry].
-  /// Caller may remove the entry to hide the notification.
-  static OverlayEntry showTopNotification(BuildContext context, String message, {Duration duration = const Duration(seconds: 6), Duration? autoDismissAfter, bool persistent = false, VoidCallback? onDismissed}) {
+  // show top notification
+  static OverlayEntry showTopNotification(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 6),
+    Duration? autoDismissAfter,
+    bool persistent = false,
+    VoidCallback? onDismissed,
+  }) {
     final overlay = Overlay.of(context);
 
     late OverlayEntry entry;
-    entry = OverlayEntry(builder: (_) => _TopNotification(
-      message: message,
-      duration: duration,
-      autoDismissAfter: autoDismissAfter,
-      persistent: persistent,
-      onDismiss: () {
-        entry.remove();
-        try {
-          onDismissed?.call();
-        } catch (_) {}
-      },
-    ));
+    entry = OverlayEntry(
+      builder:
+          (_) => _TopNotification(
+            message: message,
+            duration: duration,
+            autoDismissAfter: autoDismissAfter,
+            persistent: persistent,
+            onDismiss: () {
+              entry.remove();
+              try {
+                onDismissed?.call();
+              } catch (_) {}
+            },
+          ),
+    );
 
-  overlay.insert(entry);
+    overlay.insert(entry);
     return entry;
   }
 
-  /// Convenience helper to hide a previously returned [OverlayEntry].
+  // hide notification
   static void hideTopNotification(OverlayEntry? entry) {
     try {
       entry?.remove();

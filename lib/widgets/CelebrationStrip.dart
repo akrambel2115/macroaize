@@ -3,9 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 
-/// A thin, celebratory banner that animates in with a typewriter message
-/// and a subtle confetti sparkle burst. Intended to be shown when progress
-/// updates or a milestone is hit.
 class CelebrationStrip extends StatefulWidget {
   const CelebrationStrip({
     super.key,
@@ -38,16 +35,26 @@ class _CelebrationStripState extends State<CelebrationStrip>
   void initState() {
     super.initState();
 
-    _entranceCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _slide = Tween<Offset>(begin: const Offset(-0.15, 0), end: Offset.zero)
-        .chain(CurveTween(curve: Curves.easeOutCubic))
-        .animate(_entranceCtrl);
+    _entranceCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _slide = Tween<Offset>(
+      begin: const Offset(-0.15, 0),
+      end: Offset.zero,
+    ).chain(CurveTween(curve: Curves.easeOutCubic)).animate(_entranceCtrl);
     _opacity = CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOut);
 
-    final typeDuration = Duration(milliseconds: 30 * widget.message.length + 300);
-    _typeCtrl = AnimationController(vsync: this, duration: typeDuration)..addListener(_updateTypewriter);
+    final typeDuration = Duration(
+      milliseconds: 30 * widget.message.length + 300,
+    );
+    _typeCtrl = AnimationController(vsync: this, duration: typeDuration)
+      ..addListener(_updateTypewriter);
 
-    _confettiCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..addListener(() => setState(() {}));
+    _confettiCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..addListener(() => setState(() {}));
 
     _particles = List.generate(22, (i) => _Particle.random());
 
@@ -134,7 +141,7 @@ class _CelebrationStripState extends State<CelebrationStrip>
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.2,
                     ),
-          textAlign: TextAlign.center,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
@@ -144,7 +151,10 @@ class _CelebrationStripState extends State<CelebrationStrip>
             IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
-                  painter: _ConfettiPainter(progress: _confettiCtrl.value, particles: _particles),
+                  painter: _ConfettiPainter(
+                    progress: _confettiCtrl.value,
+                    particles: _particles,
+                  ),
                   size: Size.infinite,
                 ),
               ),
@@ -183,10 +193,7 @@ class _AnimatedWaveUnderlineState extends State<_AnimatedWaveUnderline>
       animation: _ctrl,
       builder: (context, child) {
         return CustomPaint(
-          foregroundPainter: _WavePainter(
-            t: _ctrl.value,
-            color: widget.color,
-          ),
+          foregroundPainter: _WavePainter(t: _ctrl.value, color: widget.color),
           child: child,
         );
       },
@@ -202,10 +209,11 @@ class _WavePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0;
 
     final path = Path();
     final y = size.height - 6;
@@ -241,9 +249,12 @@ class _Particle {
 
   factory _Particle.random() {
     final rnd = _rnd;
-    final origin = Offset(rnd.nextDouble(), rnd.nextDouble() * 0.4 + 0.2); // top 60%
+    final origin = Offset(
+      rnd.nextDouble(),
+      rnd.nextDouble() * 0.4 + 0.2,
+    );
     final angle = rnd.nextDouble() * 2 * pi;
-    final speed = rnd.nextDouble() * 0.35 + 0.2; // normalized speed
+    final speed = rnd.nextDouble() * 0.35 + 0.2;
     final velocity = Offset(cos(angle), sin(angle)) * speed;
     final hue = rnd.nextDouble();
     final shape = rnd.nextBool() ? _Shape.circle : _Shape.spark;
@@ -258,9 +269,9 @@ class _Particle {
   }
 
   static final _rnd = Random();
-  final Offset origin; // normalized [0..1]
-  final Offset velocity; // normalized per second
-  final double hue; // 0..1
+  final Offset origin;
+  final Offset velocity;
+  final double hue;
   final _Shape shape;
   final double size;
 }
@@ -269,7 +280,7 @@ enum _Shape { circle, spark }
 
 class _ConfettiPainter extends CustomPainter {
   _ConfettiPainter({required this.progress, required this.particles});
-  final double progress; // 0..1
+  final double progress;
   final List<_Particle> particles;
 
   @override
@@ -280,15 +291,20 @@ class _ConfettiPainter extends CustomPainter {
       final life = Curves.easeOut.transform(1 - p);
       final pos = Offset(
         part.origin.dx * size.width + part.velocity.dx * size.width * p,
-          // rise up a touch to feel celebratory
-        part.origin.dy * size.height + part.velocity.dy * size.height * p * -0.6,
+        // rise up effect
+        part.origin.dy * size.height +
+            part.velocity.dy * size.height * p * -0.6,
       );
 
       final alpha = (255 * (life.clamp(0, 1))).toInt();
-      final paint = Paint()
-        ..color = HSVColor.fromAHSV(1, part.hue * 360, 0.8, 1.0)
-            .toColor()
-            .withAlpha(alpha);
+      final paint =
+          Paint()
+            ..color = HSVColor.fromAHSV(
+              1,
+              part.hue * 360,
+              0.8,
+              1.0,
+            ).toColor().withAlpha(alpha);
 
       switch (part.shape) {
         case _Shape.circle:
@@ -309,6 +325,7 @@ class _ConfettiPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ConfettiPainter oldDelegate) {
-    return oldDelegate.progress != progress || oldDelegate.particles != particles;
+    return oldDelegate.progress != progress ||
+        oldDelegate.particles != particles;
   }
 }

@@ -29,21 +29,24 @@ class ChatWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const double kTypingIndicatorSize = 16.0;
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final bgColor = isUser
-        ? (context.theme.brightness == Brightness.dark
-            ? AppColor.neutralGrey800
-            : AppColor.neutralGrey100)
-        : context.theme.cardColor;
-    final textColor = isUser
-        ? (context.theme.brightness == Brightness.dark
-            ? AppColor.neutralWhite
-            : AppColor.neutralGrey900)
-        : context.textTheme.bodyLarge?.color;
+    final bgColor =
+        isUser
+            ? (context.theme.brightness == Brightness.dark
+                ? AppColor.neutralGrey800
+                : AppColor.neutralGrey100)
+            : context.theme.cardColor;
+    final textColor =
+        isUser
+            ? (context.theme.brightness == Brightness.dark
+                ? AppColor.neutralWhite
+                : AppColor.neutralGrey900)
+            : context.textTheme.bodyLarge?.color;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
             Image.asset(AppAssets.coachIcon, height: 28, width: 28),
@@ -103,9 +106,17 @@ class ChatWidget extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () {
-                            Get.find<ChatController>().showFeedbackSheet(context, index);
+                            Get.find<ChatController>().showFeedbackSheet(
+                              context,
+                              index,
+                            );
                           },
-                          icon: Image.asset(AppAssets.thumbsDown, height: 26, width: 26, color: Colors.grey),
+                          icon: Image.asset(
+                            AppAssets.thumbsDown,
+                            height: 26,
+                            width: 26,
+                            color: Colors.grey,
+                          ),
                         ),
                         IconButton(
                           onPressed: () {

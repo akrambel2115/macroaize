@@ -21,7 +21,8 @@ class CalorieRing extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final rawSize = size ?? math.min(constraints.maxWidth, constraints.maxHeight);
+        final rawSize =
+            size ?? math.min(constraints.maxWidth, constraints.maxHeight);
         final circleSize = rawSize * 1.12;
         final stroke = strokeWidth ?? math.max(6.0, rawSize * 0.09);
 
@@ -36,9 +37,10 @@ class CalorieRing extends StatelessWidget {
                 painter: RoundedArcPainter(
                   progress: animatedProgress,
                   strokeWidth: stroke,
-                  backgroundColor: context.theme.brightness == Brightness.dark
-                      ? AppColor.neutralGrey800
-                      : AppColor.neutralGrey200,
+                  backgroundColor:
+                      context.theme.brightness == Brightness.dark
+                          ? AppColor.neutralGrey800
+                          : AppColor.neutralGrey200,
                   progressColor: progressColor ?? AppColor.primaryOrange,
                 ),
               );
@@ -69,19 +71,21 @@ class RoundedArcPainter extends CustomPainter {
     final center = rect.center;
     final radius = math.min(size.width, size.height) / 2;
 
-    final bgPaint = Paint()
-      ..color = backgroundColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final bgPaint =
+        Paint()
+          ..color = backgroundColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
     canvas.drawCircle(center, radius - strokeWidth / 2, bgPaint);
 
-    final progressPaint = Paint()
-      ..color = progressColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..isAntiAlias = true;
+    final progressPaint =
+        Paint()
+          ..color = progressColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..isAntiAlias = true;
 
     final startAngle = -math.pi / 2;
     final sweepAngle = 2 * math.pi * progress;

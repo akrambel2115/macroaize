@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// Instagram-style carousel picker with center focus, scaling, and opacity effects.
-/// The center item is larger and fully opaque, while side items fade and scale down.
 class BottomModePicker extends StatefulWidget {
   final List<String> items;
   final List<String> icons;
@@ -34,7 +32,7 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
     super.initState();
     _pageController = PageController(
       initialPage: widget.currentIndex,
-      viewportFraction: 0.3, // Shows multiple items with center focus
+      viewportFraction: 0.3,
     );
     _entranceController = AnimationController(
       vsync: this,
@@ -43,7 +41,7 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
     _fadeAnim = CurvedAnimation(parent: _entranceController, curve: Curves.easeInOut);
     _scaleAnim = Tween<double>(begin: 0.97, end: 1.0).animate(CurvedAnimation(parent: _entranceController, curve: Curves.easeOut));
 
-    // Delay so the page view is laid out before animating in
+    // delay for layout
     Future.delayed(const Duration(milliseconds: 120), () {
       if (mounted) _entranceController.forward();
     });
@@ -67,8 +65,6 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
       );
     }
   }
-
-  // helper removed
 
   @override
   Widget build(BuildContext context) {
@@ -97,9 +93,9 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
                         value = (1.0 - ((page - index).abs() * 0.5)).clamp(0.0, 1.0);
                       }
 
-                      // scale and opacity based on distance from center
-                      final scale = 0.7 + (value * 0.3); // Scale from 0.7 to 1.0
-                      final opacity = 0.4 + (value * 0.6); // Opacity from 0.4 to 1.0
+                      // scale and opacity
+                      final scale = 0.7 + (value * 0.3);
+                      final opacity = 0.4 + (value * 0.6);
                       final isCenter = (index == widget.currentIndex);
 
                       return Transform.scale(
@@ -108,7 +104,6 @@ class _BottomModePickerState extends State<BottomModePicker> with SingleTickerPr
                           child: Opacity(
                             opacity: opacity,
                             child: Padding(
-                              // keep touch padding but no background
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               child: Text(
                                 widget.items[index].tr,

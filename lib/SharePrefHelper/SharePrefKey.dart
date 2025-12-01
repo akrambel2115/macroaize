@@ -32,4 +32,6 @@ class SharePrefKey {
   static String language = 'language';
   static String hasSeenChatHistoryNotice = 'hasSeenChatHistoryNotice';
   static String onboardingCompleted = 'onboardingCompleted';
+  static String hasSeenAppTips = 'hasSeenAppTips';
+  static String hasCompletedTutorial = 'hasCompletedTutorial';
 }

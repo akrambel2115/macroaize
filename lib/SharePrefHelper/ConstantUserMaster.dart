@@ -31,3 +31,29 @@ Map<String, int> calculateMacrosFromTDEE(double tdee, int weightKg) {
     'carbs': carbs,
   };
 }
+
+double adjustCaloriesForGoal(double tdee, int currentWeight, int desiredGoal, String goalType) {
+  final goal = goalType.trim();
+
+  if (goal == 'Maintain Weight' || goal.isEmpty) return tdee;
+
+  if (goal == 'Lose Weight') {
+    if (desiredGoal < currentWeight) {
+      final diff = (currentWeight - desiredGoal).abs();
+      final pct = (diff >= 10) ? 0.20 : 0.15;
+      return (tdee * (1 - pct)).clamp(1200, double.infinity);
+    }
+    return (tdee * (1 - 0.10)).clamp(1200, double.infinity);
+  }
+
+  if (goal == 'Gain Weight') {
+    if (desiredGoal > currentWeight) {
+      final diff = (desiredGoal - currentWeight).abs();
+      final pct = (diff >= 10) ? 0.20 : 0.10;
+      return (tdee * (1 + pct));
+    }
+    return (tdee * (1 + 0.10));
+  }
+
+  return tdee;
+}
