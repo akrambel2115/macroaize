@@ -9,6 +9,8 @@ class HeightWeightStep extends StatelessWidget {
   final ValueChanged<int> onHeightCmChanged;
   final void Function(int feet, int inches) onHeightFeetInchesChanged;
   final ValueChanged<int> onWeightKgChanged;
+  final int? initialHeightCm;
+  final int? initialWeightKg;
   final VoidCallback onContinue;
   final VoidCallback? onBack;
   final bool showHeaderBack;
@@ -23,6 +25,8 @@ class HeightWeightStep extends StatelessWidget {
     required this.onHeightFeetInchesChanged,
     required this.onWeightKgChanged,
     required this.onContinue,
+    this.initialHeightCm,
+    this.initialWeightKg,
     this.onBack,
     this.showHeaderBack = false,
     this.showFooterPrevious = true,
@@ -70,6 +74,8 @@ class HeightWeightStep extends StatelessWidget {
                     onHeightCmChanged: onHeightCmChanged,
                     onHeightFeetInchesChanged: onHeightFeetInchesChanged,
                     onWeightKgChanged: onWeightKgChanged,
+                    initialHeightCm: initialHeightCm,
+                    initialWeightKg: initialWeightKg,
                   ),
                   const SizedBox(height: 12),
                 ],

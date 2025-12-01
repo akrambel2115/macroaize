@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:get/get.dart';
 
-
 class WeightJourney extends StatefulWidget {
   const WeightJourney({
     super.key,
@@ -21,16 +20,18 @@ class WeightJourney extends StatefulWidget {
   State<WeightJourney> createState() => _WeightJourneyState();
 }
 
-class _WeightJourneyState extends State<WeightJourney> with SingleTickerProviderStateMixin {
+class _WeightJourneyState extends State<WeightJourney>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _progressAnim;
   double _prevProgress = 0;
 
   double get _progress {
     final diff = (widget.goalWeight - widget.currentWeight).abs();
-    final denom = widget.currentWeight > widget.goalWeight
-        ? widget.currentWeight.toDouble()
-        : widget.goalWeight.toDouble();
+    final denom =
+        widget.currentWeight > widget.goalWeight
+            ? widget.currentWeight.toDouble()
+            : widget.goalWeight.toDouble();
     if (denom <= 0) return 0.0;
     return (1 - (diff / denom)).clamp(0.0, 1.0);
   }
@@ -38,18 +39,25 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
     _prevProgress = _progress;
-    _progressAnim = Tween<double>(begin: _prevProgress, end: _prevProgress)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _progressAnim = Tween<double>(
+      begin: _prevProgress,
+      end: _prevProgress,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
   void didUpdateWidget(covariant WeightJourney oldWidget) {
     super.didUpdateWidget(oldWidget);
     final newProgress = _progress;
-    _progressAnim = Tween<double>(begin: _prevProgress, end: newProgress)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _progressAnim = Tween<double>(
+      begin: _prevProgress,
+      end: newProgress,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _controller
       ..value = 0
       ..forward();
@@ -64,7 +72,7 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-  final start = widget.currentWeight;
+    final start = widget.currentWeight;
     final end = widget.goalWeight;
     final total = (end - start).abs();
     final maxMilestones = 7;
@@ -89,12 +97,12 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
 
     return LayoutBuilder(
       builder: (context, constraints) {
-  final width = constraints.maxWidth;
-  const lineHeight = 6.0;
-  const avatarSize = 28.0;
-  const paddingH = 8.0;
-  const containerHeight = 99.0;
-  final centerY = 30.0;
+        final width = constraints.maxWidth;
+        const lineHeight = 6.0;
+        const avatarSize = 28.0;
+        const paddingH = 8.0;
+        const containerHeight = 99.0;
+        final centerY = 30.0;
         return SizedBox(
           height: containerHeight,
           child: Stack(
@@ -128,18 +136,26 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _LabelPill(text: 'Current', color: AppColor.secondary, onTap: widget.onEditCurrent),
+                          _LabelPill(
+                            text: 'Current',
+                            color: AppColor.secondary,
+                            onTap: widget.onEditCurrent,
+                          ),
                           const SizedBox(height: 6),
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
+                            transitionBuilder:
+                                (child, anim) =>
+                                    FadeTransition(opacity: anim, child: child),
                             child: Text(
                               '$start${'kg'.tr}',
                               key: ValueKey<int>(start),
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: AppColor.secondary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(
+                                color: AppColor.secondary,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
@@ -149,18 +165,26 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          _LabelPill(text: 'Goal', color: AppColor.primaryOrange, onTap: widget.onEditGoal),
+                          _LabelPill(
+                            text: 'Goal',
+                            color: AppColor.primaryOrange,
+                            onTap: widget.onEditGoal,
+                          ),
                           const SizedBox(height: 6),
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
+                            transitionBuilder:
+                                (child, anim) =>
+                                    FadeTransition(opacity: anim, child: child),
                             child: Text(
                               '$end${'kg'.tr}',
                               key: ValueKey<int>(end),
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: AppColor.primaryOrange,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(
+                                color: AppColor.primaryOrange,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
@@ -173,10 +197,17 @@ class _WeightJourneyState extends State<WeightJourney> with SingleTickerProvider
                 animation: _progressAnim,
                 builder: (context, child) {
                   final usableWidth = width - paddingH * 2;
-                  final x = (paddingH + usableWidth * _progressAnim.value).clamp(0.0, width);
-                  
-                  final left = (x - (avatarSize / 2)).clamp(0.0, width - avatarSize);
-                  final top = (centerY - (avatarSize / 2)).clamp(0.0, containerHeight - avatarSize);
+                  final x = (paddingH + usableWidth * _progressAnim.value)
+                      .clamp(0.0, width);
+
+                  final left = (x - (avatarSize / 2)).clamp(
+                    0.0,
+                    width - avatarSize,
+                  );
+                  final top = (centerY - (avatarSize / 2)).clamp(
+                    0.0,
+                    containerHeight - avatarSize,
+                  );
                   return Positioned(
                     left: left,
                     top: top,
@@ -225,7 +256,7 @@ class _JourneyPainter extends CustomPainter {
       Rect.fromLTWH(0, y - radius, size.width * progressAnim.value, lineHeight),
       Radius.circular(radius),
     );
-  final progressPaint = Paint()..color = AppColor.primaryOrange;
+    final progressPaint = Paint()..color = AppColor.primaryOrange;
     canvas.drawRRect(progressRect, progressPaint);
 
     final total = (end - start).abs();
@@ -236,9 +267,10 @@ class _JourneyPainter extends CustomPainter {
       final t = tRaw.isNaN || tRaw.isInfinite ? 0.0 : tRaw;
       final x = size.width * t.clamp(0.0, 1.0);
       final reached = t <= progressAnim.value;
-      final paint = Paint()
-        ..color = reached ? AppColor.primaryOrange : AppColor.neutralGrey400
-        ..style = PaintingStyle.fill;
+      final paint =
+          Paint()
+            ..color = reached ? AppColor.primaryOrange : AppColor.neutralGrey400
+            ..style = PaintingStyle.fill;
       canvas.drawCircle(Offset(x, y), 4, paint);
     }
   }
@@ -291,9 +323,9 @@ class _LabelPill extends StatelessWidget {
         Text(
           text.tr,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         if (onTap != null) ...[
           const SizedBox(width: 6),

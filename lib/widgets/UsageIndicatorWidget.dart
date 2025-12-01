@@ -8,39 +8,38 @@ import 'package:foodcalorietracker/shared/services/subscription_service.dart';
 
 class UsageIndicatorWidget extends StatelessWidget {
   final bool showOnlyWhenLimited;
-  
-  const UsageIndicatorWidget({
-    super.key,
-    this.showOnlyWhenLimited = false,
-  });
+
+  const UsageIndicatorWidget({super.key, this.showOnlyWhenLimited = false});
 
   @override
   Widget build(BuildContext context) {
     final subscriptionService = SubscriptionService();
     final usageService = UsageService();
-    
+
     return StreamBuilder<Subscription?>(
       stream: subscriptionService.subscriptionStream,
       builder: (context, subscriptionSnapshot) {
         final subscription = subscriptionSnapshot.data;
-        
-            if (subscription?.isActive == true && showOnlyWhenLimited) {
+
+        if (subscription?.isActive == true && showOnlyWhenLimited) {
           return const SizedBox.shrink();
         }
-            if (subscription?.isActive == true) {
-              return _buildPremiumBadge(context);
-            }
+        if (subscription?.isActive == true) {
+          return _buildPremiumBadge(context);
+        }
         return StreamBuilder<UserUsage?>(
           stream: usageService.usageStream,
           builder: (context, usageSnapshot) {
-            final usage = usageSnapshot.data ?? const UserUsage(scanCount: 0, chatCount: 0);
+            final usage =
+                usageSnapshot.data ??
+                const UserUsage(scanCount: 0, chatCount: 0);
             return _buildUsageDisplay(context, usage);
           },
         );
       },
     );
   }
-  
+
   Widget _buildPremiumBadge(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -58,11 +57,7 @@ class UsageIndicatorWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.star,
-            color: Colors.white,
-            size: 16,
-          ),
+          const Icon(Icons.star, color: Colors.white, size: 16),
           const SizedBox(width: 6),
           Text(
             'Premium',
@@ -75,7 +70,7 @@ class UsageIndicatorWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildUsageDisplay(BuildContext context, UserUsage usage) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -94,11 +89,7 @@ class UsageIndicatorWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.info_outline,
-                color: AppColor.primaryOrange,
-                size: 16,
-              ),
+              Icon(Icons.info_outline, color: AppColor.primaryOrange, size: 16),
               const SizedBox(width: 8),
               Text(
                 'Daily Usage',
@@ -108,7 +99,8 @@ class UsageIndicatorWidget extends StatelessWidget {
               ),
               const Spacer(),
               GestureDetector(
-                onTap: () => Get.toNamed('/premiumView'), // Adjust route as needed
+                onTap:
+                    () => Get.toNamed('/premiumView'), // Adjust route as needed
                 child: Text(
                   'Go Premium',
                   style: context.textTheme.labelSmall?.copyWith(
@@ -149,7 +141,7 @@ class UsageIndicatorWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildUsageItem(
     BuildContext context, {
     required IconData icon,
@@ -165,11 +157,7 @@ class UsageIndicatorWidget extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: isLimitReached ? Colors.grey : color,
-              size: 16,
-            ),
+            Icon(icon, color: isLimitReached ? Colors.grey : color, size: 16),
             const SizedBox(width: 6),
             Text(
               label,
@@ -189,7 +177,8 @@ class UsageIndicatorWidget extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final progress = total > 0 ? (current / total).clamp(0.0, 1.0) : 0.0;
+              final progress =
+                  total > 0 ? (current / total).clamp(0.0, 1.0) : 0.0;
               return Stack(
                 children: [
                   Container(
@@ -209,11 +198,12 @@ class UsageIndicatorWidget extends StatelessWidget {
         Text(
           '$remaining left',
           style: context.textTheme.labelSmall?.copyWith(
-            color: isLimitReached 
-              ? Colors.red 
-              : remaining <= 1 
-                ? Colors.orange 
-                : Colors.grey,
+            color:
+                isLimitReached
+                    ? Colors.red
+                    : remaining <= 1
+                    ? Colors.orange
+                    : Colors.grey,
             fontSize: 10,
             fontWeight: FontWeight.w500,
           ),

@@ -22,8 +22,8 @@ class WorkoutStep extends StatelessWidget {
     required this.onSelect,
     required this.onContinue,
     this.onBack,
-  this.showHeaderBack = false,
-  this.showFooterPrevious = true,
+    this.showHeaderBack = false,
+    this.showFooterPrevious = true,
     this.padding,
   });
 
@@ -31,7 +31,14 @@ class WorkoutStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasSelection = selectedId.isNotEmpty;
     return Padding(
-      padding: padding ?? EdgeInsets.only(left: 10, right: 10, bottom: MediaQuery.of(context).padding.bottom, top: 10),
+      padding:
+          padding ??
+          EdgeInsets.only(
+            left: 10,
+            right: 10,
+            bottom: MediaQuery.of(context).padding.bottom,
+            top: 10,
+          ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -51,10 +58,7 @@ class WorkoutStep extends StatelessWidget {
             (subtitle ?? 'This will used to calibrate your custom plan').tr,
             style: context.theme.textTheme.titleSmall,
           ).paddingOnly(top: 10, bottom: 10),
-          WorkoutSelectorRadial(
-            selectedId: selectedId,
-            onSelect: onSelect,
-          ),
+          WorkoutSelectorRadial(selectedId: selectedId, onSelect: onSelect),
           const Spacer(),
           Row(
             children: [
@@ -69,7 +73,8 @@ class WorkoutStep extends StatelessWidget {
                     height: 50,
                   ),
                 ),
-              if (showFooterPrevious && onBack != null) const SizedBox(width: 10),
+              if (showFooterPrevious && onBack != null)
+                const SizedBox(width: 10),
               Expanded(
                 child: ModernButton(
                   text: 'Continue'.tr,
@@ -77,7 +82,10 @@ class WorkoutStep extends StatelessWidget {
                   style: ModernButtonStyle.primary,
                   size: ModernButtonSize.medium,
                   borderRadius: BorderRadius.circular(30),
-                  icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                  icon: const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                  ),
                   height: 50,
                 ),
               ),
