@@ -4,12 +4,10 @@ import { getMessaging } from 'firebase-admin/messaging';
 import { logger } from 'firebase-functions/v2';
 import { defineSecret } from 'firebase-functions/params';
 
-// Define secret for Firebase service account (using Secret Manager)
+// Firebase secret
 export const FIREBASE_SERVICE_ACCOUNT = defineSecret('FIREBASE_SERVICE_ACCOUNT');
 
-/**
- * Interface for notification payload
- */
+// Notification payload
 export interface NotificationPayload {
   title: string;
   body: string;
@@ -17,9 +15,7 @@ export interface NotificationPayload {
   imageUrl?: string;
 }
 
-/**
- * Interface for FCM token document
- */
+// FCM token doc
 interface FCMTokenDoc {
   token: string;
   platform: string;
@@ -28,20 +24,16 @@ interface FCMTokenDoc {
   lastUsed: FirebaseFirestore.Timestamp;
 }
 
-/**
- * Secure notification service for sending FCM messages
- * Uses Firebase Admin SDK with service account authentication
- * Implements token cleanup and error handling best practices
- */
+// Notification service
 export class NotificationService {
   private static instance: NotificationService;
   private messaging: admin.messaging.Messaging | null = null;
   private db: admin.firestore.Firestore | null = null;
-  
+
   private constructor() {
-    // Initialize services lazily when first accessed
+    // Lazy init
   }
-  
+
   public static getInstance(): NotificationService {
     if (!NotificationService.instance) {
       NotificationService.instance = new NotificationService();
@@ -49,10 +41,7 @@ export class NotificationService {
     return NotificationService.instance;
   }
 
-  /**
-   * Lazy initialization of Firebase services
-   * Ensures Firebase Admin is properly initialized before use
-   */
+  // Init services
   private initializeServices(): void {
     if (!this.messaging) {
       this.messaging = getMessaging();
@@ -62,22 +51,14 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Send notification to a specific user
-   * Fetches all active FCM tokens for the user and sends to all devices
-   * Handles invalid tokens and cleans them up automatically
-   * 
-   * @param uid - User ID to send notification to
-   * @param payload - Notification payload with title, body, and optional data
-   * @returns Promise<boolean> - True if at least one message was sent successfully
-   */
+  // Send user notification
   async sendNotificationToUser(uid: string, payload: NotificationPayload): Promise<boolean> {
     const correlationId = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
-      // Initialize Firebase services
+      // Init services
       this.initializeServices();
-      
+
       logger.info('Sending notification to user', {
         correlationId,
         uid,
@@ -85,7 +66,7 @@ export class NotificationService {
         hasData: !!payload.data
       });
 
-      // Fetch all active FCM tokens for the user
+      // Fetch tokens
       const tokensSnapshot = await this.db!
         .collection('users')
         .doc(uid)
@@ -116,7 +97,7 @@ export class NotificationService {
         tokenCount: tokens.length
       });
 
-      // Prepare FCM message
+      // Prepare message
       const message = {
         notification: {
           title: payload.title,
@@ -145,7 +126,7 @@ export class NotificationService {
         }
       };
 
-      // Send to multiple tokens using sendMulticast
+      // Send multicast
       const tokenValues = tokens.map((t: any) => t.token);
       const multicastMessage = {
         ...message,
@@ -153,7 +134,7 @@ export class NotificationService {
       };
 
       const response = await this.messaging!.sendEachForMulticast(multicastMessage);
-      
+
       logger.info('FCM multicast response', {
         correlationId,
         uid,
@@ -161,14 +142,14 @@ export class NotificationService {
         failureCount: response.failureCount
       });
 
-      // Handle invalid tokens - mark them as inactive
+      // Handle invalid tokens
       const invalidTokens: string[] = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success && resp.error) {
           const errorCode = resp.error.code;
           // Token is invalid, unregistered, or app was uninstalled
           if (errorCode === 'messaging/invalid-registration-token' ||
-              errorCode === 'messaging/registration-token-not-registered') {
+            errorCode === 'messaging/registration-token-not-registered') {
             invalidTokens.push(tokens[idx].docId);
             logger.warn('Invalid FCM token detected', {
               correlationId,
@@ -181,17 +162,17 @@ export class NotificationService {
         }
       });
 
-      // Clean up invalid tokens in batch
+      // Cleanup tokens
       if (invalidTokens.length > 0) {
         await this.cleanupInvalidTokens(uid, invalidTokens, correlationId);
       }
 
-      // Update lastUsed timestamp for valid tokens
+      // Update usage
       if (response.successCount > 0) {
         await this.updateTokenUsage(uid, tokens, correlationId);
       }
 
-      // Log notification audit
+      // Log audit
       await this.logNotificationAudit(uid, payload, response.successCount, response.failureCount, correlationId);
 
       return response.successCount > 0;
@@ -202,25 +183,18 @@ export class NotificationService {
         uid,
         error: error instanceof Error ? error.message : String(error)
       });
-      
-      // Log failed notification audit
+
+      // Log audit
       await this.logNotificationAudit(uid, payload, 0, 1, correlationId, error);
-      
+
       return false;
     }
   }
 
-  /**
-   * Send notification to multiple users
-   * Efficiently handles bulk notifications
-   * 
-   * @param userIds - Array of user IDs
-   * @param payload - Notification payload
-   * @returns Promise<number> - Number of users successfully notified
-   */
+  // Send bulk notifications
   async sendNotificationToUsers(userIds: string[], payload: NotificationPayload): Promise<number> {
     const correlationId = `bulk_notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     logger.info('Sending bulk notifications', {
       correlationId,
       userCount: userIds.length,
@@ -228,18 +202,18 @@ export class NotificationService {
     });
 
     let successCount = 0;
-    
-    // Process in batches to avoid overwhelming the system
+
+    // Process batches
     const batchSize = 10;
     for (let i = 0; i < userIds.length; i += batchSize) {
       const batch = userIds.slice(i, i + batchSize);
-      
-      const promises = batch.map(uid => 
+
+      const promises = batch.map(uid =>
         this.sendNotificationToUser(uid, payload)
           .then(success => success ? 1 : 0)
           .catch(() => 0)
       );
-      
+
       const results = await Promise.all(promises);
       successCount += results.reduce((sum, result) => sum + result, 0);
     }
@@ -254,20 +228,14 @@ export class NotificationService {
     return successCount;
   }
 
-  /**
-   * Send notification to a topic (for broadcast notifications)
-   * 
-   * @param topic - Topic name
-   * @param payload - Notification payload
-   * @returns Promise<boolean> - True if message was sent successfully
-   */
+  // Send topic notification
   async sendNotificationToTopic(topic: string, payload: NotificationPayload): Promise<boolean> {
     const correlationId = `topic_notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
-      // Initialize Firebase services
+      // Init services
       this.initializeServices();
-      
+
       logger.info('Sending notification to topic', {
         correlationId,
         topic,
@@ -304,7 +272,7 @@ export class NotificationService {
       };
 
       const response = await this.messaging!.send(message);
-      
+
       logger.info('Topic notification sent successfully', {
         correlationId,
         topic,
@@ -319,41 +287,38 @@ export class NotificationService {
         topic,
         error: error instanceof Error ? error.message : String(error)
       });
-      
+
       return false;
     }
   }
 
-  /**
-   * Clean up invalid FCM tokens
-   * Marks tokens as inactive instead of deleting for audit purposes
-   */
+  // Cleanup invalid tokens
   private async cleanupInvalidTokens(uid: string, tokenDocIds: string[], correlationId: string): Promise<void> {
     try {
       const batch = this.db!.batch();
-      
+
       for (const tokenDocId of tokenDocIds) {
         const tokenRef = this.db!
           .collection('users')
           .doc(uid)
           .collection('fcmTokens')
           .doc(tokenDocId);
-        
+
         batch.update(tokenRef, {
           isActive: false,
           invalidatedAt: FieldValue.serverTimestamp(),
           invalidationReason: 'FCM error - token invalid'
         });
       }
-      
+
       await batch.commit();
-      
+
       logger.info('Cleaned up invalid FCM tokens', {
         correlationId,
         uid,
         invalidatedCount: tokenDocIds.length
       });
-      
+
     } catch (error) {
       logger.error('Failed to cleanup invalid tokens', {
         correlationId,
@@ -363,27 +328,25 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Update lastUsed timestamp for successful tokens
-   */
+  // Update token usage
   private async updateTokenUsage(uid: string, tokens: any[], correlationId: string): Promise<void> {
     try {
       const batch = this.db!.batch();
-      
+
       for (const token of tokens) {
         const tokenRef = this.db!
           .collection('users')
           .doc(uid)
           .collection('fcmTokens')
           .doc(token.docId);
-        
+
         batch.update(tokenRef, {
           lastUsed: FieldValue.serverTimestamp()
         });
       }
-      
+
       await batch.commit();
-      
+
     } catch (error) {
       logger.warn('Failed to update token usage timestamps', {
         correlationId,
@@ -393,14 +356,12 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Log notification audit for monitoring and debugging
-   */
+  // Log audit
   private async logNotificationAudit(
-    uid: string, 
-    payload: NotificationPayload, 
-    successCount: number, 
-    failureCount: number, 
+    uid: string,
+    payload: NotificationPayload,
+    successCount: number,
+    failureCount: number,
     correlationId: string,
     error?: any
   ): Promise<void> {
@@ -421,7 +382,7 @@ export class NotificationService {
         region: 'europe-west1'
       });
     } catch (auditError) {
-      // Don't fail the notification if audit logging fails
+      // Ignore audit errors
       logger.warn('Failed to log notification audit', {
         correlationId,
         auditError: auditError instanceof Error ? auditError.message : String(auditError)
@@ -430,10 +391,7 @@ export class NotificationService {
   }
 }
 
-/**
- * Factory function to get notification service instance
- * Ensures proper initialization of Firebase Admin SDK
- */
+// Get service instance
 export function getNotificationService(): NotificationService {
   return NotificationService.getInstance();
 }
