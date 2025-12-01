@@ -18,46 +18,55 @@ class TransitionView extends GetView<TransitionController> {
             children: [
               FadeTransition(
                 opacity: controller.fadeAnim,
-                child: Builder(builder: (ctx) {
-                  if (controller.assetPath == AppAssets.loadingClock || controller.assetPath == AppAssets.loader) {
-                    return Center(
-                      child: SizedBox(
-                        width: 180,
-                        height: 180,
+                child: Builder(
+                  builder: (ctx) {
+                    if (controller.assetPath == AppAssets.loadingClock ||
+                        controller.assetPath == AppAssets.loader) {
+                      return Center(
+                        child: SizedBox(
+                          width: 180,
+                          height: 180,
+                          child: Lottie.asset(
+                            controller.assetPath,
+                            controller: controller.lottieController,
+                            onLoaded: (composition) {
+                              controller.lottieController
+                                ..duration = composition.duration;
+                              controller.lottieController
+                                  .forward()
+                                  .whenComplete(
+                                    () => controller.onLottieComplete(),
+                                  );
+                            },
+                            fit: BoxFit.contain,
+                            repeat: false,
+                          ),
+                        ),
+                      );
+                    }
+
+                    // transition for first time flow
+                    return SizedBox.expand(
+                      child: Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
                         child: Lottie.asset(
                           controller.assetPath,
                           controller: controller.lottieController,
                           onLoaded: (composition) {
                             controller.lottieController
                               ..duration = composition.duration
-                              ..forward().whenComplete(() => controller.onLottieComplete());
+                              ..forward().whenComplete(
+                                () => controller.onLottieComplete(),
+                              );
                           },
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
                           repeat: false,
                         ),
                       ),
                     );
-                  }
-
-                  // Full-screen transition for first-time flow
-                  return SizedBox.expand(
-                    child: Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                      child: Lottie.asset(
-                        controller.assetPath,
-                        controller: controller.lottieController,
-                        onLoaded: (composition) {
-                          controller.lottieController
-                            ..duration = composition.duration
-                            ..forward().whenComplete(() => controller.onLottieComplete());
-                        },
-                        fit: BoxFit.cover,
-                        repeat: false,
-                      ),
-                    ),
-                  );
-                }),
+                  },
+                ),
               ),
 
               SafeArea(child: Container()),

@@ -5,6 +5,7 @@ import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 import 'package:foodcalorietracker/routes/app_routes.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
+import 'package:foodcalorietracker/constant/AppAssets.dart';
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController mainController;
@@ -21,12 +22,11 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
     super.onInit();
     _setupAppName();
     _initializeAnimations();
-    // View triggers `startAnimations()` when visible
   }
 
   bool _started = false;
 
-  /// Called by the view to begin animations when visible
+  // start when visible
   void startAnimations() {
     if (_started) return;
     _started = true;
@@ -35,23 +35,20 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
 
   void _setupAppName() {
     final name = Get.find<AppConfigService>().appName;
-    // Use orange for letters
+    // setup letters
     for (int i = 0; i < name.length; i++) {
-      appNameLetters.add({
-        'letter': name[i],
-        'color': AppColor.primaryOrange,
-      });
+      appNameLetters.add({'letter': name[i], 'color': AppColor.primaryOrange});
     }
   }
 
   void _initializeAnimations() {
-    // Main animation controller
+    // main controller
     mainController = AnimationController(
       duration: const Duration(milliseconds: 3000),
       vsync: this,
     );
 
-  // Scale animation for final bounce
+    // scale bounce
     scaleController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -61,16 +58,16 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       CurvedAnimation(parent: scaleController, curve: Curves.elasticOut),
     );
 
-  // Individual letter animations (staggered)
+    // staggered letters
     for (int i = 0; i < appNameLetters.length; i++) {
       AnimationController letterController = AnimationController(
-  duration: const Duration(milliseconds: 450),
+        duration: const Duration(milliseconds: 450),
         vsync: this,
       );
 
       Animation<double> letterAnimation = Tween<double>(
-  begin: -60.0,
-  end: 0.0,
+        begin: -60.0,
+        end: 0.0,
       ).animate(
         CurvedAnimation(parent: letterController, curve: Curves.easeOutBack),
       );
@@ -81,38 +78,38 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
   }
 
   void _startAnimationSequence() async {
-    // Start letter animations with staggered delay - don't await each one
+    // staggered letter drop
     for (int i = 0; i < letterControllers.length; i++) {
       Future.delayed(Duration(milliseconds: 120 * i), () {
         letterControllers[i].forward();
       });
     }
 
-    // Wait for all letters to finish dropping
+    // wait for letters
     await Future.delayed(
       Duration(milliseconds: 120 * letterControllers.length + 500),
     );
 
-    // Start scale animation
+    // scale bounce
     scaleController.forward().then((_) {
       scaleController.reverse();
     });
 
-    // Navigate to next screen after animations
+    // navigate next
     await Future.delayed(const Duration(milliseconds: 1200));
     _navigateToNext();
   }
 
   void _navigateToNext() async {
-    // Check if onboarding is completed
+    // check onboarding
     final onboardingCompleted =
         await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
 
     if (onboardingCompleted) {
-      // User has completed onboarding, play the transition Lottie then go home
-      Get.offAllNamed(Routes.transitionView);
+      // go to home
+      Get.offAllNamed(Routes.leadingView);
     } else {
-      // User hasn't completed onboarding, go to welcome flow
+      // go to welcome
       Get.offAllNamed(Routes.welcomeView);
     }
   }

@@ -27,17 +27,17 @@ class _SignUpViewState extends State<SignUpView> {
         ),
         child: GetBuilder<SignUpController>(
           builder: (controller) {
-            // Map selectedView into 6-step progress
+            // map to 6 steps
             final int stepIndex = controller.selectedView.clamp(0, 5);
             final bool forward = stepIndex >= _prevStep;
 
-            // Update prev step for next build (no setState required)
+            // update prev step
             _prevStep = stepIndex;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Step progress indicator
+                // step progress
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6.0),
                   child: _StepProgressIndicator(
@@ -46,31 +46,33 @@ class _SignUpViewState extends State<SignUpView> {
                     activeColor: AppColor.primaryOrange,
                   ),
                 ),
-                // Top-left back button
-                AppWidgets.backButton(context, () {
-                  if (controller.selectedView > 0) {
-                    controller.selectedView = controller.selectedView - 1;
-                    controller.update();
-                  } else {
-                    Get.back();
-                  }
-                }),
+                // back button
+                if (controller.selectedView <
+                    7) // hide on setup/review
+                  AppWidgets.backButton(context, () {
+                    if (controller.selectedView > 0) {
+                      controller.selectedView = controller.selectedView - 1;
+                      controller.update();
+                    } else {
+                      Get.back();
+                    }
+                  }),
                 const SizedBox(height: 8),
 
-                // Active screen with animated transitions
+                // active screen
                 Expanded(
                   child: AnimatedSwitcher(
-                    // Increased duration for a slower, smoother transition
+                    // smooth transition
                     duration: const Duration(milliseconds: 700),
-                    // Use symmetric easeInOut curves for smoother entrance/exit
+                    // ease in out
                     switchInCurve: Curves.easeInOut,
                     switchOutCurve: Curves.easeInOut,
                     transitionBuilder: (child, animation) {
-                      // Combine slide + fade and adjust for RTL
+                      // slide fade rtl aware
                       final textDir = Directionality.of(context);
                       final bool isRtl = textDir == TextDirection.rtl;
 
-                      // Determine animation start offset
+                      // animation offset
                       final Offset begin =
                           forward
                               ? (isRtl
@@ -116,7 +118,7 @@ class _SignUpViewState extends State<SignUpView> {
 }
 
 class _StepProgressIndicator extends StatelessWidget {
-  final int currentStep; // 0-based
+  final int currentStep; // current index
   final int total;
   final Color? activeColor;
 

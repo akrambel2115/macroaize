@@ -5,7 +5,8 @@ import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
 import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
 
-class TransitionController extends GetxController with GetTickerProviderStateMixin {
+class TransitionController extends GetxController
+    with GetTickerProviderStateMixin {
   late AnimationController fadeController;
   late Animation<double> fadeAnim;
   late AnimationController lottieController;
@@ -13,8 +14,11 @@ class TransitionController extends GetxController with GetTickerProviderStateMix
   @override
   void onInit() {
     super.onInit();
-  _selectAsset();
-    fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _selectAsset();
+    fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
     fadeAnim = CurvedAnimation(parent: fadeController, curve: Curves.easeIn);
 
     lottieController = AnimationController(vsync: this);
@@ -25,15 +29,16 @@ class TransitionController extends GetxController with GetTickerProviderStateMix
   String assetPath = AppAssets.transition;
 
   void _selectAsset() async {
-    final onboardingCompleted = await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
-
-  assetPath = onboardingCompleted ? AppAssets.loader : AppAssets.transition;
+    final onboardingCompleted =
+        await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
+    assetPath = AppAssets.transition;
     update();
   }
 
   void onLottieComplete() async {
     await Future.delayed(const Duration(milliseconds: 250));
-    final onboardingCompleted = await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
+    final onboardingCompleted =
+        await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
     if (onboardingCompleted) {
       Get.offAllNamed(Routes.leadingView);
     } else {
