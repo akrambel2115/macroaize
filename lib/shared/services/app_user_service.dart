@@ -58,7 +58,8 @@ class AppUserService {
   UsageService? _usageService;
   Stream<AppUser>? _userStream;
 
-  Stream<AppUser> get userStream => _userStream ?? Stream.value(const AppUser());
+  Stream<AppUser> get userStream =>
+      _userStream ?? Stream.value(const AppUser());
 
   /// Initialize the service; optional mocks for testing
   void initialize({
@@ -72,11 +73,13 @@ class AppUserService {
   }
 
   Stream<AppUser> _createUserStream({Stream? authStateStream}) {
-    final authStream = authStateStream ?? FirebaseAuth.instance.authStateChanges();
+    final authStream =
+        authStateStream ?? FirebaseAuth.instance.authStateChanges();
 
     return authStream.asyncMap((firebaseUser) async {
       if (firebaseUser == null) return const AppUser();
-      if (_subscriptionService == null || _usageService == null) return AppUser(firebaseUser: firebaseUser);
+      if (_subscriptionService == null || _usageService == null)
+        return AppUser(firebaseUser: firebaseUser);
 
       final subscription = await _subscriptionService!.subscriptionStream.first;
       final usage = await _usageService!.usageStream.first;
@@ -92,7 +95,8 @@ class AppUserService {
   Future<AppUser> getCurrentUser() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) return const AppUser();
-    if (_subscriptionService == null || _usageService == null) return AppUser(firebaseUser: firebaseUser);
+    if (_subscriptionService == null || _usageService == null)
+      return AppUser(firebaseUser: firebaseUser);
 
     final subscription = await _subscriptionService!.subscriptionStream.first;
     final usage = await _usageService!.usageStream.first;
@@ -120,7 +124,8 @@ class AppUserService {
   }
 
   bool isAuthenticated() => FirebaseAuth.instance.currentUser != null;
-  bool isEmailVerified() => FirebaseAuth.instance.currentUser?.emailVerified == true;
+  bool isEmailVerified() =>
+      FirebaseAuth.instance.currentUser?.emailVerified == true;
   bool isSecurelyAuthenticated() {
     final user = FirebaseAuth.instance.currentUser;
     return user != null && user.emailVerified;
@@ -131,7 +136,7 @@ class AppUserService {
     return user != null && !user.emailVerified;
   }
 
-  /// Check activation (email verified) and optionally show warnings
+  /// check email verified and optionally show warnings
   bool checkAccountActivation(String feature, {bool showWarning = true}) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {

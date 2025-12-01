@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import '../../routes/app_routes.dart';
 
-/// Email verification guard service
+// email verification guard
 class EmailVerificationGuard {
   static final EmailVerificationGuard _instance =
       EmailVerificationGuard._internal();
@@ -13,7 +13,9 @@ class EmailVerificationGuard {
 
   DateTime? _skipUntil;
   bool _skipActive = false;
-  bool get _isSkipActive => _skipActive || (_skipUntil != null && DateTime.now().isBefore(_skipUntil!));
+  bool get _isSkipActive =>
+      _skipActive ||
+      (_skipUntil != null && DateTime.now().isBefore(_skipUntil!));
 
   Future<bool> needsVerification() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -30,7 +32,7 @@ class EmailVerificationGuard {
   }
 
   Future<void> markVerificationSkipped() async {
-    _skipActive = true; // Session-scoped skip
+    _skipActive = true; // session skip
   }
 
   Future<void> markVerificationSkippedFor(Duration duration) async {
@@ -54,7 +56,7 @@ class EmailVerificationGuard {
   }) {
     final user = FirebaseAuth.instance.currentUser;
 
-    // Not authenticated
+    // not authenticated
     if (user == null) {
       if (showError) {
         NotificationService.showError('auth_required');
@@ -66,7 +68,7 @@ class EmailVerificationGuard {
       return true;
     }
 
-    // Authenticated but not verified
+    // not verified
     if (!user.emailVerified) {
       if (showError) {
         final message =
@@ -81,7 +83,7 @@ class EmailVerificationGuard {
       return false;
     }
 
-    // Authenticated and verified
+    // verified
     return true;
   }
 
@@ -89,7 +91,7 @@ class EmailVerificationGuard {
     String? errorMessage,
     bool showError = true,
   }) async {
-  // First check email verification
+    // check verification
     if (!checkVerificationOrBlock(
       errorMessage: 'email_verification_required_for_premium',
       showError: showError,
@@ -98,7 +100,7 @@ class EmailVerificationGuard {
       return false;
     }
 
-    // Then check premium status (existing logic can be kept)
+    // check premium
     return true;
   }
 
@@ -114,17 +116,17 @@ class EmailVerificationGuard {
   }
 
   bool checkRouteAccess(String routeName) {
-    // Allow verification-related routes
+    // verification routes
     if (_isVerificationRoute(routeName)) {
       return true;
     }
 
-    // Allow basic authentication routes
+    // auth routes
     if (_isBasicAuthRoute(routeName)) {
       return true;
     }
 
-    // For protected routes, check verification
+    // protected routes
     if (_isProtectedRoute(routeName)) {
       return checkVerificationOrBlock(
         errorMessage: 'email_verification_required_for_app_access',
@@ -136,11 +138,11 @@ class EmailVerificationGuard {
     return true;
   }
 
-  /// Redirect to verification screen
+  // redirect to verify
   void _redirectToVerification() {
-    // Only redirect if not already on verification screen
+    // skip if on verify
     if (Get.currentRoute != Routes.emailVerificationView) {
-      // Use post-frame callback to avoid navigation during build
+      // post-frame navigate
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.offNamed(Routes.emailVerificationView);
       });

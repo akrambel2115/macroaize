@@ -1,17 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Subscription {
-	final bool isPremium;
-	final String? planType; // monthly | yearly
-	final DateTime? startDate;
-	final DateTime? endDate;
+  final bool isPremium;
+  final String? planType; // monthly | yearly
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? provider; 
+  final String? status; // active | canceled | expired | past_due | ...
+  final String? productId;
 
-	const Subscription({
-		required this.isPremium,
-		this.planType,
-		this.startDate,
-		this.endDate,
-	});
+  const Subscription({
+    required this.isPremium,
+    this.planType,
+    this.startDate,
+    this.endDate,
+    this.provider,
+    this.status,
+    this.productId,
+  });
 
   factory Subscription.fromFirestore(Map<String, dynamic> data) {
     DateTime? parseDate(dynamic v) {
@@ -32,6 +38,9 @@ class Subscription {
       planType: data['planType']?.toString(),
       startDate: parseDate(data['startDate']),
       endDate: parseDate(data['endDate']),
+      provider: data['provider']?.toString(),
+      status: data['status']?.toString(),
+      productId: data['productId']?.toString(),
     );
   }	bool get isActive {
 		if (!isPremium) return false;

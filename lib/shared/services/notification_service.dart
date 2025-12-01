@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../constant/AppColor.dart';
 
 class NotificationService {
-  /// Show a localized success snackbar.
+  /// success snackbar.
   static void showSuccess(String messageKey, {Map<String, String>? params}) {
     Get.closeAllSnackbars();
 
@@ -20,7 +20,7 @@ class NotificationService {
     ));
   }
 
-  /// Show a localized error snackbar.
+  // error snackbar.
   static void showError(String messageKey, {Map<String, String>? params}) {
     Get.closeAllSnackbars();
 

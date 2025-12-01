@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-/// Firebase Cloud Messaging service
 class FirebaseMessagingService extends GetxService {
   static const String _logTag = 'FCMService';
   
@@ -34,7 +33,6 @@ class FirebaseMessagingService extends GetxService {
     await _initializeMessaging();
   }
 
-  /// Initialize FCM: permissions, handlers, token
   Future<void> _initializeMessaging() async {
     try {
       if (kDebugMode) {
@@ -54,11 +52,10 @@ class FirebaseMessagingService extends GetxService {
       if (kDebugMode) {
         debugPrint('[$_logTag] Error initializing Firebase Messaging: $e');
       }
-      // Don't throw - allow app to continue without FCM
+      // allow app without fcm
     }
   }
 
-  /// Request notification permissions
   Future<void> _requestPermissions() async {
     try {
       NotificationSettings settings = await _firebaseMessaging.requestPermission(
@@ -104,14 +101,12 @@ class FirebaseMessagingService extends GetxService {
     }
   }
 
-  /// Configure message handlers
   void _setupMessageHandlers() {
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
     _firebaseMessaging.getInitialMessage().then(_handleNotificationTap);
   }
 
-  /// Handle messages received in foreground
   void _handleForegroundMessage(RemoteMessage message) {
     if (kDebugMode) {
       debugPrint('[$_logTag] Received foreground message: ${message.messageId}');
@@ -122,7 +117,6 @@ class FirebaseMessagingService extends GetxService {
     _showLocalNotification(message);
   }
 
-  /// Handle notification tap (background/terminated)
   void _handleNotificationTap(RemoteMessage? message) {
     if (message == null) return;
     
@@ -133,7 +127,6 @@ class FirebaseMessagingService extends GetxService {
     _handleNotificationNavigation(message.data);
   }
 
-  /// Show a simple local notification for foreground messages
   void _showLocalNotification(RemoteMessage message) {
     if (message.notification?.body != null) {
       Get.showSnackbar(GetSnackBar(
@@ -146,7 +139,6 @@ class FirebaseMessagingService extends GetxService {
     }
   }
 
-  /// Navigate based on notification data
   void _handleNotificationNavigation(Map<String, dynamic> data) {
     final String? type = data['type'];
     
@@ -171,7 +163,6 @@ class FirebaseMessagingService extends GetxService {
     }
   }
 
-  /// Manage token lifecycle: initial and refresh
   Future<void> _handleTokenManagement() async {
     try {
       final String? token = await _firebaseMessaging.getToken();
@@ -199,7 +190,6 @@ class FirebaseMessagingService extends GetxService {
     }
   }
 
-  /// Store FCM token in Firestore
   Future<void> _storeTokenInFirestore(String token) async {
     try {
       final User? user = _auth.currentUser;
@@ -235,7 +225,6 @@ class FirebaseMessagingService extends GetxService {
     }
   }
 
-  /// Mark current token inactive in Firestore
   Future<void> removeTokenFromFirestore() async {
     try {
       final User? user = _auth.currentUser;
@@ -263,7 +252,6 @@ class FirebaseMessagingService extends GetxService {
     }
   }
 
-  /// Subscribe to a topic
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _firebaseMessaging.subscribeToTopic(topic);
@@ -277,7 +265,6 @@ class FirebaseMessagingService extends GetxService {
     }
   }
 
-  /// Unsubscribe from a topic
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _firebaseMessaging.unsubscribeFromTopic(topic);
@@ -300,7 +287,7 @@ class FirebaseMessagingService extends GetxService {
   }
 }
 
-/// Background message handler
+// background handler
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (kDebugMode) {

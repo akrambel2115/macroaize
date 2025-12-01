@@ -33,18 +33,23 @@ class UserUsage {
       return 0;
     }
 
-    final cfg = Get.isRegistered<AppConfigService>() ? Get.find<AppConfigService>() : null;
+    final cfg =
+        Get.isRegistered<AppConfigService>()
+            ? Get.find<AppConfigService>()
+            : null;
 
     return UserUsage(
       scanCount: (data['scanCount'] as num?)?.toInt() ?? 0,
       chatCount: (data['chatCount'] as num?)?.toInt() ?? 0,
       lastUsageDate: parseDate(data['lastUsageDate']),
-      scanLimit: _toInt(data['scanLimit']) != 0
-          ? _toInt(data['scanLimit'])
-          : (cfg?.freeScanLimit ?? 2),
-      chatLimit: _toInt(data['chatLimit']) != 0
-          ? _toInt(data['chatLimit'])
-          : (cfg?.freeChatLimit ?? 5),
+      scanLimit:
+          _toInt(data['scanLimit']) != 0
+              ? _toInt(data['scanLimit'])
+              : (cfg?.freeScanLimit ?? 2),
+      chatLimit:
+          _toInt(data['chatLimit']) != 0
+              ? _toInt(data['chatLimit'])
+              : (cfg?.freeChatLimit ?? 5),
     );
   }
 
@@ -61,7 +66,7 @@ class UserUsage {
     final now = DateTime.now().toUtc();
     final usageDate = lastUsageDate!;
     return now.year == usageDate.year &&
-           now.month == usageDate.month &&
-           now.day == usageDate.day;
+        now.month == usageDate.month &&
+        now.day == usageDate.day;
   }
 }

@@ -41,6 +41,8 @@ class AppConfigService extends GetxService {
   int get premiumMonthlyPriceDzd => (_config['pricing']?['monthlyDzd'] as num?)?.toInt() ?? 450;
   int get premiumYearlyPriceDzd => (_config['pricing']?['yearlyDzd'] as num?)?.toInt() ?? 4500;
 
+  bool get subscriptionsEnabled => (_config['features']?['subscriptionsEnabled'] as bool?) ?? false;
+
   String get minRequiredAppVersion => (_config['app']?['minRequiredVersion'] as String?) ?? '1.0.0';
   String get updateMessage => (_config['app']?['updateMessage'] as String?) ?? 'A new version is required to continue using MacroAize.';
 
