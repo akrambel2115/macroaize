@@ -1,8 +1,37 @@
 const Map<String, String> arabic = {
+  // ==============================================================================
+  // 1. Navigation & Common UI
+  // ==============================================================================
   "Home": "الرئيسية",
+  "Setting": "الإعدادات",
+  "Profile": "الملف الشخصي",
+  "View All": "عرض الكل",
+  "Continue": "متابعة",
+  "Previous": "السابق",
+  "Cancel": "إلغاء",
+  "Exit": "خروج",
+  "Done": "تم",
+  "Save": "حفظ",
+  "Add": "إضافة",
+  "Update": "تحديث",
+  "Delete": "حذف",
+  "Delete Item": "حذف العنصر",
+  "Are you sure you want to delete this item?":
+      "هل أنت متأكد من رغبتك في حذف هذا العنصر؟",
+  "Search": "بحث",
+  "Clear Search": "مسح البحث",
+  "Close": "إغلاق",
+  "Next": "التالي",
+  "Skip": "تخطي",
+  "Ok": "حسنًا",
+  "Got it": "حسنًا",
+  "Maybe later": "ربما لاحقًا",
+
+  // ==============================================================================
+  // 2. Dashboard & Tracking (Home Screen)
+  // ==============================================================================
   "Calorie": "السعرات الحرارية",
   "Analytics": "التحليلات",
-  "Setting": "الإعدادات",
   "Track Food": "تتبع الطعام",
   "Consumed": "المستهلك",
   "Remaining": "المتبقي",
@@ -10,18 +39,48 @@ const Map<String, String> arabic = {
   "Carbs": "الكربوهيدرات",
   "Fats": "الدهون",
   "History": "السجل",
-  "View All": "عرض الكل",
+  "No History Yet": "لا يوجد سجل بعد",
+  "Start tracking your meals to see your nutrition history here":
+      "ابدأ بتتبع وجباتك لرؤية سجلك الغذائي هنا",
+  "History not found": "لم يتم العثور على سجل",
+  "Calorie Goal Reached": "تم الوصول للهدف من السعرات",
+  "You've completed your calorie goal for today. Would you like to add more?":
+      "لقد أكملت هدفك من السعرات الحرارية لهذا اليوم. هل ترغب في إضافة المزيد؟",
+  "Add More Calories": "إضافة المزيد من السعرات",
+  "Daily Usage": "الاستخدام اليومي",
+  "Scans": "المسح",
+  "Chat": "الدردشة",
+  "Left": "متبقي",
+  "Login to view usage": "سجل الدخول لعرض استخدامك",
+  "Track subtitle": "تتبع تغذيتك اليومية",
+  "Goal label": "الهدف",
+  "Daily macros": "المغذيات اليومية",
+  "Daily macros reached": "تم تحقيق أهداف المغذيات اليومية",
+
+  // ==============================================================================
+  // 3. Meals & Portions
+  // ==============================================================================
   "BreakFast": "فطور",
   "Lunch": "غداء",
   "snack(s)": "وجبة خفيفة",
   "Dinner": "عشاء",
   "Which meal would you like to track?": "أي وجبة ترغب في تتبعها؟",
+  "Meal Breakdown": "تفاصيل الوجبة",
+  "Tap to edit portions": "اضغط لتعديل الحصص",
+  "Items": "عناصر",
+  "Verified": "مؤكد",
+  "Estimated": "تقديري",
+  "Meal contains": "هذه الوجبة تحتوي على",
+  "Conjunction and": "و",
+  "Meal label": "الوجبة",
+
+  // ==============================================================================
+  // 4. Camera & AI Scanning
+  // ==============================================================================
   "Snap Tips": "نصائح للتصوير",
   "Too close": "قريب جدًا",
   "Too far": "بعيد جدًا",
   "Multi-species": "أصناف متعددة",
-  "Continue": "متابعة",
-  "Previous": "السابق",
   "Gallery": "معرض الصور",
   "Tips": "نصائح",
   "Perfect Shot": "لقطة مثالية",
@@ -31,47 +90,98 @@ const Map<String, String> arabic = {
   "Center food in the frame and tap to scan":
       "ضع الطعام في منتصف الإطار واضغط للمسح",
   "Analyzing food...": "جاري تحليل الطعام...",
-  "No History Yet": "لا يوجد سجل بعد",
-  "Start tracking your meals to see your nutrition history here":
-      "ابدأ بتتبع وجباتك لرؤية سجلك الغذائي هنا",
+  "Analyzing nutrition...": "جاري تحليل التغذية...",
+  "Grant camera access in scanner": "اضغط على الإطار لمنح الوصول إلى الكاميرا",
+  "Camera permission denied title": "إذن الكاميرا مطلوب",
+  "Camera permission denied message":
+      "تم رفض الوصول إلى الكاميرا. يرجى تفعيل إذن الكاميرا من إعدادات الجهاز لاستخدام الماسح.",
+  "Unlock Food Scanner": "فتح ماسح الطعام",
+  "Unlock Food Calorie": "فتح سعرات الطعام",
+  "Unlimited Food Scanner To Calorie": "ماسح طعام غير محدود للسعرات",
+
+  // ==============================================================================
+  // 5. Food Search & Custom Foods
+  // ==============================================================================
   "Local Food": "طعام محلي",
   "Search Food": "ابحث عن طعام",
   "No Food Found": "لم يتم العثور على طعام",
   "Try searching with different keywords or browse our local food database":
       "جرّب البحث بكلمات مختلفة أو تصفح قاعدة بياناتنا للطعام المحلي",
-  // Local Food add / edit dialog keys
-  "add_custom_food": "إضافة طعام مخصص",
-  "edit_food": "تعديل الطعام",
-  "name": "الاسم",
-  "quantity": "الكمية",
-  "calories": "السعرات الحرارية",
-  "add": "إضافة",
-  "save": "حفظ",
+  "Search by Food Name/Dish": "ابحث باسم الطعام/الطبق",
+  "Food items found": "عناصر طعام موجودة",
+  "Add custom food": "إضافة طعام مخصص",
+  "Edit food": "تعديل الطعام",
+  "Name": "الاسم",
+  "Quantity": "الكمية",
+  "Calories": "السعرات الحرارية",
+  "Proteins": "بروتينات",
   "Custom Food": "طعام مخصص",
-  "delete_selected": "حذف المحدد",
-  "proteins": "بروتينات",
+  "Delete selected": "حذف المحدد",
+  "Food added success": "تمت إضافة الطعام بنجاح",
+  "Food updated success": "تم تحديث الطعام بنجاح",
+  "Food deleted success": "تم حذف @count عنصر بنجاح",
+  "Local food premium message": "إنشاء وتعديل الأطعمة المخصصة هي ميزة مميزة.",
+  "Local food premium badge":
+      "قم بالترقية إلى بريميوم لإنشاء أطعمة مخصصة غير محدودة!",
+  "Barcode activated": "الباركود مفعّل",
+  "Barcode deactivated": "الباركود غير مفعّل",
+  "Product not found": "المنتج غير موجود في قاعدة البيانات",
+  "Error fetching product": "خطأ في جلب معلومات المنتج",
 
-  "Clear Search": "مسح البحث",
-  "Premium Features": "الميزات المميزة",
-  "Choose Your Plan": "اختر خطتك",
-  "OverView": "نظرة عامة",
+  // ==============================================================================
+  // 6. Profile, Body Metrics & Goals
+  // ==============================================================================
+  "Personal details": "المعلومات الشخصية",
   "Weight Goal": "الوزن المستهدف",
-  "Update": "تحديث",
   "Current Weight": "الوزن الحالي",
-  "kg": "كغ",
-  "Try to update once a week so we can adjust your plan to ensure you hit your goal":
-      "حاول التحديث مرة أسبوعيًا حتى نتمكن من تعديل خطتك لضمان تحقيق هدفك",
   "Update Weight": "تحديث الوزن",
-  "Week": "أسبوع",
-  "Month": "شهر",
-  "Profile": "الملف الشخصي",
-  "Year": "سنة",
   "Update Weight Goal": "تحديث الوزن المستهدف",
   "Enter new weight (kg)": "أدخل وزنك الجديد (كغ)",
-  "Cancel": "إلغاء",
-  "Exit": "خروج",
+  "Try to update once a week so we can adjust your plan to ensure you hit your goal":
+      "حاول التحديث مرة أسبوعيًا حتى نتمكن من تعديل خطتك لضمان تحقيق هدفك",
+  "Try to update once a week to help us adjust your plan":
+      "حاول التحديث مرة أسبوعيًا لمساعدتنا في تعديل خطتك",
+  "Weight Overview": "نظرة عامة على الوزن",
+  "Current": "الحالي",
+  "Goal": "الهدف",
+  "To go": "متبقي",
+  "Invalid number": "الرجاء إدخال رقم صالح",
+  "Weight out of range": "الرجاء إدخال وزن بين 20 و 300 كغ",
+  "Age": "العمر",
+  "Height": "الطول",
+  "Gender": "الجنس",
+  "Male": "ذكر",
+  "Female": "أنثى",
+  "Update Your Gender": "تحديث جنسك",
+  "Adjust goals": "تعديل الأهداف",
+  "Calories,carbs,fat and protein": "السعرات، الكربوهيدرات، الدهون والبروتين",
+  "Adjust goals subtitle": "السعرات، الكربوهيدرات، الدهون والبروتين",
+  "Update Calorie Goal": "تحديث هدف السعرات",
+  "Calorie goal": "هدف السعرات",
+  "Update Protein Goal": "تحديث هدف البروتين",
+  "Protein goal": "هدف البروتين",
+  "Update Carb Goal": "تحديث هدف الكربوهيدرات",
+  "Carb goal": "هدف الكربوهيدرات",
+  "Update Fat Goal": "تحديث هدف الدهون",
+  "Auto Generate Goal": "إنشاء هدف تلقائي",
+  "Update targets title": "تم تحديث الأهداف",
+  "Update targets body":
+      "لقد قمنا بإعادة حساب أهدافك اليومية من السعرات الحرارية والمغذيات الكبرى لتتناسب مع وزنك الجديد.",
+  "Kg": "كغ",
+  "Lb": "رطل",
+  "Ft": "قدم",
+  "In": "بوصة",
+  "Cm": "سم",
+  "Imperial": "إمبراطوري",
+  "Metric": "متري",
 
-  "Calorie Your Week :": "سعراتك الأسبوعية:",
+  // ==============================================================================
+  // 7. Calendar & Time
+  // ==============================================================================
+  "Week": "أسبوع",
+  "Month": "شهر",
+  "Year": "سنة",
+  "Day": "يوم",
   "Sun": "الأحد",
   "Mon": "الاثنين",
   "Tue": "الثلاثاء",
@@ -79,8 +189,6 @@ const Map<String, String> arabic = {
   "Thu": "الخميس",
   "Fri": "الجمعة",
   "Sat": "السبت",
-  "Average Calorie Month :": "متوسط السعرات الشهري:",
-  "Average Calorie Yearly :": "متوسط السعرات السنوي:",
   "Jan": "يناير",
   "Feb": "فبراير",
   "Mar": "مارس",
@@ -93,16 +201,30 @@ const Map<String, String> arabic = {
   "Oct": "أكتوبر",
   "Nov": "نوفمبر",
   "Dec": "ديسمبر",
-  "Age": "العمر",
-  "Height": "الطول",
+  "January": "يناير",
+  "February": "فبراير",
+  "March": "مارس",
+  "April": "أبريل",
+  "June": "يونيو",
+  "July": "يوليو",
+  "August": "أغسطس",
+  "September": "سبتمبر",
+  "October": "أكتوبر",
+  "November": "نوفمبر",
+  "December": "ديسمبر",
+  "Calorie Your Week :": "سعراتك الأسبوعية:",
+  "Average Calorie Month :": "متوسط السعرات الشهري:",
+  "Average Calorie Yearly :": "متوسط السعرات السنوي:",
+
+  // ==============================================================================
+  // 8. Settings & Legal
+  // ==============================================================================
   "Customization": "تخصيص",
   "Dark Mode": "الوضع الداكن",
   "Language": "اللغة",
-  "Personal details": "المعلومات الشخصية",
-  "Adjust goals": "تعديل الأهداف",
-  "Calories,carbs,fat and protein": "السعرات، الكربوهيدرات، الدهون والبروتين",
-  // Subtitle for Adjust Goals in Settings
-  "adjust_goals_subtitle": "السعرات، الكربوهيدرات، الدهون والبروتين",
+  "Language english": "English",
+  "Language french": "Français",
+  "Language arabic": "العربية",
   "Chat history": "سجل المحادثات",
   "The coach does not memorize chat history. Each interaction is independent.":
       "لا يقوم المدرب بحفظ سجل المحادثات. كل تفاعل مستقل.",
@@ -110,18 +232,416 @@ const Map<String, String> arabic = {
   "Terms and Condition": "الشروط والأحكام",
   "Privacy Policy": "سياسة الخصوصية",
   "Reset Data?": "إعادة تعيين البيانات؟",
+  "Confirm Reset": "تأكيد إعادة التعيين",
+  "Are you sure you want to Reset Data?":
+      "هل أنت متأكد من رغبتك في إعادة تعيين البيانات؟",
+  "Reset": "إعادة تعيين",
+  "You have been Reset Account": "تمت إعادة تعيين حسابك",
   "VERSION": "الإصدار",
-  "History not found": "لم يتم العثور على سجل",
-  "Delete Item": "حذف العنصر",
-  "Are you sure you want to delete this item?":
-      "هل أنت متأكد من رغبتك في حذف هذا العنصر؟",
-  "Delete": "حذف",
-  "Search by Food Name/Dish": "ابحث باسم الطعام/الطبق",
-  "Calorie Goal Reached": "تم الوصول للهدف من السعرات",
-  "You've completed your calorie goal for today. Would you like to add more?":
-      "لقد أكملت هدفك من السعرات الحرارية لهذا اليوم. هل ترغب في إضافة المزيد؟",
-  "Done": "تم",
-  "Add More Calories": "إضافة المزيد من السعرات",
+  "Home Screen Widgets": "أدوات الشاشة الرئيسية",
+  "Exit app title": "الخروج من التطبيق",
+  "Exit app message": "هل أنت متأكد أنك تريد الخروج؟",
+  "Account": "الحساب",
+  "Tap to view details": "انقر لعرض التفاصيل",
+  "Register login": "تسجيل الدخول / إنشاء حساب",
+  "Access account sync data": "الوصول إلى حسابك ومزامنة بياناتك",
+  "App info": "معلومات التطبيق",
+  "Clear all app data": "مسح كافة بيانات التطبيق",
+  "Account reset success": "تمت إعادة تعيين الحساب بنجاح",
+
+  // ==============================================================================
+  // 9. Premium & Subscriptions
+  // ==============================================================================
+  "Premium Features": "الميزات المميزة",
+  "Choose Your Plan": "اختر خطتك",
+  "Subscription": "الاشتراك",
+  "BUY NOW": "اشترِ الآن",
+  "Get Premium": "احصل على بريميوم",
+  "Get All The New Exciting Features": "احصل على جميع الميزات الجديدة والمثيرة",
+  "Unlock Unlimited Chat with Ai":
+      "فتح الدردشة غير المحدودة مع الذكاء الاصطناعي",
+  "Most Popular": "الأكثر شيوعًا",
+  "Premium badge": "بريميوم",
+  "Go premium title": "الترقية إلى بريميوم",
+  "Go premium subtitle": "التجربة الكاملة لأفضل برنامج غذائي",
+  "Feature ai scan title": "تحكم في وزنك وتناول طعامًا أفضل",
+  "Feature ai scan subtitle": "مع مسح الوجبات بالذكاء الاصطناعي وملاحظات يومية",
+  "Feature results title": "حقق نتائج طويلة الأمد",
+  "Feature results subtitle": "مع الطيار الآلي وتتبع المغذيات",
+  "Feature chatbot title": "الدردشة الذكية \"المدرب\"",
+  "Feature chatbot subtitle": "إرشاد غذائي فوري",
+  "Feature recipes title": "وصفات وخطط بريميوم",
+  "Feature recipes subtitle": "ترشدك نحو النجاح",
+  "Best value": "أفضل قيمة",
+  "Save percent": "وفّر @percent%*",
+  "Months 12": "12 شهرًا",
+  "Month 1": "شهر واحد",
+  "Billed annually": "تتم الفوترة سنويًا",
+  "Billed monthly": "تتم الفوترة شهريًا",
+  "Per month": "شهريًا",
+  "Continue cta": "متابعة",
+  "Compared to monthly": "*مقارنة بالدفع الشهري",
+  "Currency dzd": "دج",
+  "Premium required": "الترقية إلى بريميوم مطلوبة",
+  "Premium feature": "ميزة مميزة",
+  "Go premium": "الترقية إلى بريميوم",
+
+  // ==============================================================================
+  // 10. Authentication & Onboarding
+  // ==============================================================================
+  "Login": "تسجيل الدخول",
+  "Register": "إنشاء حساب",
+  "Email": "البريد الإلكتروني",
+  "Password": "كلمة المرور",
+  "Confirm password": "تأكيد كلمة المرور",
+  "First name": "الاسم الأول",
+  "Last name": "الاسم الأخير",
+  "Forgot password": "هل نسيت كلمة المرور؟",
+  "Continue with google": "المتابعة باستخدام جوجل",
+  "Continue with apple": "المتابعة باستخدام آبل",
+  "Auth login success": "تم تسجيل الدخول بنجاح",
+  "Auth register success": "تم إنشاء الحساب بنجاح",
+  "Auth password reset sent": "تم إرسال بريد إعادة تعيين كلمة المرور",
+  "Auth wrong credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+  "Auth account not found": "الحساب غير موجود",
+  "Auth email in use": "هذا البريد الإلكتروني مستخدم بالفعل",
+  "Auth weak password": "كلمة المرور ضعيفة جدًا",
+  "Auth account different provider": "الحساب مرتبط بمزود تسجيل آخر",
+  "Auth network error": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+  "Auth unknown error": "حدث خطأ غير معروف",
+  "Auth authentication error": "خطأ في المصادقة",
+  "Auth unexpected error": "خطأ غير متوقع",
+  "Auth logout success": "تم تسجيل الخروج بنجاح",
+  "Auth logout failed": "فشل تسجيل الخروج",
+  "Auth modal title": "سجل الدخول للمتابعة",
+  "Sign out title": "تسجيل الخروج؟",
+  "Sign out confirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "Sign out": "تسجيل الخروج",
+  "Welcome": "أهلاً بك",
+  "Choose Your Gender": "اختر جنسك",
+  "Calorie tracking made easy": "تتبع السعرات أصبح سهلاً",
+  "Just snap a quick photo of your meal and we''ll do the rest":
+      "التقط صورة سريعة لوجبتك وسنتكفل بالباقي",
+  "In-depth nutrition analyses": "تحليلات غذائية معمقة",
+  "We will keep your informed about your food choicer and their nutritional content":
+      "سنبقيك على اطلاع بخياراتك الغذائية ومحتواها الغذائي",
+  "Transform your body": "غيّر جسدك",
+  "Today is best time to start working toward your dream body":
+      "اليوم هو أفضل وقت للبدء بالعمل نحو جسم أحلامك",
+  "Where were you born?": "أين ولدت؟",
+  "This Will be used to calibrate your custom plan":
+      "سيُستخدم هذا لمعايرة خطتك المخصصة",
+  "What's stopping you from reaching your goals?":
+      "ما الذي يمنعك من تحقيق أهدافك؟",
+  "Lack of consistency": "قلة الاستمرارية",
+  "Unhealthy eating habits": "عادات أكل غير صحية",
+  "Lack of supports": "نقص الدعم",
+  "Busy schedule": "جدول أعمال مزدحم",
+  "Lack of meal inspiration": "قلة الإلهام للوجبات",
+  "We're setting": "نحن نقوم بإعداد",
+  "everything up for you": "كل شيء من أجلك",
+  "Customizing health plan....": "جاري تخصيص خطتك الصحية...",
+  "Welcome hi": "مرحبًا!",
+  "Welcome subtitle prefix": "مرحبًا بك في مدربك الشخصي ",
+  "Welcome subtitle highlight": "مدرب التغذية",
+  "Plan intro title": "لنبدأ ببعض الأسئلة",
+  "Plan intro subtitle": "سيساعدنا هذا في تخصيص خطتك",
+  "Your Plan is Ready!": "خطتك جاهزة!",
+  "We have customized your nutrition plan based on your goals":
+      "لقد قمنا بإعادة حساب أهدافك اليومية من السعرات الحرارية والمغذيات الكبرى لتتناسب مع وزنك الجديد.",
+  "Daily Calorie Goal": "هدف السعرات الحرارية اليومية",
+  "Macronutrients Breakdown": "توزيع المغذيات الكبرى",
+  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.":
+      "تعتمد هذه الخطة على عمرك ووزنك وطولك ومستوى نشاطك وأهدافك. يمكنك تعديل كمية الطعام اليومية في الإعدادات في أي وقت.",
+  "Continue to Premium": "الاستمرار إلى Premium",
+  "How many workout do you per week?": "كم مرة تتمرن في الأسبوع؟",
+  "This will used to calibrate your custom plan":
+      "سيُستخدم هذا لمعايرة خطتك المخصصة",
+  "Choose your height and weight": "اختر طولك ووزنك",
+  "Select your height and weight to calibrate your custom plan":
+      "حدد طولك ووزنك لمعايرة خطتك المخصصة",
+  "Workout Now and then": "أحياناً",
+  "A few workout per week": "بضع مرات في الأسبوع",
+  "Dedicated athlete": "رياضي ملتزم",
+  "What is your goal?": "ما هو هدفك؟",
+  "This helps is generate a plan for your calorie intake.":
+      "هذا يساعد في إنشاء خطة لاستهلاكك من السعرات الحرارية.",
+  "Gain Weight": "زيادة الوزن",
+  "Maintain Weight": "الحفاظ على الوزن",
+  "Lose Weight": "خسارة الوزن",
+
+  // ==============================================================================
+  // 11. Email Verification & Account Management
+  // ==============================================================================
+  "Email verification title": "التحقق من بريدك الإلكتروني",
+  "Email verification subtitle": "تحقق من بريدك الإلكتروني للمتابعة",
+  "Email sent to": "لقد أرسلنا رابط التحقق إلى @email",
+  "Email verification instructions":
+      "انقر على الرابط في بريدك الإلكتروني للتحقق من حسابك. هذا يساعدنا في الحفاظ على أمان حسابك.",
+  "Checking verification status": "جاري التحقق من الحالة...",
+  "Resend verification email": "إعادة إرسال بريد التحقق",
+  "Resend cooldown": "يمكنك إعادة الإرسال بعد @seconds ثانية",
+  "Resend limit reached": "تبقى @attempts محاولات",
+  "Verification attempts remaining": "تبقى @remaining من @total محاولات",
+  "Email verification success":
+      "تم التحقق من البريد الإلكتروني بنجاح! مرحبًا بك في ماكروآيز",
+  "Email verification resent": "تم إرسال بريد التحقق! يرجى مراجعة بريدك الوارد",
+  "Email verification resend error":
+      "فشل إرسال بريد التحقق. يرجى المحاولة مرة أخرى",
+  "Email verification max attempts":
+      "لقد وصلت إلى الحد الأقصى للمحاولات. يرجى المحاولة لاحقًا",
+  "Email verification cooldown":
+      "يرجى الانتظار @seconds ثانية قبل طلب بريد آخر",
+  "Skip verification title": "تخطي التحقق؟",
+  "Skip verification warning":
+      "سيسمح لك هذا بالوصول دون التحقق من البريد الإلكتروني. لا يوصى به لأسباب أمنية.",
+  "Skip anyway": "تخطي على أي حال",
+  "Skip verification": "تخطي التحقق",
+  "Verify": "تحقق",
+  "Email verification error":
+      "فشل التحقق من البريد الإلكتروني. يرجى المحاولة مرة أخرى",
+  "Auth required": "مطلوب تسجيل الدخول للمتابعة",
+  "Email verification required for feature":
+      "التحقق من البريد الإلكتروني مطلوب لاستخدام هذه الميزة",
+  "Email verification required for premium":
+      "التحقق من البريد الإلكتروني مطلوب للوصول إلى الميزات المميزة",
+  "Email verification required for scan":
+      "التحقق من البريد الإلكتروني مطلوب لاستخدام ماسح الطعام",
+  "Email verification required for chat":
+      "التحقق من البريد الإلكتروني مطلوب للدردشة مع المدرب الذكي",
+  "Email verification required for app access":
+      "التحقق من البريد الإلكتروني مطلوب للوصول إلى التطبيق",
+  "Email verified status": "تم التحقق",
+  "Email unverified status": "لم يتم التحقق",
+  "Email verified": "تم التحقق من البريد الإلكتروني",
+  "Email verification complete subtitle": "حسابك آمن وجاهز للاستخدام",
+  "Email verification required": "التحقق من البريد الإلكتروني مطلوب",
+  "Email verification required subtitle":
+      "يرجى التحقق من @email للوصول إلى كافة الميزات",
+  "Verify email": "التحقق من البريد الإلكتروني",
+  "Verify now": "تحقق الآن",
+  "Refresh": "تحديث",
+  "Refresh failed": "فشل تحديث الحالة. يرجى المحاولة مرة أخرى",
+  "Tap to verify email": "انقر للتحقق من بريدك الإلكتروني",
+  "Account activation required": "تفعيل الحساب مطلوب",
+  "Account activation required for chat":
+      "يرجى تفعيل حسابك لاستخدام المدرب الذكي",
+  "Account activation required for scanner":
+      "يرجى تفعيل حسابك لاستخدام ماسح الطعام",
+  "Account activation required for premium":
+      "يرجى تفعيل حسابك لشراء النسخة المميزة",
+  "Verify account to continue": "تحقق من حسابك للمتابعة",
+  "Auth register verification required":
+      "تم إنشاء الحساب! يرجى مراجعة بريدك الإلكتروني للتحقق من حسابك.",
+  "Account details title": "تفاصيل الحساب",
+  "No name": "لا يوجد اسم",
+  "Name label": "الاسم",
+  "Email label": "البريد الإلكتروني",
+  "Change password": "تغيير كلمة المرور",
+  "Logout": "تسجيل الخروج",
+  "Display name updated": "تم تحديث اسم العرض",
+  "Edit display name": "تعديل اسم العرض",
+  "New display name": "اسم العرض الجديد",
+  "Password changed message":
+      "تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى.",
+  "Current password incorrect": "كلمة المرور الحالية غير صحيحة.",
+  "Too many attempts": "محاولات كثيرة جدًا. يرجى المحاولة لاحقًا.",
+  "Please relogin": "يرجى إعادة تسجيل الدخول والمحاولة مرة أخرى.",
+  "Operation failed": "فشلت العملية.",
+  "Current password label": "كلمة المرور الحالية",
+  "New password label": "كلمة المرور الجديدة",
+  "Confirm new password label": "تأكيد كلمة المرور الجديدة",
+  "Min 8 chars": "8 أحرف على الأقل",
+  "Password complexity hint":
+      "استخدم حرفًا كبيرًا، حرفًا صغيرًا، رقمًا، ورمزًا",
+  "Must differ from current": "يجب أن تكون مختلفة عن الحالية",
+  "Does not match": "غير متطابق",
+  "Change password cta": "تغيير كلمة المرور",
+  "Email required": "البريد الإلكتروني مطلوب",
+  "Required": "مطلوب",
+  "Invalid email format": "صيغة البريد الإلكتروني غير صحيحة",
+  "Password required": "كلمة المرور مطلوبة",
+  "Password min length": "8 أحرف على الأقل",
+  "Password complexity": "استخدم حروفًا كبيرة وصغيرة وأرقامًا ورموزًا",
+  "Name required": "مطلوب",
+  "Name too short": "قصير جدًا",
+  "Passwords do not match": "كلمتا المرور غير متطابقتين",
+  "Please fix errors": "يرجى إصلاح الأخطاء",
+  "Accept terms of service": "يرجى قبول شروط الخدمة",
+  "By registering agree": "بالتسجيل، فإنك توافق على ",
+  "Terms of service": "شروط الخدمة",
+
+  // ==============================================================================
+  // 12. Influencer & Promo
+  // ==============================================================================
+  "Influencer program": "برنامج المؤثرين",
+  "Your promo code": "رمز الخصم الخاص بك",
+  "Copied": "تم النسخ",
+  "Current balance": "الرصيد الحالي",
+  "Total earned": "إجمالي الأرباح",
+  "Referrals count": "عدد الإحالات",
+  "Request withdrawal": "طلب سحب",
+  "Minimum withdrawal amount": "الحد الأدنى للسحب: @amount دج",
+  "Withdrawal history": "سجل السحوبات",
+  "Promo code expired": "انتهت صلاحية رمز الخصم",
+  "Promo expires in": "ينتهي الرمز خلال @days يوم",
+  "Promo expires on": "ينتهي الرمز في @date",
+  "Promo code copied": "تم نسخ رمز الخصم",
+  "Promo code": "رمز الخصم",
+  "Enter promo code": "أدخل رمز الخصم",
+  "Apply promo code": "تطبيق",
+  "Skip promo code": "تخطي",
+  "Promo code applied": "تم تطبيق رمز الخصم بنجاح!",
+  "Promo code invalid": "رمز الخصم غير صالح",
+  "Promo code dialog title": "هل لديك رمز خصم؟",
+  "Promo code dialog subtitle": "أدخل رمز الخصم للاستفادة من الخصم",
+  "Have a Promo Code?": "هل لديك رمز خصم؟",
+  "Enter your promo code to get 3 days free trial":
+      "أدخل رمز الخصم للحصول على 3 أيام تجربة مجانية",
+  "ENTER CODE": "أدخل الرمز",
+  "Validate Code": "تحقق من الرمز",
+  "Promo code applied successfully!": "تم تطبيق رمز الخصم بنجاح!",
+  "Please enter a promo code": "الرجاء إدخال رمز الخصم",
+  "Invalid promo code": "رمز الخصم غير صالح",
+  "Available balance": "الرصيد المتاح",
+  "Withdrawal amount": "مبلغ السحب",
+  "Enter amount": "أدخل المبلغ",
+  "Bank account rip": "الحساب البنكي (RIP)",
+  "Enter rip number": "أدخل رقم RIP",
+  "Withdrawal processing info": "تتم معالجة السحوبات في غضون 5 أيام عمل.",
+  "Requested on": "تم الطلب في @date",
+  "Unknown date": "تاريخ غير معروف",
+  "Withdrawal submitted": "تم إرسال طلب السحب",
+  "Request id": "معرف الطلب: @id",
+  "Processing time": "وقت المعالجة: @days أيام عمل",
+  "Withdrawal email confirmation":
+      "ستصلك رسالة تأكيد عبر البريد الإلكتروني بمجرد معالجة طلب السحب.",
+  "Processing": "قيد المعالجة",
+  "Copy failed": "فشل النسخ: @error",
+  "Request id short": "المعرف",
+  "Bank account short": "الحساب",
+  "Processing date": "تاريخ المعالجة",
+  "Processing deadline": "الموعد النهائي",
+  "Requested date": "تاريخ الطلب",
+  "Completed": "مكتمل",
+  "Failed": "فشل",
+  "Email verification required withdrawal":
+      "التحقق من البريد الإلكتروني مطلوب للسحب",
+  "Showing recent withdrawals": "عرض @shown من @total سحوبات",
+  "Withdrawal history full": "سجل السحوبات",
+  "No withdrawal history": "لا يوجد سجل سحوبات",
+  "Withdrawal history empty description":
+      "اطلب سحبك الأول لرؤية سجل معاملاتك هنا",
+  "View withdrawal history": "عرض سجل السحوبات",
+  "Withdrawal history subtitle": "تتبع جميع طلبات السحب الخاصة بك",
+
+  // ==============================================================================
+  // 13. AI Coach & Chat
+  // ==============================================================================
+  "Ask anything": "اسأل أي شيء",
+  "Ask The Coach": "اسأل المدرب",
+  "This picture not available Calorie,Protein,Carbs and Fats,":
+      "هذه الصورة لا تحتوي على معلومات السعرات الحرارية، البروتين، الكربوهيدرات والدهون.",
+  "Ask Coach": "اسأل المدرب",
+  "Write your message": "اكتب رسالتك",
+  "Chat image premium message":
+      "إرفاق الصور يتطلب اشتراكًا مميزًا. قم بالترقية الآن لفتح هذه الميزة.",
+  "Chat image premium badge": "افتح إرفاق الصور للمدرب مع بريميوم",
+
+  // ==============================================================================
+  // 14. Recipes
+  // ==============================================================================
+  "Recipes title": "الوصفات",
+  "Top recipes": "أفضل الوصفات",
+  "All recipes": "كل الوصفات",
+  "Less text": "أقل ^",
+  "Macronutrients": "المغذيات الكبرى",
+  "Ingredients": "المكونات",
+  "Serving": "الحصة",
+  "Directions": "الخطوات",
+  "Add to plan": "أضف إلى الخطة",
+  "Step": "خطوة",
+  "Top recipes subtitle": "اكتشف وصفات صحية ولذيذة مصممة لأهدافك",
+  "No recipes available": "لا توجد وصفات متاحة",
+  "Search recipes by name or ingredient": "ابحث عن وصفات بالاسم أو المكونات",
+  "Failed to load recipes": "فشل تحميل الوصفات. يرجى المحاولة مرة أخرى.",
+  "Recipes premium message":
+      "الوصول إلى الوصفات يتطلب اشتراكًا مميزًا. قم بالترقية الآن لفتح هذه الميزة.",
+  "Recipes premium badge": "افتح جميع الوصفات والميزات مع بريميوم",
+
+  // ==============================================================================
+  // 15. Tutorials & Tips
+  // ==============================================================================
+  "App tips": "نصائح التطبيق",
+  "Tip welcome title": "مرحباً بك في macroAize!",
+  "Tip welcome description":
+      "متتبع التغذية الشخصي الخاص بك المدعوم بالذكاء الاصطناعي. لنقم بجولة سريعة لمساعدتك على البدء في رحلتك الصحية.",
+  "Tip track food title": "تتبع وجباتك",
+  "Tip track food description":
+      "اضغط على زر + في الشاشة الرئيسية لتسجيل وجباتك. اختر بين الإفطار أو الغداء أو العشاء أو الوجبات الخفيفة للحفاظ على سجلات دقيقة.",
+  "Tip scan food title": "المسح بالذكاء الاصطناعي",
+  "Tip scan food description":
+      "التقط صورة لطعامك وسيقوم الذكاء الاصطناعي الخاص بنا بتحليل وحساب السعرات الحرارية والبروتين والكربوهيدرات والدهون على الفور.",
+  "Tip ai coach title": "تحدث مع المدرب الذكي",
+  "Tip ai coach description":
+      "احصل على نصائح غذائية مخصصة واقتراحات للوجبات وإجابات على أسئلتك الصحية من مدربنا الذكي في أي وقت.",
+  "Tip analytics title": "تتبع تقدمك",
+  "Tip analytics description":
+      "اعرض تحليلات مفصلة لاتجاهات التغذية الخاصة بك، وتقدم الوزن، وتوزيع الماكروز للبقاء على المسار الصحيح نحو أهدافك.",
+  "Tutorial tap to continue": "اضغط في أي مكان للمتابعة",
+  "Tutorial step": "خطوة",
+  "Tutorial add food title": "تتبع وجباتك",
+  "Tutorial add food description":
+      "اضغط على زر '+' لإضافة طعام إلى سجلك اليومي. يمكنك البحث أو المسح أو إضافة أطعمة مخصصة.",
+  "Tutorial scanner title": "ماسح الطعام بالذكاء الاصطناعي",
+  "Tutorial scanner description":
+      "استخدم الماسح الضوئي المدعوم بالذكاء الاصطناعي لتحليل طعامك على الفور والحصول على معلومات غذائية دقيقة.",
+  "Tutorial ai coach title": "مدرب التغذية بالذكاء الاصطناعي",
+  "Tutorial ai coach description":
+      "تحدث مع مدربك الشخصي بالذكاء الاصطناعي للحصول على نصائح مخصصة واقتراحات وجبات وإرشادات غذائية.",
+  "Tutorial analytics title": "تتبع تقدمك",
+  "Tutorial analytics description":
+      "اعرض تحليلاتك الغذائية وتقدم وزنك واتجاهاتك اليومية لتبقى على المسار الصحيح نحو أهدافك.",
+  "Tutorial profile title": "ملفك الشخصي",
+  "Tutorial profile description":
+      "الوصول إلى إعداداتك، وضبط أهدافك، وتخصيص تجربتك في قسم الملف الشخصي.",
+  "Widget promo title": "إضافة أداة إلى الشاشة الرئيسية",
+  "Widget promo android instructions":
+      "اضغط مطولاً على شاشتك الرئيسية، اختر 'Widgets' وابحث عن 'macroAize' لإضافته للوصول السريع!",
+  "Widget promo ios step1": "اضغط مطولاً في أي مكان على شاشتك الرئيسية.",
+  "Widget promo ios step2": "اضغط على زر '+' في الزاوية العلوية اليسرى.",
+  "Widget promo ios step3": "ابحث عن 'macroAize' واختر الأداة الخاصة بك.",
+  "Widget promo got it": "حسنًا!",
+
+  // ==============================================================================
+  // 16. Units & Labels
+  // ==============================================================================
+  "Kcal unit": "سعرة",
+  "Gram unit": "غ",
+  "Unit piece": "قطعة",
+  "Protein unit": "غ",
+  "Carbs unit": "غ",
+  "Fat unit": "غ",
+  "Cals": "سعرات",
+  "Prot": "بروتين",
+  "Nut prt": "بروتين",
+  "Nut carb": "كربوهيدرات",
+  "Nut cal": "سعرات",
+  "Nut fat": "دهون",
+  "Min": "دقيقة",
+  "Cal": "سعرة",
+  "Success": "نجاح",
+  "Nutrition details": "تفاصيل التغذية",
+  "Fats label": "الدهون",
+  "Log": "سجل",
+  "Unknown meal": "وجبة غير معروفة",
+  "Goal achieved message": "لقد حققت هدفك! استمر في التقدم.",
+  "On a roll message": "أنت على المسار الصحيح — كل خطوة مهمة!",
+  "Keep momentum message": "أنت تحرز تقدمًا — حافظ على هذا الزخم!",
+
+  // ==============================================================================
+  // 17. Food Items Database
+  // ==============================================================================
   "Boiled Egg": "بيضة مسلوقة",
   "Oatmeal": "شوفان",
   "Banana": "موز",
@@ -239,77 +759,8 @@ const Map<String, String> arabic = {
   "2 rotis + paneer": "2 روتي + بانير",
   "1 bowl + 2 slices": "وعاء + شريحتان",
   "1 bowl + 2 appams": "وعاء + 2 أبام",
-
   "3 pieces": "3 قطع",
   "2 chillas + salad": "2 تشيلا + سلطة",
-  "Cal": "سعرة",
-  "Cropper": "قص",
-  "Calorie Tracker": "متتبع السعرات",
-  "Add Calorie": "إضافة سعرات",
-  "Quantity": "الكمية",
-  "Ask anything": "اسأل أي شيء",
-  "Ask The Coach": "اسأل المدرب",
-  "This picture not available Calorie,Protein,Carbs and Fats,":
-      "هذه الصورة لا تحتوي على معلومات السعرات الحرارية، البروتين، الكربوهيدرات والدهون.",
-  "Ask Coach": "اسأل المدرب",
-  "Write your message": "اكتب رسالتك",
-  "Confirm Reset": "تأكيد إعادة التعيين",
-  "Are you sure you want to Reset Data?": "هل أنت متأكد من رغبتك في إعادة تعيين البيانات؟",
-  "Reset": "إعادة تعيين",
-  "You have been Reset Account": "تمت إعادة تعيين حسابك",
-  "Personal Details": "التفاصيل الشخصية",
-  "Goal Weight": "الوزن المستهدف",
-  "cm": "سم",
-  "Date Of Birth": "تاريخ الميلاد",
-  "Gender": "الجنس",
-  "Male": "ذكر",
-  "Female": "أنثى",
-  "Choose your desired weight?": "اختر وزنك المرغوب",
-  "Imperial": "إمبراطوري",
-  "Metric": "متري",
-  "Weight": "الوزن",
-  "lb": "رطل",
-  "ft": "قدم",
-  "in": "بوصة",
-  "Day": "يوم",
-  "January": "يناير",
-  "February": "فبراير",
-  "March": "مارس",
-  "April": "أبريل",
-  "June": "يونيو",
-  "July": "يوليو",
-  "August": "أغسطس",
-  "September": "سبتمبر",
-  "October": "أكتوبر",
-  "November": "نوفمبر",
-  "December": "ديسمبر",
-  "Update Your Gender": "تحديث جنسك",
-  "Adjust Goals": "تعديل الأهداف",
-  "How many workout do you per week?": "كم مرة تتمرن في الأسبوع؟",
-  "This will used to calibrate your custom plan":
-      "سيُستخدم هذا لمعايرة خطتك المخصصة",
-  "Choose your height and weight": "اختر طولك ووزنك",
-  "Select your height and weight to calibrate your custom plan":
-      "حدد طولك ووزنك لمعايرة خطتك المخصصة",
-  "Workout Now and then": "أحياناً",
-  "A few workout per week": "بضع مرات في الأسبوع",
-  "Dedicated athlete": "رياضي ملتزم",
-  "What is your goal?": "ما هو هدفك؟",
-  "This helps is generate a plan for your calorie intake.":
-      "هذا يساعد في إنشاء خطة لاستهلاكك من السعرات الحرارية.",
-  "Gain Weight": "زيادة الوزن",
-    "Maintain Weight": "الحفاظ على الوزن",
-  "Lose Weight": "خسارة الوزن",
-  "Update Calorie Goal": "تحديث هدف السعرات",
-  "Calorie goal": "هدف السعرات",
-  "Save": "حفظ",
-  "Calorie Goal": "هدف السعرات الحرارية",
-  "Update Protein Goal": "تحديث هدف البروتين",
-  "Protein goal": "هدف البروتين",
-  "Update Carb Goal": "تحديث هدف الكربوهيدرات",
-  "Carb goal": "هدف الكربوهيدرات",
-  "Update Fat Goal": "تحديث هدف الدهون",
-  "Auto Generate Goal": "إنشاء هدف تلقائي",
   "Fruit Salad": "سلطة فواكه",
   "Roasted Chickpeas": "حمص محمص",
   "Mixed Nuts": "مكسرات مشكلة",
@@ -434,468 +885,4 @@ const Map<String, String> arabic = {
   "1 bowl + 1 toast": "وعاء + 1 توست",
   "1 bowl + 1 appam": "وعاء + 1 أبام",
   "1 tomato": "حبة طماطم واحدة",
-  "Restore": "استعادة",
-  "Get Premium": "احصل على بريميوم",
-  "Get All The New Exciting Features": "احصل على جميع الميزات الجديدة والمثيرة",
-  "Unlock Food Scanner": "فتح ماسح الطعام",
-  "Unlock Food Calorie": "فتح سعرات الطعام",
-  "Unlock Unlimited Chat with Ai": "فتح الدردشة غير المحدودة مع الذكاء الاصطناعي",
-  "Unlimited Food Scanner To Calorie": "ماسح طعام غير محدود للسعرات",
-  "Most Popular": "الأكثر شيوعًا",
-  "Subscription": "الاشتراك",
-  "BUY NOW": "اشترِ الآن",
-  "Terms of Condition": "شروط الاستخدام",
-  "Welcome": "أهلاً بك",
-  "Choose Your Gender": "اختر جنسك",
-  "Calorie tracking made easy": "تتبع السعرات أصبح سهلاً",
-  "Just snap a quick photo of your meal and we''ll do the rest":
-      "التقط صورة سريعة لوجبتك وسنتكفل بالباقي",
-  "In-depth nutrition analyses": "تحليلات غذائية معمقة",
-  "We will keep your informed about your food choicer and their nutritional content":
-      "سنبقيك على اطلاع بخياراتك الغذائية ومحتواها الغذائي",
-  "Transform your body": "غيّر جسدك",
-  "Today is best time to start working toward your dream body":
-      "اليوم هو أفضل وقت للبدء بالعمل نحو جسم أحلامك",
-  "Where were you born?": "أين ولدت؟",
-  "This Will be used to calibrate your custom plan":
-      "سيُستخدم هذا لمعايرة خطتك المخصصة",
-  "What's stopping you from reaching your goals?":
-      "ما الذي يمنعك من تحقيق أهدافك؟",
-  "Lack of consistency": "قلة الاستمرارية",
-  "Unhealthy eating habits": "عادات أكل غير صحية",
-  "Lack of supports": "نقص الدعم",
-  "Busy schedule": "جدول أعمال مزدحم",
-  "Lack of meal inspiration": "قلة الإلهام للوجبات",
-  "We're setting": "نحن نقوم بإعداد",
-  "everything up for you": "كل شيء من أجلك",
-  "Customizing health plan....": "جاري تخصيص خطتك الصحية...",
-  "welcome_hi": "مرحبًا!",
-  "welcome_subtitle_prefix": "مرحبًا بك في مدربك الشخصي ",
-  "welcome_subtitle_highlight": "مدرب التغذية",
-  "plan_intro_title": "لنبدأ ببعض الأسئلة",
-  "plan_intro_subtitle": "سيساعدنا هذا في تخصيص خطتك",
-
-  // Dynamic meal description components
-  "meal_contains": "هذه الوجبة تحتوي على",
-  "conjunction_and": "و",
-
-  // Units and labels
-  "kcal_unit": "سعرة",
-  "gram_unit": "غ",
-  "unit_piece": "قطعة",
-  "protein_unit": "غ",
-  "carbs_unit": "غ",
-  "fat_unit": "غ",
-  "Cal Left": "السعرات المتبقية",
-  "meal_label": "الوجبة",
-
-  // Abbreviations for compact badges
-  "cals": "سعرات",
-  "prot": "بروتين",
-  "carbs": "كربوهيدرات",
-  "fats": "دهون",
-
-  // Modern UI labels
-  "track_subtitle": "تتبع تغذيتك اليومية",
-  "goal_label": "الهدف",
-  // Localized language display names
-  "language_english": "English",
-  "language_french": "Français",
-  "language_arabic": "العربية",
-  "Analyzing nutrition...": "جاري تحليل التغذية...",
-  // Influencer / promo keys
-  "influencer_program": "برنامج المؤثرين",
-  "your_promo_code": "رمز الخصم الخاص بك",
-  "copied": "تم النسخ",
-  "current_balance": "الرصيد الحالي",
-  "total_earned": "إجمالي الأرباح",
-  "referrals_count": "عدد الإحالات",
-  "request_withdrawal": "طلب سحب",
-  "minimum_withdrawal_amount": "الحد الأدنى للسحب: @amount دج",
-  "withdrawal_history": "سجل السحوبات",
-  "promo_code_expired": "انتهت صلاحية رمز الخصم",
-  "promo_expires_in": "ينتهي الرمز خلال @days يوم",
-  "promo_expires_on": "ينتهي الرمز في @date",
-  "promo_code_copied": "تم نسخ رمز الخصم",
-  "promo_code": "رمز الخصم",
-  "enter_promo_code": "أدخل رمز الخصم",
-  "apply_promo_code": "تطبيق",
-  "skip_promo_code": "تخطي",
-  "promo_code_applied": "تم تطبيق رمز الخصم بنجاح!",
-  "promo_code_invalid": "رمز الخصم غير صالح",
-  "promo_code_dialog_title": "هل لديك رمز خصم؟",
-  "promo_code_dialog_subtitle": "أدخل رمز الخصم للاستفادة من الخصم",
-  
-  // Promo Code View (Sign Up)
-  "Have a Promo Code?": "هل لديك رمز خصم؟",
-  "Enter your promo code to get 3 days free trial": "أدخل رمز الخصم للحصول على 3 أيام تجربة مجانية",
-  "ENTER CODE": "أدخل الرمز",
-  "Validate Code": "تحقق من الرمز",
-  "Promo code applied successfully!": "تم تطبيق رمز الخصم بنجاح!",
-  "Please enter a promo code": "الرجاء إدخال رمز الخصم",
-    "Invalid promo code": "رمز الخصم غير صالح",
-
-  // Plan review page translations
-  "Your Plan is Ready!": "خطتك جاهزة!",
-  "We have customized your nutrition plan based on your goals": "لقد قمنا بتخصيص خطة التغذية الخاصة بك بناءً على أهدافك",
-  "Daily Calorie Goal": "هدف السعرات الحرارية اليومية",
-  "Macronutrients Breakdown": "توزيع المغذيات الكبرى",
-  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.": "تعتمد هذه الخطة على عمرك ووزنك وطولك ومستوى نشاطك وأهدافك. يمكنك تعديل كمية الطعام اليومية في الإعدادات في أي وقت.",
-  "Continue to Premium": "الاستمرار إلى Premium",
-
-  // App Tips/Tutorial translations
-  "app_tips": "نصائح التطبيق",
-  "skip": "تخطي",
-  "next": "التالي",
-  "previous": "السابق",
-  "get_started": "ابدأ الآن",
-  "tip_welcome_title": "مرحباً بك في macroAize!",
-  "tip_welcome_description": "متتبع التغذية الشخصي الخاص بك المدعوم بالذكاء الاصطناعي. لنقم بجولة سريعة لمساعدتك على البدء في رحلتك الصحية.",
-  "tip_track_food_title": "تتبع وجباتك",
-  "tip_track_food_description": "اضغط على زر + في الشاشة الرئيسية لتسجيل وجباتك. اختر بين الإفطار أو الغداء أو العشاء أو الوجبات الخفيفة للحفاظ على سجلات دقيقة.",
-  "tip_scan_food_title": "المسح بالذكاء الاصطناعي",
-  "tip_scan_food_description": "التقط صورة لطعامك وسيقوم الذكاء الاصطناعي الخاص بنا بتحليل وحساب السعرات الحرارية والبروتين والكربوهيدرات والدهون على الفور.",
-  "tip_ai_coach_title": "تحدث مع المدرب الذكي",
-  "tip_ai_coach_description": "احصل على نصائح غذائية مخصصة واقتراحات للوجبات وإجابات على أسئلتك الصحية من مدربنا الذكي في أي وقت.",
-  "tip_analytics_title": "تتبع تقدمك",
-  "tip_analytics_description": "اعرض تحليلات مفصلة لاتجاهات التغذية الخاصة بك، وتقدم الوزن، وتوزيع الماكروز للبقاء على المسار الصحيح نحو أهدافك.",
-
-  // Email verification translations
-  
-  "available_balance": "الرصيد المتاح",
-  "withdrawal_amount": "مبلغ السحب",
-  "enter_amount": "أدخل المبلغ",
-  "bank_account_rip": "الحساب البنكي (RIP)",
-  "enter_rip_number": "أدخل رقم RIP",
-  "withdrawal_processing_info": "تتم معالجة السحوبات في غضون 5 أيام عمل.",
-  "requested_on": "تم الطلب في @date",
-  "unknown_date": "تاريخ غير معروف",
-  // Withdrawal specific translations
-  "withdrawal_submitted": "تم إرسال طلب السحب",
-  "request_id": "معرف الطلب: @id",
-  "processing_time": "وقت المعالجة: @days أيام عمل",
-  "withdrawal_email_confirmation":
-      "ستصلك رسالة تأكيد عبر البريد الإلكتروني بمجرد معالجة طلب السحب.",
-  "got_it": "حسنًا",
-  "processing": "قيد المعالجة",
-  "copy_failed": "فشل النسخ: @error",
-  "request_id_short": "المعرف",
-  "bank_account_short": "الحساب",
-  "processing_date": "تاريخ المعالجة",
-  "processing_deadline": "الموعد النهائي",
-  "requested_date": "تاريخ الطلب",
-  "completed": "مكتمل",
-  "failed": "فشل",
-  "email_verification_required_withdrawal":
-      "التحقق من البريد الإلكتروني مطلوب للسحب",
-  "view_all": "عرض الكل",
-  "showing_recent_withdrawals": "عرض @shown من @total سحوبات",
-  "withdrawal_history_full": "سجل السحوبات",
-  "no_withdrawal_history": "لا يوجد سجل سحوبات",
-  "withdrawal_history_empty_description":
-      "اطلب سحبك الأول لرؤية سجل معاملاتك هنا",
-  "view_withdrawal_history": "عرض سجل السحوبات",
-  "withdrawal_history_subtitle": "تتبع جميع طلبات السحب الخاصة بك",
-  // Permission UI
-  "grant_camera_access_in_scanner": "اضغط على الإطار لمنح الوصول إلى الكاميرا",
-  "camera_permission_denied_title": "إذن الكاميرا مطلوب",
-  "camera_permission_denied_message":
-      "تم رفض الوصول إلى الكاميرا. يرجى تفعيل إذن الكاميرا من إعدادات الجهاز لاستخدام الماسح.",
-  "ok": "حسنًا",
-
-  // Exit confirmation dialog
-  "exit_app_title": "الخروج من التطبيق",
-  "exit_app_message": "هل أنت متأكد أنك تريد الخروج؟",
-
-  // Nutrition details dialog
-  "nutrition_details": "تفاصيل التغذية",
-  "fats_label": "الدهون",
-  "log": "سجل",
-
-  // Premium paywall (modern)
-  'premium_badge': 'بريميوم',
-  'go_premium_title': 'الترقية إلى بريميوم',
-  'go_premium_subtitle': 'التجربة الكاملة لأفضل برنامج غذائي',
-  'feature_ai_scan_title': 'تحكم في وزنك وتناول طعامًا أفضل',
-  'feature_ai_scan_subtitle':
-      'مع مسح الوجبات بالذكاء الاصطناعي وملاحظات يومية',
-  'feature_results_title': 'حقق نتائج طويلة الأمد',
-  'feature_results_subtitle': 'مع الطيار الآلي وتتبع المغذيات',
-  'feature_chatbot_title': 'الدردشة الذكية "المدرب"',
-  'feature_chatbot_subtitle': 'إرشاد غذائي فوري',
-  'feature_recipes_title': 'وصفات وخطط بريميوم',
-  'feature_recipes_subtitle': 'ترشدك نحو النجاح',
-  'best_value': 'أفضل قيمة',
-  'save_percent': 'وفّر @percent%*',
-  'months_12': '12 شهرًا',
-  'month_1': 'شهر واحد',
-  'billed_annually': 'تتم الفوترة سنويًا',
-  'billed_monthly': 'تتم الفوترة شهريًا',
-  'per_month': 'شهريًا',
-  'continue_cta': 'متابعة',
-  'compared_to_monthly': '*مقارنة بالدفع الشهري',
-  'currency_dzd': 'دج',
-
-  // Weight tracking UI
-  "Target Weight": "الوزن المستهدف",
-  "to go": "متبقي",
-  "Try to update once a week to help us adjust your plan":
-      "حاول التحديث مرة أسبوعيًا لمساعدتنا في تعديل خطتك",
-  "Weight Overview": "نظرة عامة على الوزن",
-  "Current": "الحالي",
-  "Goal": "الهدف",
-  "invalid_number": "الرجاء إدخال رقم صالح",
-  "weight_out_of_range": "الرجاء إدخال وزن بين 20 و 300 كغ",
-
-  // Celebration strip messages
-  "goal_achieved_message": "لقد حققت هدفك! استمر في التقدم.",
-  "on_a_roll_message": "أنت على المسار الصحيح — كل خطوة مهمة!",
-  "keep_momentum_message": "أنت تحرز تقدمًا — حافظ على هذا الزخم!",
-
-  // Notifications
-  "update_targets_title": "تم تحديث الأهداف",
-  "update_targets_body":
-      "لقد قمنا بإعادة حساب أهدافك اليومية من السعرات الحرارية والمغذيات الكبرى لتتناسب مع وزنك الجديد.",
-
-  // Donut chart center texts
-  "daily_macros": "المغذيات اليومية",
-  "daily_macros_reached": "تم تحقيق أهداف المغذيات اليومية",
-
-  // Recipes Section
-  "recipes_title": "الوصفات",
-  "top_recipes": "أفضل الوصفات",
-  "all_recipes": "كل الوصفات",
-  // Recipe Detail specific keys
-  "less_text": "أقل ^",
-  "macronutrients": "المغذيات الكبرى",
-  "ingredients": "المكونات",
-  "serving": "الحصة",
-  "directions": "الخطوات",
-  "add_to_plan": "أضف إلى الخطة",
-  "step": "خطوة",
-  "top_recipes_subtitle": "اكتشف وصفات صحية ولذيذة مصممة لأهدافك",
-  "no_recipes_available": "لا توجد وصفات متاحة",
-  "Search recipes by name or ingredient": "ابحث عن وصفات بالاسم أو المكونات",
-  "failed_to_load_recipes": "فشل تحميل الوصفات. يرجى المحاولة مرة أخرى.",
-  "min": "دقيقة",
-  "cal": "سعرة",
-  "close": "إغلاق",
-
-  "food items found": "عناصر طعام موجودة",
-
-  // Meal Breakdown
-  "meal_breakdown": "تفاصيل الوجبة",
-  "tap_to_edit_portions": "اضغط لتعديل الحصص",
-  "items": "عناصر",
-  "verified": "مؤكد",
-  "estimated": "تقديري",
-  // Centralized success messages
-  "success": "نجاح",
-  "food_added_success": "تمت إضافة الطعام بنجاح",
-  "food_updated_success": "تم تحديث الطعام بنجاح",
-  "food_deleted_success": "تم حذف @count عنصر بنجاح",
-  // Nutrient short labels
-  "nut_prt": "بروتين",
-  "nut_carb": "كربوهيدرات",
-  "nut_cal": "سعرات",
-  "nut_fat": "دهون",
-  // Authentication messages
-  "auth_login_success": "تم تسجيل الدخول بنجاح",
-  "auth_register_success": "تم إنشاء الحساب بنجاح",
-  "auth_password_reset_sent": "تم إرسال بريد إعادة تعيين كلمة المرور",
-  "auth_wrong_credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-  "auth_account_not_found": "الحساب غير موجود",
-  "auth_email_in_use": "هذا البريد الإلكتروني مستخدم بالفعل",
-  "auth_weak_password": "كلمة المرور ضعيفة جدًا",
-  "auth_account_different_provider": "الحساب مرتبط بمزود تسجيل آخر",
-  "auth_network_error": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
-  "auth_unknown_error": "حدث خطأ غير معروف",
-  "auth_authentication_error": "خطأ في المصادقة",
-  "auth_unexpected_error": "خطأ غير متوقع",
-  "auth_logout_success": "تم تسجيل الخروج بنجاح",
-  "auth_logout_failed": "فشل تسجيل الخروج",
-  // Title used for the authentication/modal which prompts users to sign in
-  "auth_modal_title": "سجل الدخول للمتابعة",
-  // Daily usage labels
-  "Daily Usage": "الاستخدام اليومي",
-  "Scans": "المسح",
-  "Chat": "الدردشة",
-  "left": "متبقي",
-  "login_to_view_usage": "سجل الدخول لعرض استخدامك",
-
-  // Email verification translations
-  "email_verification_title": "التحقق من بريدك الإلكتروني",
-  "email_verification_subtitle": "تحقق من بريدك الإلكتروني للمتابعة",
-  "email_sent_to": "لقد أرسلنا رابط التحقق إلى @email",
-  "email_verification_instructions":
-      "انقر على الرابط في بريدك الإلكتروني للتحقق من حسابك. هذا يساعدنا في الحفاظ على أمان حسابك.",
-  "checking_verification_status": "جاري التحقق من الحالة...",
-  "resend_verification_email": "إعادة إرسال بريد التحقق",
-  "resend_cooldown": "يمكنك إعادة الإرسال بعد @seconds ثانية",
-  "resend_limit_reached": "تبقى @attempts محاولات",
-  "verification_attempts_remaining": "تبقى @remaining من @total محاولات",
-  "email_verification_success":
-      "تم التحقق من البريد الإلكتروني بنجاح! مرحبًا بك في ماكروآيز",
-  "email_verification_resent":
-      "تم إرسال بريد التحقق! يرجى مراجعة بريدك الوارد",
-  "email_verification_resend_error":
-      "فشل إرسال بريد التحقق. يرجى المحاولة مرة أخرى",
-  "email_verification_max_attempts":
-      "لقد وصلت إلى الحد الأقصى للمحاولات. يرجى المحاولة لاحقًا",
-  "email_verification_cooldown":
-      "يرجى الانتظار @seconds ثانية قبل طلب بريد آخر",
-  "skip_verification_title": "تخطي التحقق؟",
-  "skip_verification_warning":
-      "سيسمح لك هذا بالوصول دون التحقق من البريد الإلكتروني. لا يوصى به لأسباب أمنية.",
-  "skip_anyway": "تخطي على أي حال",
-  "skip_verification": "تخطي التحقق",
-  "verify": "تحقق",
-  "sign_out_title": "تسجيل الخروج؟",
-  "sign_out_confirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
-  "sign_out": "تسجيل الخروج",
-  "cancel": "إلغاء",
-  "email_verification_error":
-      "فشل التحقق من البريد الإلكتروني. يرجى المحاولة مرة أخرى",
-
-  // Email verification guard messages
-  "auth_required": "مطلوب تسجيل الدخول للمتابعة",
-  "email_verification_required_for_feature":
-      "التحقق من البريد الإلكتروني مطلوب لاستخدام هذه الميزة",
-  "email_verification_required_for_premium":
-      "التحقق من البريد الإلكتروني مطلوب للوصول إلى الميزات المميزة",
-  "email_verification_required_for_scan":
-      "التحقق من البريد الإلكتروني مطلوب لاستخدام ماسح الطعام",
-  "email_verification_required_for_chat":
-      "التحقق من البريد الإلكتروني مطلوب للدردشة مع المدرب الذكي",
-  "email_verification_required_for_app_access":
-      "التحقق من البريد الإلكتروني مطلوب للوصول إلى التطبيق",
-
-  // UI status indicators
-  "email_verified_status": "تم التحقق",
-  "email_unverified_status": "لم يتم التحقق",
-  "email_verified": "تم التحقق من البريد الإلكتروني",
-  "email_verification_complete_subtitle": "حسابك آمن وجاهز للاستخدام",
-  "email_verification_required": "التحقق من البريد الإلكتروني مطلوب",
-  "email_verification_required_subtitle":
-      "يرجى التحقق من @email للوصول إلى كافة الميزات",
-  "verify_email": "التحقق من البريد الإلكتروني",
-  "verify_now": "تحقق الآن",
-  "refresh": "تحديث",
-  "refresh_failed": "فشل تحديث الحالة. يرجى المحاولة مرة أخرى",
-  "tap_to_verify_email": "انقر للتحقق من بريدك الإلكتروني",
-
-  // Account activation gating warnings
-  "account_activation_required": "تفعيل الحساب مطلوب",
-  "account_activation_required_for_chat":
-      "يرجى تفعيل حسابك لاستخدام المدرب الذكي",
-  "account_activation_required_for_scanner":
-      "يرجى تفعيل حسابك لاستخدام ماسح الطعام",
-  "account_activation_required_for_premium":
-      "يرجى تفعيل حسابك لشراء النسخة المميزة",
-  "verify_account_to_continue": "تحقق من حسابك للمتابعة",
-
-  // Premium Required Messages
-  "premium_required": "الترقية إلى بريميوم مطلوبة",
-  "premium_feature": "ميزة مميزة",
-  "recipes_premium_message":
-      "الوصول إلى الوصفات يتطلب اشتراكًا مميزًا. قم بالترقية الآن لفتح هذه الميزة.",
-  "recipes_premium_badge": "افتح جميع الوصفات والميزات مع بريميوم",
-  "local_food_premium_message":
-      "إنشاء وتعديل الأطعمة المخصصة هي ميزة مميزة.",
-  "local_food_premium_badge":
-      "قم بالترقية إلى بريميوم لإنشاء أطعمة مخصصة غير محدودة!",
-  "chat_image_premium_message":
-      "إرفاق الصور يتطلب اشتراكًا مميزًا. قم بالترقية الآن لفتح هذه الميزة.",
-  "chat_image_premium_badge": "افتح إرفاق الصور للمدرب مع بريميوم",
-  "go_premium": "الترقية إلى بريميوم",
-  "maybe_later": "ربما لاحقًا",
-  // History fallbacks
-  "unknown_meal": "وجبة غير معروفة",
-
-  // Login/Register Form Labels
-  "login": "تسجيل الدخول",
-  "register": "إنشاء حساب",
-  "email": "البريد الإلكتروني",
-  "password": "كلمة المرور",
-  "confirm_password": "تأكيد كلمة المرور",
-  "first_name": "الاسم الأول",
-  "last_name": "الاسم الأخير",
-  "forgot_password": "هل نسيت كلمة المرور؟",
-  "continue_with_google": "المتابعة باستخدام جوجل",
-  "continue_with_apple": "المتابعة باستخدام آبل",
-
-  // Validation Messages
-  "email_required": "البريد الإلكتروني مطلوب",
-  "required": "مطلوب",
-  "invalid_email_format": "صيغة البريد الإلكتروني غير صحيحة",
-  "password_required": "كلمة المرور مطلوبة",
-  "password_min_length": "8 أحرف على الأقل",
-  "password_complexity": "استخدم حروفًا كبيرة وصغيرة وأرقامًا ورموزًا",
-  "name_required": "مطلوب",
-  "name_too_short": "قصير جدًا",
-  "passwords_do_not_match": "كلمتا المرور غير متطابقتين",
-  "please_fix_errors": "يرجى إصلاح الأخطاء",
-  "accept_terms_of_service": "يرجى قبول شروط الخدمة",
-
-  // Terms of Service
-  "by_registering_agree": "بالتسجيل، فإنك توافق على ",
-  "terms_of_service": "شروط الخدمة",
-
-  // Registration Success
-  "auth_register_verification_required":
-      "تم إنشاء الحساب! يرجى مراجعة بريدك الإلكتروني للتحقق من حسابك.",
-
-  // Settings - Account Section
-  "account": "الحساب",
-  "tap_to_view_details": "انقر لعرض التفاصيل",
-  "register_login": "تسجيل الدخول / إنشاء حساب",
-  "access_account_sync_data": "الوصول إلى حسابك ومزامنة بياناتك",
-
-  // Settings - App Info Section
-  "app_info": "معلومات التطبيق",
-  "version": "الإصدار",
-  "reset_data": "إعادة تعيين البيانات",
-  "clear_all_app_data": "مسح كافة بيانات التطبيق",
-  "account_reset_success": "تمت إعادة تعيين الحساب بنجاح",
-
-  // Account Details page translations
-  "account_details_title": "تفاصيل الحساب",
-  "no_name": "لا يوجد اسم",
-  "name_label": "الاسم",
-  "email_label": "البريد الإلكتروني",
-  "change_password": "تغيير كلمة المرور",
-  "logout": "تسجيل الخروج",
-  "display_name_updated": "تم تحديث اسم العرض",
-  "edit_display_name": "تعديل اسم العرض",
-  "new_display_name": "اسم العرض الجديد",
-  "password_changed_message":
-      "تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى.",
-  "current_password_incorrect": "كلمة المرور الحالية غير صحيحة.",
-  "too_many_attempts": "محاولات كثيرة جدًا. يرجى المحاولة لاحقًا.",
-  "please_relogin": "يرجى إعادة تسجيل الدخول والمحاولة مرة أخرى.",
-  "operation_failed": "فشلت العملية.",
-  // Change Password page translations
-  "current_password_label": "كلمة المرور الحالية",
-  "new_password_label": "كلمة المرور الجديدة",
-  "confirm_new_password_label": "تأكيد كلمة المرور الجديدة",
-  "min_8_chars": "8 أحرف على الأقل",
-  "password_complexity_hint": "استخدم حرفًا كبيرًا، حرفًا صغيرًا، رقمًا، ورمزًا",
-  "must_differ_from_current": "يجب أن تكون مختلفة عن الحالية",
-  "does_not_match": "غير متطابق",
-  "change_password_cta": "تغيير كلمة المرور",
-
-  // Interactive Tutorial
-  "tutorial_tap_to_continue": "اضغط في أي مكان للمتابعة",
-  "tutorial_step": "خطوة",
-  "tutorial_add_food_title": "تتبع وجباتك",
-  "tutorial_add_food_description": "اضغط على زر '+' لإضافة طعام إلى سجلك اليومي. يمكنك البحث أو المسح أو إضافة أطعمة مخصصة.",
-  "tutorial_scanner_title": "ماسح الطعام بالذكاء الاصطناعي",
-  "tutorial_scanner_description": "استخدم الماسح الضوئي المدعوم بالذكاء الاصطناعي لتحليل طعامك على الفور والحصول على معلومات غذائية دقيقة.",
-  "tutorial_ai_coach_title": "مدرب التغذية بالذكاء الاصطناعي",
-  "tutorial_ai_coach_description": "تحدث مع مدربك الشخصي بالذكاء الاصطناعي للحصول على نصائح مخصصة واقتراحات وجبات وإرشادات غذائية.",
-  "tutorial_analytics_title": "تتبع تقدمك",
-  "tutorial_analytics_description": "اعرض تحليلاتك الغذائية وتقدم وزنك واتجاهاتك اليومية لتبقى على المسار الصحيح نحو أهدافك.",
-  "tutorial_profile_title": "ملفك الشخصي",
-  "tutorial_profile_description": "الوصول إلى إعداداتك، وضبط أهدافك، وتخصيص تجربتك في قسم الملف الشخصي.",
 };
-

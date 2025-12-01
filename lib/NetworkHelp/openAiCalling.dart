@@ -38,11 +38,12 @@ class OpenAiCalling {
         'temperature': 0,
         'max_tokens': 500,
       };
-  final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
-  final callable = functions.httpsCallable('chatWithOpenRouter');
-  final result = await callable.call(parameters);
-  // normalize to Map<String, dynamic>
-  final decodedJson = jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
+      final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+      final callable = functions.httpsCallable('chatWithOpenRouter');
+      final result = await callable.call(parameters);
+      // map<String, dynamic>
+      final decodedJson =
+          jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
       OpenAiModel data = OpenAiModel.fromJson(decodedJson);
       return data.choices!.first.message!.content.toString();
     } catch (e) {
@@ -53,8 +54,8 @@ class OpenAiCalling {
 
   static Future<String> sentImageApi(File image) async {
     try {
-  // get current app language for localization
-  final currentLang = _getLanguageName();
+      // get current app language for localization
+      final currentLang = _getLanguageName();
       final bytes = await image.readAsBytes();
       final base64Image = base64Encode(bytes);
       final parameters = {
@@ -83,11 +84,13 @@ class OpenAiCalling {
         'temperature': 0,
         'max_tokens': 300,
       };
-  final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
-  final callable = functions.httpsCallable('chatWithOpenRouter');
-  final result = await callable.call(parameters);
-  // normalize to Map<String, dynamic>
-  final decodedJson = jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
+      final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+      final callable = functions.httpsCallable('chatWithOpenRouter');
+      final result = await callable.call(parameters);
+
+      // map<String, dynamic>
+      final decodedJson =
+          jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
       OpenAiModel data = OpenAiModel.fromJson(decodedJson);
       return data.choices!.first.message!.content.toString();
     } catch (e) {
@@ -96,16 +99,12 @@ class OpenAiCalling {
     }
   }
 
-  // helper to map language code to name for AI prompts
+  // helper to map language code to name
   static String _getLanguageName() {
     final currentLang = Get.locale?.languageCode.toLowerCase() ?? 'en';
 
     // map language codes to readable names
-    final languageMap = {
-      'en': 'English',
-      'ar': 'Arabic',
-      'fr': 'French',
-    };
+    final languageMap = {'en': 'English', 'ar': 'Arabic', 'fr': 'French'};
 
     return languageMap[currentLang] ?? 'English';
   }

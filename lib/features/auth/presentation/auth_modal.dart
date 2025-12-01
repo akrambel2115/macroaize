@@ -20,9 +20,9 @@ class AuthModal extends StatelessWidget {
   static Future<bool> show() async {
     final repo = FirebaseAuthRepository();
     Get.put(AuthController(repo), tag: 'auth');
-  // open full-screen auth
-  final res = await Get.to<bool?>(() => const AuthModal(isFullScreen: true));
-  // if controller set a success key, show it after the screen closes
+    // open full-screen auth
+    final res = await Get.to<bool?>(() => const AuthModal(isFullScreen: true));
+    // if controller set a success key, show it after the screen closes
     final controller =
         Get.isRegistered<AuthController>(tag: 'auth')
             ? Get.find<AuthController>(tag: 'auth')
@@ -244,7 +244,7 @@ class _LoginTab extends GetView<AuthController> {
                       c.isLoading.value
                           ? null
                           : () async {
-              // validate on press
+                            // validate on press
                             if (!(c.loginKey.currentState?.validate() ??
                                 false)) {
                               c.errorText.value = 'please_fix_errors'.tr;
@@ -411,7 +411,9 @@ class _RegisterTab extends GetView<AuthController> {
                 final recognizer =
                     TapGestureRecognizer()
                       ..onTap = () async {
-                        final uri = Uri.parse(Get.find<AppConfigService>().termsLink);
+                        final uri = Uri.parse(
+                          Get.find<AppConfigService>().termsLink,
+                        );
                         if (await canLaunchUrl(uri)) {
                           await launchUrl(
                             uri,
@@ -515,7 +517,7 @@ class _SocialButtons extends GetView<AuthController> {
   Widget build(BuildContext context) {
     final c = controller;
     return Obx(() {
-  // ensure reactive reads are inside Obx
+      // ensure reactive reads are inside Obx
       final loading = c.isLoading.value;
       return Column(
         children: [

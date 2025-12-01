@@ -1,8 +1,38 @@
 const Map<String, String> english = {
+  // ==============================================================================
+  // 1. Navigation & Common UI
+  // ==============================================================================
   "Home": "Home",
+  "Setting": "Settings",
+  "Profile": "Profile",
+  "View All": "View All",
+  "Continue": "Continue",
+  "Previous": "Previous",
+  "Cancel": "Cancel",
+  "Exit": "Exit",
+  "Done": "Done",
+  "Save": "Save",
+  "add": "Add",
+  "Update": "Update",
+  "Delete": "Delete",
+  "Delete Item": "Delete Item",
+  "Are you sure you want to delete this item?":
+      "Are you sure you want to delete this item?",
+  "Search": "Search",
+  "Clear Search": "Clear Search",
+  "close": "Close",
+  "next": "Next",
+  "skip": "Skip",
+  "ok": "OK",
+  "got_it": "Got It",
+  "maybe_later": "Maybe Later",
+  "previous": "Previous",
+
+  // ==============================================================================
+  // 2. Dashboard & Tracking (Home Screen)
+  // ==============================================================================
   "Calorie": "Calories",
   "Analytics": "Analytics",
-  "Setting": "Settings",
   "Track Food": "Track Food",
   "Consumed": "Consumed",
   "Remaining": "Remaining",
@@ -10,18 +40,48 @@ const Map<String, String> english = {
   "Carbs": "Carbs",
   "Fats": "Fats",
   "History": "History",
-  "View All": "View All",
+  "No History Yet": "No History Yet",
+  "Start tracking your meals to see your nutrition history here":
+      "Start tracking your meals to see your nutrition history here",
+  "History not found": "No History Found",
+  "Calorie Goal Reached": "Calorie Goal Reached!",
+  "You've completed your calorie goal for today. Would you like to add more?":
+      "You've hit your calorie goal for today. Great job! Would you like to log more?",
+  "Add More Calories": "Add More Calories",
+  "Daily Usage": "Daily Usage",
+  "Scans": "Scans",
+  "Chat": "Chat",
+  "left": "left",
+  "login_to_view_usage": "Login to see usage",
+  "track_subtitle": "Track your daily nutrition",
+  "goal_label": "Goal",
+  "daily_macros": "Daily Macros",
+  "daily_macros_reached": "Daily Macros Reached",
+
+  // ==============================================================================
+  // 3. Meals & Portions
+  // ==============================================================================
   "BreakFast": "Breakfast",
   "Lunch": "Lunch",
   "snack(s)": "Snack(s)",
   "Dinner": "Dinner",
   "Which meal would you like to track?": "Which meal would you like to track?",
+  "meal_breakdown": "Meal Breakdown",
+  "tap_to_edit_portions": "Tap to edit portions",
+  "items": "items",
+  "verified": "Verified",
+  "estimated": "Estimated",
+  "meal_contains": "This meal contains",
+  "conjunction_and": "and",
+  "meal_label": "Meal",
+
+  // ==============================================================================
+  // 4. Camera & AI Scanning
+  // ==============================================================================
   "Snap Tips": "Snapping Tips",
   "Too close": "Too close",
   "Too far": "Too far",
   "Multi-species": "Multiple items",
-  "Continue": "Continue",
-  "Previous": "Previous",
   "Gallery": "Gallery",
   "Tips": "Tips",
   "Perfect Shot": "Perfect Shot",
@@ -31,45 +91,100 @@ const Map<String, String> english = {
   "Center food in the frame and tap to scan":
       "Center your food in the frame and tap to scan",
   "Analyzing food...": "Analyzing your food...",
-  "No History Yet": "No History Yet",
-  "Start tracking your meals to see your nutrition history here":
-      "Start tracking your meals to see your nutrition history here",
+  "Analyzing nutrition...": "Analyzing nutrition...",
+  "grant_camera_access_in_scanner": "Tap the frame to grant camera access",
+  "camera_permission_denied_title": "Camera Permission Required",
+  "camera_permission_denied_message":
+      "Camera access was denied. Please enable camera permission in your device settings to use the scanner.",
+  "Unlock Food Scanner": "Unlock Food Scanner",
+  "Unlock Food Calorie": "Unlock Food Calorie",
+  "Unlimited Food Scanner To Calorie": "Unlimited Food Scanner To Calorie",
+
+  // ==============================================================================
+  // 5. Food Search & Custom Foods
+  // ==============================================================================
   "Local Food": "Local Food",
   "Search Food": "Search Food",
   "No Food Found": "No Food Found",
   "Try searching with different keywords or browse our local food database":
       "Try searching with different keywords or browse our local food database",
-  // Local Food add / edit dialog keys
+  "Search by Food Name/Dish": "Search by Food Name/Dish",
+  "food items found": "food items found",
   "add_custom_food": "Add Custom Food",
   "edit_food": "Edit Food",
   "name": "Name",
   "quantity": "Quantity",
   "calories": "Calories",
-  "add": "Add",
-  "save": "Save",
+  "proteins": "Proteins",
   "Custom Food": "Custom Food",
   "delete_selected": "Delete Selected",
-  "proteins": "Proteins",
+  "food_added_success": "Food added successfully",
+  "food_updated_success": "Food updated successfully",
+  "food_deleted_success": "@count food item(s) deleted",
+  "local_food_premium_message":
+      "Creating and editing custom foods is a Premium feature.",
+  "local_food_premium_badge":
+      "Upgrade to Premium to create unlimited custom foods!",
+  "barcode_activated": "Barcode Activated",
+  "barcode_deactivated": "Barcode Deactivated",
+  "product_not_found": "Product not found in database",
+  "error_fetching_product": "Error fetching product information",
 
-  "Clear Search": "Clear Search",
-  "Premium Features": "Premium Features",
-  "Choose Your Plan": "Choose Your Plan",
-  "OverView": "Overview",
+  // ==============================================================================
+  // 6. Profile, Body Metrics & Goals
+  // ==============================================================================
+  "Personal details": "Personal Details",
   "Weight Goal": "Weight Goal",
-  "Update": "Update",
   "Current Weight": "Current Weight",
-  "kg": "kg",
+  "Update Weight": "Update Weight",
+  "Update Weight Goal": "Update Weight Goal",
+  "Enter new weight (kg)": "Enter new weight (kg)",
   "Try to update once a week so we can adjust your plan to ensure you hit your goal":
       "Try to update once a week so we can adjust your plan to ensure you hit your goal",
-  "Update Weight": "Update Weight",
+  "Try to update once a week to help us adjust your plan":
+      "Try to update once a week to help us adjust your plan",
+  "Weight Overview": "Weight Overview",
+  "Current": "Current",
+  "Goal": "Goal",
+  "to go": "to go",
+  "invalid_number": "Please enter a valid whole number",
+  "weight_out_of_range": "Please enter a weight between 20 and 300 kg",
+  "Age": "Age",
+  "Height": "Height",
+  "Gender": "Gender",
+  "Male": "Male",
+  "Female": "Female",
+  "Update Your Gender": "Update Your Gender",
+  "Adjust goals": "Adjust Goals",
+  "Calories,carbs,fat and protein": "Calories, Carbs, Fat and Protein",
+  "adjust_goals_subtitle": "Calories, Carbs, Fat and Protein",
+  "Update Calorie Goal": "Update Calorie Goal",
+  "Calorie goal": "Calorie goal",
+  "Update Protein Goal": "Update Protein Goal",
+  "Protein goal": "Protein goal",
+  "Update Carb Goal": "Update Carb Goal",
+  "Carb goal": "Carb goal",
+  "Update Fat Goal": "Update Fat Goal",
+  "Auto Generate Goal": "Auto-Generate Goal",
+  "update_targets_title": "Targets Updated",
+  "update_targets_body":
+      "We've recalculated your daily calorie & macro targets to match your new weight.",
+  "kg": "kg",
+  "lb": "lb",
+  "ft": "ft",
+  "in": "in",
+  "cm": "cm",
+  "Imperial": "Imperial",
+  "Metric": "Metric",
+  "Target Weight": "Target Weight",
+
+  // ==============================================================================
+  // 7. Calendar & Time
+  // ==============================================================================
   "Week": "Week",
   "Month": "Month",
   "Year": "Year",
-  "Update Weight Goal": "Update Weight Goal",
-  "Enter new weight (kg)": "Enter new weight (kg)",
-  "Cancel": "Cancel",
-  "Exit": "Exit",
-  "Calorie Your Week :": "Your Week in Calories:",
+  "Day": "Day",
   'Sun': 'Sun',
   'Mon': 'Mon',
   'Tue': 'Tue',
@@ -77,8 +192,6 @@ const Map<String, String> english = {
   'Thu': 'Thu',
   'Fri': 'Fri',
   'Sat': 'Sat',
-  "Average Calorie Month :": "Average Daily Calories (Month):",
-  "Average Calorie Yearly :": "Average Daily Calories (Year):",
   "Jan": "Jan",
   "Feb": "Feb",
   "Mar": "Mar",
@@ -91,17 +204,30 @@ const Map<String, String> english = {
   "Oct": "Oct",
   "Nov": "Nov",
   "Dec": "Dec",
-  "Age": "Age",
-  "Height": "Height",
+  'January': 'January',
+  'February': 'February',
+  'March': 'March',
+  'April': 'April',
+  'June': 'June',
+  'July': 'July',
+  'August': 'August',
+  'September': 'September',
+  'October': 'October',
+  'November': 'November',
+  'December': 'December',
+  "Calorie Your Week :": "Your Week in Calories:",
+  "Average Calorie Month :": "Average Daily Calories (Month):",
+  "Average Calorie Yearly :": "Average Daily Calories (Year):",
+
+  // ==============================================================================
+  // 8. Settings & Legal
+  // ==============================================================================
   "Customization": "Customization",
-  "Profile": "Profile",
   "Dark Mode": "Dark Mode",
   "Language": "Language",
-  "Personal details": "Personal Details",
-  "Adjust goals": "Adjust Goals",
-  "Calories,carbs,fat and protein": "Calories, Carbs, Fat and Protein",
-  // Subtitle for Adjust Goals in Settings
-  "adjust_goals_subtitle": "Calories, Carbs, Fat and Protein",
+  "language_english": "English",
+  "language_french": "Français",
+  "language_arabic": "Arabic",
   "Chat history": "Chat History",
   "The coach does not memorize chat history. Each interaction is independent.":
       "The coach doesn't remember past conversations. Each chat is a fresh start.",
@@ -109,18 +235,428 @@ const Map<String, String> english = {
   "Terms and Condition": "Terms and Conditions",
   "Privacy Policy": "Privacy Policy",
   "Reset Data?": "Reset Data?",
+  "Confirm Reset": "Confirm Reset",
+  "Are you sure you want to Reset Data?":
+      "Are you sure you want to reset your data?",
+  "Reset": "Reset",
+  "You have been Reset Account": "Your account has been reset.",
   "VERSION": "VERSION",
-  "History not found": "No History Found",
-  "Delete Item": "Delete Item",
-  "Are you sure you want to delete this item?":
-      "Are you sure you want to delete this item?",
-  "Delete": "Delete",
-  "Search by Food Name/Dish": "Search by Food Name/Dish",
-  "Calorie Goal Reached": "Calorie Goal Reached!",
-  "You've completed your calorie goal for today. Would you like to add more?":
-      "You've hit your calorie goal for today. Great job! Would you like to log more?",
-  "Done": "Done",
-  "Add More Calories": "Add More Calories",
+  "exit_app_title": "Exit App",
+  "exit_app_message": "Are you sure you want to exit the app?",
+  "account": "Account",
+  "tap_to_view_details": "Tap to view details",
+  "register_login": "Register / Login",
+  "access_account_sync_data": "Access your account and sync data",
+  "app_info": "App Info",
+  "version": "Version",
+  "reset_data": "Reset Data",
+  "clear_all_app_data": "Clear all app data",
+  "account_reset_success": "Account has been reset successfully",
+  "Home Screen Widgets": "Home Screen Widgets",
+
+  // ==============================================================================
+  // 9. Premium & Subscriptions
+  // ==============================================================================
+  "Premium Features": "Premium Features",
+  "Choose Your Plan": "Choose Your Plan",
+  "Subscription": "Subscription",
+  "BUY NOW": "BUY NOW",
+  "Get Premium": "Get Premium",
+  "Get All The New Exciting Features": "Get All The New Exciting Features",
+  "Unlock Unlimited Chat with Ai": "Unlock Unlimited Chat with AI",
+  "Most Popular": "Most Popular",
+  'premium_badge': 'PREMIUM',
+  'go_premium_title': 'Go Premium',
+  'go_premium_subtitle': 'Get the full experience of the best diet program',
+  'feature_ai_scan_title': 'Manage your weight and eat better',
+  'feature_ai_scan_subtitle': 'with AI Meal Scan and daily feedback',
+  'feature_results_title': 'Achieve long-lasting results',
+  'feature_results_subtitle': 'with Autopilot and macros tracking',
+  'feature_chatbot_title': 'AI Chatbot "Coach"',
+  'feature_chatbot_subtitle': 'Instant nutrition guidance',
+  'feature_recipes_title': 'Premium recipes and diets',
+  'feature_recipes_subtitle': 'to guide you toward success',
+  'best_value': 'BEST VALUE',
+  'save_percent': 'SAVE @percent%*',
+  'months_12': '12 Months',
+  'month_1': '1 Month',
+  'billed_annually': 'Billed annually',
+  'billed_monthly': 'Billed monthly',
+  'per_month': 'Per month',
+  'continue_cta': 'Continue',
+  'compared_to_monthly': '*Compared to monthly payments',
+  'currency_dzd': 'DZD',
+  "premium_required": "Premium Required",
+  "premium_feature": "Premium Feature",
+  "go_premium": "Go Premium",
+
+  // ==============================================================================
+  // 10. Authentication & Onboarding
+  // ==============================================================================
+  "login": "Login",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "confirm_password": "Confirm Password",
+  "first_name": "First Name",
+  "last_name": "Last Name",
+  "forgot_password": "Forgot Password?",
+  "continue_with_google": "Continue with Google",
+  "continue_with_apple": "Continue with Apple",
+  "auth_login_success": "Signed in successfully",
+  "auth_register_success": "Account created successfully",
+  "auth_password_reset_sent": "Password reset email sent",
+  "auth_wrong_credentials": "Incorrect email or password",
+  "auth_account_not_found": "Account not found",
+  "auth_email_in_use": "Email already in use",
+  "auth_weak_password": "Password is too weak",
+  "auth_account_different_provider":
+      "An account already exists with a different provider",
+  "auth_network_error": "Network error. Please check your connection.",
+  "auth_unknown_error": "An unexpected error occurred",
+  "auth_authentication_error": "Authentication error",
+  "auth_unexpected_error": "Unexpected error",
+  "auth_logout_success": "Signed out successfully",
+  "auth_logout_failed": "Sign out failed",
+  "auth_modal_title": "Sign in to continue",
+  "sign_out_title": "Sign Out?",
+  "sign_out_confirmation": "Are you sure you want to sign out?",
+  "sign_out": "Sign Out",
+  "cancel": "Cancel",
+  "Welcome": "Welcome",
+  "Choose Your Gender": "Choose Your Gender",
+  "welcome_hi": "Hi there!",
+  "welcome_subtitle_prefix": "Welcome to your personal ",
+  "welcome_subtitle_highlight": "nutrition coach",
+  "Calorie tracking made easy": "Calorie tracking made easy",
+  "Just snap a quick photo of your meal and we''ll do the rest":
+      "Just snap a quick photo of your meal and we'll do the rest",
+  "In-depth nutrition analyses": "In-depth nutrition analyses",
+  "We will keep your informed about your food choicer and their nutritional content":
+      "We'll keep you informed about your food choices and their nutritional content",
+  "Transform your body": "Transform your body",
+  "Today is best time to start working toward your dream body":
+      "Today is the best time to start working toward your dream body",
+  "Where were you born?": "Where were you born?",
+  "This Will be used to calibrate your custom plan":
+      "This will be used to calibrate your custom plan",
+  "What's stopping you from reaching your goals?":
+      "What's stopping you from reaching your goals?",
+  "Lack of consistency": "Lack of consistency",
+  "Unhealthy eating habits": "Unhealthy eating habits",
+  "Lack of supports": "Lack of support",
+  "Busy schedule": "Busy schedule",
+  "Lack of meal inspiration": "Lack of meal inspiration",
+  "We're setting": "We're setting",
+  "everything up for you": "everything up for you",
+  "Customizing health plan....": "Customizing your health plan...",
+  "plan_intro_title": "Let's start with some questions",
+  "plan_intro_subtitle": "This will help us customize your plan",
+  "Your Plan is Ready!": "Your Plan is Ready!",
+  "We have customized your nutrition plan based on your goals":
+      "We have customized your nutrition plan based on your goals",
+  "Daily Calorie Goal": "Daily Calorie Goal",
+  "Macronutrients Breakdown": "Macronutrients Breakdown",
+  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.":
+      "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.",
+  "Continue to Premium": "Continue to Premium",
+  "How many workout do you per week?": "How many times a week do you work out?",
+  "This will used to calibrate your custom plan":
+      "This will be used to calibrate your custom plan.",
+  "Choose your height and weight": "Choose your height and weight",
+  "Select your height and weight to calibrate your custom plan":
+      "Select your height and weight to calibrate your custom plan",
+  "Workout Now and then": "Occasionally",
+  "A few workout per week": "A few times a week",
+  "Dedicated athlete": "Dedicated athlete",
+  "What is your goal?": "What is your goal?",
+  "This helps is generate a plan for your calorie intake.":
+      "This helps us create a plan for your calorie intake.",
+  "Gain Weight": "Gain Weight",
+  "Maintain Weight": "Maintain Weight",
+  "Lose Weight": "Lose Weight",
+
+  // ==============================================================================
+  // 11. Email Verification & Account Management
+  // ==============================================================================
+  "email_verification_title": "Verify Your Email",
+  "email_verification_subtitle": "Check your email to continue",
+  "email_sent_to": "We've sent a verification link to @email",
+  "email_verification_instructions":
+      "Click the link in your email to verify your account. This helps us keep your account secure.",
+  "checking_verification_status": "Checking verification status...",
+  "resend_verification_email": "Resend Email",
+  "resend_cooldown": "Resend in @seconds seconds",
+  "resend_limit_reached": "@attempts attempts remaining",
+  "verification_attempts_remaining": "@remaining of @total attempts remaining",
+  "email_verification_success":
+      "Email verified successfully! Welcome to macroAize",
+  "email_verification_resent": "Verification email sent! Check your inbox",
+  "email_verification_resend_error":
+      "Failed to send verification email. Please try again",
+  "email_verification_max_attempts":
+      "Maximum resend attempts reached. Please try again later",
+  "email_verification_cooldown":
+      "Please wait @seconds seconds before requesting another email",
+  "skip_verification_title": "Skip Verification?",
+  "skip_verification_warning":
+      "This will allow access without email verification. This is not recommended for security.",
+  "skip_anyway": "Skip Anyway",
+  "skip_verification": "Skip Verification",
+  "verify": "Verify",
+  "email_verification_error": "Email verification failed. Please try again",
+  "auth_required": "Please sign in to continue",
+  "email_verification_required_for_feature":
+      "Please verify your email to use this feature",
+  "email_verification_required_for_premium":
+      "Email verification is required to access premium features",
+  "email_verification_required_for_scan":
+      "Please verify your email to use the food scanner",
+  "email_verification_required_for_chat":
+      "Please verify your email to chat with the AI coach",
+  "email_verification_required_for_app_access":
+      "Email verification is required to access the app",
+  "email_verified_status": "Verified",
+  "email_unverified_status": "Unverified",
+  "email_verified": "Email Verified",
+  "email_verification_complete_subtitle":
+      "Your account is secure and ready to use",
+  "email_verification_required": "Email Verification Required",
+  "email_verification_required_subtitle":
+      "Please verify @email to access all features",
+  "verify_email": "Verify Email",
+  "verify_now": "Verify Now",
+  "refresh": "Refresh",
+  "refresh_failed": "Failed to refresh status. Please try again",
+  "tap_to_verify_email": "Tap to verify your email address",
+  "account_activation_required": "Account activation required",
+  "account_activation_required_for_chat":
+      "Please activate your account to use the AI coach",
+  "account_activation_required_for_scanner":
+      "Please activate your account to use the food scanner",
+  "account_activation_required_for_premium":
+      "Please activate your account to purchase premium",
+  "verify_account_to_continue": "Verify your email to continue",
+  "auth_register_verification_required":
+      "Account created! Please check your email to verify your account.",
+  "account_details_title": "Account Details",
+  "no_name": "No name",
+  "name_label": "Name",
+  "email_label": "Email",
+  "change_password": "Change Password",
+  "logout": "Logout",
+  "display_name_updated": "Display name updated",
+  "edit_display_name": "Edit display name",
+  "new_display_name": "New display name",
+  "password_changed_message": "Password changed. Please login again.",
+  "current_password_incorrect": "Current password is incorrect.",
+  "too_many_attempts": "Too many attempts, please try again later.",
+  "please_relogin": "Please re-login and try again.",
+  "operation_failed": "Operation failed.",
+  "current_password_label": "Current Password",
+  "new_password_label": "New Password",
+  "confirm_new_password_label": "Confirm New Password",
+  "min_8_chars": "Min 8 characters",
+  "password_complexity_hint": "Use upper, lower, number, & symbol",
+  "must_differ_from_current": "Must differ from current password",
+  "does_not_match": "Does not match",
+  "change_password_cta": "Change Password",
+  "email_required": "Email is required",
+  "required": "Required",
+  "invalid_email_format": "Invalid email format",
+  "password_required": "Password is required",
+  "password_min_length": "Password must be at least 8 characters",
+  "password_complexity":
+      "Use a mix of uppercase, lowercase, numbers, and symbols",
+  "name_required": "Name is required",
+  "name_too_short": "Name is too short",
+  "passwords_do_not_match": "Passwords do not match",
+  "please_fix_errors": "Please fix the errors",
+  "accept_terms_of_service": "Please accept the Terms of Service",
+  "by_registering_agree": "By registering, you agree to the ",
+  "terms_of_service": "Terms of Service",
+  "too_short": "Too short",
+  "too_long": "Too long",
+
+  // ==============================================================================
+  // 12. Influencer & Promo
+  // ==============================================================================
+  "influencer_program": "Influencer Program",
+  "your_promo_code": "Your promo code",
+  "copied": "Copied",
+  "current_balance": "Current balance",
+  "total_earned": "Total earned",
+  "referrals_count": "Referrals",
+  "request_withdrawal": "Request Withdrawal",
+  "minimum_withdrawal_amount": "Minimum withdrawal amount: @amount DZD",
+  "withdrawal_history": "Withdrawal History",
+  "promo_code_expired": "Promo code expired",
+  "promo_expires_in": "Promo expires in @days days",
+  "promo_expires_on": "Promo expires on @date",
+  "promo_code_copied": "Promo code copied",
+  "promo_code": "Promo Code",
+  "enter_promo_code": "Enter promo code",
+  "apply_promo_code": "Apply",
+  "skip_promo_code": "Skip",
+  "promo_code_applied": "Promo code applied successfully!",
+  "promo_code_invalid": "Invalid promo code",
+  "promo_code_dialog_title": "Have a promo code?",
+  "promo_code_dialog_subtitle":
+      "Enter your promo code to get a discount on your subscription",
+  "Have a Promo Code?": "Have a Promo Code?",
+  "Enter your promo code to get 3 days free trial":
+      "Enter your promo code to get 3 days free trial",
+  "ENTER CODE": "ENTER CODE",
+  "Validate Code": "Validate Code",
+  "Promo code applied successfully!": "Promo code applied successfully!",
+  "Please enter a promo code": "Please enter a promo code",
+  "Invalid promo code": "Invalid promo code",
+  "available_balance": "Available balance",
+  "withdrawal_amount": "Withdrawal amount",
+  "enter_amount": "Enter amount",
+  "bank_account_rip": "Bank Account (RIP)",
+  "enter_rip_number": "Enter RIP number",
+  "withdrawal_processing_info":
+      "Withdrawals are processed within 5 business days.",
+  "requested_on": "Requested on @date",
+  "unknown_date": "Unknown date",
+  "withdrawal_submitted": "Withdrawal Request Submitted",
+  "request_id": "Request ID: @id",
+  "processing_time": "Processing Time: @days business days",
+  "withdrawal_email_confirmation":
+      "You will receive an email confirmation once your withdrawal has been processed.",
+  "processing": "Processing",
+  "copy_failed": "Copy failed: @error",
+  "request_id_short": "ID",
+  "bank_account_short": "Account",
+  "processing_deadline": "Deadline",
+  "completed": "Completed",
+  "failed": "Failed",
+  "email_verification_required_withdrawal":
+      "Email verification is required to request withdrawals",
+  "view_all": "View All",
+  "showing_recent_withdrawals": "Showing @shown of @total withdrawals",
+  "withdrawal_history_full": "Withdrawal History",
+  "no_withdrawal_history": "No withdrawal history yet",
+  "withdrawal_history_empty_description":
+      "Request your first withdrawal to see your transaction history here",
+  "view_withdrawal_history": "View Withdrawal History",
+  "withdrawal_history_subtitle": "Track all your withdrawal requests",
+
+  // ==============================================================================
+  // 13. AI Coach & Chat
+  // ==============================================================================
+  "Ask anything": "Ask me anything...",
+  "Ask The Coach": "Ask The Coach",
+  "This picture not available Calorie,Protein,Carbs and Fats,":
+      "This picture doesn't have calorie, protein, carbs, or fat information.",
+  "Ask Coach": "Ask Coach",
+  "Write your message": "Write your message...",
+  "chat_image_premium_message":
+      "Access to image attachments requires a premium subscription. Upgrade now to unlock this feature.",
+  "chat_image_premium_badge":
+      "Unlock image attachments for the coach with Premium",
+
+  // ==============================================================================
+  // 14. Recipes
+  // ==============================================================================
+  "recipes_title": "Recipes",
+  "top_recipes": "Top Recipes",
+  "all_recipes": "All Recipes",
+  "less_text": "Less ^",
+  "macronutrients": "Macronutrients",
+  "ingredients": "Ingredients",
+  "serving": "Serving",
+  "directions": "Directions",
+  "add_to_plan": "Add to Plan",
+  "step": "Step",
+  "top_recipes_subtitle":
+      "Discover healthy and delicious recipes crafted for your goals",
+  "no_recipes_available": "No recipes available",
+  "Search recipes by name or ingredient":
+      "Search recipes by name or ingredient",
+  "failed_to_load_recipes": "Failed to load recipes. Please try again.",
+  "recipes_premium_message":
+      "Access to recipes requires a premium subscription. Upgrade now to unlock this feature.",
+  "recipes_premium_badge": "Unlock all recipes and features with Premium",
+
+  // ==============================================================================
+  // 15. Tutorials & Tips
+  // ==============================================================================
+  "app_tips": "App Tips",
+  "tip_welcome_title": "Welcome to macroAize!",
+  "tip_welcome_description":
+      "Your personal AI-powered nutrition tracker. Let's take a quick tour to help you get started on your health journey.",
+  "tip_track_food_title": "Track Your Meals",
+  "tip_track_food_description":
+      "Tap the + button on the home screen to log your meals. Choose between breakfast, lunch, dinner, or snacks to keep accurate records.",
+  "tip_scan_food_title": "Scan with AI",
+  "tip_scan_food_description":
+      "Take a photo of your food and our AI will instantly analyze and calculate calories, protein, carbs, and fats for you.",
+  "tip_ai_coach_title": "Chat with AI Coach",
+  "tip_ai_coach_description":
+      "Get personalized nutrition advice, meal suggestions, and answers to your health questions from our AI coach anytime.",
+  "tip_analytics_title": "Track Your Progress",
+  "tip_analytics_description":
+      "View detailed analytics of your nutrition trends, weight progress, and macro distribution to stay on track with your goals.",
+  "tutorial_tap_to_continue": "Tap anywhere to continue",
+  "tutorial_step": "Step",
+  "tutorial_add_food_title": "Track Your Meals",
+  "tutorial_add_food_description":
+      "Tap the '+' button to add food to your daily log. You can search, scan, or add custom foods.",
+  "tutorial_scanner_title": "AI Food Scanner",
+  "tutorial_scanner_description":
+      "Use our AI-powered scanner to instantly analyze your food and get accurate nutrition information.",
+  "tutorial_ai_coach_title": "AI Nutrition Coach",
+  "tutorial_ai_coach_description":
+      "Chat with your personal AI coach for personalized advice, meal suggestions, and nutrition guidance.",
+  "tutorial_analytics_title": "Track Your Progress",
+  "tutorial_analytics_description":
+      "View your nutrition analytics, weight progress, and daily trends to stay on track with your goals.",
+  "tutorial_profile_title": "Your Profile",
+  "tutorial_profile_description":
+      "Access your settings, adjust your goals, and customize your experience in the profile section.",
+  "widget_promo_title": "Add Home Screen Widget",
+  "widget_promo_android_instructions":
+      "Long press on your home screen, select 'Widgets', and find 'macroAize' to add it for quick access!",
+  "widget_promo_ios_step1": "Long press anywhere on your home screen.",
+  "widget_promo_ios_step2": "Tap the '+' button in the top left corner.",
+  "widget_promo_ios_step3": "Search for 'macroAize' and select your widget.",
+  "widget_promo_got_it": "Got it!",
+
+  // ==============================================================================
+  // 16. Units & Labels
+  // ==============================================================================
+  "kcal_unit": "kcal",
+  "gram_unit": "g",
+  "unit_piece": "piece",
+  "protein_unit": "g",
+  "carbs_unit": "g",
+  "fat_unit": "g",
+  "cals": "cals",
+  "prot": "prot",
+  "carbs": "carbs",
+  "fats": "fats",
+  "nut_prt": "prt",
+  "nut_carb": "carb",
+  "nut_cal": "cal",
+  "nut_fat": "fat",
+  "min": "min",
+  "cal": "Cal",
+  "Cal": "Cal",
+  "success": "Success",
+  "nutrition_details": "Nutrition Details",
+  "fats_label": "Fats",
+  "log": "Log",
+  "unknown_meal": "Unknown meal",
+  "goal_achieved_message": "Goal achieved! Keep shining.",
+  "on_a_roll_message": "You're on a roll—every step counts!",
+  "keep_momentum_message": "Progress made—keep the momentum going!",
+  "Cal Left": "Calories Left",
+
+  // ==============================================================================
+  // 17. Food Items Database
+  // ==============================================================================
   "Boiled Egg": "Boiled Egg",
   "Oatmeal": "Oatmeal",
   "Banana": "Banana",
@@ -140,7 +676,6 @@ const Map<String, String> english = {
   "Smoothie (Fruit)": "Fruit Smoothie",
   "Yogurt (Plain)": "Plain Yogurt",
   "Khichdi": "Khichdi",
-
   "Thepla": "Thepla",
   "Cheela (Moong dal)": "Cheela (Moong dal)",
   "Pav Bhaji": "Pav Bhaji",
@@ -239,78 +774,19 @@ const Map<String, String> english = {
   "2 rotis + paneer": "2 rotis + paneer",
   "1 bowl + 2 slices": "1 bowl + 2 slices",
   "1 bowl + 2 appams": "1 bowl + 2 appams",
-
   "3 pieces": "3 pieces",
   "2 chillas + salad": "2 chillas + salad",
-  "Cal": "Cal",
   "Cropper": "Cropper",
   "Calorie Tracker": "Calorie Tracker",
   "Add Calorie": "Add Calories",
   "Quantity": "Quantity",
-  "Ask anything": "Ask me anything...",
-  "Ask The Coach": "Ask The Coach",
-  "This picture not available Calorie,Protein,Carbs and Fats,":
-      "This picture doesn't have calorie, protein, carbs, or fat information.",
-  "Ask Coach": "Ask Coach",
-  "Write your message": "Write your message...",
-  "Confirm Reset": "Confirm Reset",
-  "Are you sure you want to Reset Data?":
-      "Are you sure you want to reset your data?",
-  "Reset": "Reset",
-  "You have been Reset Account": "Your account has been reset.",
   "Personal Details": "Personal Details",
   "Goal Weight": "Goal Weight",
-  "cm": "cm",
   "Date Of Birth": "Date Of Birth",
-  "Gender": "Gender",
-  "Male": "Male",
-  "Female": "Female",
-  "Choose your desired weight?": "What's your target weight?",
-  "Imperial": "Imperial",
-  "Metric": "Metric",
   "Weight": "Weight",
-  "lb": "lb",
-  "ft": "ft",
-  "in": "in",
-  "Day": "Day",
-  'January': 'January',
-  'February': 'February',
-  'March': 'March',
-  'April': 'April',
-  'June': 'June',
-  'July': 'July',
-  'August': 'August',
-  'September': 'September',
-  'October': 'October',
-  'November': 'November',
-  'December': 'December',
-  "Update Your Gender": "Update Your Gender",
-  "Adjust Goals": "Adjust Goals",
-  "How many workout do you per week?": "How many times a week do you work out?",
-  "This will used to calibrate your custom plan":
-      "This will be used to calibrate your custom plan.",
-  "Choose your height and weight": "Choose your height and weight",
-  "Select your height and weight to calibrate your custom plan":
-      "Select your height and weight to calibrate your custom plan",
-  "Workout Now and then": "Occasionally",
-  "A few workout per week": "A few times a week",
-  "Dedicated athlete": "Dedicated athlete",
-  "What is your goal?": "What is your goal?",
-  "This helps is generate a plan for your calorie intake.":
-      "This helps us create a plan for your calorie intake.",
-  "Gain Weight": "Gain Weight",
-    "Maintain Weight": "Maintain Weight",
-  "Lose Weight": "Lose Weight",
-  "Update Calorie Goal": "Update Calorie Goal",
-  "Calorie goal": "Calorie goal",
-  "Save": "Save",
+  "Choose your desired weight?": "What's your target weight?",
   "Calorie Goal": "Calorie Goal",
-  "Update Protein Goal": "Update Protein Goal",
-  "Protein goal": "Protein goal",
-  "Update Carb Goal": "Update Carb Goal",
-  "Carb goal": "Carb goal",
-  "Update Fat Goal": "Update Fat Goal",
-  "Auto Generate Goal": "Auto-Generate Goal",
+  "Adjust Goals": "Adjust Goals",
   "Fruit Salad": "Fruit Salad",
   "Roasted Chickpeas": "Roasted Chickpeas",
   "Mixed Nuts": "Mixed Nuts",
@@ -436,469 +912,7 @@ const Map<String, String> english = {
   "1 bowl + 1 appam": "1 bowl + 1 appam",
   "1 tomato": "1 tomato",
   "Restore": "Restore",
-  "Get Premium": "Get Premium",
-  "Get All The New Exciting Features": "Get All The New Exciting Features",
-  "Unlock Food Scanner": "Unlock Food Scanner",
-  "Unlock Food Calorie": "Unlock Food Calorie",
-  "Unlock Unlimited Chat with Ai": "Unlock Unlimited Chat with AI",
-  "Unlimited Food Scanner To Calorie": "Unlimited Food Scanner To Calorie",
-  "Most Popular": "Most Popular",
-  "Subscription": "Subscription",
-  "BUY NOW": "BUY NOW",
   "Terms of Condition": "Terms of Condition",
-  "Welcome": "Welcome",
-  "Choose Your Gender": "Choose Your Gender",
-  "welcome_hi": "Hi there!",
-  "welcome_subtitle_prefix": "Welcome to your personal ",
-  "welcome_subtitle_highlight": "nutrition coach",
-  "Calorie tracking made easy": "Calorie tracking made easy",
-  "Just snap a quick photo of your meal and we''ll do the rest":
-      "Just snap a quick photo of your meal and we'll do the rest",
-  "In-depth nutrition analyses": "In-depth nutrition analyses",
-  "We will keep your informed about your food choicer and their nutritional content":
-      "We'll keep you informed about your food choices and their nutritional content",
-  "Transform your body": "Transform your body",
-  "Today is best time to start working toward your dream body":
-      "Today is the best time to start working toward your dream body",
-  "Where were you born?": "Where were you born?",
-  "This Will be used to calibrate your custom plan":
-      "This will be used to calibrate your custom plan",
-  "What's stopping you from reaching your goals?":
-      "What's stopping you from reaching your goals?",
-  "Lack of consistency": "Lack of consistency",
-  "Unhealthy eating habits": "Unhealthy eating habits",
-  "Lack of supports": "Lack of support",
-  "Busy schedule": "Busy schedule",
-  "Lack of meal inspiration": "Lack of meal inspiration",
-  "We're setting": "We're setting",
-  "everything up for you": "everything up for you",
-  "Customizing health plan....": "Customizing your health plan...",
-  "plan_intro_title": "Let's start with some questions",
-  "plan_intro_subtitle": "This will help us customize your plan",
-
-  // Dynamic meal description components
-  "meal_contains": "This meal contains",
-  "conjunction_and": "and",
-
-  // Units and labels
-  "kcal_unit": "kcal",
-  "gram_unit": "g",
-  "unit_piece": "piece",
-  "protein_unit": "g",
-  "carbs_unit": "g",
-  "fat_unit": "g",
-  "Cal Left": "Calories Left",
-  "meal_label": "Meal",
-  // Abbreviations used in compact history badges
-  "cals": "cals",
-  "prot": "prot",
-  "carbs": "carbs",
-  "fats": "fats",
-
-  // Modern UI labels
-  "track_subtitle": "Track your daily nutrition",
-  "goal_label": "Goal",
-  "Analyzing nutrition...": "Analyzing nutrition...",
-  // Permission UI
-  "grant_camera_access_in_scanner": "Tap the frame to grant camera access",
-  "camera_permission_denied_title": "Camera Permission Required",
-  "camera_permission_denied_message":
-      "Camera access was denied. Please enable camera permission in your device settings to use the scanner.",
-  "ok": "OK",
-
-  // Exit confirmation dialog
-  "exit_app_title": "Exit App",
-  "exit_app_message": "Are you sure you want to exit the app?",
-
-  // Nutrition details dialog
-  "nutrition_details": "Nutrition Details",
-  "fats_label": "Fats",
-  "log": "Log",
-
-  // Premium paywall (modern)
-  'premium_badge': 'PREMIUM',
-  'go_premium_title': 'Go Premium',
-  'go_premium_subtitle': 'Get the full experience of the best diet program',
-  'feature_ai_scan_title': 'Manage your weight and eat better',
-  'feature_ai_scan_subtitle': 'with AI Meal Scan and daily feedback',
-  'feature_results_title': 'Achieve long-lasting results',
-  'feature_results_subtitle': 'with Autopilot and macros tracking',
-  'feature_chatbot_title': 'AI Chatbot "Coach"',
-  'feature_chatbot_subtitle': 'Instant nutrition guidance',
-  'feature_recipes_title': 'Premium recipes and diets',
-  'feature_recipes_subtitle': 'to guide you toward success',
-  'best_value': 'BEST VALUE',
-  'save_percent': 'SAVE @percent%*',
-  'months_12': '12 Months',
-  'month_1': '1 Month',
-  'billed_annually': 'Billed annually',
-  'billed_monthly': 'Billed monthly',
-  'per_month': 'Per month',
-  'continue_cta': 'Continue',
-  'compared_to_monthly': '*Compared to monthly payments',
-  'currency_dzd': 'DZD',
-
-  // Weight tracking UI
-  "Target Weight": "Target Weight",
-  "to go": "to go",
-  "Try to update once a week to help us adjust your plan":
-      "Try to update once a week to help us adjust your plan",
-  "Weight Overview": "Weight Overview",
-  "Current": "Current",
-  "Goal": "Goal",
-  "invalid_number": "Please enter a valid whole number",
-  "weight_out_of_range": "Please enter a weight between 20 and 300 kg",
-
-  // Celebration strip messages
-  "goal_achieved_message": "Goal achieved! Keep shining.",
-  "on_a_roll_message": "You're on a roll—every step counts!",
-  "keep_momentum_message": "Progress made—keep the momentum going!",
-
-  // Notifications
-  "update_targets_title": "Targets Updated",
-  "update_targets_body":
-      "We've recalculated your daily calorie & macro targets to match your new weight.",
-
-  // Donut chart center texts
-  "daily_macros": "Daily Macros",
-  "daily_macros_reached": "Daily Macros Reached",
-
-  // Recipes Section
-  "recipes_title": "Recipes",
-  "top_recipes": "Top Recipes",
-  "all_recipes": "All Recipes",
-  // Recipe Detail specific keys
-  "less_text": "Less ^",
-  "macronutrients": "Macronutrients",
-  "ingredients": "Ingredients",
-  "serving": "Serving",
-  "directions": "Directions",
-  "add_to_plan": "Add to Plan",
-  "step": "Step",
-  // Localized language display names
-  "language_english": "English",
-  "language_french": "Français",
-  "language_arabic": "Arabic",
-  "top_recipes_subtitle":
-      "Discover healthy and delicious recipes crafted for your goals",
-  "no_recipes_available": "No recipes available",
-  "Search recipes by name or ingredient":
-      "Search recipes by name or ingredient",
-  "min": "min",
-  "cal": "Cal",
-  "close": "Close",
-
-  "food items found": "food items found",
-
-  // Meal Breakdown
-  "meal_breakdown": "Meal Breakdown",
-  "tap_to_edit_portions": "Tap to edit portions",
-  "items": "items",
-  "verified": "Verified",
-  "estimated": "Estimated",
-  // Nutrient short labels
-  "nut_prt": "prt",
-  "nut_carb": "carb",
-  "nut_cal": "cal",
-  "nut_fat": "fat",
-  // Notification messages
-  "success": "Success",
-  "food_added_success": "Food added successfully",
-  "food_updated_success": "Food updated successfully",
-  "food_deleted_success": "@count food item(s) deleted",
-  "failed_to_load_recipes": "Failed to load recipes. Please try again.",
-  // Authentication messages
-  "auth_login_success": "Signed in successfully",
-  "auth_register_success": "Account created successfully",
-  "auth_password_reset_sent": "Password reset email sent",
-  "auth_wrong_credentials": "Incorrect email or password",
-  "auth_account_not_found": "Account not found",
-  "auth_email_in_use": "Email already in use",
-  "auth_weak_password": "Password is too weak",
-  "auth_account_different_provider": "An account already exists with a different provider",
-  "auth_network_error": "Network error. Please check your connection.",
-  "auth_unknown_error": "An unexpected error occurred",
-  "auth_authentication_error": "Authentication error",
-  "auth_unexpected_error": "Unexpected error",
-  "auth_logout_success": "Signed out successfully",
-  "auth_logout_failed": "Sign out failed",
-  // Title used for the authentication/modal which prompts users to sign in
-  "auth_modal_title": "Sign in to continue",
-  // Daily usage labels
-  "Daily Usage": "Daily Usage",
-  "Scans": "Scans",
-  "Chat": "Chat",
-  "left": "left",
-  // Influencer / promo keys
-  "influencer_program": "Influencer Program",
-  "your_promo_code": "Your promo code",
-  "copied": "Copied",
-  "current_balance": "Current balance",
-  "total_earned": "Total earned",
-  "referrals_count": "Referrals",
-  "request_withdrawal": "Request Withdrawal",
-  "minimum_withdrawal_amount": "Minimum withdrawal amount: @amount DZD",
-  "withdrawal_history": "Withdrawal History",
-  "promo_code_expired": "Promo code expired",
-  "promo_expires_in": "Promo expires in @days days",
-  "promo_expires_on": "Promo expires on @date",
-  "promo_code_copied": "Promo code copied",
-  "available_balance": "Available balance",
-  "withdrawal_amount": "Withdrawal amount",
-  "enter_amount": "Enter amount",
-  "bank_account_rip": "Bank Account (RIP)",
-  "enter_rip_number": "Enter RIP number",
-  "withdrawal_processing_info":
-      "Withdrawals are processed within 5 business days.",
-  "requested_on": "Requested on @date",
-  "unknown_date": "Unknown date",
-  "login_to_view_usage": "Login to see usage",
-  "promo_code": "Promo Code",
-  "enter_promo_code": "Enter promo code",
-  "apply_promo_code": "Apply",
-  "skip_promo_code": "Skip",
-  "promo_code_applied": "Promo code applied successfully!",
-  "promo_code_invalid": "Invalid promo code",
-  "promo_code_dialog_title": "Have a promo code?",
-  "promo_code_dialog_subtitle":
-      "Enter your promo code to get a discount on your subscription",
-  
-  // Promo Code View (Sign Up)
-  "Have a Promo Code?": "Have a Promo Code?",
-  "Enter your promo code to get 3 days free trial": "Enter your promo code to get 3 days free trial",
-  "ENTER CODE": "ENTER CODE",
-  "Validate Code": "Validate Code",
-  "Promo code applied successfully!": "Promo code applied successfully!",
-  "Please enter a promo code": "Please enter a promo code",
-  "Invalid promo code": "Invalid promo code",
-
-  // Plan review page translations
-  "Your Plan is Ready!": "Your Plan is Ready!",
-  "We have customized your nutrition plan based on your goals": "We have customized your nutrition plan based on your goals",
-  "Daily Calorie Goal": "Daily Calorie Goal",
-  "Macronutrients Breakdown": "Macronutrients Breakdown",
-  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.": "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.",
-  "Continue to Premium": "Continue to Premium",
-
-  // App Tips/Tutorial translations
-  "app_tips": "App Tips",
-  "skip": "Skip",
-  "next": "Next",
-  "previous": "Previous",
+  "OverView": "Overview",
   "get_started": "Get Started",
-  "tip_welcome_title": "Welcome to macroAize!",
-  "tip_welcome_description": "Your personal AI-powered nutrition tracker. Let's take a quick tour to help you get started on your health journey.",
-  "tip_track_food_title": "Track Your Meals",
-  "tip_track_food_description": "Tap the + button on the home screen to log your meals. Choose between breakfast, lunch, dinner, or snacks to keep accurate records.",
-  "tip_scan_food_title": "Scan with AI",
-  "tip_scan_food_description": "Take a photo of your food and our AI will instantly analyze and calculate calories, protein, carbs, and fats for you.",
-  "tip_ai_coach_title": "Chat with AI Coach",
-  "tip_ai_coach_description": "Get personalized nutrition advice, meal suggestions, and answers to your health questions from our AI coach anytime.",
-  "tip_analytics_title": "Track Your Progress",
-  "tip_analytics_description": "View detailed analytics of your nutrition trends, weight progress, and macro distribution to stay on track with your goals.",
-
-  // Email verification translations
-  "email_verification_title": "Verify Your Email",
-  "email_verification_subtitle": "Check your email to continue",
-  "email_sent_to": "We've sent a verification link to @email",
-  "email_verification_instructions":
-      "Click the link in your email to verify your account. This helps us keep your account secure.",
-  "checking_verification_status": "Checking verification status...",
-  "resend_verification_email": "Resend Email",
-  "resend_cooldown": "Resend in @seconds seconds",
-  "resend_limit_reached": "@attempts attempts remaining",
-  "verification_attempts_remaining": "@remaining of @total attempts remaining",
-  "email_verification_success":
-      "Email verified successfully! Welcome to macroAize",
-  "email_verification_resent": "Verification email sent! Check your inbox",
-  "email_verification_resend_error":
-      "Failed to send verification email. Please try again",
-  "email_verification_max_attempts":
-      "Maximum resend attempts reached. Please try again later",
-  "email_verification_cooldown":
-      "Please wait @seconds seconds before requesting another email",
-  "skip_verification_title": "Skip Verification?",
-  "skip_verification_warning":
-      "This will allow access without email verification. This is not recommended for security.",
-  "skip_anyway": "Skip Anyway",
-  "skip_verification": "Skip Verification",
-  "verify": "Verify",
-  "sign_out_title": "Sign Out?",
-  "sign_out_confirmation": "Are you sure you want to sign out?",
-  "sign_out": "Sign Out",
-  "cancel": "Cancel",
-  "email_verification_error": "Email verification failed. Please try again",
-
-  // Email verification guard messages
-  "auth_required": "Please sign in to continue",
-  "email_verification_required_for_feature":
-      "Please verify your email to use this feature",
-  "email_verification_required_for_premium":
-      "Email verification is required to access premium features",
-  "email_verification_required_for_scan":
-      "Please verify your email to use the food scanner",
-  "email_verification_required_for_chat":
-      "Please verify your email to chat with the AI coach",
-  "email_verification_required_for_app_access":
-      "Email verification is required to access the app",
-
-  // Premium Required Messages
-  "premium_required": "Premium Required",
-  "premium_feature": "Premium Feature",
-  "recipes_premium_message":
-      "Access to recipes requires a premium subscription. Upgrade now to unlock this feature.",
-  "recipes_premium_badge": "Unlock all recipes and features with Premium",
-  "local_food_premium_message":
-      "Creating and editing custom foods is a Premium feature.",
-  "local_food_premium_badge":
-      "Upgrade to Premium to create unlimited custom foods!",
-  "chat_image_premium_message":
-      "Access to image attachments requires a premium subscription. Upgrade now to unlock this feature.",
-  "chat_image_premium_badge":
-      "Unlock image attachments for the coach with Premium",
-  "go_premium": "Go Premium",
-  "maybe_later": "Maybe Later",
-
-  // History fallbacks
-  "unknown_meal": "Unknown meal",
-
-  // UI status indicators
-  "email_verified_status": "Verified",
-  "email_unverified_status": "Unverified",
-  "email_verified": "Email Verified",
-  "email_verification_complete_subtitle":
-      "Your account is secure and ready to use",
-  "email_verification_required": "Email Verification Required",
-  "email_verification_required_subtitle":
-      "Please verify @email to access all features",
-  "verify_email": "Verify Email",
-  "verify_now": "Verify Now",
-  "refresh": "Refresh",
-  "refresh_failed": "Failed to refresh status. Please try again",
-  "tap_to_verify_email": "Tap to verify your email address",
-
-  // Account activation gating warnings
-  "account_activation_required": "Account activation required",
-  "account_activation_required_for_chat":
-      "Please activate your account to use the AI coach",
-  "account_activation_required_for_scanner":
-      "Please activate your account to use the food scanner",
-  "account_activation_required_for_premium":
-      "Please activate your account to purchase premium",
-  "verify_account_to_continue": "Verify your email to continue",
-
-  // Settings - Account Section
-  "account": "Account",
-  "tap_to_view_details": "Tap to view details",
-  "register_login": "Register / Login",
-  "access_account_sync_data": "Access your account and sync data",
-
-  // Settings - App Info Section
-  "app_info": "App Info",
-  "version": "Version",
-  "reset_data": "Reset Data",
-  "clear_all_app_data": "Clear all app data",
-  "account_reset_success": "Account has been reset successfully",
-
-  // Account Details page translations
-  "account_details_title": "Account Details",
-  "no_name": "No name",
-  "name_label": "Name",
-  "email_label": "Email",
-  "change_password": "Change Password",
-  "logout": "Logout",
-  "display_name_updated": "Display name updated",
-  "edit_display_name": "Edit display name",
-  "new_display_name": "New display name",
-  "required": "Required",
-  "too_short": "Too short",
-  "too_long": "Too long",
-  "password_changed_message": "Password changed. Please login again.",
-  "current_password_incorrect": "Current password is incorrect.",
-  "too_many_attempts": "Too many attempts, please try again later.",
-  "please_relogin": "Please re-login and try again.",
-  "operation_failed": "Operation failed.",
-
-  // Change Password page translations
-  "current_password_label": "Current Password",
-  "new_password_label": "New Password",
-  "confirm_new_password_label": "Confirm New Password",
-  "min_8_chars": "Min 8 characters",
-  "password_complexity_hint": "Use upper, lower, number, & symbol",
-  "must_differ_from_current": "Must differ from current password",
-  "does_not_match": "Does not match",
-  "please_fix_errors": "Please fix the errors",
-  "change_password_cta": "Change Password",
-
-  // Withdrawal specific translations
-  "withdrawal_submitted": "Withdrawal Request Submitted",
-  "request_id": "Request ID: @id",
-  "processing_time": "Processing Time: @days business days",
-  "withdrawal_email_confirmation":
-      "You will receive an email confirmation once your withdrawal has been processed.",
-  "got_it": "Got It",
-  "processing": "Processing",
-  "copy_failed": "Copy failed: @error",
-  "email_verification_required_withdrawal":
-      "Email verification is required to request withdrawals",
-  "completed": "Completed",
-  "failed": "Failed",
-  "view_all": "View All",
-  "showing_recent_withdrawals": "Showing @shown of @total withdrawals",
-  "withdrawal_history_full": "Withdrawal History",
-  "no_withdrawal_history": "No withdrawal history yet",
-  "withdrawal_history_empty_description":
-      "Request your first withdrawal to see your transaction history here",
-  "view_withdrawal_history": "View Withdrawal History",
-  "withdrawal_history_subtitle": "Track all your withdrawal requests",
-  "request_id_short": "ID",
-  "bank_account_short": "Account",
-  "requested_date": "Requested",
-  "processing_date": "Processing Deadline",
-  "processing_deadline": "Deadline",
-
-  // Login/Register Form Labels
-  "login": "Login",
-  "register": "Register",
-  "email": "Email",
-  "password": "Password",
-  "confirm_password": "Confirm Password",
-  "first_name": "First Name",
-  "last_name": "Last Name",
-  "forgot_password": "Forgot Password?",
-  "continue_with_google": "Continue with Google",
-  "continue_with_apple": "Continue with Apple",
-
-  // Validation Messages
-  "email_required": "Email is required",
-  "invalid_email_format": "Invalid email format",
-  "password_required": "Password is required",
-  "password_min_length": "Password must be at least 8 characters",
-  "password_complexity": "Use a mix of uppercase, lowercase, numbers, and symbols",
-  "name_required": "Name is required",
-  "name_too_short": "Name is too short",
-  "passwords_do_not_match": "Passwords do not match",
-  "accept_terms_of_service": "Please accept the Terms of Service",
-
-  // Terms of Service
-  "by_registering_agree": "By registering, you agree to the ",
-  "terms_of_service": "Terms of Service",
-
-  // Registration Success
-  "auth_register_verification_required":
-      "Account created! Please check your email to verify your account.",
-
-  // Interactive Tutorial
-  "tutorial_tap_to_continue": "Tap anywhere to continue",
-  "tutorial_step": "Step",
-  "tutorial_add_food_title": "Track Your Meals",
-  "tutorial_add_food_description": "Tap the '+' button to add food to your daily log. You can search, scan, or add custom foods.",
-  "tutorial_scanner_title": "AI Food Scanner",
-  "tutorial_scanner_description": "Use our AI-powered scanner to instantly analyze your food and get accurate nutrition information.",
-  "tutorial_ai_coach_title": "AI Nutrition Coach",
-  "tutorial_ai_coach_description": "Chat with your personal AI coach for personalized advice, meal suggestions, and nutrition guidance.",
-  "tutorial_analytics_title": "Track Your Progress",
-  "tutorial_analytics_description": "View your nutrition analytics, weight progress, and daily trends to stay on track with your goals.",
-  "tutorial_profile_title": "Your Profile",
-  "tutorial_profile_description": "Access your settings, adjust your goals, and customize your experience in the profile section.",
 };

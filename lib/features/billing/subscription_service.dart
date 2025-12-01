@@ -25,7 +25,7 @@ class SubscriptionService {
 
     final url = (res.data is Map && (res.data['checkoutUrl'] is String)) ? res.data['checkoutUrl'] as String : (res.data as Map)['checkoutUrl'] as String;
 
-    // Return stream of subscription doc; UI can open the URL and listen for changes separately
+    // return stream of subscription doc, ui can open the url and listen for changes separately
     yield* _firestore.collection('subscriptions').doc(user.uid).snapshots();
   }
 

@@ -23,7 +23,8 @@ class MainController extends GetxController {
   getLanguageCode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     languageCode = prefs.getString(SharePrefKey.languageCode) ?? "en";
-    final storedLangKey = prefs.getString(SharePrefKey.language) ?? 'language_english';
+    final storedLangKey =
+        prefs.getString(SharePrefKey.language) ?? 'language_english';
     languageKey = storedLangKey;
     language = storedLangKey.tr;
     countryCode = prefs.getString('countryCode') ?? "US";

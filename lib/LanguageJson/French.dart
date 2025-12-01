@@ -1,8 +1,38 @@
 const Map<String, String> french = {
+  // ==============================================================================
+  // 1. Navigation & Common UI
+  // ==============================================================================
   "Home": "Accueil",
+  "Setting": "Paramètres",
+  "Profile": "Profil",
+  "View All": "Voir tout",
+  "Continue": "Continuer",
+  "Previous": "Précédent",
+  "Cancel": "Annuler",
+  "Exit": "Quitter",
+  "Done": "Terminé",
+  "Save": "Enregistrer",
+  "add": "Ajouter",
+  "Update": "Mettre à jour",
+  "Delete": "Supprimer",
+  "Delete Item": "Supprimer l'élément",
+  "Are you sure you want to delete this item?":
+      "Êtes-vous sûr de vouloir supprimer cet élément ?",
+  "Search": "Recherche",
+  "Clear Search": "Effacer la recherche",
+  "close": "Fermer",
+  "next": "Suivant",
+  "skip": "Passer",
+  "ok": "OK",
+  "got_it": "Compris",
+  "maybe_later": "Peut-être plus tard",
+  "previous": "Précédent",
+
+  // ==============================================================================
+  // 2. Dashboard & Tracking (Home Screen)
+  // ==============================================================================
   "Calorie": "Calories",
   "Analytics": "Analyses",
-  "Setting": "Paramètres",
   "Track Food": "Suivre un aliment",
   "Consumed": "Consommées",
   "Remaining": "Restantes",
@@ -10,18 +40,48 @@ const Map<String, String> french = {
   "Carbs": "Glucides",
   "Fats": "Lipides",
   "History": "Historique",
-  "View All": "Voir tout",
+  "No History Yet": "Aucun historique pour le moment",
+  "Start tracking your meals to see your nutrition history here":
+      "Commencez à suivre vos repas pour voir votre historique nutritionnel ici",
+  "History not found": "Aucun historique trouvé",
+  "Calorie Goal Reached": "Objectif de calories atteint !",
+  "You've completed your calorie goal for today. Would you like to add more?":
+      "Vous avez atteint votre objectif de calories pour aujourd'hui. Bravo ! Souhaitez-vous en ajouter d'autres ?",
+  "Add More Calories": "Ajouter plus de calories",
+  "Daily Usage": "Utilisation quotidienne",
+  "Scans": "Scans",
+  "Chat": "Chat",
+  "left": "restants",
+  "login_to_view_usage": "Connectez-vous pour voir l'utilisation",
+  "track_subtitle": "Suivez votre nutrition quotidienne",
+  "goal_label": "Objectif",
+  "daily_macros": "Macros du jour",
+  "daily_macros_reached": "Macros du jour atteintes",
+
+  // ==============================================================================
+  // 3. Meals & Portions
+  // ==============================================================================
   "BreakFast": "Petit-déjeuner",
   "Lunch": "Déjeuner",
   "snack(s)": "Collation(s)",
   "Dinner": "Dîner",
   "Which meal would you like to track?": "Quel repas souhaitez-vous suivre ?",
+  "meal_breakdown": "Détail du repas",
+  "tap_to_edit_portions": "Appuyez pour modifier les portions",
+  "items": "éléments",
+  "verified": "Vérifié",
+  "estimated": "Estimé",
+  "meal_contains": "Ce repas contient",
+  "conjunction_and": "et",
+  "meal_label": "Repas",
+
+  // ==============================================================================
+  // 4. Camera & AI Scanning
+  // ==============================================================================
   "Snap Tips": "Conseils photo",
   "Too close": "Trop près",
   "Too far": "Trop loin",
   "Multi-species": "Plusieurs aliments",
-  "Continue": "Continuer",
-  "Previous": "Précédent",
   "Gallery": "Galerie",
   "Tips": "Conseils",
   "Perfect Shot": "Photo parfaite",
@@ -31,45 +91,103 @@ const Map<String, String> french = {
   "Center food in the frame and tap to scan":
       "Centrez l'aliment dans le cadre et appuyez pour scanner",
   "Analyzing food...": "Analyse de votre aliment...",
-  "No History Yet": "Aucun historique pour le moment",
-  "Start tracking your meals to see your nutrition history here":
-      "Commencez à suivre vos repas pour voir votre historique nutritionnel ici",
+  "Analyzing nutrition...": "Analyse nutritionnelle...",
+  "grant_camera_access_in_scanner":
+      "Appuyez sur le cadre pour autoriser l'accès à la caméra",
+  "camera_permission_denied_title": "Autorisation de la caméra requise",
+  "camera_permission_denied_message":
+      "L'accès à la caméra a été refusé. Veuillez activer l'autorisation de la caméra dans les paramètres de votre appareil pour utiliser le scanner.",
+  "Unlock Food Scanner": "Débloquer le scanner d'aliments",
+  "Unlock Food Calorie": "Débloquer les calories des aliments",
+  "Unlimited Food Scanner To Calorie":
+      "Scanner d'aliments illimité pour les calories",
+
+  // ==============================================================================
+  // 5. Food Search & Custom Foods
+  // ==============================================================================
   "Local Food": "Aliments locaux",
   "Search Food": "Rechercher un aliment",
   "No Food Found": "Aucun aliment trouvé",
   "Try searching with different keywords or browse our local food database":
       "Essayez de rechercher avec d'autres mots-clés ou parcourez notre base de données d'aliments locaux",
-  // Local Food add / edit dialog keys
+  "Search by Food Name/Dish": "Rechercher par nom d'aliment/plat",
+  "food items found": "aliments trouvés",
   "add_custom_food": "Ajouter un aliment personnalisé",
   "edit_food": "Modifier l'aliment",
   "name": "Nom",
   "quantity": "Quantité",
   "calories": "Calories",
-  "add": "Ajouter",
-  "save": "Enregistrer",
+  "proteins": "Protéines",
   "Custom Food": "Aliment personnalisé",
   "delete_selected": "Supprimer la sélection",
-  "proteins": "Protéines",
+  "food_added_success": "Aliment ajouté avec succès",
+  "food_updated_success": "Aliment mis à jour avec succès",
+  "food_deleted_success": "@count aliment(s) supprimé(s)",
+  "local_food_premium_message":
+      "La création et la modification d'aliments personnalisés sont une fonctionnalité Premium.",
+  "local_food_premium_badge":
+      "Passez à Premium pour créer des aliments personnalisés en illimité !",
+  "barcode_activated": "Code-barres Activé",
+  "barcode_deactivated": "Code-barres Désactivé",
+  "product_not_found": "Produit introuvable dans la base de données",
+  "error_fetching_product":
+      "Erreur lors de la récupération des informations du produit",
 
-  "Clear Search": "Effacer la recherche",
-  "Premium Features": "Fonctionnalités Premium",
-  "Choose Your Plan": "Choisissez votre forfait",
-  "OverView": "Aperçu",
+  // ==============================================================================
+  // 6. Profile, Body Metrics & Goals
+  // ==============================================================================
+  "Personal details": "Informations personnelles",
   "Weight Goal": "Objectif de poids",
-  "Update": "Mettre à jour",
   "Current Weight": "Poids actuel",
-  "kg": "kg",
+  "Update Weight": "Mettre à jour le poids",
+  "Update Weight Goal": "Mettre à jour l'objectif de poids",
+  "Enter new weight (kg)": "Entrez votre nouveau poids (kg)",
   "Try to update once a week so we can adjust your plan to ensure you hit your goal":
       "Essayez de faire une mise à jour une fois par semaine pour que nous puissions ajuster votre plan afin de vous aider à atteindre votre objectif",
-  "Update Weight": "Mettre à jour le poids",
+  "Try to update once a week to help us adjust your plan":
+      "Essayez de mettre à jour une fois par semaine pour nous aider à ajuster votre plan",
+  "Weight Overview": "Aperçu du poids",
+  "Current": "Actuel",
+  "Goal": "Objectif",
+  "to go": "restant",
+  "invalid_number": "Veuillez entrer un nombre entier valide",
+  "weight_out_of_range": "Veuillez entrer un poids entre 20 et 300 kg",
+  "Age": "Âge",
+  "Height": "Taille",
+  "Gender": "Genre",
+  "Male": "Homme",
+  "Female": "Femme",
+  "Update Your Gender": "Mettre à jour votre genre",
+  "Adjust goals": "Ajuster les objectifs",
+  "Calories,carbs,fat and protein": "Calories, Glucides, Lipides et Protéines",
+  "adjust_goals_subtitle": "Calories, Glucides, Lipides et Protéines",
+  "Update Calorie Goal": "Mettre à jour l'objectif de calories",
+  "Calorie goal": "Objectif de calories",
+  "Update Protein Goal": "Mettre à jour l'objectif de protéines",
+  "Protein goal": "Objectif de protéines",
+  "Update Carb Goal": "Mettre à jour l'objectif de glucides",
+  "Carb goal": "Objectif de glucides",
+  "Update Fat Goal": "Mettre à jour l'objectif de lipides",
+  "Auto Generate Goal": "Générer automatiquement l'objectif",
+  "update_targets_title": "Objectifs mis à jour",
+  "update_targets_body":
+      "Nous avons recalculé vos objectifs quotidiens en calories et en macros pour correspondre à votre nouveau poids.",
+  "kg": "kg",
+  "lb": "lb",
+  "ft": "ft",
+  "in": "in",
+  "cm": "cm",
+  "Imperial": "Impérial",
+  "Metric": "Métrique",
+  "Target Weight": "Poids cible",
+
+  // ==============================================================================
+  // 7. Calendar & Time
+  // ==============================================================================
   "Week": "Semaine",
   "Month": "Mois",
   "Year": "Année",
-  "Update Weight Goal": "Mettre à jour l'objectif de poids",
-  "Enter new weight (kg)": "Entrez votre nouveau poids (kg)",
-  "Cancel": "Annuler",
-  "Exit": "Quitter",
-  "Calorie Your Week :": "Vos calories de la semaine :",
+  "Day": "Jour",
   'Sun': 'Dim',
   'Mon': 'Lun',
   'Tue': 'Mar',
@@ -77,8 +195,6 @@ const Map<String, String> french = {
   'Thu': 'Jeu',
   'Fri': 'Ven',
   'Sat': 'Sam',
-  "Average Calorie Month :": "Moyenne de calories par jour (mois) :",
-  "Average Calorie Yearly :": "Moyenne de calories par jour (année) :",
   "Jan": "Janv",
   "Feb": "Févr",
   "Mar": "Mars",
@@ -91,17 +207,30 @@ const Map<String, String> french = {
   "Oct": "Oct",
   "Nov": "Nov",
   "Dec": "Déc",
-  "Age": "Âge",
-  "Height": "Taille",
+  'January': 'Janvier',
+  'February': 'Février',
+  'March': 'Mars',
+  'April': 'Avril',
+  'June': 'Juin',
+  'July': 'Juillet',
+  'August': 'Août',
+  'September': 'Septembre',
+  'October': 'Octobre',
+  'November': 'Novembre',
+  'December': 'Décembre',
+  "Calorie Your Week :": "Vos calories de la semaine :",
+  "Average Calorie Month :": "Moyenne de calories par jour (mois) :",
+  "Average Calorie Yearly :": "Moyenne de calories par jour (année) :",
+
+  // ==============================================================================
+  // 8. Settings & Legal
+  // ==============================================================================
   "Customization": "Personnalisation",
-  "Profile": "Profil",
   "Dark Mode": "Mode sombre",
   "Language": "Langue",
-  "Personal details": "Informations personnelles",
-  "Adjust goals": "Ajuster les objectifs",
-  "Calories,carbs,fat and protein": "Calories, Glucides, Lipides et Protéines",
-  // Subtitle for Adjust Goals in Settings
-  "adjust_goals_subtitle": "Calories, Glucides, Lipides et Protéines",
+  "language_english": "English",
+  "language_french": "Français",
+  "language_arabic": "Arabe",
   "Chat history": "Historique des conversations",
   "The coach does not memorize chat history. Each interaction is independent.":
       "Le coach ne mémorise pas les conversations passées. Chaque discussion est un nouveau départ.",
@@ -109,18 +238,446 @@ const Map<String, String> french = {
   "Terms and Condition": "Conditions d'utilisation",
   "Privacy Policy": "Politique de confidentialité",
   "Reset Data?": "Réinitialiser les données ?",
+  "Confirm Reset": "Confirmer la réinitialisation",
+  "Are you sure you want to Reset Data?":
+      "Êtes-vous sûr de vouloir réinitialiser vos données ?",
+  "Reset": "Réinitialiser",
+  "You have been Reset Account": "Votre compte a été réinitialisé.",
   "VERSION": "VERSION",
-  "History not found": "Aucun historique trouvé",
-  "Delete Item": "Supprimer l'élément",
-  "Are you sure you want to delete this item?":
-      "Êtes-vous sûr de vouloir supprimer cet élément ?",
-  "Delete": "Supprimer",
-  "Search by Food Name/Dish": "Rechercher par nom d'aliment/plat",
-  "Calorie Goal Reached": "Objectif de calories atteint !",
-  "You've completed your calorie goal for today. Would you like to add more?":
-      "Vous avez atteint votre objectif de calories pour aujourd'hui. Bravo ! Souhaitez-vous en ajouter d'autres ?",
-  "Done": "Terminé",
-  "Add More Calories": "Ajouter plus de calories",
+  "exit_app_title": "Quitter l'application",
+  "exit_app_message": "Êtes-vous sûr de vouloir quitter l'application ?",
+  "account": "Compte",
+  "tap_to_view_details": "Appuyez pour voir les détails",
+  "register_login": "S'inscrire / Se connecter",
+  "access_account_sync_data":
+      "Accédez à votre compte et synchronisez vos données",
+  "app_info": "Infos sur l'app",
+  "version": "Version",
+  "reset_data": "Réinitialiser les données",
+  "clear_all_app_data": "Effacer toutes les données de l'application",
+  "account_reset_success": "Le compte a été réinitialisé avec succès",
+  "Home Screen Widgets": "Widgets de l'écran d'accueil",
+
+  // ==============================================================================
+  // 9. Premium & Subscriptions
+  // ==============================================================================
+  "Premium Features": "Fonctionnalités Premium",
+  "Choose Your Plan": "Choisissez votre forfait",
+  "Subscription": "Abonnement",
+  "BUY NOW": "ACHETER MAINTENANT",
+  "Get Premium": "Passer à Premium",
+  "Get All The New Exciting Features":
+      "Découvrez toutes les nouvelles fonctionnalités",
+  "Unlock Unlimited Chat with Ai": "Débloquer le chat illimité avec l'IA",
+  "Most Popular": "Le plus populaire",
+  'premium_badge': 'PREMIUM',
+  'go_premium_title': 'Passer à Premium',
+  "go_premium_subtitle":
+      "Vivez l'expérience complète du meilleur programme alimentaire",
+  "feature_ai_scan_title": "Gérez votre poids et mangez mieux",
+  'feature_ai_scan_subtitle':
+      'avec le scan de repas par IA et un retour quotidien',
+  'feature_results_title': 'Obtenez des résultats durables',
+  'feature_results_subtitle':
+      'avec le pilote automatique et le suivi des macros',
+  'feature_chatbot_title': 'Chatbot IA "Coach"',
+  'feature_chatbot_subtitle': 'Conseils nutritionnels instantanés',
+  'feature_recipes_title': 'Recettes et régimes premium',
+  'feature_recipes_subtitle': 'pour vous guider vers le succès',
+  'best_value': 'MEILLEURE OFFRE',
+  'save_percent': 'ÉCONOMISEZ @percent%*',
+  'months_12': '12 mois',
+  'month_1': '1 mois',
+  'billed_annually': 'Facturation annuelle',
+  'billed_monthly': 'Facturation mensuelle',
+  'per_month': 'Par mois',
+  'continue_cta': 'Continuer',
+  'compared_to_monthly': '*Par rapport aux paiements mensuels',
+  'currency_dzd': 'DZD',
+  "premium_required": "Premium requis",
+  "premium_feature": "Fonctionnalité Premium",
+  "go_premium": "Passer à Premium",
+
+  // ==============================================================================
+  // 10. Authentication & Onboarding
+  // ==============================================================================
+  "login": "Connexion",
+  "register": "S'inscrire",
+  "email": "E-mail",
+  "password": "Mot de passe",
+  "confirm_password": "Confirmer le mot de passe",
+  "first_name": "Prénom",
+  "last_name": "Nom",
+  "forgot_password": "Mot de passe oublié ?",
+  "continue_with_google": "Continuer avec Google",
+  "continue_with_apple": "Continuer avec Apple",
+  "auth_login_success": "Connecté avec succès",
+  "auth_register_success": "Compte créé avec succès",
+  "auth_password_reset_sent":
+      "E-mail de réinitialisation du mot de passe envoyé",
+  "auth_wrong_credentials": "E-mail ou mot de passe incorrect",
+  "auth_account_not_found": "Compte non trouvé",
+  "auth_email_in_use": "Cet e-mail est déjà utilisé",
+  "auth_weak_password": "Le mot de passe est trop faible",
+  "auth_account_different_provider":
+      "Un compte existe déjà avec un autre fournisseur",
+  "auth_network_error": "Erreur réseau. Veuillez vérifier votre connexion.",
+  "auth_unknown_error": "Une erreur inattendue est survenue",
+  "auth_authentication_error": "Erreur d'authentification",
+  "auth_unexpected_error": "Erreur inattendue",
+  "auth_logout_success": "Déconnecté avec succès",
+  "auth_logout_failed": "Échec de la déconnexion",
+  "auth_modal_title": "Connectez-vous pour continuer",
+  "sign_out_title": "Se déconnecter ?",
+  "sign_out_confirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
+  "sign_out": "Se déconnecter",
+  "cancel": "Annuler",
+  "Welcome": "Bienvenue",
+  "Choose Your Gender": "Choisissez votre genre",
+  "welcome_hi": "Bonjour !",
+  "welcome_subtitle_prefix": "Bienvenue chez votre ",
+  "welcome_subtitle_highlight": "coach en nutrition personnel",
+  "Calorie tracking made easy": "Le suivi des calories, en toute simplicité",
+  "Just snap a quick photo of your meal and we''ll do the rest":
+      "Prenez simplement une photo de votre repas et nous nous occupons du reste",
+  "In-depth nutrition analyses": "Analyses nutritionnelles approfondies",
+  "We will keep your informed about your food choicer and their nutritional content":
+      "Nous vous tiendrons informé de vos choix alimentaires et de leur contenu nutritionnel",
+  "Transform your body": "Transformez votre corps",
+  "Today is best time to start working toward your dream body":
+      "C'est le moment idéal pour commencer à travailler pour le corps de vos rêves",
+  "Where were you born?": "Où êtes-vous né(e) ?",
+  "This Will be used to calibrate your custom plan":
+      "Ceci sera utilisé pour calibrer votre plan personnalisé",
+  "What's stopping you from reaching your goals?":
+      "Qu'est-ce qui vous empêche d'atteindre vos objectifs ?",
+  "Lack of consistency": "Manque de régularité",
+  "Unhealthy eating habits": "Mauvaises habitudes alimentaires",
+  "Lack of supports": "Manque de soutien",
+  "Busy schedule": "Emploi du temps chargé",
+  "Lack of meal inspiration": "Manque d'inspiration pour les repas",
+  "We're setting": "Nous préparons",
+  "everything up for you": "tout pour vous",
+  "Customizing health plan....": "Personnalisation de votre plan de santé...",
+  "plan_intro_title": "Commençons par quelques questions",
+  "plan_intro_subtitle": "Cela nous aidera à personnaliser votre plan",
+  "Your Plan is Ready!": "Votre plan est prêt !",
+  "We have customized your nutrition plan based on your goals":
+      "Nous avons personnalisé votre plan nutritionnel en fonction de vos objectifs",
+  "Daily Calorie Goal": "Objectif calorique quotidien",
+  "Macronutrients Breakdown": "Répartition des macronutriments",
+  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.":
+      "Ce plan est basé sur votre âge, poids, taille, niveau d'activité et objectifs. Vous pouvez ajuster votre apport quotidien dans les paramètres à tout moment.",
+  "Continue to Premium": "Continuer vers Premium",
+  "How many workout do you per week?":
+      "Combien de fois par semaine vous entraînez-vous ?",
+  "This will used to calibrate your custom plan":
+      "Ceci sera utilisé pour calibrer votre plan personnalisé.",
+  "Choose your height and weight": "Choisissez votre taille et votre poids",
+  "Select your height and weight to calibrate your custom plan":
+      "Sélectionnez votre taille et votre poids pour calibrer votre plan personnalisé",
+  "Workout Now and then": "Occasionnellement",
+  "A few workout per week": "Quelques fois par semaine",
+  "Dedicated athlete": "Athlète dévoué",
+  "What is your goal?": "Quel est votre objectif ?",
+  "This helps is generate a plan for your calorie intake.":
+      "Cela nous aide à créer un plan pour votre apport calorique.",
+  "Gain Weight": "Prendre du poids",
+  "Maintain Weight": "Maintenir le poids",
+  "Lose Weight": "Perdre du poids",
+
+  // ==============================================================================
+  // 11. Email Verification & Account Management
+  // ==============================================================================
+  "email_verification_title": "Vérifiez votre e-mail",
+  "email_verification_subtitle": "Consultez vos e-mails pour continuer",
+  "email_sent_to": "Nous avons envoyé un lien de vérification à @email",
+  "email_verification_instructions":
+      "Cliquez sur le lien dans l'e-mail pour vérifier votre compte. Cela nous aide à sécuriser votre compte.",
+  "checking_verification_status": "Vérification du statut...",
+  "resend_verification_email": "Renvoyer l'e-mail",
+  "resend_cooldown": "Renvoyer dans @seconds secondes",
+  "resend_limit_reached": "@attempts tentatives restantes",
+  "verification_attempts_remaining":
+      "Il reste @remaining sur @total tentatives",
+  "email_verification_success":
+      "E-mail vérifié avec succès ! Bienvenue sur macroAize",
+  "email_verification_resent":
+      "E-mail de vérification envoyé ! Consultez votre boîte de réception",
+  "email_verification_resend_error":
+      "Échec de l'envoi de l'e-mail de vérification. Veuillez réessayer",
+  "email_verification_max_attempts":
+      "Nombre maximal de tentatives de renvoi atteint. Veuillez réessayer plus tard",
+  "email_verification_cooldown":
+      "Veuillez attendre @seconds secondes avant de demander un autre e-mail",
+  "skip_verification_title": "Passer la vérification ?",
+  "skip_verification_warning":
+      "Cela permettra d'accéder sans vérification de l'e-mail. Ce n'est pas recommandé pour des raisons de sécurité.",
+  "skip_anyway": "Passer quand même",
+  "skip_verification": "Passer la vérification",
+  "verify": "Vérifier",
+  "email_verification_error":
+      "La vérification de l'e-mail a échoué. Veuillez réessayer",
+  "auth_required": "Veuillez vous connecter pour continuer",
+  "email_verification_required_for_feature":
+      "Veuillez vérifier votre e-mail pour utiliser cette fonctionnalité",
+  "email_verification_required_for_premium":
+      "La vérification de l'e-mail est requise pour accéder aux fonctionnalités premium",
+  "email_verification_required_for_scan":
+      "Veuillez vérifier votre e-mail pour utiliser le scanner d'aliments",
+  "email_verification_required_for_chat":
+      "Veuillez vérifier votre e-mail pour discuter avec le coach IA",
+  "email_verification_required_for_app_access":
+      "La vérification de l'e-mail est requise pour accéder à l'application",
+  "email_verified_status": "Vérifié",
+  "email_unverified_status": "Non vérifié",
+  "email_verified": "E-mail vérifié",
+  "email_verification_complete_subtitle":
+      "Votre compte est sécurisé et prêt à l'emploi",
+  "email_verification_required": "Vérification de l'e-mail requise",
+  "email_verification_required_subtitle":
+      "Veuillez vérifier @email pour accéder à toutes les fonctionnalités",
+  "verify_email": "Vérifier l'e-mail",
+  "verify_now": "Vérifier maintenant",
+  "refresh": "Actualiser",
+  "refresh_failed": "Échec de l'actualisation du statut. Veuillez réessayer",
+  "tap_to_verify_email": "Appuyez pour vérifier votre adresse e-mail",
+  "account_activation_required": "Activation du compte requise",
+  "account_activation_required_for_chat":
+      "Veuillez activer votre compte pour utiliser le coach IA",
+  "account_activation_required_for_scanner":
+      "Veuillez activer votre compte pour utiliser le scanner d'aliments",
+  "account_activation_required_for_premium":
+      "Veuillez activer votre compte pour acheter le premium",
+  "verify_account_to_continue": "Vérifiez votre e-mail pour continuer",
+  "auth_register_verification_required":
+      "Compte créé ! Veuillez consulter vos e-mails pour vérifier votre compte.",
+  "account_details_title": "Détails du compte",
+  "no_name": "Pas de nom",
+  "name_label": "Nom",
+  "email_label": "E-mail",
+  "change_password": "Changer le mot de passe",
+  "logout": "Se déconnecter",
+  "display_name_updated": "Nom d'affichage mis à jour",
+  "edit_display_name": "Modifier le nom d'affichage",
+  "new_display_name": "Nouveau nom d'affichage",
+  "password_changed_message": "Mot de passe changé. Veuillez vous reconnecter.",
+  "current_password_incorrect": "Le mot de passe actuel est incorrect.",
+  "too_many_attempts": "Trop de tentatives, veuillez réessayer plus tard.",
+  "please_relogin": "Veuillez vous reconnecter et réessayer.",
+  "operation_failed": "L'opération a échoué.",
+  "current_password_label": "Mot de passe actuel",
+  "new_password_label": "Nouveau mot de passe",
+  "confirm_new_password_label": "Confirmer le nouveau mot de passe",
+  "min_8_chars": "8 caractères minimum",
+  "password_complexity_hint":
+      "Utilisez majuscule, minuscule, chiffre et symbole",
+  "must_differ_from_current": "Doit être différent du mot de passe actuel",
+  "does_not_match": "Ne correspond pas",
+  "change_password_cta": "Changer le mot de passe",
+  "email_required": "L'e-mail est requis",
+  "required": "Requis",
+  "invalid_email_format": "Format d'e-mail invalide",
+  "password_required": "Le mot de passe est requis",
+  "password_min_length": "Le mot de passe doit contenir au moins 8 caractères",
+  "password_complexity":
+      "Utilisez un mélange de majuscules, de minuscules, de chiffres et de symboles",
+  "name_required": "Le nom est requis",
+  "name_too_short": "Le nom est trop court",
+  "passwords_do_not_match": "Les mots de passe ne correspondent pas",
+  "please_fix_errors": "Veuillez corriger les erreurs",
+  "accept_terms_of_service": "Veuillez accepter les conditions d'utilisation",
+  "by_registering_agree": "En vous inscrivant, vous acceptez les ",
+  "terms_of_service": "Conditions d'utilisation",
+  "too_short": "Trop court",
+  "too_long": "Trop long",
+
+  // ==============================================================================
+  // 12. Influencer & Promo
+  // ==============================================================================
+  "influencer_program": "Programme d'influenceurs",
+  "your_promo_code": "Votre code promo",
+  "copied": "Copié",
+  "current_balance": "Solde actuel",
+  "total_earned": "Total gagné",
+  "referrals_count": "Parrainages",
+  "request_withdrawal": "Demander un retrait",
+  "minimum_withdrawal_amount": "Montant minimum de retrait : @amount DZD",
+  "withdrawal_history": "Historique des retraits",
+  "promo_code_expired": "Code promo expiré",
+  "promo_expires_in": "Le code promo expire dans @days jours",
+  "promo_expires_on": "Le code promo expire le @date",
+  "promo_code_copied": "Code promo copié",
+  "promo_code": "Code promo",
+  "enter_promo_code": "Entrez le code promo",
+  "apply_promo_code": "Appliquer",
+  "skip_promo_code": "Passer",
+  "promo_code_applied": "Code promo appliqué avec succès !",
+  "promo_code_invalid": "Code promo invalide",
+  "promo_code_dialog_title": "Vous avez un code promo ?",
+  "promo_code_dialog_subtitle":
+      "Entrez votre code promo pour bénéficier d'une réduction sur votre abonnement",
+  "Have a Promo Code?": "Avez-vous un code promo ?",
+  "Enter your promo code to get 3 days free trial":
+      "Entrez votre code promo pour obtenir 3 jours d'essai gratuit",
+  "ENTER CODE": "ENTREZ LE CODE",
+  "Validate Code": "Valider le code",
+  "Promo code applied successfully!": "Code promo appliqué avec succès !",
+  "Please enter a promo code": "Veuillez entrer un code promo",
+  "Invalid promo code": "Code promo invalide",
+  "available_balance": "Solde disponible",
+  "withdrawal_amount": "Montant du retrait",
+  "enter_amount": "Entrez le montant",
+  "bank_account_rip": "Compte bancaire (RIB)",
+  "enter_rip_number": "Entrez le numéro de RIB",
+  "withdrawal_processing_info":
+      "Les retraits sont traités dans un délai de 5 jours ouvrables.",
+  "requested_on": "Demandé le @date",
+  "unknown_date": "Date inconnue",
+  "withdrawal_submitted": "Demande de retrait soumise",
+  "request_id": "ID de la demande : @id",
+  "processing_time": "Temps de traitement : @days jours ouvrables",
+  "withdrawal_email_confirmation":
+      "Vous recevrez une confirmation par e-mail une fois votre retrait traité.",
+  "processing": "En cours de traitement",
+  "copy_failed": "Échec de la copie : @error",
+  "request_id_short": "ID",
+  "bank_account_short": "Compte",
+  "requested_date": "Demandé",
+  "processing_date": "Date limite de traitement",
+  "processing_deadline": "Date limite",
+  "completed": "Terminé",
+  "failed": "Échoué",
+  "email_verification_required_withdrawal":
+      "La vérification de l'e-mail est requise pour demander des retraits",
+  "view_all": "Voir tout",
+  "showing_recent_withdrawals": "Affichage de @shown sur @total retraits",
+  "withdrawal_history_full": "Historique des retraits",
+  "no_withdrawal_history": "Aucun historique de retrait pour le moment",
+  "withdrawal_history_empty_description":
+      "Demandez votre premier retrait pour voir votre historique de transactions ici",
+  "view_withdrawal_history": "Voir l'historique des retraits",
+  "withdrawal_history_subtitle": "Suivez toutes vos demandes de retrait",
+
+  // ==============================================================================
+  // 13. AI Coach & Chat
+  // ==============================================================================
+  "Ask anything": "Posez-moi une question...",
+  "Ask The Coach": "Demandez au coach",
+  "This picture not available Calorie,Protein,Carbs and Fats,":
+      "Cette photo ne contient pas d'informations sur les calories, les protéines, les glucides ou les lipides.",
+  "Ask Coach": "Demander au coach",
+  "Write your message": "Écrivez votre message...",
+  "chat_image_premium_message":
+      "L'accès aux pièces jointes nécessite un abonnement premium. Mettez à niveau maintenant pour débloquer cette fonctionnalité.",
+  "chat_image_premium_badge":
+      "Débloquez les pièces jointes pour le coach avec Premium",
+
+  // ==============================================================================
+  // 14. Recipes
+  // ==============================================================================
+  "recipes_title": "Recettes",
+  "top_recipes": "Top recettes",
+  "all_recipes": "Toutes les recettes",
+  "less_text": "Moins ^",
+  "macronutrients": "Macronutriments",
+  "ingredients": "Ingrédients",
+  "serving": "Portion",
+  "directions": "Instructions",
+  "add_to_plan": "Ajouter au plan",
+  "step": "Étape",
+  "top_recipes_subtitle":
+      "Découvrez des recettes saines et délicieuses adaptées à vos objectifs",
+  "no_recipes_available": "Aucune recette disponible",
+  "Search recipes by name or ingredient":
+      "Rechercher des recettes par nom ou ingrédient",
+  "failed_to_load_recipes":
+      "Échec du chargement des recettes. Veuillez réessayer.",
+  "recipes_premium_message":
+      "L'accès aux recettes nécessite un abonnement premium. Mettez à niveau maintenant pour débloquer cette fonctionnalité.",
+  "recipes_premium_badge":
+      "Débloquez toutes les recettes et fonctionnalités avec Premium",
+
+  // ==============================================================================
+  // 15. Tutorials & Tips
+  // ==============================================================================
+  "app_tips": "Conseils d'utilisation",
+  "tip_welcome_title": "Bienvenue sur macroAize !",
+  "tip_welcome_description":
+      "Votre tracker nutritionnel personnel alimenté par l'IA. Faisons une visite rapide pour vous aider à démarrer votre parcours santé.",
+  "tip_track_food_title": "Suivez vos repas",
+  "tip_track_food_description":
+      "Appuyez sur le bouton + sur l'écran d'accueil pour enregistrer vos repas. Choisissez entre petit-déjeuner, déjeuner, dîner ou collations pour garder des registres précis.",
+  "tip_scan_food_title": "Scanner avec l'IA",
+  "tip_scan_food_description":
+      "Prenez une photo de votre nourriture et notre IA analysera et calculera instantanément les calories, protéines, glucides et lipides pour vous.",
+  "tip_ai_coach_title": "Discutez avec le Coach IA",
+  "tip_ai_coach_description":
+      "Obtenez des conseils nutritionnels personnalisés, des suggestions de repas et des réponses à vos questions de santé de notre coach IA à tout moment.",
+  "tip_analytics_title": "Suivez vos progrès",
+  "tip_analytics_description":
+      "Consultez des analyses détaillées de vos tendances nutritionnelles, de vos progrès de poids et de la répartition des macros pour rester sur la bonne voie vers vos objectifs.",
+  "tutorial_tap_to_continue": "Appuyez n'importe où pour continuer",
+  "tutorial_step": "Étape",
+  "tutorial_add_food_title": "Suivez vos repas",
+  "tutorial_add_food_description":
+      "Appuyez sur le bouton '+' pour ajouter des aliments à votre journal quotidien. Vous pouvez rechercher, scanner ou ajouter des aliments personnalisés.",
+  "tutorial_scanner_title": "Scanner alimentaire IA",
+  "tutorial_scanner_description":
+      "Utilisez notre scanner alimentaire IA pour analyser instantanément vos aliments et obtenir des informations nutritionnelles précises.",
+  "tutorial_ai_coach_title": "Coach nutritionnel IA",
+  "tutorial_ai_coach_description":
+      "Chattez avec votre coach IA personnel pour des conseils personnalisés, des suggestions de repas et des orientations nutritionnelles.",
+  "tutorial_analytics_title": "Suivez vos progrès",
+  "tutorial_analytics_description":
+      "Consultez vos analyses nutritionnelles, vos progrès de poids et vos tendances quotidiennes pour rester sur la bonne voie avec vos objectifs.",
+  "tutorial_profile_title": "Votre profil",
+  "tutorial_profile_description":
+      "Accédez à vos paramètres, ajustez vos objectifs et personnalisez votre expérience dans la section profil.",
+  "widget_promo_title": "Ajouter un widget sur l'écran d'accueil",
+  "widget_promo_android_instructions":
+      "Appuyez longuement sur votre écran d'accueil, sélectionnez 'Widgets' et trouvez 'macroAize' pour l'ajouter pour un accès rapide !",
+  "widget_promo_ios_step1":
+      "Appuyez longuement n'importe où sur votre écran d'accueil.",
+  "widget_promo_ios_step2":
+      "Appuyez sur le bouton '+' dans le coin supérieur gauche.",
+  "widget_promo_ios_step3":
+      "Recherchez 'macroAize' et sélectionnez votre widget.",
+  "widget_promo_got_it": "Compris !",
+
+  // ==============================================================================
+  // 16. Units & Labels
+  // ==============================================================================
+  "kcal_unit": "kcal",
+  "gram_unit": "g",
+  "unit_piece": "morceau",
+  "protein_unit": "g",
+  "carbs_unit": "g",
+  "fat_unit": "g",
+  "cals": "cals",
+  "prot": "prot",
+  "carbs": "gluc",
+  "fats": "lip",
+  "nut_prt": "prot",
+  "nut_carb": "gluc",
+  "nut_cal": "cal",
+  "nut_fat": "lip",
+  "min": "min",
+  "cal": "Cal",
+  "Cal": "Cal",
+  "success": "Succès",
+  "nutrition_details": "Détails nutritionnels",
+  "fats_label": "Lipides",
+  "log": "Journal",
+  "unknown_meal": "Repas inconnu",
+  "goal_achieved_message": "Objectif atteint ! Continuez comme ça.",
+  "on_a_roll_message": "Vous êtes sur la bonne voie, chaque pas compte !",
+  "keep_momentum_message": "Progrès réalisés, continuez sur votre lancée !",
+  "Cal Left": "Calories restantes",
+
+  // ==============================================================================
+  // 17. Food Items Database
+  // ==============================================================================
   "Boiled Egg": "Œuf dur",
   "Oatmeal": "Flocons d'avoine",
   "Banana": "Banane",
@@ -140,7 +697,6 @@ const Map<String, String> french = {
   "Smoothie (Fruit)": "Smoothie aux fruits",
   "Yogurt (Plain)": "Yaourt nature",
   "Khichdi": "Khichdi",
-
   "Thepla": "Thepla",
   "Cheela (Moong dal)": "Cheela (Moong dal)",
   "Pav Bhaji": "Pav Bhaji",
@@ -239,79 +795,19 @@ const Map<String, String> french = {
   "2 rotis + paneer": "2 rotis + paneer",
   "1 bowl + 2 slices": "1 bol + 2 tranches",
   "1 bowl + 2 appams": "1 bol + 2 appams",
-
   "3 pieces": "3 morceaux",
   "2 chillas + salad": "2 chillas + salade",
-  "Cal": "Cal",
   "Cropper": "Recadrage",
   "Calorie Tracker": "Suivi des calories",
   "Add Calorie": "Ajouter des calories",
   "Quantity": "Quantité",
-  "Ask anything": "Posez-moi une question...",
-  "Ask The Coach": "Demandez au coach",
-  "This picture not available Calorie,Protein,Carbs and Fats,":
-      "Cette photo ne contient pas d'informations sur les calories, les protéines, les glucides ou les lipides.",
-  "Ask Coach": "Demander au coach",
-  "Write your message": "Écrivez votre message...",
-  "Confirm Reset": "Confirmer la réinitialisation",
-  "Are you sure you want to Reset Data?":
-      "Êtes-vous sûr de vouloir réinitialiser vos données ?",
-  "Reset": "Réinitialiser",
-  "You have been Reset Account": "Votre compte a été réinitialisé.",
   "Personal Details": "Informations personnelles",
   "Goal Weight": "Poids objectif",
-  "cm": "cm",
   "Date Of Birth": "Date de naissance",
-  "Gender": "Genre",
-  "Male": "Homme",
-  "Female": "Femme",
-  "Choose your desired weight?": "Quel est votre poids cible ?",
-  "Imperial": "Impérial",
-  "Metric": "Métrique",
   "Weight": "Poids",
-  "lb": "lb",
-  "ft": "ft",
-  "in": "in",
-  "Day": "Jour",
-  'January': 'Janvier',
-  'February': 'Février',
-  'March': 'Mars',
-  'April': 'Avril',
-  'June': 'Juin',
-  'July': 'Juillet',
-  'August': 'Août',
-  'September': 'Septembre',
-  'October': 'Octobre',
-  'November': 'Novembre',
-  'December': 'Décembre',
-  "Update Your Gender": "Mettre à jour votre genre",
-  "Adjust Goals": "Ajuster les objectifs",
-  "How many workout do you per week?":
-      "Combien de fois par semaine vous entraînez-vous ?",
-  "This will used to calibrate your custom plan":
-      "Ceci sera utilisé pour calibrer votre plan personnalisé.",
-  "Choose your height and weight": "Choisissez votre taille et votre poids",
-  "Select your height and weight to calibrate your custom plan":
-      "Sélectionnez votre taille et votre poids pour calibrer votre plan personnalisé",
-  "Workout Now and then": "Occasionnellement",
-  "A few workout per week": "Quelques fois par semaine",
-  "Dedicated athlete": "Athlète dévoué",
-  "What is your goal?": "Quel est votre objectif ?",
-  "This helps is generate a plan for your calorie intake.":
-      "Cela nous aide à créer un plan pour votre apport calorique.",
-  "Gain Weight": "Prendre du poids",
-    "Maintain Weight": "Maintenir le poids",
-  "Lose Weight": "Perdre du poids",
-  "Update Calorie Goal": "Mettre à jour l'objectif de calories",
-  "Calorie goal": "Objectif de calories",
-  "Save": "Enregistrer",
+  "Choose your desired weight?": "Quel est votre poids cible ?",
   "Calorie Goal": "Objectif de calories",
-  "Update Protein Goal": "Mettre à jour l'objectif de protéines",
-  "Protein goal": "Objectif de protéines",
-  "Update Carb Goal": "Mettre à jour l'objectif de glucides",
-  "Carb goal": "Objectif de glucides",
-  "Update Fat Goal": "Mettre à jour l'objectif de lipides",
-  "Auto Generate Goal": "Générer automatiquement l'objectif",
+  "Adjust Goals": "Ajuster les objectifs",
   "Fruit Salad": "Salade de fruits",
   "Roasted Chickpeas": "Pois chiches grillés",
   "Mixed Nuts": "Mélange de noix",
@@ -437,469 +933,7 @@ const Map<String, String> french = {
   "1 bowl + 1 appam": "1 bol + 1 appam",
   "1 tomato": "1 tomate",
   "Restore": "Restaurer",
-  "Get Premium": "Passer à Premium",
-  "Get All The New Exciting Features": "Découvrez toutes les nouvelles fonctionnalités",
-  "Unlock Food Scanner": "Débloquer le scanner d'aliments",
-  "Unlock Food Calorie": "Débloquer les calories des aliments",
-  "Unlock Unlimited Chat with Ai": "Débloquer le chat illimité avec l'IA",
-  "Unlimited Food Scanner To Calorie": "Scanner d'aliments illimité pour les calories",
-  "Most Popular": "Le plus populaire",
-  "Subscription": "Abonnement",
-  "BUY NOW": "ACHETER MAINTENANT",
   "Terms of Condition": "Conditions d'utilisation",
-  "Welcome": "Bienvenue",
-  "Choose Your Gender": "Choisissez votre genre",
-  "welcome_hi": "Bonjour !",
-  "welcome_subtitle_prefix": "Bienvenue chez votre ",
-  "welcome_subtitle_highlight": "coach en nutrition personnel",
-  "Calorie tracking made easy": "Le suivi des calories, en toute simplicité",
-  "Just snap a quick photo of your meal and we''ll do the rest":
-      "Prenez simplement une photo de votre repas et nous nous occupons du reste",
-  "In-depth nutrition analyses": "Analyses nutritionnelles approfondies",
-  "We will keep your informed about your food choicer and their nutritional content":
-      "Nous vous tiendrons informé de vos choix alimentaires et de leur contenu nutritionnel",
-  "Transform your body": "Transformez votre corps",
-  "Today is best time to start working toward your dream body":
-      "C'est le moment idéal pour commencer à travailler pour le corps de vos rêves",
-  "Where were you born?": "Où êtes-vous né(e) ?",
-  "This Will be used to calibrate your custom plan":
-      "Ceci sera utilisé pour calibrer votre plan personnalisé",
-  "What's stopping you from reaching your goals?":
-      "Qu'est-ce qui vous empêche d'atteindre vos objectifs ?",
-  "Lack of consistency": "Manque de régularité",
-  "Unhealthy eating habits": "Mauvaises habitudes alimentaires",
-  "Lack of supports": "Manque de soutien",
-  "Busy schedule": "Emploi du temps chargé",
-  "Lack of meal inspiration": "Manque d'inspiration pour les repas",
-  "We're setting": "Nous préparons",
-  "everything up for you": "tout pour vous",
-  "Customizing health plan....": "Personnalisation de votre plan de santé...",
-  "plan_intro_title": "Commençons par quelques questions",
-  "plan_intro_subtitle": "Cela nous aidera à personnaliser votre plan",
-
-  // Dynamic meal description components
-  "meal_contains": "Ce repas contient",
-  "conjunction_and": "et",
-
-  // Units and labels
-  "kcal_unit": "kcal",
-  "gram_unit": "g",
-  "unit_piece": "morceau",
-  "protein_unit": "g",
-  "carbs_unit": "g",
-  "fat_unit": "g",
-  "Cal Left": "Calories restantes",
-  "meal_label": "Repas",
-  // Abbreviations used in compact history badges
-  "cals": "cals",
-  "prot": "prot",
-  "carbs": "gluc",
-  "fats": "lip",
-
-  // Modern UI labels
-  "track_subtitle": "Suivez votre nutrition quotidienne",
-  "goal_label": "Objectif",
-  "Analyzing nutrition...": "Analyse nutritionnelle...",
-  // Permission UI
-  "grant_camera_access_in_scanner": "Appuyez sur le cadre pour autoriser l'accès à la caméra",
-  "camera_permission_denied_title": "Autorisation de la caméra requise",
-  "camera_permission_denied_message":
-      "L'accès à la caméra a été refusé. Veuillez activer l'autorisation de la caméra dans les paramètres de votre appareil pour utiliser le scanner.",
-  "ok": "OK",
-
-  // Exit confirmation dialog
-  "exit_app_title": "Quitter l'application",
-  "exit_app_message": "Êtes-vous sûr de vouloir quitter l'application ?",
-
-  // Nutrition details dialog
-  "nutrition_details": "Détails nutritionnels",
-  "fats_label": "Lipides",
-  "log": "Journal",
-
-  // Premium paywall (modern)
-  'premium_badge': 'PREMIUM',
-  'go_premium_title': 'Passer à Premium',
-  "go_premium_subtitle": "Vivez l'expérience complète du meilleur programme alimentaire",
-  "feature_ai_scan_title": "Gérez votre poids et mangez mieux",
-  'feature_ai_scan_subtitle': 'avec le scan de repas par IA et un retour quotidien',
-  'feature_results_title': 'Obtenez des résultats durables',
-  'feature_results_subtitle': 'avec le pilote automatique et le suivi des macros',
-  'feature_chatbot_title': 'Chatbot IA "Coach"',
-  'feature_chatbot_subtitle': 'Conseils nutritionnels instantanés',
-  'feature_recipes_title': 'Recettes et régimes premium',
-  'feature_recipes_subtitle': 'pour vous guider vers le succès',
-  'best_value': 'MEILLEURE OFFRE',
-  'save_percent': 'ÉCONOMISEZ @percent%*',
-  'months_12': '12 mois',
-  'month_1': '1 mois',
-  'billed_annually': 'Facturation annuelle',
-  'billed_monthly': 'Facturation mensuelle',
-  'per_month': 'Par mois',
-  'continue_cta': 'Continuer',
-  'compared_to_monthly': '*Par rapport aux paiements mensuels',
-  'currency_dzd': 'DZD',
-
-  // Weight tracking UI
-  "Target Weight": "Poids cible",
-  "to go": "restant",
-  "Try to update once a week to help us adjust your plan":
-      "Essayez de mettre à jour une fois par semaine pour nous aider à ajuster votre plan",
-  "Weight Overview": "Aperçu du poids",
-  "Current": "Actuel",
-  "Goal": "Objectif",
-  "invalid_number": "Veuillez entrer un nombre entier valide",
-  "weight_out_of_range": "Veuillez entrer un poids entre 20 et 300 kg",
-
-  // Celebration strip messages
-  "goal_achieved_message": "Objectif atteint ! Continuez comme ça.",
-  "on_a_roll_message": "Vous êtes sur la bonne voie, chaque pas compte !",
-  "keep_momentum_message": "Progrès réalisés, continuez sur votre lancée !",
-
-  // Notifications
-  "update_targets_title": "Objectifs mis à jour",
-  "update_targets_body":
-      "Nous avons recalculé vos objectifs quotidiens en calories et en macros pour correspondre à votre nouveau poids.",
-
-  // Donut chart center texts
-  "daily_macros": "Macros du jour",
-  "daily_macros_reached": "Macros du jour atteintes",
-
-  // Recipes Section
-  "recipes_title": "Recettes",
-  "top_recipes": "Top recettes",
-  "all_recipes": "Toutes les recettes",
-  // Recipe Detail specific keys
-  "less_text": "Moins ^",
-  "macronutrients": "Macronutriments",
-  "ingredients": "Ingrédients",
-  "serving": "Portion",
-  "directions": "Instructions",
-  "add_to_plan": "Ajouter au plan",
-  "step": "Étape",
-  // Localized language display names
-  "language_english": "English",
-  "language_french": "Français",
-  "language_arabic": "Arabe",
-  "top_recipes_subtitle":
-      "Découvrez des recettes saines et délicieuses adaptées à vos objectifs",
-  "no_recipes_available": "Aucune recette disponible",
-  "Search recipes by name or ingredient":
-      "Rechercher des recettes par nom ou ingrédient",
-  "min": "min",
-  "cal": "Cal",
-  "close": "Fermer",
-
-  "food items found": "aliments trouvés",
-
-  // Meal Breakdown
-  "meal_breakdown": "Détail du repas",
-  "tap_to_edit_portions": "Appuyez pour modifier les portions",
-  "items": "éléments",
-  "verified": "Vérifié",
-  "estimated": "Estimé",
-  // Nutrient short labels
-  "nut_prt": "prot",
-  "nut_carb": "gluc",
-  "nut_cal": "cal",
-  "nut_fat": "lip",
-  // Notification messages
-  "success": "Succès",
-  "food_added_success": "Aliment ajouté avec succès",
-  "food_updated_success": "Aliment mis à jour avec succès",
-  "food_deleted_success": "@count aliment(s) supprimé(s)",
-  "failed_to_load_recipes": "Échec du chargement des recettes. Veuillez réessayer.",
-  // Authentication messages
-  "auth_login_success": "Connecté avec succès",
-  "auth_register_success": "Compte créé avec succès",
-  "auth_password_reset_sent": "E-mail de réinitialisation du mot de passe envoyé",
-  "auth_wrong_credentials": "E-mail ou mot de passe incorrect",
-  "auth_account_not_found": "Compte non trouvé",
-  "auth_email_in_use": "Cet e-mail est déjà utilisé",
-  "auth_weak_password": "Le mot de passe est trop faible",
-  "auth_account_different_provider": "Un compte existe déjà avec un autre fournisseur",
-  "auth_network_error": "Erreur réseau. Veuillez vérifier votre connexion.",
-  "auth_unknown_error": "Une erreur inattendue est survenue",
-  "auth_authentication_error": "Erreur d'authentification",
-  "auth_unexpected_error": "Erreur inattendue",
-  "auth_logout_success": "Déconnecté avec succès",
-  "auth_logout_failed": "Échec de la déconnexion",
-  // Title used for the authentication/modal which prompts users to sign in
-  "auth_modal_title": "Connectez-vous pour continuer",
-  // Daily usage labels
-  "Daily Usage": "Utilisation quotidienne",
-  "Scans": "Scans",
-  "Chat": "Chat",
-  "left": "restants",
-  // Influencer / promo keys
-  "influencer_program": "Programme d'influenceurs",
-  "your_promo_code": "Votre code promo",
-  "copied": "Copié",
-  "current_balance": "Solde actuel",
-  "total_earned": "Total gagné",
-  "referrals_count": "Parrainages",
-  "request_withdrawal": "Demander un retrait",
-  "minimum_withdrawal_amount": "Montant minimum de retrait : @amount DZD",
-  "withdrawal_history": "Historique des retraits",
-  "promo_code_expired": "Code promo expiré",
-  "promo_expires_in": "Le code promo expire dans @days jours",
-  "promo_expires_on": "Le code promo expire le @date",
-  "promo_code_copied": "Code promo copié",
-  "available_balance": "Solde disponible",
-  "withdrawal_amount": "Montant du retrait",
-  "enter_amount": "Entrez le montant",
-  "bank_account_rip": "Compte bancaire (RIB)",
-  "enter_rip_number": "Entrez le numéro de RIB",
-  "withdrawal_processing_info":
-      "Les retraits sont traités dans un délai de 5 jours ouvrables.",
-  "requested_on": "Demandé le @date",
-  "unknown_date": "Date inconnue",
-  "login_to_view_usage": "Connectez-vous pour voir l'utilisation",
-  "promo_code": "Code promo",
-  "enter_promo_code": "Entrez le code promo",
-  "apply_promo_code": "Appliquer",
-  "skip_promo_code": "Passer",
-  "promo_code_applied": "Code promo appliqué avec succès !",
-  "promo_code_invalid": "Code promo invalide",
-  "promo_code_dialog_title": "Vous avez un code promo ?",
-  "promo_code_dialog_subtitle":
-      "Entrez votre code promo pour bénéficier d'une réduction sur votre abonnement",
-
-  // Promo Code View (Sign Up)
-  "Have a Promo Code?": "Avez-vous un code promo ?",
-  "Enter your promo code to get 3 days free trial": "Entrez votre code promo pour obtenir 3 jours d'essai gratuit",
-  "ENTER CODE": "ENTREZ LE CODE",
-  "Validate Code": "Valider le code",
-  "Promo code applied successfully!": "Code promo appliqué avec succès !",
-  "Please enter a promo code": "Veuillez entrer un code promo",
-  "Invalid promo code": "Code promo invalide",
-
-  // Plan review page translations
-  "Your Plan is Ready!": "Votre plan est prêt !",
-  "We have customized your nutrition plan based on your goals": "Nous avons personnalisé votre plan nutritionnel en fonction de vos objectifs",
-  "Daily Calorie Goal": "Objectif calorique quotidien",
-  "Macronutrients Breakdown": "Répartition des macronutriments",
-  "This plan is based on your age, weight, height, activity level, and goals. You can adjust your daily intake in settings anytime.": "Ce plan est basé sur votre âge, poids, taille, niveau d'activité et objectifs. Vous pouvez ajuster votre apport quotidien dans les paramètres à tout moment.",
-  "Continue to Premium": "Continuer vers Premium",
-
-  // App Tips/Tutorial translations
-  "app_tips": "Conseils d'utilisation",
-  "skip": "Passer",
-  "next": "Suivant",
-  "previous": "Précédent",
+  "OverView": "Aperçu",
   "get_started": "Commencer",
-  "tip_welcome_title": "Bienvenue sur macroAize !",
-  "tip_welcome_description": "Votre tracker nutritionnel personnel alimenté par l'IA. Faisons une visite rapide pour vous aider à démarrer votre parcours santé.",
-  "tip_track_food_title": "Suivez vos repas",
-  "tip_track_food_description": "Appuyez sur le bouton + sur l'écran d'accueil pour enregistrer vos repas. Choisissez entre petit-déjeuner, déjeuner, dîner ou collations pour garder des registres précis.",
-  "tip_scan_food_title": "Scanner avec l'IA",
-  "tip_scan_food_description": "Prenez une photo de votre nourriture et notre IA analysera et calculera instantanément les calories, protéines, glucides et lipides pour vous.",
-  "tip_ai_coach_title": "Discutez avec le Coach IA",
-  "tip_ai_coach_description": "Obtenez des conseils nutritionnels personnalisés, des suggestions de repas et des réponses à vos questions de santé de notre coach IA à tout moment.",
-  "tip_analytics_title": "Suivez vos progrès",
-  "tip_analytics_description": "Consultez des analyses détaillées de vos tendances nutritionnelles, de vos progrès de poids et de la répartition des macros pour rester sur la bonne voie vers vos objectifs.",
-
-  // Email verification translations
-  "email_verification_title": "Vérifiez votre e-mail",
-  "email_verification_subtitle": "Consultez vos e-mails pour continuer",
-  "email_sent_to": "Nous avons envoyé un lien de vérification à @email",
-  "email_verification_instructions":
-      "Cliquez sur le lien dans l'e-mail pour vérifier votre compte. Cela nous aide à sécuriser votre compte.",
-  "checking_verification_status": "Vérification du statut...",
-  "resend_verification_email": "Renvoyer l'e-mail",
-  "resend_cooldown": "Renvoyer dans @seconds secondes",
-  "resend_limit_reached": "@attempts tentatives restantes",
-  "verification_attempts_remaining": "Il reste @remaining sur @total tentatives",
-  "email_verification_success":
-      "E-mail vérifié avec succès ! Bienvenue sur macroAize",
-  "email_verification_resent": "E-mail de vérification envoyé ! Consultez votre boîte de réception",
-  "email_verification_resend_error":
-      "Échec de l'envoi de l'e-mail de vérification. Veuillez réessayer",
-  "email_verification_max_attempts":
-      "Nombre maximal de tentatives de renvoi atteint. Veuillez réessayer plus tard",
-  "email_verification_cooldown":
-      "Veuillez attendre @seconds secondes avant de demander un autre e-mail",
-  "skip_verification_title": "Passer la vérification ?",
-  "skip_verification_warning":
-      "Cela permettra d'accéder sans vérification de l'e-mail. Ce n'est pas recommandé pour des raisons de sécurité.",
-  "skip_anyway": "Passer quand même",
-  "skip_verification": "Passer la vérification",
-  "verify": "Vérifier",
-  "sign_out_title": "Se déconnecter ?",
-  "sign_out_confirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
-  "sign_out": "Se déconnecter",
-  "cancel": "Annuler",
-  "email_verification_error": "La vérification de l'e-mail a échoué. Veuillez réessayer",
-
-  // Email verification guard messages
-  "auth_required": "Veuillez vous connecter pour continuer",
-  "email_verification_required_for_feature":
-      "Veuillez vérifier votre e-mail pour utiliser cette fonctionnalité",
-  "email_verification_required_for_premium":
-      "La vérification de l'e-mail est requise pour accéder aux fonctionnalités premium",
-  "email_verification_required_for_scan":
-      "Veuillez vérifier votre e-mail pour utiliser le scanner d'aliments",
-  "email_verification_required_for_chat":
-      "Veuillez vérifier votre e-mail pour discuter avec le coach IA",
-  "email_verification_required_for_app_access":
-      "La vérification de l'e-mail est requise pour accéder à l'application",
-
-  // Premium Required Messages
-  "premium_required": "Premium requis",
-  "premium_feature": "Fonctionnalité Premium",
-  "recipes_premium_message":
-      "L'accès aux recettes nécessite un abonnement premium. Mettez à niveau maintenant pour débloquer cette fonctionnalité.",
-  "recipes_premium_badge": "Débloquez toutes les recettes et fonctionnalités avec Premium",
-  "local_food_premium_message":
-      "La création et la modification d'aliments personnalisés sont une fonctionnalité Premium.",
-  "local_food_premium_badge":
-      "Passez à Premium pour créer des aliments personnalisés en illimité !",
-  "chat_image_premium_message":
-      "L'accès aux pièces jointes nécessite un abonnement premium. Mettez à niveau maintenant pour débloquer cette fonctionnalité.",
-  "chat_image_premium_badge":
-      "Débloquez les pièces jointes pour le coach avec Premium",
-  "go_premium": "Passer à Premium",
-  "maybe_later": "Peut-être plus tard",
-
-  // History fallbacks
-  "unknown_meal": "Repas inconnu",
-
-  // UI status indicators
-  "email_verified_status": "Vérifié",
-  "email_unverified_status": "Non vérifié",
-  "email_verified": "E-mail vérifié",
-  "email_verification_complete_subtitle":
-      "Votre compte est sécurisé et prêt à l'emploi",
-  "email_verification_required": "Vérification de l'e-mail requise",
-  "email_verification_required_subtitle":
-      "Veuillez vérifier @email pour accéder à toutes les fonctionnalités",
-  "verify_email": "Vérifier l'e-mail",
-  "verify_now": "Vérifier maintenant",
-  "refresh": "Actualiser",
-  "refresh_failed": "Échec de l'actualisation du statut. Veuillez réessayer",
-  "tap_to_verify_email": "Appuyez pour vérifier votre adresse e-mail",
-
-  // Account activation gating warnings
-  "account_activation_required": "Activation du compte requise",
-  "account_activation_required_for_chat":
-      "Veuillez activer votre compte pour utiliser le coach IA",
-  "account_activation_required_for_scanner":
-      "Veuillez activer votre compte pour utiliser le scanner d'aliments",
-  "account_activation_required_for_premium":
-      "Veuillez activer votre compte pour acheter le premium",
-  "verify_account_to_continue": "Vérifiez votre e-mail pour continuer",
-
-  // Settings - Account Section
-  "account": "Compte",
-  "tap_to_view_details": "Appuyez pour voir les détails",
-  "register_login": "S'inscrire / Se connecter",
-  "access_account_sync_data": "Accédez à votre compte et synchronisez vos données",
-
-  // Settings - App Info Section
-  "app_info": "Infos sur l'app",
-  "version": "Version",
-  "reset_data": "Réinitialiser les données",
-  "clear_all_app_data": "Effacer toutes les données de l'application",
-  "account_reset_success": "Le compte a été réinitialisé avec succès",
-
-  // Account Details page translations
-  "account_details_title": "Détails du compte",
-  "no_name": "Pas de nom",
-  "name_label": "Nom",
-  "email_label": "E-mail",
-  "change_password": "Changer le mot de passe",
-  "logout": "Se déconnecter",
-  "display_name_updated": "Nom d'affichage mis à jour",
-  "edit_display_name": "Modifier le nom d'affichage",
-  "new_display_name": "Nouveau nom d'affichage",
-  "required": "Requis",
-  "too_short": "Trop court",
-  "too_long": "Trop long",
-  "password_changed_message": "Mot de passe changé. Veuillez vous reconnecter.",
-  "current_password_incorrect": "Le mot de passe actuel est incorrect.",
-  "too_many_attempts": "Trop de tentatives, veuillez réessayer plus tard.",
-  "please_relogin": "Veuillez vous reconnecter et réessayer.",
-  "operation_failed": "L'opération a échoué.",
-
-  // Change Password page translations
-  "current_password_label": "Mot de passe actuel",
-  "new_password_label": "Nouveau mot de passe",
-  "confirm_new_password_label": "Confirmer le nouveau mot de passe",
-  "min_8_chars": "8 caractères minimum",
-  "password_complexity_hint": "Utilisez majuscule, minuscule, chiffre et symbole",
-  "must_differ_from_current": "Doit être différent du mot de passe actuel",
-  "does_not_match": "Ne correspond pas",
-  "please_fix_errors": "Veuillez corriger les erreurs",
-  "change_password_cta": "Changer le mot de passe",
-
-  // Withdrawal specific translations
-  "withdrawal_submitted": "Demande de retrait soumise",
-  "request_id": "ID de la demande : @id",
-  "processing_time": "Temps de traitement : @days jours ouvrables",
-  "withdrawal_email_confirmation":
-      "Vous recevrez une confirmation par e-mail une fois votre retrait traité.",
-  "got_it": "Compris",
-  "processing": "En cours de traitement",
-  "copy_failed": "Échec de la copie : @error",
-  "email_verification_required_withdrawal":
-      "La vérification de l'e-mail est requise pour demander des retraits",
-  "completed": "Terminé",
-  "failed": "Échoué",
-  "view_all": "Voir tout",
-  "showing_recent_withdrawals": "Affichage de @shown sur @total retraits",
-  "withdrawal_history_full": "Historique des retraits",
-  "no_withdrawal_history": "Aucun historique de retrait pour le moment",
-  "withdrawal_history_empty_description":
-      "Demandez votre premier retrait pour voir votre historique de transactions ici",
-  "view_withdrawal_history": "Voir l'historique des retraits",
-  "withdrawal_history_subtitle": "Suivez toutes vos demandes de retrait",
-  "request_id_short": "ID",
-  "bank_account_short": "Compte",
-  "requested_date": "Demandé",
-  "processing_date": "Date limite de traitement",
-  "processing_deadline": "Date limite",
-
-  // Login/Register Form Labels
-  "login": "Connexion",
-  "register": "S'inscrire",
-  "email": "E-mail",
-  "password": "Mot de passe",
-  "confirm_password": "Confirmer le mot de passe",
-  "first_name": "Prénom",
-  "last_name": "Nom",
-  "forgot_password": "Mot de passe oublié ?",
-  "continue_with_google": "Continuer avec Google",
-  "continue_with_apple": "Continuer avec Apple",
-
-  // Validation Messages
-  "email_required": "L'e-mail est requis",
-  "invalid_email_format": "Format d'e-mail invalide",
-  "password_required": "Le mot de passe est requis",
-  "password_min_length": "Le mot de passe doit contenir au moins 8 caractères",
-  "password_complexity": "Utilisez un mélange de majuscules, de minuscules, de chiffres et de symboles",
-  "name_required": "Le nom est requis",
-  "name_too_short": "Le nom est trop court",
-  "passwords_do_not_match": "Les mots de passe ne correspondent pas",
-  "accept_terms_of_service": "Veuillez accepter les conditions d'utilisation",
-
-  // Terms of Service
-  "by_registering_agree": "En vous inscrivant, vous acceptez les ",
-  "terms_of_service": "Conditions d'utilisation",
-
-  // Registration Success
-  "auth_register_verification_required":
-      "Compte créé ! Veuillez consulter vos e-mails pour vérifier votre compte.",
-
-  // Interactive Tutorial
-  "tutorial_tap_to_continue": "Appuyez n'importe où pour continuer",
-  "tutorial_step": "Étape",
-  "tutorial_add_food_title": "Suivez vos repas",
-  "tutorial_add_food_description": "Appuyez sur le bouton '+' pour ajouter des aliments à votre journal quotidien. Vous pouvez rechercher, scanner ou ajouter des aliments personnalisés.",
-  "tutorial_scanner_title": "Scanner alimentaire IA",
-  "tutorial_scanner_description": "Utilisez notre scanner alimentaire IA pour analyser instantanément vos aliments et obtenir des informations nutritionnelles précises.",
-  "tutorial_ai_coach_title": "Coach nutritionnel IA",
-  "tutorial_ai_coach_description": "Chattez avec votre coach IA personnel pour des conseils personnalisés, des suggestions de repas et des orientations nutritionnelles.",
-  "tutorial_analytics_title": "Suivez vos progrès",
-  "tutorial_analytics_description": "Consultez vos analyses nutritionnelles, vos progrès de poids et vos tendances quotidiennes pour rester sur la bonne voie avec vos objectifs.",
-  "tutorial_profile_title": "Votre profil",
-  "tutorial_profile_description": "Accédez à vos paramètres, ajustez vos objectifs et personnalisez votre expérience dans la section profil.",
 };
