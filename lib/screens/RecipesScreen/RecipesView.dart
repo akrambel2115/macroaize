@@ -16,14 +16,13 @@ class _RecipesViewState extends State<RecipesView> {
   final FocusNode _searchFocusNode = FocusNode();
   late final TextEditingController _searchController;
 
-  // local state: whether search is active (focused or has text)
+  // search active state
   bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    // Listen to focus changes to toggle header visibility
     _searchFocusNode.addListener(_onSearchFocusChange);
     _searchController.addListener(_onSearchTextChange);
   }
@@ -50,6 +49,7 @@ class _RecipesViewState extends State<RecipesView> {
       setState(() => _isSearching = hasText);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     // Ensure a shared RecipesController is registered; use it without re-initializing
@@ -65,34 +65,37 @@ class _RecipesViewState extends State<RecipesView> {
             onRefresh: () => controller.refreshRecipes(),
             color: AppColor.primaryOrange,
             child: Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom + 64),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewPadding.bottom + 64,
+              ),
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                cacheExtent: 1000, // prebuild more for smoother scrolling
+                cacheExtent: 1000,
                 slivers: [
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         _buildHeader(context, controller),
                         const SizedBox(height: 24),
-                        // Hide top recipes while searching (focused or has query)
+                        // hide when searching
                         if (!_isSearching) ...[
-                          // Replace top recipes grid with efficient horizontal list
                           _buildTopRecipesHorizontal(context, controller),
                           const SizedBox(height: 24),
                         ],
                         Text(
                           'all_recipes'.tr,
-                          style: context.theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: context.theme.textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 16),
                       ]),
                     ),
                   ),
-                  // All recipes sliver grid with page-based loading
+                  // all recipes grid
                   if (controller.isLoading && controller.allRecipes.isEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -101,9 +104,13 @@ class _RecipesViewState extends State<RecipesView> {
                   else
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: _buildRecipeSliverGrid(controller.allRecipes, controller, context),
+                      sliver: _buildRecipeSliverGrid(
+                        controller.allRecipes,
+                        controller,
+                        context,
+                      ),
                     ),
-                  // Page navigation controls
+                  // pagination controls
                   SliverToBoxAdapter(
                     child: _buildPaginationControls(context, controller),
                   ),
@@ -120,23 +127,19 @@ class _RecipesViewState extends State<RecipesView> {
     final args = Get.arguments;
     final bool explicitShowBack = args is Map && args['showBack'] == true;
     final bool explicitHideBack = args is Map && args['hideBack'] == true;
-    
-    // Check if this is embedded in an IndexedStack (bottom tab scenario)
+
     bool isInIndexedStack = false;
     context.visitAncestorElements((element) {
       if (element.widget is IndexedStack) {
         isInIndexedStack = true;
-        return false; // stop visiting
+        return false;
       }
-      return true; // continue visiting
+      return true;
     });
-    
-    // Show back button only when:
-    // 1. Explicitly requested (from View All button)
-    // 2. Not explicitly hidden
-    // 3. Not embedded in IndexedStack (bottom tab)
-    final bool showBack = explicitShowBack && !explicitHideBack && !isInIndexedStack;
-    
+
+    final bool showBack =
+        explicitShowBack && !explicitHideBack && !isInIndexedStack;
+
     return AppBar(
       scrolledUnderElevation: 0,
       backgroundColor: context.theme.scaffoldBackgroundColor,
@@ -148,15 +151,16 @@ class _RecipesViewState extends State<RecipesView> {
         ),
       ),
       centerTitle: false,
-      leading: showBack
-          ? IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_rounded,
-                color: context.theme.colorScheme.onSurface,
-              ),
-              onPressed: () => Get.back(),
-            )
-          : null,
+      leading:
+          showBack
+              ? IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: context.theme.colorScheme.onSurface,
+                ),
+                onPressed: () => Get.back(),
+              )
+              : null,
     );
   }
 
@@ -171,7 +175,6 @@ class _RecipesViewState extends State<RecipesView> {
           ),
         ),
         const SizedBox(height: 12),
-        // Reuse the shared search bar used in Local Food
         SharedSearchBar(
           controller: _searchController,
           hint: 'Search recipes by name or ingredient'.tr,
@@ -187,7 +190,10 @@ class _RecipesViewState extends State<RecipesView> {
     );
   }
 
-  Widget _buildTopRecipesHorizontal(BuildContext context, RecipesController controller) {
+  Widget _buildTopRecipesHorizontal(
+    BuildContext context,
+    RecipesController controller,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,48 +205,58 @@ class _RecipesViewState extends State<RecipesView> {
           ),
         ),
         const SizedBox(height: 12),
-        // Constrain the horizontal list to a fixed height so it doesn't grow
         SizedBox(
           height: 180,
-          child: controller.isLoading && controller.topRecipes.isEmpty
-              ? ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: 4,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) => SizedBox(
-                    width: 160,
-                    child: _buildLoadingCard(context),
-                  ),
-                )
-              : ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemExtent: 160, // fixed extent for efficient layouts
-                  itemCount: controller.topRecipes.length,
-                  itemBuilder: (context, index) {
-                    final recipe = controller.topRecipes[index];
-                    return Padding(
-                      padding: EdgeInsets.only(right: index == controller.topRecipes.length - 1 ? 0 : 12),
-                      child: RepaintBoundary(
-                        child: SizedBox(
+          child:
+              controller.isLoading && controller.topRecipes.isEmpty
+                  ? ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: 4,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder:
+                        (context, index) => SizedBox(
                           width: 160,
-                          child: RecipeCard(
-                            recipe: recipe,
-                            onTap: () => controller.openRecipeDetails(recipe),
+                          child: _buildLoadingCard(context),
+                        ),
+                  )
+                  : ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemExtent: 160,
+                    itemCount: controller.topRecipes.length,
+                    itemBuilder: (context, index) {
+                      final recipe = controller.topRecipes[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          right:
+                              index == controller.topRecipes.length - 1
+                                  ? 0
+                                  : 12,
+                        ),
+                        child: RepaintBoundary(
+                          child: SizedBox(
+                            width: 160,
+                            child: RecipeCard(
+                              recipe: recipe,
+                              onTap: () => controller.openRecipeDetails(recipe),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
         ),
       ],
     );
   }
 
-  // Sliver grid for "All recipes" section used in CustomScrollView
-  SliverGrid _buildRecipeSliverGrid(List recipes, RecipesController controller, BuildContext context) {
+  // sliver grid builder
+  SliverGrid _buildRecipeSliverGrid(
+    List recipes,
+    RecipesController controller,
+    BuildContext context,
+  ) {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -266,41 +282,42 @@ class _RecipesViewState extends State<RecipesView> {
     );
   }
 
-  // Removed old non-sliver grid builders to keep the layout sliver-based and efficient
-
-  Widget _buildPaginationControls(BuildContext context, RecipesController controller) {
+  Widget _buildPaginationControls(
+    BuildContext context,
+    RecipesController controller,
+  ) {
     if (controller.totalPages <= 1) return const SizedBox.shrink();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Previous button
+          // prev button
           _buildPaginationButton(
             context,
-            onPressed: controller.hasPreviousPage && !controller.isLoadingPage 
-              ? controller.goToPreviousPage 
-              : null,
+            onPressed:
+                controller.hasPreviousPage && !controller.isLoadingPage
+                    ? controller.goToPreviousPage
+                    : null,
             icon: Icons.chevron_left,
             isLoading: false,
           ),
-          
+
           const SizedBox(width: 16),
-          
-          // Page numbers
-          Expanded(
-            child: _buildPageNumbers(context, controller),
-          ),
-          
+
+          // page numbers
+          Expanded(child: _buildPageNumbers(context, controller)),
+
           const SizedBox(width: 16),
-          
-          // Next button
+
+          // next button
           _buildPaginationButton(
             context,
-            onPressed: controller.hasNextPage && !controller.isLoadingPage 
-              ? controller.goToNextPage 
-              : null,
+            onPressed:
+                controller.hasNextPage && !controller.isLoadingPage
+                    ? controller.goToNextPage
+                    : null,
             icon: Icons.chevron_right,
             isLoading: controller.isLoadingPage,
           ),
@@ -315,12 +332,13 @@ class _RecipesViewState extends State<RecipesView> {
     required IconData icon,
     required bool isLoading,
   }) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final bgColor = onPressed != null
-    ? AppColor.primaryOrange
-    : (isDark ? AppColor.darkBorder : AppColor.neutralGrey200);
-  return Material(
-    color: bgColor,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor =
+        onPressed != null
+            ? AppColor.primaryOrange
+            : (isDark ? AppColor.darkBorder : AppColor.neutralGrey200);
+    return Material(
+      color: bgColor,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onPressed,
@@ -329,20 +347,24 @@ class _RecipesViewState extends State<RecipesView> {
           width: 48,
           height: 48,
           child: Center(
-            child: isLoading
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
+            child:
+                isLoading
+                    ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                    : Icon(
+                      icon,
+                      color:
+                          onPressed != null
+                              ? Colors.white
+                              : AppColor.neutralGrey400,
+                      size: 24,
                     ),
-                  )
-                : Icon(
-          icon,
-          color: onPressed != null ? Colors.white : AppColor.neutralGrey400,
-                    size: 24,
-                  ),
           ),
         ),
       ),
@@ -352,34 +374,39 @@ class _RecipesViewState extends State<RecipesView> {
   Widget _buildPageNumbers(BuildContext context, RecipesController controller) {
     final currentPage = controller.currentPageNumber;
     final totalPages = controller.totalPages;
-    
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Show first page if not near beginning
           if (currentPage > 3) ...[
             _buildPageNumberButton(context, controller, 1),
-            if (currentPage > 4) 
+            if (currentPage > 4)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('...', style: TextStyle(color: AppColor.neutralGrey500)),
+                child: Text(
+                  '...',
+                  style: TextStyle(color: AppColor.neutralGrey500),
+                ),
               ),
           ],
-          
-          // Show pages around current page
-          for (int i = (currentPage - 2).clamp(1, totalPages); 
-               i <= (currentPage + 2).clamp(1, totalPages); 
-               i++)
+
+          for (
+            int i = (currentPage - 2).clamp(1, totalPages);
+            i <= (currentPage + 2).clamp(1, totalPages);
+            i++
+          )
             _buildPageNumberButton(context, controller, i),
-          
-          // Show last page if not near end
+
           if (currentPage < totalPages - 2) ...[
             if (currentPage < totalPages - 3)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('...', style: TextStyle(color: AppColor.neutralGrey500)),
+                child: Text(
+                  '...',
+                  style: TextStyle(color: AppColor.neutralGrey500),
+                ),
               ),
             _buildPageNumberButton(context, controller, totalPages),
           ],
@@ -388,16 +415,23 @@ class _RecipesViewState extends State<RecipesView> {
     );
   }
 
-  Widget _buildPageNumberButton(BuildContext context, RecipesController controller, int pageNumber) {
+  Widget _buildPageNumberButton(
+    BuildContext context,
+    RecipesController controller,
+    int pageNumber,
+  ) {
     final isCurrentPage = pageNumber == controller.currentPageNumber;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Material(
         color: isCurrentPage ? AppColor.primaryOrange : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
-          onTap: controller.isLoadingPage ? null : () => controller.goToPage(pageNumber - 1),
+          onTap:
+              controller.isLoadingPage
+                  ? null
+                  : () => controller.goToPage(pageNumber - 1),
           borderRadius: BorderRadius.circular(8),
           child: SizedBox(
             width: 40,
@@ -451,7 +485,6 @@ class _RecipesViewState extends State<RecipesView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image placeholder
           Expanded(
             flex: 3,
             child: Container(
@@ -470,7 +503,6 @@ class _RecipesViewState extends State<RecipesView> {
               ),
             ),
           ),
-          // Content placeholder
           Expanded(
             flex: 2,
             child: Padding(

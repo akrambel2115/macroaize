@@ -15,7 +15,6 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
-
   List<Map<String, String>> get _ingredients {
     final lang = Get.locale?.languageCode ?? 'en';
     final base = widget.recipe.localizedIngredients(lang);
@@ -81,7 +80,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           bottomRight: Radius.circular(24),
         ),
         boxShadow: [
-          BoxShadow(color: AppColor.mediumShadow, blurRadius: 20, offset: const Offset(0, 8)),
+          BoxShadow(
+            color: AppColor.mediumShadow,
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: ClipRRect(
@@ -92,32 +95,42 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            LayoutBuilder(builder: (context, constraints) {
-              final dpr = MediaQuery.of(context).devicePixelRatio;
-              final targetW = (constraints.maxWidth * dpr).clamp(64, 2048).round();
-              final targetH = (constraints.maxHeight * dpr).clamp(64, 2048).round();
-              final imageUrl = widget.recipe.imageUrl.isNotEmpty
-                  ? widget.recipe.imageUrl
-                  : 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1200';
-              if (imageUrl.isEmpty) {
-                return _buildPlaceholderImage();
-              }
-              return Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                cacheWidth: targetW,
-                cacheHeight: targetH,
-                filterQuality: FilterQuality.low,
-                errorBuilder: (context, error, stack) => _buildPlaceholderImage(),
-              );
-            }),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final dpr = MediaQuery.of(context).devicePixelRatio;
+                final targetW =
+                    (constraints.maxWidth * dpr).clamp(64, 2048).round();
+                final targetH =
+                    (constraints.maxHeight * dpr).clamp(64, 2048).round();
+                final imageUrl =
+                    widget.recipe.imageUrl.isNotEmpty
+                        ? widget.recipe.imageUrl
+                        : 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1200';
+                if (imageUrl.isEmpty) {
+                  return _buildPlaceholderImage();
+                }
+                return Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  cacheWidth: targetW,
+                  cacheHeight: targetH,
+                  filterQuality: FilterQuality.low,
+                  errorBuilder:
+                      (context, error, stack) => _buildPlaceholderImage(),
+                );
+              },
+            ),
 
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.35), Colors.black.withOpacity(0.7)],
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.35),
+                    Colors.black.withOpacity(0.7),
+                  ],
                 ),
               ),
             ),
@@ -141,60 +154,113 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.recipe.localizedTitle(Get.locale?.languageCode ?? 'en'),
+                    widget.recipe.localizedTitle(
+                      Get.locale?.languageCode ?? 'en',
+                    ),
                     textAlign: TextAlign.left,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(color: Colors.black.withOpacity(0.5), offset: const Offset(0, 2), blurRadius: 4),
-                          ],
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.5),
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
                         ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white70,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.schedule, size: 14, color: Colors.black87),
+                            const Icon(
+                              Icons.schedule,
+                              size: 14,
+                              color: Colors.black87,
+                            ),
                             const SizedBox(width: 6),
-                            Text('${widget.recipe.duration} ${'min'.tr}', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.black87, fontWeight: FontWeight.w600)),
+                            Text(
+                              '${widget.recipe.duration} ${'min'.tr}',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleSmall?.copyWith(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColor.primaryGreen.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.local_fire_department, size: 14, color: Colors.white),
+                            const Icon(
+                              Icons.local_fire_department,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                             const SizedBox(width: 6),
-                            Text('${widget.recipe.calories} ${'kcal_unit'.tr}', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                            Text(
+                              '${widget.recipe.calories} ${'kcal_unit'.tr}',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white70,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.speed, size: 14, color: Colors.black87),
+                            const Icon(
+                              Icons.speed,
+                              size: 14,
+                              color: Colors.black87,
+                            ),
                             const SizedBox(width: 6),
-                            Text(widget.recipe.localizedDifficulty(Get.locale?.languageCode ?? 'en'), style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.black87, fontWeight: FontWeight.w600)),
+                            Text(
+                              widget.recipe.localizedDifficulty(
+                                Get.locale?.languageCode ?? 'en',
+                              ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleSmall?.copyWith(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -216,18 +282,23 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Builder(builder: (_) {
-            final lang = Get.locale?.languageCode ?? 'en';
-            final desc = widget.recipe.localizedDescription(lang).trim();
-            if (desc.isEmpty) return const SizedBox.shrink();
-            return Text(
-              desc,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 13.0,
-                    color: isDark ? AppColor.neutralGrey200 : AppColor.neutralGrey600,
-                  ),
-            );
-          }),
+          Builder(
+            builder: (_) {
+              final lang = Get.locale?.languageCode ?? 'en';
+              final desc = widget.recipe.localizedDescription(lang).trim();
+              if (desc.isEmpty) return const SizedBox.shrink();
+              return Text(
+                desc,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 13.0,
+                  color:
+                      isDark
+                          ? AppColor.neutralGrey200
+                          : AppColor.neutralGrey600,
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -254,7 +325,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text('macronutrients'.tr, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'macronutrients'.tr,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -265,13 +339,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 label: 'Carbs'.tr,
                 value: '${widget.recipe.carbs}g',
                 color: Colors.green,
-                progress: (widget.recipe.carbs / 100).toDouble().clamp(0.0, 1.0),
+                progress: (widget.recipe.carbs / 100).toDouble().clamp(
+                  0.0,
+                  1.0,
+                ),
               ),
               _macroRing(
                 label: 'Protein'.tr,
                 value: '${widget.recipe.protein}g',
                 color: Colors.red,
-                progress: (widget.recipe.protein / 100).toDouble().clamp(0.0, 1.0),
+                progress: (widget.recipe.protein / 100).toDouble().clamp(
+                  0.0,
+                  1.0,
+                ),
               ),
               _macroRing(
                 label: 'Fats'.tr,
@@ -286,7 +366,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  Widget _macroRing({required String label, required String value, required Color color, required double progress}) {
+  Widget _macroRing({
+    required String label,
+    required String value,
+    required Color color,
+    required double progress,
+  }) {
     return Column(
       children: [
         SizedBox(
@@ -304,7 +389,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    value,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ],
@@ -337,24 +425,41 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text('ingredients'.tr, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'ingredients'.tr,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          ..._ingredients.map((it) => Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(child: Text(it['name']!, style: const TextStyle(fontSize: 14))),
-                      Text(it['qty']!, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Container(height: 1, width: double.infinity, color: Colors.grey.shade200),
-                  const SizedBox(height: 8),
-                ],
-              ))
+          ..._ingredients.map(
+            (it) => Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        it['name']!,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    Text(
+                      it['qty']!,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 1,
+                  width: double.infinity,
+                  color: Colors.grey.shade200,
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -381,7 +486,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text('directions'.tr, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'directions'.tr,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ],
           ),
           const SizedBox(height: 12),

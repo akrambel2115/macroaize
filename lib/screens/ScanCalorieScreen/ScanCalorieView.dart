@@ -8,7 +8,7 @@ import 'package:foodcalorietracker/screens/ScanCalorieScreen/ScanCalorieControll
 import 'package:foodcalorietracker/widgets/AppWidgets.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/ModernButton.dart';
-import 'package:foodcalorietracker/widgets/customButton.dart';
+import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
 import 'package:foodcalorietracker/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -18,7 +18,7 @@ import 'package:foodcalorietracker/widgets/UsdaBadge.dart';
 class ScanCalorieView extends GetView<ScanCalorieController> {
   const ScanCalorieView({super.key});
 
-  // Page padding symmetry for quantity selector
+  // quantity selector padding
   static const double _kQuantityInnerGutter = 12.0;
 
   @override
@@ -77,18 +77,12 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               ],
             ),
             child: ModernFadeSlideTransition(
-              child: CustomButtom(
-                backgroundcolor: context.theme.focusColor,
-                btncolor: Colors.white,
-                btntext: "Add Calorie".tr,
-                ontap: () async {
-                  await controller.onAddButton(context);
+              child: PrimaryCTA(
+                label: "Add Calorie".tr,
+                icon: Icons.add_circle_outline,
+                onTap: () {
+                  controller.onAddButton(context);
                 },
-                sufixicon: const Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 20,
-                ),
               ),
             ),
           );
@@ -107,7 +101,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Food image with glass morphism effect and Lottie overlay
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
@@ -122,29 +115,32 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       width: 1,
                     ),
                   ),
-                  // Stack image + animation so the animation always fills this box
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Base image
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Opacity(
                           opacity: 0.7,
-                          child: Image.file(
-                            controller.image,
-                            fit: BoxFit.cover,
-                          ),
+                          child:
+                              controller.image != null
+                                  ? Image.file(
+                                    controller.image!,
+                                    fit: BoxFit.cover,
+                                  )
+                                  : Container(
+                                    color: Colors.grey[900],
+                                    child: const Icon(
+                                      Icons.fastfood,
+                                      color: Colors.white24,
+                                      size: 64,
+                                    ),
+                                  ),
                         ),
                       ),
 
-                      // Lottie overlay
                       Positioned.fill(
                         child: ColorFiltered(
-                          // Use srcIn to force the animation to take the tint color
-                          // and increase opacity for stronger coloration. If this
-                          // still doesn't fully override the original Lottie colors
-                          // we can apply a color matrix next.
                           colorFilter: ColorFilter.mode(
                             AppColor.primaryOrange.withOpacity(0.9),
                             BlendMode.srcIn,
@@ -160,8 +156,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 ),
               ),
             ),
-            // removed standalone animation block — now embedded inside the image box
-            // Loading text
             Positioned(
               bottom: 20,
               child: ModernFadeSlideTransition(
@@ -184,7 +178,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-        // Stack image + animation so the animation always fills this box
                     children: [
                       const ModernLoadingIndicator(
                         size: 16,
@@ -217,37 +210,25 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
       padding: const EdgeInsets.only(bottom: 100),
       child: Column(
         children: [
-          // Hero image section
-        // Hero image section
           _buildHeroImageSection(context, controller),
 
-          // Main content
-                // Main content
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Meal info card
-                // Meal info card
                 if (controller.calorie != 0)
                   _buildMealInfoCard(context, controller),
 
                 const SizedBox(height: 16),
 
-                // Meal Breakdown (if available)
-                // Meal Breakdown (if available)
                 if (controller.hasBreakdown)
                   _buildMealBreakdown(context, controller),
 
-                // Quantity selector (fallback for single item mode)
-                // Quantity selector (fallback for single item mode)
-                if (!controller.hasBreakdown && controller.calorie != 0)
+                if (controller.calorie != 0)
                   _buildQuantitySelector(context, controller),
 
                 const SizedBox(height: 20),
 
-                // Capsule macro grid (animated) — uses totals either from items or single
-                // Capsule macro grid (animated)
                 if (controller.calorie != 0)
                   CapsuleMacroGrid(
                     calories: controller.calorieQuantity,
@@ -258,13 +239,9 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
 
                 const SizedBox(height: 20),
 
-                // AI Chat button
-                // AI Chat button
                 if (controller.calorie != 0)
                   _buildAIChatButton(context, controller),
 
-                // No data state
-                // No data state
                 if (controller.calorie == 0) _buildNoDataState(context),
               ],
             ),
@@ -302,9 +279,19 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Main image
-            Image.file(controller.image, fit: BoxFit.cover),
-            // Gradient overlay
+            if (controller.image != null)
+              Image.file(controller.image!, fit: BoxFit.cover)
+            else
+              Container(
+                color: AppColor.neutralGrey800,
+                child: Center(
+                  child: Icon(
+                    Icons.restaurant,
+                    size: 64,
+                    color: AppColor.neutralGrey400,
+                  ),
+                ),
+              ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -318,8 +305,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 ),
               ),
             ),
-            // USDA Badge - Top Left
-            // USDA Badge - Top Left
             if (controller.calorie != 0)
               Positioned(
                 top: 16,
@@ -327,14 +312,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 child: ModernFadeSlideTransition(
                   beginOffset: const Offset(-0.3, 0),
                   child: UsdaBadge(
-                    verified: controller.usdaVerified,
-                    filled:
-                        true, // Use filled background for better visibility over image
+                    verified: controller.usdaVerified || controller.isBarcode,
+                    filled: true,
                   ),
                 ),
               ),
-            // Content overlay
-            // Content overlay
             if (controller.calorie != 0)
               Positioned(
                 bottom: 20,
@@ -437,7 +419,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColor.neutralGrey100.withOpacity(0.5),
+                color:
+                    context.theme.brightness == Brightness.dark
+                        ? AppColor.darkCard.withOpacity(0.9)
+                        : AppColor.neutralGrey100.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -459,6 +444,9 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     BuildContext context,
     ScanCalorieController controller,
   ) {
+    if (controller.isBarcode) {
+      return _buildDynamicUnitSelector(context, controller);
+    }
     return ModernFadeSlideTransition(
       beginOffset: const Offset(0, 0.2),
       child: Padding(
@@ -555,6 +543,287 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     );
   }
 
+  Widget _buildDynamicUnitSelector(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
+    return ModernFadeSlideTransition(
+      beginOffset: const Offset(0, 0.2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              "Serving Size".tr,
+              style: context.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                _buildUnitTab(context, controller, ScanUnit.unit, 'Unit'.tr),
+                const SizedBox(width: 8),
+                _buildUnitTab(
+                  context,
+                  controller,
+                  ScanUnit.gram,
+                  controller.netWeightUnit == 'ml' ? 'ml'.tr : 'g'.tr,
+                ),
+                if (controller.netWeightUnit == 'ml') ...[
+                  const SizedBox(width: 8),
+                  _buildUnitTab(context, controller, ScanUnit.cup, 'Cup'.tr),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildInputForUnit(context, controller),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUnitTab(
+    BuildContext context,
+    ScanCalorieController controller,
+    ScanUnit unit,
+    String label,
+  ) {
+    final isSelected = controller.selectedUnit == unit;
+    return GestureDetector(
+      onTap: () => controller.setUnit(unit),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColor.primaryOrange : context.theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color:
+                isSelected ? AppColor.primaryOrange : AppColor.neutralGrey200,
+          ),
+        ),
+        child: Text(
+          label,
+          style: context.textTheme.titleSmall?.copyWith(
+            color:
+                isSelected
+                    ? Colors.white
+                    : context.theme.textTheme.bodyMedium?.color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputForUnit(
+    BuildContext context,
+    ScanCalorieController controller,
+  ) {
+    switch (controller.selectedUnit) {
+      case ScanUnit.unit:
+        return Column(
+          children: [
+            const SizedBox(height: 8),
+            Text(
+              "(${controller.totalNetWeight} ${controller.netWeightUnit} per unit)",
+              style: context.textTheme.labelSmall?.copyWith(
+                color: AppColor.neutralGrey400,
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildStepperButton(
+                  context,
+                  Icons.remove,
+                  controller.customAmount > 0.25
+                      ? () => controller.decrementCustomAmount()
+                      : null,
+                ),
+                Container(
+                  width: 140,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "${controller.customAmount.toStringAsFixed(2).replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "")} ${'Unit(s)'.tr}",
+                    style: context.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.primaryOrange,
+                    ),
+                  ),
+                ),
+                _buildStepperButton(
+                  context,
+                  Icons.add,
+                  controller.customAmount < 20.0
+                      ? () => controller.incrementCustomAmount()
+                      : null,
+                ),
+              ],
+            ),
+          ],
+        );
+      case ScanUnit.gram:
+      case ScanUnit.ml:
+        return Column(
+          children: [
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: TextField(
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.primaryOrange,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "0",
+                      hintStyle: context.textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColor.neutralGrey400,
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    controller: TextEditingController(
+                        text: controller.customAmount
+                            .toStringAsFixed(1)
+                            .replaceAll(RegExp(r"([.]*0)(?!.*\d)"), ""),
+                      )
+                      ..selection = TextSelection.fromPosition(
+                        TextPosition(
+                          offset:
+                              controller.customAmount
+                                  .toStringAsFixed(1)
+                                  .replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "")
+                                  .length,
+                        ),
+                      ),
+                    onChanged:
+                        (val) => controller.updateCustomAmountFromText(val),
+                  ),
+                ),
+                Text(
+                  controller.netWeightUnit,
+                  style: context.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColor.neutralGrey600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Enter precise amount",
+              style: context.textTheme.labelSmall?.copyWith(
+                color: AppColor.neutralGrey400,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        );
+      case ScanUnit.cup:
+        return Column(
+          children: [
+            const SizedBox(height: 8),
+            Text(
+              "(~240ml per cup)",
+              style: context.textTheme.labelSmall?.copyWith(
+                color: AppColor.neutralGrey400,
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildStepperButton(
+                  context,
+                  Icons.remove,
+                  controller.customAmount > 0.25
+                      ? () => controller.decrementCustomAmount()
+                      : null,
+                ),
+                Container(
+                  width: 140,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "${controller.customAmount.toStringAsFixed(2).replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "")} ${'Cup(s)'.tr}",
+                    style: context.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.primaryOrange,
+                    ),
+                  ),
+                ),
+                _buildStepperButton(
+                  context,
+                  Icons.add,
+                  controller.customAmount < 20.0
+                      ? () => controller.incrementCustomAmount()
+                      : null,
+                ),
+              ],
+            ),
+          ],
+        );
+    }
+  }
+
+  Widget _buildStepperButton(
+    BuildContext context,
+    IconData icon,
+    VoidCallback? onTap,
+  ) {
+    final bool disabled = onTap == null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: disabled ? context.theme.cardColor : AppColor.primaryOrange,
+          shape: BoxShape.circle,
+          boxShadow:
+              disabled
+                  ? null
+                  : [
+                    BoxShadow(
+                      color: AppColor.primaryOrange.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+          border: disabled ? Border.all(color: AppColor.neutralGrey200) : null,
+        ),
+        child: Icon(
+          icon,
+          color: disabled ? AppColor.neutralGrey400 : Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
   Widget _buildAIChatButton(
     BuildContext context,
     ScanCalorieController controller,
@@ -642,7 +911,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Enhanced header with better spacing and visual hierarchy
             Container(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
@@ -654,8 +922,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      Icons
-                          .fastfood, // different icon from the meal info section
+                      Icons.fastfood,
                       color: AppColor.primaryGreen,
                       size: 20,
                     ),
@@ -667,7 +934,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       children: [
                         Text(
                           'meal_breakdown'.tr,
-                          // match meal name title style
                           style: context.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             letterSpacing: -0.5,
@@ -676,9 +942,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                         const SizedBox(height: 2),
                         Text(
                           'tap_to_edit_portions'.tr,
-                          // match meal info small label style
                           style: context.textTheme.titleSmall?.copyWith(
-                            // keep a slightly muted tone to mirror meal info label
                             color: context.theme.textTheme.titleSmall?.color,
                             fontWeight: FontWeight.w500,
                           ),
@@ -707,15 +971,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               ),
             ),
             const SizedBox(height: 20),
-            // Enhanced scrollable item list with improved design
             Container(
               decoration: BoxDecoration(
                 color: context.theme.cardColor.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: AppColor.neutralGrey200.withOpacity(0.5),
-                  width: 1,
-                ),
               ),
               child: SizedBox(
                 height: math.min(itemsHeight(controller.items.length), 320),
@@ -743,7 +1002,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                     final units = const [
                       'piece',
                       'g',
-                    ]; // Limited to only piece and g
+                    ];
                     String currentUnit = it.unit;
                     return Container(
                       padding: const EdgeInsets.all(16),
@@ -759,14 +1018,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                           ),
                         ],
                       ),
-        // Header display with meal kcal and name
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Item header with name and badge
                           Row(
                             children: [
-                              // Enhanced header with spacing and visual hierarchy
                               Container(
                                 width: 4,
                                 height: 24,
@@ -792,7 +1048,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              // Enhanced scrollable item list
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -846,10 +1101,8 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Controls row (amount input and unit selector)
                           Row(
                             children: [
-                              // Amount input with modern styling
                               Container(
                                 width: 80,
                                 height: 44,
@@ -896,10 +1149,8 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                               ),
                               const SizedBox(width: 10),
 
-                              // Unit selector with enhanced styling
                               StatefulBuilder(
                                 builder: (ctx2, setState) {
-                                  // Ensure currentUnit is valid, fallback to 'g' if invalid
                                   if (!['piece', 'g'].contains(currentUnit)) {
                                     currentUnit = 'g';
                                   }
@@ -964,7 +1215,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
 
                           const SizedBox(height: 12),
 
-                          // Nutrition info with full width display
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -992,7 +1242,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                       MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Left column: Protein (top) and Fat (bottom)
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -1006,7 +1255,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
-                                              '${'nut_prt'.tr}: ${it.protein.round()}${'gram_unit'.tr}',
+                                              '${'nut_prt'.tr}: ${it.protein.toStringAsFixed(1)}${'gram_unit'.tr}',
                                               style: context.textTheme.bodySmall
                                                   ?.copyWith(
                                                     color:
@@ -1027,7 +1276,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
-                                              '${'nut_fat'.tr}: ${it.fat.round()}${'gram_unit'.tr}',
+                                              '${'nut_fat'.tr}: ${it.fat.toStringAsFixed(1)}${'gram_unit'.tr}',
                                               style: context.textTheme.bodySmall
                                                   ?.copyWith(
                                                     color:
@@ -1041,7 +1290,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                       ],
                                     ),
 
-                                    // Right column: Calories (top) and Carbs (bottom)
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.end,
@@ -1070,7 +1318,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                         Row(
                                           children: [
                                             Text(
-                                              '${'nut_carb'.tr}: ${it.carbs.round()}${'gram_unit'.tr}',
+                                              '${'nut_carb'.tr}: ${it.carbs.toStringAsFixed(1)}${'gram_unit'.tr}',
                                               style: context.textTheme.bodySmall
                                                   ?.copyWith(
                                                     color:
@@ -1103,14 +1351,13 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
             ),
             const SizedBox(height: 16),
             const SizedBox(height: 16),
-            // totals shown in capsule macro grid above
           ],
         ),
       ),
     );
   }
 
-  // Approximate height for N items (each row ~90 px + padding)
+  // items list height
   double itemsHeight(int count) {
     final per = 100.0;
     return count * per + 20.0;

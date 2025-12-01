@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
 import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:foodcalorietracker/widgets/ContinueButton.dart';
 import 'package:foodcalorietracker/widgets/ScannerOverlay.dart';
 import 'package:foodcalorietracker/widgets/BottomModePicker.dart';
 import 'package:get/get.dart';
@@ -25,28 +25,37 @@ class ScanFoodView extends GetView<ScanFoodController> {
 
             return Stack(
               children: [
-                // Camera preview
+                // camera preview
                 if (controller.cameraController?.value.isInitialized == true)
                   Positioned.fill(
                     child: CameraPreview(controller.cameraController!),
                   ),
 
-                // Scanning overlay and permission prompt
+                // scanner overlay
                 Positioned.fill(
                   child: Center(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
-                        // Activate camera to trigger permission prompt
-                        if (controller.cameraController?.value.isInitialized != true) {
+                        // trigger camera permission
+                        if (controller.cameraController?.value.isInitialized !=
+                            true) {
                           controller.ensureCameraActive();
                         }
                       },
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          ScannerOverlay(width: 300, height: 260, borderRadius: 36),
-                          if (controller.cameraController?.value.isInitialized != true)
+                          ScannerOverlay(
+                            width: 300,
+                            height: 260,
+                            borderRadius: 36,
+                          ),
+                          if (controller
+                                  .cameraController
+                                  ?.value
+                                  .isInitialized !=
+                              true)
                             Container(
                               width: 300,
                               height: 260,
@@ -54,7 +63,11 @@ class ScanFoodView extends GetView<ScanFoodController> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.photo_camera_outlined, color: Colors.white70, size: 36),
+                                  const Icon(
+                                    Icons.photo_camera_outlined,
+                                    color: Colors.white70,
+                                    size: 36,
+                                  ),
                                   const SizedBox(height: 8),
                                   Text(
                                     'grant_camera_access_in_scanner'.tr,
@@ -73,7 +86,99 @@ class ScanFoodView extends GetView<ScanFoodController> {
                   ),
                 ),
 
-                // Controls + meal picker at bottom
+                // flash toggle
+                if (!controller.isLoading)
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: GestureDetector(
+                      onTap: controller.toggleFlash,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color:
+                              controller.isFlashOn
+                                  ? AppColor.primaryOrange
+                                  : Colors.black.withOpacity(0.35),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color:
+                                controller.isFlashOn
+                                    ? AppColor.primaryOrange
+                                    : Colors.white.withOpacity(0.14),
+                            width: controller.isFlashOn ? 2 : 1,
+                          ),
+                          boxShadow:
+                              controller.isFlashOn
+                                  ? [
+                                    BoxShadow(
+                                      color: AppColor.primaryOrange.withOpacity(
+                                        0.4,
+                                      ),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                  : null,
+                        ),
+                        child: Icon(
+                          controller.isFlashOn
+                              ? Icons.flash_on_rounded
+                              : Icons.flash_off_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // barcode toggle
+                if (!controller.isLoading)
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: GestureDetector(
+                      onTap: controller.toggleBarcodeMode,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color:
+                              controller.isBarcodeMode
+                                  ? AppColor.primaryOrange
+                                  : Colors.black.withOpacity(0.35),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color:
+                                controller.isBarcodeMode
+                                    ? AppColor.primaryOrange
+                                    : Colors.white.withOpacity(0.14),
+                            width: controller.isBarcodeMode ? 2 : 1,
+                          ),
+                          boxShadow:
+                              controller.isBarcodeMode
+                                  ? [
+                                    BoxShadow(
+                                      color: AppColor.primaryOrange.withOpacity(
+                                        0.4,
+                                      ),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                  : null,
+                        ),
+                        child: Icon(
+                          Icons.barcode_reader,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // bottom controls
                 if (!controller.isLoading)
                   Positioned(
                     bottom: 12,
@@ -82,7 +187,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // control buttons row
+                        // control buttons
                         _buildControlButtons(context, controller),
                         const SizedBox(height: 6),
                         // meal picker
@@ -91,7 +196,9 @@ class ScanFoodView extends GetView<ScanFoodController> {
                           child: BottomModePicker(
                             items: meals,
                             currentIndex: meals.indexOf(controller.isIdentify),
-                            onChanged: (idx) => controller.onChangeIdentify(meals[idx]),
+                            onChanged:
+                                (idx) =>
+                                    controller.onChangeIdentify(meals[idx]),
                             height: 42,
                           ),
                         ),
@@ -99,7 +206,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                     ),
                   ),
 
-                // Loading overlay
+                // loading overlay
                 if (controller.isLoading) _buildLoadingOverlay(context),
               ],
             );
@@ -109,18 +216,21 @@ class ScanFoodView extends GetView<ScanFoodController> {
     );
   }
 
-  Widget _buildControlButtons(BuildContext context, ScanFoodController controller) {
+  Widget _buildControlButtons(
+    BuildContext context,
+    ScanFoodController controller,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        // Gallery icon-only button (left)
+        // gallery button
         _buildIconControlButton(
           context,
           icon: Icons.photo_library_outlined,
           onTap: () => controller.takeImage(ImageSource.gallery, context),
         ),
 
-        // Minimal capture button
+        // capture button
         GestureDetector(
           onTap: () => controller.onTackImageCamera(context),
           child: Container(
@@ -147,7 +257,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
           ),
         ),
 
-        // Tips icon-only button (right)
+        // tips button
         _buildIconControlButton(
           context,
           icon: Icons.lightbulb_outline,
@@ -172,18 +282,9 @@ class ScanFoodView extends GetView<ScanFoodController> {
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.35),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withOpacity(0.14),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.14), width: 1),
         ),
-        child: Center(
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: iconSize,
-          ),
-        ),
+        child: Center(child: Icon(icon, color: Colors.white, size: iconSize)),
       ),
     );
   }
@@ -195,16 +296,13 @@ class ScanFoodView extends GetView<ScanFoodController> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.theme.cardColor,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ModernLoadingIndicator(
-                size: 48,
-                color: AppColor.primaryOrange,
-              ),
+              ModernLoadingIndicator(size: 48, color: AppColor.primaryOrange),
               const SizedBox(height: 16),
               Text(
                 'Analyzing food...',
@@ -231,10 +329,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Colors.black,
-                Colors.grey[900]!,
-              ],
+              colors: [Colors.black, Colors.grey[900]!],
             ),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
@@ -243,7 +338,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  // Handle
+                  // handle
                   Container(
                     width: 40,
                     height: 4,
@@ -252,10 +347,10 @@ class ScanFoodView extends GetView<ScanFoodController> {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
-                  // Title
+
+                  // title
                   Text(
                     'Snap Tips'.tr,
                     style: context.textTheme.headlineLarge?.copyWith(
@@ -263,10 +358,10 @@ class ScanFoodView extends GetView<ScanFoodController> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
-                  // Good example
+
+                  // good example
                   _buildTipExample(
                     context,
                     AppAssets.scanComplete,
@@ -275,10 +370,10 @@ class ScanFoodView extends GetView<ScanFoodController> {
                     AppColor.success,
                     Icons.check_circle,
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
-                  // Bad examples
+
+                  // bad examples
                   Row(
                     children: [
                       Expanded(
@@ -304,17 +399,11 @@ class ScanFoodView extends GetView<ScanFoodController> {
                       ),
                     ],
                   ),
-                  
+
                   const Spacer(),
-                  
-                  // Continue button
-                  ModernButton(
-                    text: 'Continue'.tr,
-                    style: ModernButtonStyle.gradient,
-                    size: ModernButtonSize.large,
-                    width: double.infinity,
-                    onPressed: () => Get.back(),
-                  ),
+
+                  // continue button
+                  ContinueButton(onTap: () => Get.back()),
                 ],
               ),
             ),
@@ -337,10 +426,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Column(
         children: [
@@ -364,11 +450,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                     color: color,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    statusIcon,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  child: Icon(statusIcon, color: Colors.white, size: 16),
                 ),
               ),
             ],

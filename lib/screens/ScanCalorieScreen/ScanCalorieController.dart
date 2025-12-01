@@ -16,13 +16,26 @@ import '../../Model/SqlDailyCalorieModel.dart';
 import '../../shared/services/UsdaApiService.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../Model/MealBreakdownItem.dart';
+import '../../shared/services/rate_us_service.dart';
+import '../../shared/services/widget_promotion_service.dart';
+
+enum ScanUnit { unit, gram, ml, cup }
 
 class ScanCalorieController extends GetxController {
   Map<String, dynamic> argument = Get.arguments;
-  late File image;
+  File? image;
   static const int kMinQuantity = 1;
   static const int kMaxQuantity = 100;
 
+  // unit selection
+  ScanUnit selectedUnit = ScanUnit.unit;
+  double customAmount =
+      1.0;
+  double totalNetWeight = 100.0;
+  String netWeightUnit = 'g';
+  bool isBarcode = false;
+
+  // quantity multiplier
   int quantity = kMinQuantity;
   String response = "";
   String type = "";
@@ -31,12 +44,12 @@ class ScanCalorieController extends GetxController {
   bool isLoading = true;
   int calorie = 0;
   int calorieQuantity = 0;
-  int protein = 0;
-  int proteinQuantity = 0;
-  int carbs = 0;
-  int carbsQuantity = 0;
-  int fats = 0;
-  int fatsQuantity = 0;
+  double protein = 0.0;
+  double proteinQuantity = 0.0;
+  double carbs = 0.0;
+  double carbsQuantity = 0.0;
+  double fats = 0.0;
+  double fatsQuantity = 0.0;
   final dbHelper = DatabaseHelper();
   int? usdaFdcId;
   bool usdaVerified = false;
@@ -60,9 +73,9 @@ class ScanCalorieController extends GetxController {
 
   String buildMealDescription() {
     final cal = _fmt(calorieQuantity);
-    final protein = _fmt(proteinQuantity);
-    final carbs = _fmt(carbsQuantity);
-    final fat = _fmt(fatsQuantity);
+    final protein = _fmt(proteinQuantity.round());
+    final carbs = _fmt(carbsQuantity.round());
+    final fat = _fmt(fatsQuantity.round());
 
     final containsText = 'meal_contains'.tr;
     final calUnit = 'kcal_unit'.tr;
@@ -98,11 +111,7 @@ class ScanCalorieController extends GetxController {
         .replaceAll(RegExp(r'_+'), '_')
         .replaceAll(RegExp(r'^_|_$'), '');
 
-    final candidateKeys = <String>[
-      'foods.$normalized',
-      normalized,
-      trimmed,
-    ];
+    final candidateKeys = <String>['foods.$normalized', normalized, trimmed];
 
     for (final key in candidateKeys) {
       final translated = key.tr;
@@ -226,93 +235,127 @@ class ScanCalorieController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
     image = argument['image'];
-    type = argument['type'];
-    final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image);
-    final parsedItems = _parseMealItems(itemsJsonStr);
-    if (parsedItems.isNotEmpty) {
-      await _enrichItemsWithUsda(parsedItems);
-      items
-        ..clear()
-        ..addAll(parsedItems);
+    image = argument['image'];
+    type = argument['type'] ?? argument['isIdentify'] ?? '';
 
-      calorie = totalKcalFromItems;
-      protein = totalProteinFromItems;
-      carbs = totalCarbsFromItems;
-      fats = totalFatFromItems;
-      _recalculateTotals();
-      mealName = _buildCompositeName(parsedItems);
+    if (argument['fromBarcode'] == true || argument['calorie'] != null) {
+      isBarcode = true;
+      mealName = argument['name'] ?? 'Unknown';
       mealNameEnglish = mealName;
-      usdaVerified = items.every((it) => it.usdaVerified);
-    } else {
-      await OpenAiCalling.sentImageApi(image).then((value) async {
-        response = value;
-        log('RAW_AI_RESPONSE => $response');
-        Map<String, dynamic> parsed = parseNutritionWithName(response);
-        Map<String, int> nutrition = {
-          'calories': parsed['calories'] ?? 0,
-          'protein': parsed['protein'] ?? 0,
-          'carbs': parsed['carbs'] ?? 0,
-          'fat': parsed['fat'] ?? 0,
-        };
 
-        mealName = (parsed['food_name'] as String?)?.trim() ?? '';
-        mealNameEnglish =
-            (parsed['food_name_english'] as String?)?.trim() ?? '';
+      calorie = (argument['calorie'] as num?)?.toInt() ?? 0;
+      protein = (argument['protein'] as num?)?.toDouble() ?? 0.0;
+      carbs = (argument['carbs'] as num?)?.toDouble() ?? 0.0;
+      fats = (argument['fats'] as num?)?.toDouble() ?? 0.0;
 
-        calorie = nutrition["calories"] ?? 0;
-        calorieQuantity = calorie;
-        protein = nutrition["protein"] ?? 0;
-        proteinQuantity = protein;
-        carbs = nutrition["carbs"] ?? 0;
-        carbsQuantity = carbs;
-        fats = nutrition["fat"] ?? 0;
-        fatsQuantity = fats;
-      });
+      final rawWeight = argument['netWeight'];
+      if (rawWeight != null) {
+        if (rawWeight is num) {
+          totalNetWeight = rawWeight.toDouble();
+        } else if (rawWeight is String) {
+          totalNetWeight = double.tryParse(rawWeight) ?? 100.0;
+        }
+      }
 
-      try {
-        String searchName =
-            mealNameEnglish.trim().isNotEmpty
-                ? mealNameEnglish.trim()
-                : mealName.trim();
-        if (searchName.isNotEmpty) {
-          log('USDA_SEARCH => Searching for: "$searchName"');
-          final results = await _usda.searchFood(searchName, limit: 3);
-          log('USDA_RESULTS => Found ${results.length} results');
-          if (results.isNotEmpty) {
-            for (int i = 0; i < results.length; i++) {
-              log(
-                'USDA_RESULT_$i => ${results[i].description} (${results[i].calories} cal)',
-              );
+      netWeightUnit = (argument['unit'] as String?) ?? 'g';
+
+      selectedUnit = ScanUnit.unit;
+      customAmount = 1.0;
+
+      _recalculateTotals();
+      isLoading = false;
+      update();
+      return;
+    }
+
+    if (image != null) {
+      final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image!);
+      final parsedItems = _parseMealItems(itemsJsonStr);
+      if (parsedItems.isNotEmpty) {
+        await _enrichItemsWithUsda(parsedItems);
+        items
+          ..clear()
+          ..addAll(parsedItems);
+
+        calorie = totalKcalFromItems;
+        protein = totalProteinFromItems.toDouble();
+        carbs = totalCarbsFromItems.toDouble();
+        fats = totalFatFromItems.toDouble();
+        _recalculateTotals();
+        mealName = _buildCompositeName(parsedItems);
+        mealNameEnglish = mealName;
+        usdaVerified = items.every((it) => it.usdaVerified);
+      } else {
+        await OpenAiCalling.sentImageApi(image!).then((value) async {
+          response = value;
+          log('RAW_AI_RESPONSE => $response');
+          Map<String, dynamic> parsed = parseNutritionWithName(response);
+          Map<String, int> nutrition = {
+            'calories': parsed['calories'] ?? 0,
+            'protein': parsed['protein'] ?? 0,
+            'carbs': parsed['carbs'] ?? 0,
+            'fat': parsed['fat'] ?? 0,
+          };
+
+          mealName = (parsed['food_name'] as String?)?.trim() ?? '';
+          mealNameEnglish =
+              (parsed['food_name_english'] as String?)?.trim() ?? '';
+
+          calorie = nutrition["calories"] ?? 0;
+          calorieQuantity = calorie;
+          protein = (nutrition["protein"] as num?)?.toDouble() ?? 0.0;
+          proteinQuantity = protein;
+          carbs = (nutrition["carbs"] as num?)?.toDouble() ?? 0.0;
+          carbsQuantity = carbs;
+          fats = (nutrition["fat"] as num?)?.toDouble() ?? 0.0;
+          fatsQuantity = fats;
+        });
+
+        try {
+          String searchName =
+              mealNameEnglish.trim().isNotEmpty
+                  ? mealNameEnglish.trim()
+                  : mealName.trim();
+          if (searchName.isNotEmpty) {
+            log('USDA_SEARCH => Searching for: "$searchName"');
+            final results = await _usda.searchFood(searchName, limit: 3);
+            log('USDA_RESULTS => Found ${results.length} results');
+            if (results.isNotEmpty) {
+              for (int i = 0; i < results.length; i++) {
+                log(
+                  'USDA_RESULT_$i => ${results[i].description} (${results[i].calories} cal)',
+                );
+              }
+              usdaOptions = results;
+              final UsdaFood picked = results.first;
+              usdaFdcId = picked.fdcId;
+              usdaVerified = true;
+              log('USDA_VERIFIED => Using: ${picked.description}');
+              calorie = picked.calories.round();
+              calorieQuantity = calorie * quantity;
+              protein = picked.protein.toDouble();
+              proteinQuantity = protein * quantity;
+              carbs = picked.carbs.toDouble();
+              carbsQuantity = carbs * quantity;
+              fats = picked.fats.toDouble();
+              fatsQuantity = fats * quantity;
+            } else {
+              log('USDA_NO_RESULTS => No results found for: "$searchName"');
+              usdaVerified = false;
             }
-            usdaOptions = results;
-            final UsdaFood picked = results.first;
-            usdaFdcId = picked.fdcId;
-            usdaVerified = true;
-            log('USDA_VERIFIED => Using: ${picked.description}');
-            calorie = picked.calories.round();
-            calorieQuantity = calorie * quantity;
-            protein = picked.protein.round();
-            proteinQuantity = protein * quantity;
-            carbs = picked.carbs.round();
-            carbsQuantity = carbs * quantity;
-            fats = picked.fats.round();
-            fatsQuantity = fats * quantity;
           } else {
-            log('USDA_NO_RESULTS => No results found for: "$searchName"');
+            log('USDA_NO_MEAL_NAME => No meal name to search');
             usdaVerified = false;
           }
-        } else {
-          log('USDA_NO_MEAL_NAME => No meal name to search');
+        } catch (e) {
+          log('USDA_ERROR => $e');
           usdaVerified = false;
+          try {
+            Fluttertoast.showToast(
+              msg: "Couldn’t fetch USDA data, using AI estimation instead.",
+            );
+          } catch (_) {}
         }
-      } catch (e) {
-        log('USDA_ERROR => $e');
-        usdaVerified = false;
-        try {
-          Fluttertoast.showToast(
-            msg: "Couldn’t fetch USDA data, using AI estimation instead.",
-          );
-        } catch (_) {}
       }
     }
     isLoading = false;
@@ -331,25 +374,21 @@ class ScanCalorieController extends GetxController {
       String raw = text.trim();
       if (raw.isEmpty) return [];
 
-      // 1) If response contains markdown code fences, extract inner JSON
       if (raw.contains('```')) {
         final start = raw.indexOf('```');
         final end = raw.lastIndexOf('```');
         if (end > start) {
           raw = raw.substring(start + 3, end).trim();
-          // drop leading language tag like "json"
           if (raw.startsWith('json')) {
             raw = raw.substring(4).trimLeft();
           }
         }
       }
 
-      // 2) If model returned just an array, wrap it
       if (raw.startsWith('[') && raw.endsWith(']')) {
         raw = '{"mealItems": $raw}';
       }
 
-      // 3) If still not an object, try to extract the first {...} block containing mealItems
       if (!(raw.startsWith('{') && raw.endsWith('}'))) {
         final mealIdx = raw.indexOf('mealItems');
         if (mealIdx != -1) {
@@ -362,41 +401,44 @@ class ScanCalorieController extends GetxController {
       }
 
       final dynamic decoded = jsonDecode(raw);
-      final List list = (decoded is Map)
-          ? (decoded['mealItems'] as List? ?? const [])
-          : (decoded is List ? decoded : const []);
+      final List list =
+          (decoded is Map)
+              ? (decoded['mealItems'] as List? ?? const [])
+              : (decoded is List ? decoded : const []);
 
-      final result = list.map<MealBreakdownItem>((it) {
-        final name = (it['name'] ?? '').toString();
-        final en = (it['english_name'] ?? '').toString();
-        final portionType = (it['portionType'] ?? '').toString();
-        final count = (it['count'] ?? 1);
-        final doubleCount = (count is num)
-            ? count.toDouble()
-            : double.tryParse(count.toString()) ?? 1.0;
-        final ew = (it['estimatedWeight'] ?? 0);
-        final estimatedWeight = (ew is num)
-            ? ew.toDouble()
-            : double.tryParse(ew.toString()) ?? 0.0;
+      final result =
+          list.map<MealBreakdownItem>((it) {
+            final name = (it['name'] ?? '').toString();
+            final en = (it['english_name'] ?? '').toString();
+            final portionType = (it['portionType'] ?? '').toString();
+            final count = (it['count'] ?? 1);
+            final doubleCount =
+                (count is num)
+                    ? count.toDouble()
+                    : double.tryParse(count.toString()) ?? 1.0;
+            final ew = (it['estimatedWeight'] ?? 0);
+            final estimatedWeight =
+                (ew is num)
+                    ? ew.toDouble()
+                    : double.tryParse(ew.toString()) ?? 0.0;
 
-        // Convert to expected estimatedAmount string
-        String estimatedAmount;
-        if (portionType == 'pieces' && doubleCount > 0) {
-          estimatedAmount = '${doubleCount.toInt()} pieces';
-        } else {
-          estimatedAmount = '${estimatedWeight.toInt()}g';
-        }
+            String estimatedAmount;
+            if (portionType == 'pieces' && doubleCount > 0) {
+              estimatedAmount = '${doubleCount.toInt()} pieces';
+            } else {
+              estimatedAmount = '${estimatedWeight.toInt()}g';
+            }
 
-        var item = MealBreakdownItem.fromBasic(
-          name: name,
-          englishName: en.isNotEmpty ? en : name,
-          estimatedAmount: estimatedAmount,
-        );
-        if (estimatedWeight > 0) {
-          item = item.copyWith(grams: estimatedWeight);
-        }
-        return item;
-      }).toList();
+            var item = MealBreakdownItem.fromBasic(
+              name: name,
+              englishName: en.isNotEmpty ? en : name,
+              estimatedAmount: estimatedAmount,
+            );
+            if (estimatedWeight > 0) {
+              item = item.copyWith(grams: estimatedWeight);
+            }
+            return item;
+          }).toList();
 
       log('ITEMS_PARSED => ${result.length} item(s)');
       return result;
@@ -426,17 +468,14 @@ class ScanCalorieController extends GetxController {
                   .recalcFromPer100g();
           list[i] = updated;
         } else {
-          // No USDA result — provide a small fallback for common foods like eggs
           final nameLower = it.englishName.toLowerCase();
           if (nameLower.contains('egg')) {
-            // Boiled egg approximate per 100g (more conservative values)
             list[i] =
                 it
                     .copyWith(
                       usdaVerified: false,
-                      kcalPer100g:
-                          146.0, // closer to your expected 146 cal for ~100g
-                      proteinPer100g: 12.0, // matches your expected 12g
+                      kcalPer100g: 146.0,
+                      proteinPer100g: 12.0,
                       carbsPer100g: 1.1,
                       fatPer100g: 10.0,
                     )
@@ -447,16 +486,14 @@ class ScanCalorieController extends GetxController {
           }
         }
       } catch (e) {
-        // In case of API error, attempt same egg fallback before giving zeroes
         final nameLower = it.englishName.toLowerCase();
         if (nameLower.contains('egg')) {
           list[i] =
               it
                   .copyWith(
                     usdaVerified: false,
-                    kcalPer100g:
-                        146.0, // closer to your expected 146 cal for ~100g
-                    proteinPer100g: 12.0, // matches your expected 12g
+                    kcalPer100g: 146.0,
+                    proteinPer100g: 12.0,
                     carbsPer100g: 1.1,
                     fatPer100g: 10.0,
                   )
@@ -471,7 +508,7 @@ class ScanCalorieController extends GetxController {
     }
   }
 
-  // Editing APIs for UI
+  // item editing
   void updateItemAmount(int index, double newAmount, String unit) {
     if (index < 0 || index >= items.length) return;
     final it = items[index];
@@ -479,9 +516,9 @@ class ScanCalorieController extends GetxController {
     switch (unit) {
       case 'piece':
         grams = newAmount * 50;
-        break; // 1 piece ≈ 50g
+        break;
       default:
-        grams = newAmount; // g
+        grams = newAmount;
     }
     final updated =
         it
@@ -493,19 +530,17 @@ class ScanCalorieController extends GetxController {
 
   void _recalcFromItems() {
     calorie = totalKcalFromItems;
-    protein = totalProteinFromItems;
-    carbs = totalCarbsFromItems;
-    fats = totalFatFromItems;
+    protein = totalProteinFromItems.toDouble();
+    carbs = totalCarbsFromItems.toDouble();
+    fats = totalFatFromItems.toDouble();
     _recalculateTotals();
     update();
   }
 
-  // _promptUsdaSelection removed: always select the first USDA result now.
-
-  /// Set quantity with validation (clamped between kMinQuantity and kMaxQuantity)
+  /// set quantity with validation
   void setQuantity(int q, {bool notify = true}) {
     final newQ = q.clamp(kMinQuantity, kMaxQuantity);
-    if (newQ == quantity) return; // no-op if unchanged
+    if (newQ == quantity) return;
     quantity = newQ;
     _recalculateTotals();
     if (notify) update();
@@ -513,7 +548,6 @@ class ScanCalorieController extends GetxController {
 
   void incrementQuantity() {
     if (quantity >= kMaxQuantity) {
-      // Inform user they reached maximum allowed quantity
       try {
         Fluttertoast.showToast(
           msg: "Maximum quantity reached",
@@ -527,22 +561,98 @@ class ScanCalorieController extends GetxController {
   }
 
   void decrementQuantity() {
-    // ensure we never go below the minimum
     setQuantity(quantity - 1);
   }
 
   void _recalculateTotals() {
-    calorieQuantity = calorie * quantity;
-    proteinQuantity = protein * quantity;
-    carbsQuantity = carbs * quantity;
-    fatsQuantity = fats * quantity;
+    if (isBarcode) {
+      double multiplier = 0.0;
+
+      switch (selectedUnit) {
+        case ScanUnit.unit:
+          multiplier = (totalNetWeight * customAmount) / 100.0;
+          break;
+
+        case ScanUnit.gram:
+        case ScanUnit.ml:
+          multiplier = customAmount / 100.0;
+          break;
+
+        case ScanUnit.cup:
+          multiplier = (240.0 * customAmount) / 100.0;
+          break;
+      }
+
+      calorieQuantity = (calorie * multiplier).round();
+      proteinQuantity = protein * multiplier;
+      carbsQuantity = carbs * multiplier;
+      fatsQuantity = fats * multiplier;
+    } else {
+      calorieQuantity = (calorie * quantity).round();
+      proteinQuantity = protein * quantity;
+      carbsQuantity = carbs * quantity;
+      fatsQuantity = fats * quantity;
+    }
+  }
+
+  void setUnit(ScanUnit unit) {
+    selectedUnit = unit;
+    switch (unit) {
+      case ScanUnit.unit:
+        customAmount = 1.0;
+        break;
+      case ScanUnit.gram:
+      case ScanUnit.ml:
+        customAmount = totalNetWeight;
+        break;
+      case ScanUnit.cup:
+        customAmount = 1.0;
+        break;
+    }
+    _recalculateTotals();
+    update();
+  }
+
+  void updateCustomAmount(double val) {
+    if (selectedUnit == ScanUnit.unit || selectedUnit == ScanUnit.cup) {
+      customAmount = (val * 4).round() / 4;
+    } else {
+      customAmount = val;
+    }
+    _recalculateTotals();
+    update();
+  }
+
+  void incrementCustomAmount() {
+    if (customAmount >= 20.0) return;
+    customAmount = (customAmount + 0.25).clamp(0.25, 20.0);
+    _recalculateTotals();
+    update();
+  }
+
+  void decrementCustomAmount() {
+    if (customAmount <= 0.25) return;
+    customAmount = (customAmount - 0.25).clamp(0.25, 20.0);
+    _recalculateTotals();
+    update();
+  }
+
+  void updateCustomAmountFromText(String val) {
+    if (val.isEmpty) return;
+    final parsed = double.tryParse(val);
+    if (parsed != null) {
+      final maxVal = totalNetWeight * 20;
+      customAmount = parsed.clamp(0.0, maxVal);
+      _recalculateTotals();
+      update();
+    }
   }
 
   void setBaseMacros({
     required int calories,
-    required int proteinG,
-    required int carbsG,
-    required int fatsG,
+    required double proteinG,
+    required double carbsG,
+    required double fatsG,
     bool notify = true,
   }) {
     calorie = calories;
@@ -562,9 +672,9 @@ class ScanCalorieController extends GetxController {
           date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
           totalGoal: ConstantUserMaster.calorieGoal,
           calorie: calorieQuantity,
-          protein: proteinQuantity,
-          carbs: carbsQuantity,
-          fats: fatsQuantity,
+          protein: proteinQuantity.round(),
+          carbs: carbsQuantity.round(),
+          fats: fatsQuantity.round(),
         ),
       );
       await dbHelper.insertDailyWater(
@@ -576,6 +686,8 @@ class ScanCalorieController extends GetxController {
         ),
       );
       Get.offAllNamed(Routes.leadingView);
+      RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
+      WidgetPromotionService().showPromotionIfNeeded();
     } else {
       if (calorieData.last.date ==
           DateFormat('dd-MM-yyyy').format(DateTime.now())) {
@@ -590,9 +702,9 @@ class ScanCalorieController extends GetxController {
               date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
               totalGoal: ConstantUserMaster.calorieGoal,
               calorie: calorieData.last.calorie + calorieQuantity,
-              protein: calorieData.last.protein + proteinQuantity,
-              carbs: calorieData.last.carbs + carbsQuantity,
-              fats: calorieData.last.fats + fatsQuantity,
+              protein: calorieData.last.protein + proteinQuantity.round(),
+              carbs: calorieData.last.carbs + carbsQuantity.round(),
+              fats: calorieData.last.fats + fatsQuantity.round(),
             ),
           );
           await dbHelper.insertDailyWater(
@@ -604,6 +716,8 @@ class ScanCalorieController extends GetxController {
             ),
           );
           Get.offAllNamed(Routes.leadingView);
+          RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
+          WidgetPromotionService().showPromotionIfNeeded();
         }
       } else {
         int id = await dbHelper.insertCalorie(
@@ -611,9 +725,9 @@ class ScanCalorieController extends GetxController {
             date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
             totalGoal: ConstantUserMaster.calorieGoal,
             calorie: calorieQuantity,
-            protein: proteinQuantity,
-            carbs: carbsQuantity,
-            fats: fatsQuantity,
+            protein: proteinQuantity.round(),
+            carbs: carbsQuantity.round(),
+            fats: fatsQuantity.round(),
           ),
         );
         await dbHelper.insertDailyWater(
@@ -625,6 +739,8 @@ class ScanCalorieController extends GetxController {
           ),
         );
         Get.offAllNamed(Routes.leadingView);
+        RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
+        WidgetPromotionService().showPromotionIfNeeded();
       }
     }
   }
@@ -639,7 +755,7 @@ class ScanCalorieController extends GetxController {
       Match? match = regex.firstMatch(text);
       if (match != null) {
         String numeric = match.group(1)!;
-        numeric = numeric.replaceAll(',', ''); // Remove commas
+        numeric = numeric.replaceAll(',', '');
         return int.parse(numeric);
       }
       return 0;
@@ -653,7 +769,7 @@ class ScanCalorieController extends GetxController {
     };
   }
 
-  // New: Try JSON first, fallback to legacy regex. Also parse optional food_name.
+  // parse nutrition json
   Map<String, dynamic> parseNutritionWithName(String text) {
     try {
       final trimmed = text.trim();
@@ -700,24 +816,22 @@ class ScanCalorieController extends GetxController {
     } catch (e) {
       log('JSON_PARSE_FAIL => $e');
     }
-    // Fallback regex method
     final vals = extractNutritionalValues(text);
     return {'food_name': '', 'food_name_english': '', ...vals};
   }
 
   addSqlData(String type) async {
-    var imageData = await saveImageToFile(image.path);
+    var imageData = image != null ? await saveImageToFile(image!.path) : null;
     dbHelper.insertCalorieHistory(
       CalorieHistoryModel(
         calorie: calorieQuantity,
         date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
-        protein: proteinQuantity,
-        carbs: carbsQuantity,
+        protein: proteinQuantity.round(),
+        carbs: carbsQuantity.round(),
         image: imageData,
-        fats: fatsQuantity,
+        fats: fatsQuantity.round(),
         type: type,
         fdcId: usdaFdcId,
-        // Note: schema lacks fdcId; consider adding if needed later
         title:
             (mealNameEnglish.trim().isNotEmpty
                 ? mealNameEnglish.trim()
@@ -736,7 +850,7 @@ class ScanCalorieController extends GetxController {
 
     if (imageData == null) {
       print("Error: Image data is null");
-      return null; // Return null if image data is null
+      return null;
     }
 
     await file.writeAsBytes(imageData);
@@ -745,17 +859,16 @@ class ScanCalorieController extends GetxController {
 
   Future<Uint8List?> fileToBytes(String? filePath) async {
     if (filePath == null || filePath.isEmpty) {
-      return null; // Return null if filePath is null or empty.
+      return null;
     }
 
     final file = File(filePath);
 
     if (await file.exists()) {
-      return await file
-          .readAsBytes(); // Read and return the bytes if the file exists.
+      return await file.readAsBytes();
     } else {
       print("Error: File does not exist");
-      return null; // Return null if the file does not exist.
+      return null;
     }
   }
 
@@ -787,7 +900,7 @@ class ScanCalorieController extends GetxController {
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
@@ -798,9 +911,9 @@ class ScanCalorieController extends GetxController {
                     date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
                     totalGoal: ConstantUserMaster.calorieGoal,
                     calorie: calorieData.last.calorie + calorieQuantity,
-                    protein: calorieData.last.protein + proteinQuantity,
-                    carbs: calorieData.last.carbs + carbsQuantity,
-                    fats: calorieData.last.fats + fatsQuantity,
+                    protein: calorieData.last.protein + proteinQuantity.round(),
+                    carbs: calorieData.last.carbs + carbsQuantity.round(),
+                    fats: calorieData.last.fats + fatsQuantity.round(),
                   ),
                 );
                 await dbHelper.insertDailyWater(
@@ -813,6 +926,7 @@ class ScanCalorieController extends GetxController {
                 );
 
                 Get.offAllNamed(Routes.leadingView);
+                WidgetPromotionService().showPromotionIfNeeded();
               },
               child: Text(
                 "Add More Calories".tr,

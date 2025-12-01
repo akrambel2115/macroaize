@@ -27,9 +27,10 @@ class RecipesController extends GetxController {
   List<Recipe> get allRecipes => _allRecipes;
   int get currentPageIndex => _currentPageIndex.value;
   int get currentPageNumber => _currentPageIndex.value + 1;
-  int get totalPages => _cachedAllRecipes != null
-      ? ((_cachedAllRecipes!.length - 1) ~/ _recipesPerPage) + 1
-      : 0;
+  int get totalPages =>
+      _cachedAllRecipes != null
+          ? ((_cachedAllRecipes!.length - 1) ~/ _recipesPerPage) + 1
+          : 0;
   bool get hasPreviousPage => _currentPageIndex.value > 0;
   bool get hasNextPage => _currentPageIndex.value < totalPages - 1;
 
@@ -75,15 +76,16 @@ class RecipesController extends GetxController {
     if (q.isEmpty) {
       _loadCurrentPage();
     } else {
-      final filtered = _cachedAllRecipes!.where((r) {
-        return r.title.toLowerCase().contains(q) || r.description.toLowerCase().contains(q);
-      }).toList();
+      final filtered =
+          _cachedAllRecipes!.where((r) {
+            return r.title.toLowerCase().contains(q) ||
+                r.description.toLowerCase().contains(q);
+          }).toList();
       _allRecipes.assignAll(filtered);
     }
     try {
       update();
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   Future<void> loadRecipes({bool forceRefresh = false}) async {
@@ -104,7 +106,6 @@ class RecipesController extends GetxController {
 
       _currentPageIndex(0);
       _loadCurrentPage();
-
     } catch (e, st) {
       debugPrint('Error loading recipes: $e');
       debugPrint(st.toString());
@@ -145,7 +146,6 @@ class RecipesController extends GetxController {
 
       _currentPageIndex(newPageIndex);
       _loadCurrentPage();
-
     } catch (e) {
       debugPrint('Error changing page: $e');
     } finally {
@@ -174,43 +174,58 @@ class RecipesController extends GetxController {
 
   bool _isCacheValid() {
     return _cachedTopRecipes != null &&
-           _cachedAllRecipes != null &&
-           _lastLoadTime != null &&
-           DateTime.now().difference(_lastLoadTime!) < _cacheTimeout;
+        _cachedAllRecipes != null &&
+        _lastLoadTime != null &&
+        DateTime.now().difference(_lastLoadTime!) < _cacheTimeout;
   }
 
   Future<void> _loadAndCacheData() async {
     try {
-      final jsonStr = await rootBundle.loadString('lib/constant/recipeLibrary.json');
+      final jsonStr = await rootBundle.loadString(
+        'lib/constant/recipeLibrary.json',
+      );
       final List<dynamic> data = json.decode(jsonStr);
 
-      final all = data.map((e) {
-        final Map<String, dynamic> item = Map<String, dynamic>.from(e as Map);
+      final all =
+          data.map((e) {
+            final Map<String, dynamic> item = Map<String, dynamic>.from(
+              e as Map,
+            );
 
-        // Prefer explicit English keys for the display fields used by Recipe
-        if (item['title_en'] != null && (item['title'] == null || item['title'].toString().isEmpty)) {
-          item['title'] = item['title_en'];
-        }
-        if (item['difficulty_en'] != null && (item['difficulty'] == null || item['difficulty'].toString().isEmpty)) {
-          item['difficulty'] = item['difficulty_en'];
-        }
-        if (item['tags_en'] != null && (item['tags'] == null || (item['tags'] as List).isEmpty)) {
-          item['tags'] = item['tags_en'];
-        }
-        if (item['description_en'] != null && (item['description'] == null || item['description'].toString().isEmpty)) {
-          item['description'] = item['description_en'];
-        }
-        if (item['instructions_en'] != null && (item['instructions'] == null || (item['instructions'] as List).isEmpty)) {
-          item['instructions'] = item['instructions_en'];
-        }
-        if (item['ingredients_en'] != null && (item['ingredients'] == null || (item['ingredients'] as List).isEmpty)) {
-          item['ingredients'] = item['ingredients_en'];
-        }
+            // Prefer explicit English keys
+            if (item['title_en'] != null &&
+                (item['title'] == null || item['title'].toString().isEmpty)) {
+              item['title'] = item['title_en'];
+            }
+            if (item['difficulty_en'] != null &&
+                (item['difficulty'] == null ||
+                    item['difficulty'].toString().isEmpty)) {
+              item['difficulty'] = item['difficulty_en'];
+            }
+            if (item['tags_en'] != null &&
+                (item['tags'] == null || (item['tags'] as List).isEmpty)) {
+              item['tags'] = item['tags_en'];
+            }
+            if (item['description_en'] != null &&
+                (item['description'] == null ||
+                    item['description'].toString().isEmpty)) {
+              item['description'] = item['description_en'];
+            }
+            if (item['instructions_en'] != null &&
+                (item['instructions'] == null ||
+                    (item['instructions'] as List).isEmpty)) {
+              item['instructions'] = item['instructions_en'];
+            }
+            if (item['ingredients_en'] != null &&
+                (item['ingredients'] == null ||
+                    (item['ingredients'] as List).isEmpty)) {
+              item['ingredients'] = item['ingredients_en'];
+            }
 
-        return Recipe.fromJson(item);
-      }).toList();
+            return Recipe.fromJson(item);
+          }).toList();
 
-      // For top recipes, pick the first 8 (or fewer) items from the list
+      // pick the first <= 8items from the list
       final top = all.length <= 8 ? List<Recipe>.from(all) : all.sublist(0, 8);
 
       _cachedTopRecipes = top;
@@ -234,21 +249,14 @@ class RecipesController extends GetxController {
   void _handleLoadingError(dynamic error, [StackTrace? stackTrace]) {
     try {
       debugPrint('Recipes load failed. Error: $error');
-      if (stackTrace != null) debugPrint('StackTrace: ${stackTrace.toString()}');
-    } catch (_) {
-    }
+      if (stackTrace != null)
+        debugPrint('StackTrace: ${stackTrace.toString()}');
+    } catch (_) {}
 
     NotificationService.showError('failed_to_load_recipes');
   }
 
   Map<String, List<Recipe>> _generateMockData() {
-    // Removed large hardcoded mock data — fall back to empty lists so the
-    // recipes page will rely on `recipeLibrary.json`. This keeps the app
-    // functional if the asset is missing (empty view). If desired we can
-    // provide a small curated fallback set instead.
-    return {
-      'top': <Recipe>[],
-      'all': <Recipe>[],
-    };
+    return {'top': <Recipe>[], 'all': <Recipe>[]};
   }
 }

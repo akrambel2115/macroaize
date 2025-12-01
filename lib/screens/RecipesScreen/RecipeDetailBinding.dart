@@ -6,6 +6,5 @@ class RecipeDetailBinding extends Bindings {
   RecipeDetailBinding({required this.recipe});
 
   @override
-  void dependencies() {
-  }
+  void dependencies() {}
 }

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:foodcalorietracker/shared/services/usage_service.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:foodcalorietracker/shared/services/barcode_scanning_service.dart';
+import 'package:foodcalorietracker/shared/services/openfoodfacts_service.dart';
 import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -19,12 +21,19 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   String isIdentify = "snack(s)";
   File? imagePath;
   bool isLoading = false;
+  bool isBarcodeMode = false;
+  bool isFlashOn = false;
   final ImagePicker _picker = ImagePicker();
   bool _permissionDialogShown = false;
 
-  // Add usage service and app user service
+  // services
   final _usageService = UsageService();
   final _appUserService = AppUserService();
+
+  // barcode scanning
+  BarcodeScanningService? _barcodeScanner;
+  final _openFoodFactsService = OpenFoodFactsService();
+  bool _isProcessingBarcode = false;
 
   @override
   Future<void> onInit() async {
@@ -80,25 +89,28 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
               ),
               barrierDismissible: true,
             );
-          } catch (_) {
-            // Ignore any dialog errors
-          }
+          } catch (_) {}
         }
       }
-      // Swallow errors to avoid forcing permission at startup
+      // silent fail startup
       update();
     }
   }
 
-  // Public: ensure camera is initialized when scanner becomes visible again
+  // init camera visible
   Future<void> ensureCameraActive() async {
     if (cameraController == null ||
         cameraController!.value.isInitialized == false) {
       await _ensureCameraReady();
     }
+
+    // resume barcode scan
+    if (isBarcodeMode && !_isProcessingBarcode) {
+      await _startBarcodeScanning();
+    }
   }
 
-  // Public: release camera resources when scanner is not visible
+  // release camera resources
   void releaseCamera() {
     try {
       cameraController?.dispose();
@@ -107,17 +119,225 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     update();
   }
 
+  void toggleFlash() async {
+    if (cameraController == null || !cameraController!.value.isInitialized)
+      return;
+
+    isFlashOn = !isFlashOn;
+    try {
+      await cameraController!.setFlashMode(
+        isFlashOn ? FlashMode.torch : FlashMode.off,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error toggling flash: $e');
+      }
+      // revert on fail
+      isFlashOn = !isFlashOn;
+    }
+    update();
+  }
+
+  void toggleBarcodeMode() async {
+    isBarcodeMode = !isBarcodeMode;
+
+    if (isBarcodeMode) {
+      // init scanner
+      _barcodeScanner = BarcodeScanningService();
+
+      // start scanning
+      await _startBarcodeScanning();
+
+      // show notification
+      Get.showSnackbar(
+        GetSnackBar(
+          messageText: Text(
+            'barcode_activated'.tr,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.black.withOpacity(0.8),
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.TOP,
+          margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
+          borderRadius: 12,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
+      );
+    } else {
+      // stop scanning
+      await _stopBarcodeScanning();
+
+      // dispose scanner
+      _barcodeScanner?.dispose();
+      _barcodeScanner = null;
+
+      // show notification
+      Get.showSnackbar(
+        GetSnackBar(
+          messageText: Text(
+            'barcode_deactivated'.tr,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.black.withOpacity(0.8),
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.TOP,
+          margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
+          borderRadius: 12,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
+      );
+    }
+
+    update();
+  }
+
+  Future<void> _startBarcodeScanning() async {
+    if (cameraController == null || !cameraController!.value.isInitialized) {
+      return;
+    }
+
+    try {
+      await cameraController!.startImageStream((CameraImage image) async {
+        if (!isBarcodeMode || _isProcessingBarcode) return;
+
+        final barcode = await _barcodeScanner?.scanBarcodeFromImage(image);
+
+        if (barcode != null && barcode.isNotEmpty) {
+          _isProcessingBarcode = true;
+          await _handleBarcodeDetected(barcode);
+        }
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error starting image stream: $e');
+      }
+    }
+  }
+
+  Future<void> _stopBarcodeScanning() async {
+    if (cameraController != null && cameraController!.value.isStreamingImages) {
+      try {
+        await cameraController!.stopImageStream();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error stopping image stream: $e');
+        }
+      }
+    }
+    _isProcessingBarcode = false;
+  }
+
+  Future<void> _handleBarcodeDetected(String barcode) async {
+    try {
+      // stop stream
+      await _stopBarcodeScanning();
+
+      // show loading
+      isLoading = true;
+      update();
+
+      // fetch product
+      final productData = await _openFoodFactsService.fetchProductByBarcode(
+        barcode,
+      );
+
+      isLoading = false;
+      update();
+
+      if (productData != null) {
+        // navigate results
+        await _navigateToResults(productData);
+      } else {
+        // product not found
+        NotificationService.showError('product_not_found');
+
+        // restart scanning
+        _isProcessingBarcode = false;
+        if (isBarcodeMode) {
+          await _startBarcodeScanning();
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error handling barcode: $e');
+      }
+      isLoading = false;
+      update();
+
+      NotificationService.showError('error_fetching_product');
+
+      // restart scanning
+      _isProcessingBarcode = false;
+      if (isBarcodeMode) {
+        await _startBarcodeScanning();
+      }
+    }
+  }
+
+  Future<void> _navigateToResults(Map<String, dynamic> productData) async {
+    // format food data
+    final foodData = {
+      'calorie': productData['calories']?.round() ?? 0,
+      'protein': productData['protein'] ?? 0.0,
+      'carbs': productData['carbs'] ?? 0.0,
+      'fats': productData['fat'] ?? 0.0,
+      'name': productData['name'] ?? 'Unknown Product',
+      'quantity': productData['quantity'] ?? '100g',
+    };
+
+    // stop scanning
+    await _stopBarcodeScanning();
+
+    // release camera
+    releaseCamera();
+
+    update();
+
+    // navigate results
+    await Get.toNamed(
+      Routes.scanCalorieView,
+      arguments: {
+        'name': foodData['name'],
+        'calorie': foodData['calorie'],
+        'protein': foodData['protein'],
+        'carbs': foodData['carbs'],
+        'fats': foodData['fats'],
+        'quantity': foodData['quantity'],
+        'isIdentify': isIdentify,
+        'fromBarcode': true,
+        'netWeight': productData['product_quantity'],
+        'unit': productData['product_quantity_unit'],
+      },
+    );
+
+    // reinit camera
+    await ensureCameraActive();
+
+    // reset flag
+    _isProcessingBarcode = false;
+  }
+
   @override
   void onClose() {
-    // TODO: implement onClose
+    _stopBarcodeScanning();
+    _barcodeScanner?.dispose();
+    cameraController?.dispose();
     super.onClose();
     WidgetsBinding.instance.removeObserver(this);
-    cameraController?.dispose();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     cameraController?.dispose();
   }
@@ -126,10 +346,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
-      // Release camera when app goes to background or becomes inactive
+      // release on background
       releaseCamera();
     }
-    // On resume: we keep it lazy; it will be ensured when scanner becomes visible again
   }
 
   takeImage(ImageSource source, BuildContext context) async {
@@ -144,16 +363,18 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   }
 
   onTackImageCamera(BuildContext context) async {
-    // ACCOUNT ACTIVATION GATING: Check if account is activated before allowing scan
+    // check activation
     if (!_appUserService.checkAccountActivation('scanner')) {
       return;
     }
 
     isLoading = true;
     update();
-    if (cameraController == null || cameraController!.value.isInitialized == false) {
+    if (cameraController == null ||
+        cameraController!.value.isInitialized == false) {
       await _ensureCameraReady();
-      if (cameraController == null || cameraController!.value.isInitialized == false) {
+      if (cameraController == null ||
+          cameraController!.value.isInitialized == false) {
         isLoading = false;
         update();
         return;
@@ -189,24 +410,24 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       if (croppedFile != null) {
         File image = File(croppedFile.path);
 
-      isLoading = true;
-      update();
+        isLoading = true;
+        update();
         isLoading = true;
         update();
 
         try {
-          // Call backend to check and increment usage
+          // check usage limit
           final result = await _usageService.incrementUsage('scan');
 
           if (result.success) {
-            // Usage allowed - proceed with scan
+            // proceed scan
             releaseCamera();
             Get.toNamed(
               Routes.scanCalorieView,
               arguments: {'image': image, 'type': isIdentify},
             );
           } else {
-            // Usage limit reached - show premium dialog
+            // limit reached
             releaseCamera();
             NotificationService.showError(
               result.message.isNotEmpty
@@ -220,7 +441,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
           final user = FirebaseAuth.instance.currentUser;
           if (user == null) {
-            // User not authenticated - prompt to login
+            // prompt login
             releaseCamera();
             await _handleAuthenticationRequired();
             return;
@@ -230,13 +451,13 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           if (el.contains('limit') ||
               el.contains('permission-denied') ||
               (el.contains('daily') && el.contains('limit'))) {
-            // Limit-related error -> centralized friendly notification
+            // limit error
             releaseCamera();
             NotificationService.showError('daily_limit_reached_try_again');
             return;
           }
 
-          // Other error
+          // other error
           releaseCamera();
           NotificationService.showError('unable_to_process_scan_try_again');
         }
@@ -246,8 +467,6 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       }
     }
   }
-
-  // usage limit dialog replaced by NotificationService.showError
 
   Future<void> _handleAuthenticationRequired() async {
     final success = await AuthModal.show();
@@ -272,8 +491,6 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       );
     }
   }
-
-  // scanLimit persistence removed; limits are enforced on backend via UsageService
 
   onChangeIdentify(String value) {
     isIdentify = value;
