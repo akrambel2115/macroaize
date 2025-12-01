@@ -9,7 +9,7 @@ class AppColor {
   // Modern Design System 
 
   // Primary Brand Colors
-  static const Color primaryOrange = Color(0xFFfb7414);
+  static const Color primaryOrange = Color(0xFFFB7414);
   static const Color primaryOrangeLight = Color(0xFFff8c42);
   static const Color primaryOrangeDark = Color(0xFFe66100);
 
@@ -90,6 +90,5 @@ class AppColor {
   static const Color secondary = Color(0xFF6B73FF);
   static const Color accent = Color(0xFFFF6B9D);
   static const Color tertiary = Color(0xFFFFB347);
-  // History-specific accent (alias to primaryOrange to keep central control)
   static const Color historyAccent = primaryOrange;
 }
