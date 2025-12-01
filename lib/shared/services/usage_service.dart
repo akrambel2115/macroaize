@@ -4,7 +4,6 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_usage.dart';
 
-/// Usage service: hydrates counts/limits, enforces caps, and syncs
 class UsageService {
   UsageService({FirebaseFunctions? functions})
     : _functions =
@@ -36,7 +35,7 @@ class UsageService {
   int get scanCount => _scanCount;
   int get chatCount => _chatCount;
 
-  /// Reactive stream of usage snapshots
+  // reactive usage stream
   Stream<UserUsage> get usageStream {
     if (!_streamInitialized) {
       _streamInitialized = true;
@@ -65,7 +64,7 @@ class UsageService {
     }
   }
 
-  /// Hydrate from backend
+  // hydrate from backend
   Future<void> getUsage() async {
     await _ensureAuthenticated();
     try {
@@ -74,7 +73,7 @@ class UsageService {
       final data = Map<String, dynamic>.from(res.data ?? {});
 
       _isPremium = data['isPremium'] == true;
-      // Supports flat or nested response shapes
+      // flat or nested response
       if (data.containsKey('scanCount') || data.containsKey('scanLimit')) {
         _scanCount = (data['scanCount'] as num?)?.toInt() ?? 0;
         _chatCount = (data['chatCount'] as num?)?.toInt() ?? 0;
@@ -102,7 +101,7 @@ class UsageService {
     }
   }
 
-  /// Push local counters to server
+  // push counters to server
   Future<void> syncUsage() async {
     await _ensureAuthenticated();
     if (_syncInFlight) return;
@@ -124,7 +123,7 @@ class UsageService {
     _emitUsageSnapshot();
   }
 
-  /// Increment usage for the given action
+  // increment action usage
   Future<UsageIncrementResult> incrementUsage(String actionType) async {
     await _ensureAuthenticated();
     if (!_hydrated) {
@@ -224,7 +223,7 @@ class UsageService {
     );
   }
 
-  /// Hydration retries with exponential backoff
+  // retry with backoff
   void _startHydrationRetries() {
     if (_hydrationRetryInFlight) return;
     _hydrationRetryInFlight = true;
@@ -276,7 +275,7 @@ class UsageService {
     }
   }
 
-  /// Cleanup resources
+  // cleanup resources
   void dispose() {
     try {
       _authSub?.cancel();

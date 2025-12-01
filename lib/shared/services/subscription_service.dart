@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/subscription.dart';
 import 'dart:async';
 
-/// Subscription service
 class SubscriptionService {
 	SubscriptionService({FirebaseFirestore? firestore, FirebaseFunctions? functions})
 			: _firestore = firestore ?? FirebaseFirestore.instance,
@@ -13,7 +12,7 @@ class SubscriptionService {
 	final FirebaseFirestore _firestore;
 	final FirebaseFunctions _functions;
 
-	/// Real-time stream of the current user's subscription.
+	// realtime subscription stream
   Stream<Subscription?> get subscriptionStream {
     return _authAwareSubscriptionStream();
   }
@@ -38,7 +37,7 @@ class SubscriptionService {
     }
   }
 
-  /// Create Chargily payment and return checkout URL.
+  // create chargily checkout
   Future<Uri> createChargilyPayment({required String planType}) async {
 		final user = FirebaseAuth.instance.currentUser;
 		if (user == null) {
@@ -51,7 +50,6 @@ class SubscriptionService {
 		return Uri.parse(url);
 	}
 
-  /// Get the current user's subscription once; returns null if not found.
   Future<Subscription?> getSubscriptionOnce() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw StateError('Not authenticated');

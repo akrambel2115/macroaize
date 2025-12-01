@@ -19,27 +19,28 @@ class UpdateGuardService extends GetxService {
 
       if (_isOutdated(current, required)) {
         final message = config.updateMessage;
-        final storeUrl = Platform.isIOS
-            ? (config.appStoreUrl.isNotEmpty ? config.appStoreUrl : config.shareUrlIos)
-            : (config.playStoreUrl.isNotEmpty ? config.playStoreUrl : config.shareUrlAndroid);
+        final storeUrl =
+            Platform.isIOS
+                ? (config.appStoreUrl.isNotEmpty
+                    ? config.appStoreUrl
+                    : config.shareUrlIos)
+                : (config.playStoreUrl.isNotEmpty
+                    ? config.playStoreUrl
+                    : config.shareUrlAndroid);
 
         await _showBlockingDialog(message, storeUrl);
       }
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   /// Compare versions ignoring pre-release/build labels
   bool _isOutdated(String current, String required) {
     List<int> parse(String v) {
       final core = v.split('+').first.split('-').first.trim();
-      return core
-          .split('.')
-          .map((part) {
-            final m = RegExp(r'^(\d+)').firstMatch(part);
-            return m != null ? int.parse(m.group(1)!) : 0;
-          })
-          .toList();
+      return core.split('.').map((part) {
+        final m = RegExp(r'^(\d+)').firstMatch(part);
+        return m != null ? int.parse(m.group(1)!) : 0;
+      }).toList();
     }
 
     final c = parse(current);
@@ -75,7 +76,10 @@ class UpdateGuardService extends GetxService {
               Icon(
                 Icons.system_update,
                 size: 48,
-                color: Get.isDarkMode ? AppColor.primaryOrange : Get.theme.primaryColor,
+                color:
+                    Get.isDarkMode
+                        ? AppColor.primaryOrange
+                        : Get.theme.primaryColor,
               ),
               const SizedBox(height: 16),
               Text(
@@ -88,8 +92,14 @@ class UpdateGuardService extends GetxService {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Get.isDarkMode ? AppColor.primaryOrange : Get.theme.primaryColor,
-                    foregroundColor: Get.isDarkMode ? Colors.white : Get.theme.colorScheme.onPrimary,
+                    backgroundColor:
+                        Get.isDarkMode
+                            ? AppColor.primaryOrange
+                            : Get.theme.primaryColor,
+                    foregroundColor:
+                        Get.isDarkMode
+                            ? Colors.white
+                            : Get.theme.colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -98,15 +108,15 @@ class UpdateGuardService extends GetxService {
                   onPressed: () async {
                     final uri = Uri.parse(storeUrl);
                     if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     }
                   },
                   child: const Text(
                     'Update Now',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
