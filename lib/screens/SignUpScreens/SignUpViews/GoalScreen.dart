@@ -15,6 +15,7 @@ class GoalScreen extends GetView<SignUpController> {
             selectedGoal: c.selectedWGoal,
             onSelectGoal: c.onChangeGoal,
             onDesiredWeightChanged: (kg) => c.onChangeDesiredWeight(kg),
+            initialWeight: c.selectedWeightKg,
             onContinue: () {
               if (c.selectedWGoal.isNotEmpty) {
                 c.onChangeView();

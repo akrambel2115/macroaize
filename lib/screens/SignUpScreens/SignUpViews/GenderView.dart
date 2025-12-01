@@ -14,8 +14,7 @@ class GenderView extends GetView<SignUpController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
-  // Back button moved to the SignUp scaffold to keep layout consistent
+        // Back button moved to the SignUp scaffold to keep layout consistent
         Text(
           "Choose Your Gender".tr,
           style: context.theme.textTheme.headlineLarge,
@@ -34,7 +33,6 @@ class GenderView extends GetView<SignUpController> {
                     assetPath: 'assets/lottie/male.json',
                     selected: c.selectedGender == 'Male',
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       c.onChangeGender('Male');
                     },
                   ),
@@ -46,7 +44,6 @@ class GenderView extends GetView<SignUpController> {
                     assetPath: 'assets/lottie/female.json',
                     selected: c.selectedGender == 'Female',
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       c.onChangeGender('Female');
                     },
                   ),
@@ -55,17 +52,23 @@ class GenderView extends GetView<SignUpController> {
             ).paddingOnly(top: 8, bottom: 8);
           },
         ),
-  // Removed third gender option (Other) per August 2025 policy update.
+        // Removed third gender option (Other) per August 2025 policy update.
         Spacer(),
         GetBuilder<SignUpController>(
           builder: (controller) {
             return ModernButton(
               text: "Continue".tr,
-              onPressed: controller.selectedGender.isNotEmpty ? controller.onChangeView : null,
+              onPressed:
+                  controller.selectedGender.isNotEmpty
+                      ? controller.onChangeView
+                      : null,
               style: ModernButtonStyle.primary,
               size: ModernButtonSize.medium,
               borderRadius: BorderRadius.circular(30),
-              icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+              icon: const Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white,
+              ),
               height: 50,
               width: double.infinity,
             );
@@ -93,7 +96,8 @@ class _AvatarCard extends StatefulWidget {
   State<_AvatarCard> createState() => _AvatarCardState();
 }
 
-class _AvatarCardState extends State<_AvatarCard> with SingleTickerProviderStateMixin {
+class _AvatarCardState extends State<_AvatarCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Duration _compDuration = const Duration(milliseconds: 1200);
 
@@ -113,7 +117,11 @@ class _AvatarCardState extends State<_AvatarCard> with SingleTickerProviderState
 
   Future<void> _playActionOnce() async {
     try {
-      await _controller.animateTo(1.0, duration: _compDuration * 0.6, curve: Curves.easeOut);
+      await _controller.animateTo(
+        1.0,
+        duration: _compDuration * 0.6,
+        curve: Curves.easeOut,
+      );
     } catch (_) {}
     if (mounted) {
       _controller.repeat();
@@ -122,8 +130,8 @@ class _AvatarCardState extends State<_AvatarCard> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
-  final isSelected = widget.selected;
-  final baseLabelStyle = Theme.of(context).textTheme.titleMedium;
+    final isSelected = widget.selected;
+    final baseLabelStyle = Theme.of(context).textTheme.titleMedium;
     return AnimatedScale(
       scale: isSelected ? 1.05 : 1.0,
       duration: const Duration(milliseconds: 220),
@@ -142,7 +150,10 @@ class _AvatarCardState extends State<_AvatarCard> with SingleTickerProviderState
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             // Simple solid orange background when selected; no outline/glow
-            color: isSelected ? AppColor.primaryOrange : Theme.of(context).cardColor,
+            color:
+                isSelected
+                    ? AppColor.primaryOrange
+                    : Theme.of(context).cardColor,
             // keep a neutral shadow for depth, same for both states
             boxShadow: [
               BoxShadow(
@@ -180,7 +191,9 @@ class _AvatarCardState extends State<_AvatarCard> with SingleTickerProviderState
               const SizedBox(height: 10),
               Text(
                 widget.label,
-                style: baseLabelStyle?.copyWith(color: isSelected ? Colors.white : baseLabelStyle.color),
+                style: baseLabelStyle?.copyWith(
+                  color: isSelected ? Colors.white : baseLabelStyle.color,
+                ),
               ),
             ],
           ),

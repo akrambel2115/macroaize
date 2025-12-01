@@ -27,11 +27,11 @@ import 'subscription_status_card.dart';
 import '../../ThemeService/ThemeController.dart';
 import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import 'package:intl/intl.dart';
+import 'package:foodcalorietracker/shared/services/widget_promotion_service.dart';
 
-// Configuration for settings menus
+// settings menu config
 class SettingConfig {
-
-  // Customization menu items
+  // customization items
   static const List<Map<String, dynamic>> customizationItems = [
     {
       'title': 'Personal details',
@@ -52,9 +52,15 @@ class SettingConfig {
       'color': AppColor.secondary,
       'route': Routes.chatHistoryView,
     },
+    {
+      'title': 'Home Screen Widgets',
+      'icon': Icons.widgets_outlined,
+      'color': AppColor.primaryGreen,
+      'action': 'widgets',
+    },
   ];
 
-  // Legal menu items
+  // legal items
   static const List<Map<String, dynamic>> legalItems = [
     {
       'title': 'Terms and Condition',
@@ -69,24 +75,22 @@ class SettingConfig {
   ];
 }
 
-/// Settings view with organized sections and config-driven menus
+// settings view
 class SettingView extends GetView<SettingController> {
   const SettingView({super.key});
 
-  // Create a single instance to avoid recreating service on every build
+  // singleton services
   static final _subscriptionService = SubscriptionService();
   static final _influencerService = InfluencerService();
 
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => SettingController());
-  // Refresh AppConfigService when settings open
+    // refresh config
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
         Get.find<AppConfigService>().refresh();
-      } catch (_) {
-        // AppConfigService might not be ready yet
-      }
+      } catch (_) {}
     });
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
@@ -96,12 +100,12 @@ class SettingView extends GetView<SettingController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Premium card / subscription status
+            // premium section
             _buildPremiumSection(context),
 
             const SizedBox(height: 16),
 
-            // Daily usage (non-premium only)
+            // daily usage
             StreamBuilder<Subscription?>(
               stream: _subscriptionService.subscriptionStream,
               builder: (context, snap) {
@@ -119,25 +123,20 @@ class SettingView extends GetView<SettingController> {
               },
             ),
 
-            // Influencer section
             _buildInfluencerSection(context),
 
-            // Profile section
             _buildProfileSection(context),
 
             const SizedBox(height: 24),
 
-            // Customization section
             _buildCustomizationSection(context),
 
             const SizedBox(height: 24),
 
-            // Legal section
             _buildLegalSection(context),
 
             const SizedBox(height: 24),
 
-            // App info and reset
             _buildAppInfoSection(context),
 
             const SizedBox(height: 32),
@@ -154,7 +153,7 @@ class SettingView extends GetView<SettingController> {
     return StreamBuilder<Subscription?>(
       stream: subscriptionService.subscriptionStream,
       builder: (context, subscriptionSnapshot) {
-        // Hide only while loading; once we have a value, show for non-premium
+        // hide while loading
         if (subscriptionSnapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox.shrink();
         }
@@ -173,12 +172,11 @@ class SettingView extends GetView<SettingController> {
                   stream: FirebaseAuth.instance.authStateChanges(),
                   builder: (context, authSnap) {
                     final user = authSnap.data;
-                    // If user not authenticated: show login prompt AND free-tier limits from Remote Config
+                    // show login prompt
                     if (user == null) {
                       final cfg = Get.find<AppConfigService>();
                       return Obx(() {
-                        // Listen to isLoaded to rebuild when config refreshes
-                        cfg.isLoaded; // trigger rebuild
+                        cfg.isLoaded;
                         final remainingScans = cfg.freeScanLimit;
                         final remainingChats = cfg.freeChatLimit;
 
@@ -199,15 +197,20 @@ class SettingView extends GetView<SettingController> {
                                   ),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
-                                    color: AppColor.primaryOrange.withOpacity(0.04),
+                                    color: AppColor.primaryOrange.withOpacity(
+                                      0.04,
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
                                       Container(
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
-                                          color: AppColor.primaryOrange.withOpacity(0.12),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: AppColor.primaryOrange
+                                              .withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         child: Icon(
                                           Icons.login,
@@ -219,10 +222,11 @@ class SettingView extends GetView<SettingController> {
                                       Expanded(
                                         child: Text(
                                           'login_to_view_usage'.tr,
-                                          style: context.textTheme.bodyMedium?.copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColor.primaryOrange,
-                                          ),
+                                          style: context.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColor.primaryOrange,
+                                              ),
                                         ),
                                       ),
                                       Icon(
@@ -256,12 +260,13 @@ class SettingView extends GetView<SettingController> {
                       });
                     }
 
-                    // Authenticated: show live usage values
-                    return StreamBuilder<UserUsage?>(
-                      stream: usageService.usageStream,
+                    // show live usage
+                    return StreamBuilder<UserUsage?>(                      stream: usageService.usageStream,
                       builder: (context, usageSnapshot) {
-                        if (usageSnapshot.connectionState == ConnectionState.waiting || !usageSnapshot.hasData) {
-                          // Show a tiny placeholder while we hydrate from server to avoid misleading defaults
+                        if (usageSnapshot.connectionState ==
+                                ConnectionState.waiting ||
+                            !usageSnapshot.hasData) {
+                          // loading placeholder
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             child: Column(
@@ -285,14 +290,15 @@ class SettingView extends GetView<SettingController> {
                             ),
                           );
                         }
-                        final usage = usageSnapshot.data ??
+                        final usage =
+                            usageSnapshot.data ??
                             const UserUsage(scanCount: 0, chatCount: 0);
-                        final remainingScans =
-                            (usage.scanLimit - usage.scanCount)
-                                .clamp(0, usage.scanLimit);
-                        final remainingChats =
-                            (usage.chatLimit - usage.chatCount)
-                                .clamp(0, usage.chatLimit);
+                        final remainingScans = (usage.scanLimit -
+                                usage.scanCount)
+                            .clamp(0, usage.scanLimit);
+                        final remainingChats = (usage.chatLimit -
+                                usage.chatCount)
+                            .clamp(0, usage.chatLimit);
 
                         return Column(
                           children: [
@@ -330,14 +336,13 @@ class SettingView extends GetView<SettingController> {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, authSnapshot) {
-        // If not authenticated, show Go Premium card
+        // show premium card
         if (authSnapshot.data == null) {
           return _buildPremiumCard(context);
         }
 
-        // If authenticated, listen to subscription
-        return StreamBuilder<Subscription?>(
-          stream: _subscriptionService.subscriptionStream,
+        // listen subscription
+        return StreamBuilder<Subscription?>(          stream: _subscriptionService.subscriptionStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -354,7 +359,7 @@ class SettingView extends GetView<SettingController> {
                 child: SubscriptionStatusCard(subscription: sub),
               );
             }
-            // Fallback to Go Premium card
+            // fallback premium card
             return _buildPremiumCard(context);
           },
         );
@@ -458,7 +463,7 @@ class SettingView extends GetView<SettingController> {
         ModernFadeSlideTransition(
           beginOffset: const Offset(0, 0.2),
           child: ModernCard(
-            // Make the entire profile card tappable and navigate to Personal Details
+            // navigate personal details
             onTap: () => Get.toNamed(Routes.personalDetailsView),
             child: Column(
               children: [
@@ -578,7 +583,7 @@ class SettingView extends GetView<SettingController> {
                   onTap: () => Get.toNamed(Routes.languageView),
                 ),
                 const SizedBox(height: 12),
-                // Dynamic customization items from config
+                // dynamic items
                 ...SettingConfig.customizationItems.asMap().entries.map((
                   entry,
                 ) {
@@ -596,7 +601,13 @@ class SettingView extends GetView<SettingController> {
                             : null,
                         item['icon'] as IconData,
                         item['color'] as Color,
-                        onTap: () => Get.toNamed(item['route'] as String),
+                        onTap: () {
+                          if (item.containsKey('route')) {
+                            Get.toNamed(item['route'] as String);
+                          } else if (item['action'] == 'widgets') {
+                            WidgetPromotionService().showPromotion();
+                          }
+                        },
                       ),
                       if (!isLast) const SizedBox(height: 12),
                     ],
@@ -660,15 +671,17 @@ class SettingView extends GetView<SettingController> {
           child: ModernCard(
             child: Column(
               children: [
-                Obx(() => _buildSettingRow(
-                      context,
-                      "version".tr,
-                      controller.appVersion.value.isNotEmpty
-                          ? controller.appVersion.value
-                          : 'unknown',
-                      Icons.code_outlined,
-                      AppColor.neutralGrey600,
-                    )),
+                Obx(
+                  () => _buildSettingRow(
+                    context,
+                    "version".tr,
+                    controller.appVersion.value.isNotEmpty
+                        ? controller.appVersion.value
+                        : 'unknown',
+                    Icons.code_outlined,
+                    AppColor.neutralGrey600,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 _buildSettingRow(
                   context,
@@ -765,7 +778,7 @@ class SettingView extends GetView<SettingController> {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        // Use a light gray overlay on press in light mode to avoid black highlight
+        // light mode overlay
         overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
           final isLight = Theme.of(context).brightness == Brightness.light;
           if (isLight) return AppColor.neutralGrey100.withOpacity(0.5);
@@ -855,7 +868,7 @@ class SettingView extends GetView<SettingController> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Warning icon
+              // warning icon
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -871,7 +884,7 @@ class SettingView extends GetView<SettingController> {
 
               const SizedBox(height: 16),
 
-              // Title
+              // title
               Text(
                 "Confirm Reset".tr,
                 style: context.textTheme.headlineMedium?.copyWith(
@@ -882,7 +895,7 @@ class SettingView extends GetView<SettingController> {
 
               const SizedBox(height: 8),
 
-              // Content
+              // content
               Text(
                 "Are you sure you want to Reset Data?".tr,
                 style: context.textTheme.bodyLarge?.copyWith(
@@ -893,7 +906,7 @@ class SettingView extends GetView<SettingController> {
 
               const SizedBox(height: 24),
 
-              // Buttons
+              // buttons
               Row(
                 children: [
                   Expanded(
@@ -939,7 +952,7 @@ class SettingView extends GetView<SettingController> {
     return StreamBuilder<Influencer?>(
       stream: _influencerService.influencerStream,
       builder: (context, snapshot) {
-        // Only show section if user is an influencer
+        // show if influencer
         if (!snapshot.hasData || snapshot.data == null) {
           return const SizedBox.shrink();
         }
@@ -961,11 +974,9 @@ class SettingView extends GetView<SettingController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Promo code row
-                    // Promo code block
+                    // promo code block
                     StatefulBuilder(
                       builder: (context, setState) {
-                        // Width is handled via IntrinsicWidth with an invisible baseline text
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1143,7 +1154,7 @@ class SettingView extends GetView<SettingController> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Withdrawal history action row
+                    // withdrawal history
                     _buildSettingRow(
                       context,
                       'view_withdrawal_history'.tr,
@@ -1153,7 +1164,7 @@ class SettingView extends GetView<SettingController> {
                       onTap: () => Get.toNamed(Routes.withdrawalHistoryView),
                     ),
 
-                    // Expiration info if applicable
+                    // expiration info
                     if (influencer.expirationDate != null) ...[
                       const SizedBox(height: 16),
                       _buildExpirationInfo(context, influencer),
@@ -1169,9 +1180,6 @@ class SettingView extends GetView<SettingController> {
     );
   }
 
-  // Removed old Influencer-specific section builders in favor of unified Setting rows
-
-  // ignore: unused_element
   Widget _buildWithdrawalHistoryItem(
     BuildContext context,
     WithdrawalRecord withdrawal,
@@ -1295,14 +1303,12 @@ class SettingView extends GetView<SettingController> {
     return const SizedBox.shrink();
   }
 
-  // Removed unused _buildStatCard in favor of standard setting rows
-
   void _copyPromoCode(String promoCode) {
     try {
       Clipboard.setData(ClipboardData(text: promoCode));
       NotificationService.showSuccess('promo_code_copied'.tr);
     } catch (e) {
-      // If clipboard access fails, still inform the user
+      // clipboard failed
       NotificationService.showError(
         'copy_failed'.trParams({'error': e.toString()}),
       );
@@ -1353,7 +1359,7 @@ class SettingView extends GetView<SettingController> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Current balance info
+                  // balance info
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -1392,7 +1398,7 @@ class SettingView extends GetView<SettingController> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Amount input
+                  // amount input
                   Text(
                     'withdrawal_amount'.tr,
                     style: context.textTheme.titleMedium?.copyWith(
@@ -1425,7 +1431,7 @@ class SettingView extends GetView<SettingController> {
                   ),
                   const SizedBox(height: 16),
 
-                  // RIP input
+                  // rip input
                   Text(
                     'bank_account_rip'.tr,
                     style: context.textTheme.titleMedium?.copyWith(
@@ -1456,10 +1462,6 @@ class SettingView extends GetView<SettingController> {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // Processing time info removed as requested
-
-                  // Removed red box error display; errors will be shown as notifications
                 ],
               ),
             ),
@@ -1479,7 +1481,7 @@ class SettingView extends GetView<SettingController> {
                           final amountText = amountController.text.trim();
                           final ripText = ripController.text.trim();
 
-                          // Validation
+                          // validation
                           if (amountText.isEmpty) {
                             setState(
                               () =>
@@ -1532,7 +1534,7 @@ class SettingView extends GetView<SettingController> {
                             return;
                           }
 
-                          // Process withdrawal
+                          // process withdrawal
                           setState(() {
                             isProcessing = true;
                             errorMessage = null;
@@ -1542,7 +1544,7 @@ class SettingView extends GetView<SettingController> {
                             final result = await _influencerService
                                 .processWithdrawal(amount, ripText);
 
-                            Get.back(); // Close dialog
+                            Get.back();
 
                             if (result.success) {
                               _showProcessingTimeAlert(
@@ -1572,8 +1574,7 @@ class SettingView extends GetView<SettingController> {
     );
   }
 
-  /// Shows full withdrawal history in a modal dialog
-  // ignore: unused_element
+  // withdrawal history modal
   void _showFullWithdrawalHistory(
     BuildContext context,
     List<WithdrawalRecord> withdrawalHistory,
@@ -1590,7 +1591,7 @@ class SettingView extends GetView<SettingController> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
+              // header
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -1626,7 +1627,7 @@ class SettingView extends GetView<SettingController> {
                 ),
               ),
 
-              // Content
+              // content
               Flexible(
                 child:
                     withdrawalHistory.isEmpty
@@ -1673,7 +1674,7 @@ class SettingView extends GetView<SettingController> {
     );
   }
 
-  /// Enhanced withdrawal history item with more details
+  // enhanced history item
   Widget _buildEnhancedWithdrawalHistoryItem(
     BuildContext context,
     WithdrawalRecord withdrawal,
@@ -1710,7 +1711,7 @@ class SettingView extends GetView<SettingController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row with amount and status
+          // header row
           Row(
             children: [
               Expanded(
@@ -1749,7 +1750,7 @@ class SettingView extends GetView<SettingController> {
           ),
           const SizedBox(height: 12),
 
-          // Details grid
+          // details grid
           Row(
             children: [
               Expanded(
@@ -1800,7 +1801,7 @@ class SettingView extends GetView<SettingController> {
     );
   }
 
-  /// Helper to build detail items in withdrawal history
+  // detail item helper
   Widget _buildDetailItem(
     BuildContext context,
     String label,
@@ -1836,7 +1837,7 @@ class SettingView extends GetView<SettingController> {
     );
   }
 
-  /// Shows a processing time alert after successful withdrawal request
+  // processing time alert
   void _showProcessingTimeAlert(
     BuildContext context,
     String withdrawalId,
@@ -1928,7 +1929,7 @@ class SettingView extends GetView<SettingController> {
   }
 
   String _formatDate(DateTime date) {
-    // TODO: Implement proper date formatting based on locale
+    // format by locale
     return '${date.day}/${date.month}/${date.year}';
   }
 
@@ -1944,9 +1945,9 @@ class SettingView extends GetView<SettingController> {
   // ignore: unused_element
   String _maskRip(String rip) {
     if (rip.isEmpty) return '';
-    if (rip.length <= 4) return rip; // If it's already short, don't mask
+    if (rip.length <= 4) return rip;
 
-    // Show only the last 4 digits for security, mask the rest
+    // mask all but last 4
     final lastFour = rip.substring(rip.length - 4);
     final masked = '*' * (rip.length - 4);
     return '$masked$lastFour';

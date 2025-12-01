@@ -13,6 +13,8 @@ class HeightWidth extends GetView<SignUpController> {
     return GetBuilder<SignUpController>(
       builder:
           (c) => HeightWeightStep(
+            initialHeightCm: c.selectedCm,
+            initialWeightKg: c.selectedWeightKg,
             onHeightCmChanged: (cm) => c.selectedCm = cm,
             onHeightFeetInchesChanged: (feet, inches) {
               c.selectedFeet = feet;

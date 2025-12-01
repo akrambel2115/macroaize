@@ -7,6 +7,8 @@ import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/BornView.da
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/GenderView.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/GoalScreen.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/HeightWidthView.dart';
+import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/PlanReviewView.dart';
+import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/PromoCodeView.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/SetupView.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/StoppingGoalView.dart';
 import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/WorkoutView.dart';
@@ -25,6 +27,7 @@ class SignUpController extends GetxController {
   int selectedHour = 9;
   int selectedMinute = 40;
   String selectedPeriod = "AM";
+  String? promoCode; // promo code
 
   final List<String> months = [
     'January',
@@ -44,14 +47,20 @@ class SignUpController extends GetxController {
   List<int> years = List.generate(
     50,
     (index) => 1975 + index,
-  ); // Years 1975-2025
-  List<int> days = List.generate(31, (index) => index + 1); // Days 1-31
-  bool isMetric = true; // Toggle state
+  ); // years range
+  List<int> days = List.generate(31, (index) => index + 1); // days range
+  bool isMetric = true; // metric toggle
   int selectedFeet = 5;
   int selectedInches = 5;
-  int selectedCm = 121;
-  int selectedWeightLb = 119;
-  int selectedWeightKg = 51;
+  int selectedCm = 170;
+  int selectedWeightLb = 132;
+  int selectedWeightKg = 60;
+
+  // calculated plan values
+  RxInt calculatedCalories = 0.obs;
+  RxInt calculatedProtein = 0.obs;
+  RxInt calculatedCarbs = 0.obs;
+  RxInt calculatedFat = 0.obs;
 
   List<Widget> screens = [
     GenderView(),
@@ -60,13 +69,15 @@ class SignUpController extends GetxController {
     GoalScreen(),
     BornView(),
     StoppingGoalView(),
+    const PromoCodeView(),
     SetupView(),
+    const PlanReviewView(),
   ];
 
   @override
   void onInit() {
     super.onInit();
-    // Default stopping goal selection
+    // default selection
     selectedStoppingGoal = 'Lack of consistency'.tr;
   }
 
@@ -113,13 +124,38 @@ class SignUpController extends GetxController {
       selectedView = 5;
     } else if (selectedView == 5) {
       selectedView = 6;
+    } else if (selectedView == 6) {
+      selectedView = 7;
       saveOnSql();
-      Future.delayed(Duration(seconds: 3)).then((value) {
+      Future.delayed(const Duration(seconds: 3)).then((value) {
         SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
-        Get.toNamed(Routes.leadingView);
+        // go to plan review
+        selectedView = 8;
+        update();
       });
+    } else if (selectedView == 8) {
+      // go to premium
+      navigateToPremium();
     }
     update();
+  }
+
+  // navigate to premium
+  void navigateToPremium() {
+    // save values
+    SharedPref.saveInt(SharePrefKey.calorie, calculatedCalories.value);
+    SharedPref.saveInt(SharePrefKey.protein, calculatedProtein.value);
+    SharedPref.saveInt(SharePrefKey.carbs, calculatedCarbs.value);
+    SharedPref.saveInt(SharePrefKey.fat, calculatedFat.value);
+
+    Get.toNamed(
+      Routes.premiumView,
+      arguments: {
+        'delayClose': true,
+        'fromOnboarding': true,
+        'promoCode': promoCode,
+      },
+    );
   }
 
   saveOnSql() {
@@ -127,25 +163,31 @@ class SignUpController extends GetxController {
       selectedCm = ((selectedFeet * 30.48) + (selectedInches * 2.54)).toInt();
       selectedWeightKg = (selectedWeightLb * 0.453592).toInt();
     }
-  DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
-    String formattedDate = "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
-  // Persist user selections
+    DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    String formattedDate =
+        "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
+    // save user data
     SharedPref.saveString(SharePrefKey.gender, selectedGender);
     SharedPref.saveString(SharePrefKey.workOutDay, selectedWorkOut);
     SharedPref.saveInt(SharePrefKey.height, selectedCm);
     SharedPref.saveInt(SharePrefKey.weight, selectedWeightKg);
     SharedPref.saveString(SharePrefKey.goalWeight, selectedWGoal);
-    SharedPref.saveInt(SharePrefKey.desiredWeight,selectedDesiredWeight);
-    SharedPref.saveString(SharePrefKey.bornDay,formattedDate);
+    SharedPref.saveInt(SharePrefKey.desiredWeight, selectedDesiredWeight);
+    SharedPref.saveString(SharePrefKey.bornDay, formattedDate);
     SharedPref.saveString(SharePrefKey.stoppingGoal, selectedStoppingGoal);
-    SharedPref.saveBool(SharePrefKey.isLogin,true);
+    SharedPref.saveBool(SharePrefKey.isLogin, true);
 
     DateTime today = DateTime.now();
     int birthYear = selectedYear;
     int age = today.year - birthYear;
-    SharedPref.saveInt(SharePrefKey.age,age);
+    SharedPref.saveInt(SharePrefKey.age, age);
 
-    double bmr = calculateBMR(selectedCm, selectedWeightKg, age, selectedGender);
+    double bmr = calculateBMR(
+      selectedCm,
+      selectedWeightKg,
+      age,
+      selectedGender,
+    );
     double activityFactor = getActivityFactor(selectedWorkOut);
     double tdee = bmr * activityFactor;
 
@@ -158,6 +200,12 @@ class SignUpController extends GetxController {
     SharedPref.saveInt(SharePrefKey.protein, macros["protein"]);
     SharedPref.saveInt(SharePrefKey.carbs, macros["carbs"]);
     SharedPref.saveInt(SharePrefKey.fat, macros["fat"]);
+
+    // store for plan review
+    calculatedCalories.value = macros["calories"] ?? 0;
+    calculatedProtein.value = macros["protein"] ?? 0;
+    calculatedCarbs.value = macros["carbs"] ?? 0;
+    calculatedFat.value = macros["fat"] ?? 0;
   }
 
   double calculateBMR(int heightCm, int weightKg, int age, String gender) {
@@ -169,55 +217,58 @@ class SignUpController extends GetxController {
   }
 
   Map<String, int> calculateMacros(double tdee, int weightKg) {
-    double protein = weightKg * 2.0; // 2g protein per kg
-    double fat = (tdee * 0.25) / 9; // 25% of calories from fat (1g fat = 9 cal)
-    double carbs = (tdee - ((protein * 4) + (fat * 9))) / 4; // Remaining calories for carbs (1g = 4 cal)
+    double protein = weightKg * 2.0; // protein per kg
+    double fat = (tdee * 0.25) / 9; // fat calories
+    double carbs =
+        (tdee - ((protein * 4) + (fat * 9))) /
+        4; // remaining carbs
 
     return {
       "calories": tdee.toInt(),
       "protein": protein.toInt(),
       "fat": fat.toInt(),
-      "carbs": carbs.toInt()
+      "carbs": carbs.toInt(),
     };
   }
+
   double getActivityFactor(String workOutDays) {
     switch (workOutDays) {
       case "0-2":
-        return 1.2; // Sedentary
+        return 1.2; // sedentary
       case "3-5":
-        return 1.55; // Moderate activity
+        return 1.55; // moderate
       case "6+":
-        return 1.725; // Active
+        return 1.725; // active
       default:
-        return 1.2; // Default to sedentary
+        return 1.2; // default
     }
   }
-  // Method to update days based on selected month & year
+
+  // update days per month
   void updateDaysInMonth() {
     int daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
 
     days = List.generate(daysInMonth, (index) => index + 1);
     update();
     if (selectedDay > daysInMonth) {
-      selectedDay =
-          daysInMonth; // Adjust if previously selected day is now invalid
+      selectedDay = daysInMonth; // adjust if invalid
     }
   }
 
-  // Days in month helper
+  // days in month
   int getDaysInMonth(int month, int year) {
     if (month == 1) {
-      // February (leap year check)
+      // february leap year
       if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
         return 29;
       } else {
         return 28;
       }
     }
-    // Months with 30 days: April, June, September, November
+    // 30 day months
     if ([3, 5, 8, 10].contains(month)) {
       return 30;
     }
-    return 31; // Default months have 31 days
+    return 31; // default 31
   }
 }
