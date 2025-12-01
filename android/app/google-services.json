@@ -14,6 +14,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "582471032450-6qrqrpp9r6ii0a466cdns44ipk86m5qk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macroaize.app",
+            "certificate_hash": "d33e522f017a97d289781779d92557b8af4ac76f"
+          }
+        },
+        {
+          "client_id": "582471032450-b0ermrp6cn2pv4lioutjpbnogd5316s7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macroaize.app",
+            "certificate_hash": "c7f575d5209d1f400f37b000d70b8f885d602e63"
+          }
+        },
+        {
+          "client_id": "582471032450-ssh0mg72hkpm6e85042vo3mjp7glii2c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macroaize.app",
+            "certificate_hash": "924675ef8fde46c9343b43d0782acf2948aa5807"
+          }
+        },
+        {
           "client_id": "582471032450-edecc8ot7soae68rop1008su6i44grgl.apps.googleusercontent.com",
           "client_type": 3
         }
