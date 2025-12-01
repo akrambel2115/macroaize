@@ -10,7 +10,8 @@ void main() {
     final recipe = Recipe(
       id: 'r1',
       title: 'Tap Smoothie',
-      imageUrl: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=300&fit=crop',
+      imageUrl:
+          'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=300&fit=crop',
       duration: 5,
       calories: 200,
       difficulty: 'Easy',
@@ -43,7 +44,10 @@ void main() {
     await tester.tap(find.text('Tap Smoothie'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Tap Smoothie'), findsWidgets); // title still present on detail
+    expect(
+      find.text('Tap Smoothie'),
+      findsWidgets,
+    ); // title still present on detail
     expect(find.byType(RecipeDetailScreen), findsOneWidget);
   });
 }

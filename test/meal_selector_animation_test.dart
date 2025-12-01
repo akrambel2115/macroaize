@@ -4,13 +4,17 @@ import 'package:get/get.dart';
 import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodView.dart';
 
 void main() {
-  testWidgets('Meal selector animates and updates selection', (WidgetTester tester) async {
+  testWidgets('Meal selector animates and updates selection', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       GetMaterialApp(
-        home: Builder(builder: (context) {
-          // initialize controller manually
-          return const ScanFoodView();
-        }),
+        home: Builder(
+          builder: (context) {
+            // initialize controller manually
+            return const ScanFoodView();
+          },
+        ),
       ),
     );
 

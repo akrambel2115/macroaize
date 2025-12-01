@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:foodcalorietracker/widgets/password_field.dart';
 
 void main() {
-  testWidgets('PasswordField toggles obscure and limits parent rebuilds', (tester) async {
+  testWidgets('PasswordField toggles obscure and limits parent rebuilds', (
+    tester,
+  ) async {
     final controller = TextEditingController();
     final rebuilds = ValueNotifier<int>(0);
 
@@ -14,7 +16,15 @@ void main() {
         rebuilds.value = value + 1;
         return child!;
       },
-      child: MaterialApp(home: Scaffold(body: PasswordField(controller: controller, label: 'Test', autofocus: false))),
+      child: MaterialApp(
+        home: Scaffold(
+          body: PasswordField(
+            controller: controller,
+            label: 'Test',
+            autofocus: false,
+          ),
+        ),
+      ),
     );
 
     await tester.pumpWidget(widget);
@@ -30,6 +40,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Toggling should not cause excessive parent rebuilds
-    expect(rebuilds.value < 20, true, reason: 'Parent rebuilt too many times: ${rebuilds.value}');
+    expect(
+      rebuilds.value < 20,
+      true,
+      reason: 'Parent rebuilt too many times: ${rebuilds.value}',
+    );
   });
 }

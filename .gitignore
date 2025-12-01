@@ -56,3 +56,6 @@ key.properties
 
 # Java Heap Dumps
 *.hprof
+
+macroaize-website/
+mvp/

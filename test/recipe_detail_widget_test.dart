@@ -9,7 +9,8 @@ void main() {
     final recipe = Recipe(
       id: 'test',
       title: 'Test Smoothie',
-      imageUrl: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=300&fit=crop',
+      imageUrl:
+          'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=300&fit=crop',
       duration: 10,
       calories: 300,
       difficulty: 'Easy',
@@ -19,7 +20,9 @@ void main() {
       instructions: const ['Blend', 'Serve'],
     );
 
-    await tester.pumpWidget(GetMaterialApp(home: RecipeDetailScreen(recipe: recipe)));
+    await tester.pumpWidget(
+      GetMaterialApp(home: RecipeDetailScreen(recipe: recipe)),
+    );
 
     await tester.pumpAndSettle();
 

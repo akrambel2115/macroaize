@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:foodcalorietracker/widgets/ScannerOverlay.dart';
 
 void main() {
-  testWidgets('ScannerOverlay has rounded border radius', (WidgetTester tester) async {
+  testWidgets('ScannerOverlay has rounded border radius', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
