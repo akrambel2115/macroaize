@@ -4,8 +4,7 @@ import 'package:foodcalorietracker/shared/services/notification_service.dart';
 import '../../SharePrefHelper/SharePref.dart';
 import '../../SharePrefHelper/SharePrefKey.dart';
 
-class AdjustGoalsController extends GetxController{
-
+class AdjustGoalsController extends GetxController {
   String selectedWorkOut = "";
   bool isAutoGenerate = false;
   int selectedUpdateGoalView = 1;
@@ -30,14 +29,20 @@ class AdjustGoalsController extends GetxController{
 
   void updateCalorieGoal(int value) async {
     ConstantUserMaster.calorieGoal = value;
-    await SharedPref.saveInt(SharePrefKey.calorie, ConstantUserMaster.calorieGoal);
+    await SharedPref.saveInt(
+      SharePrefKey.calorie,
+      ConstantUserMaster.calorieGoal,
+    );
     showSaveNotification();
     update();
   }
 
   void updateProteinGoal(int value) async {
     ConstantUserMaster.proteinGoal = value;
-    await SharedPref.saveInt(SharePrefKey.protein, ConstantUserMaster.proteinGoal);
+    await SharedPref.saveInt(
+      SharePrefKey.protein,
+      ConstantUserMaster.proteinGoal,
+    );
     showSaveNotification();
     update();
   }
@@ -56,11 +61,11 @@ class AdjustGoalsController extends GetxController{
     update();
   }
 
-
   onChangeWorkout(String value) {
     selectedWorkOut = value;
-  setHasChanges(true);
+    setHasChanges(true);
   }
+
   onChangeAutoGenerate(bool value) {
     isAutoGenerate = value;
     update();
@@ -98,13 +103,23 @@ class AdjustGoalsController extends GetxController{
       SharedPref.saveInt(SharePrefKey.height, selectedCm);
       SharedPref.saveInt(SharePrefKey.weight, selectedWeightKg);
       SharedPref.saveString(SharePrefKey.goalWeight, selectedWGoal);
-      SharedPref.saveInt(SharePrefKey.desiredWeight,selectedDesiredWeight);
+      SharedPref.saveInt(SharePrefKey.desiredWeight, selectedDesiredWeight);
 
-  double bmr = calculateBMR(selectedCm, selectedWeightKg, ConstantUserMaster.age, ConstantUserMaster.gender);
-  double activityFactor = getActivityFactor(selectedWorkOut);
-  double tdee = bmr * activityFactor;
-  double adjusted = adjustCaloriesForGoal(tdee, selectedWeightKg, selectedDesiredWeight, selectedWGoal);
-  Map<String, int> macros = calculateMacros(adjusted, selectedWeightKg);
+      double bmr = calculateBMR(
+        selectedCm,
+        selectedWeightKg,
+        ConstantUserMaster.age,
+        ConstantUserMaster.gender,
+      );
+      double activityFactor = getActivityFactor(selectedWorkOut);
+      double tdee = bmr * activityFactor;
+      double adjusted = adjustCaloriesForGoal(
+        tdee,
+        selectedWeightKg,
+        selectedDesiredWeight,
+        selectedWGoal,
+      );
+      Map<String, int> macros = calculateMacros(adjusted, selectedWeightKg);
       SharedPref.saveInt(SharePrefKey.calorie, macros["calories"]);
       SharedPref.saveInt(SharePrefKey.protein, macros["protein"]);
       SharedPref.saveInt(SharePrefKey.carbs, macros["carbs"]);
@@ -119,7 +134,7 @@ class AdjustGoalsController extends GetxController{
       ConstantUserMaster.goalWeight = selectedWGoal;
       ConstantUserMaster.desiredGoal = selectedDesiredWeight;
       selectedUpdateGoalView = 1;
-      
+
       onChangeAutoGenerate(false);
     } else {
       // manual edits: save current goal values
@@ -141,6 +156,7 @@ class AdjustGoalsController extends GetxController{
       return (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
     }
   }
+
   double getActivityFactor(String workOutDays) {
     switch (workOutDays) {
       case "0-2":
@@ -153,16 +169,19 @@ class AdjustGoalsController extends GetxController{
         return 1.2; // Default to sedentary
     }
   }
+
   Map<String, int> calculateMacros(double tdee, int weightKg) {
     double protein = weightKg * 2.0; // 2g protein per kg
     double fat = (tdee * 0.25) / 9; // 25% of calories from fat (1g fat = 9 cal)
-    double carbs = (tdee - ((protein * 4) + (fat * 9))) / 4; // Remaining calories for carbs (1g = 4 cal)
+    double carbs =
+        (tdee - ((protein * 4) + (fat * 9))) /
+        4; // Remaining calories for carbs (1g = 4 cal)
 
     return {
       "calories": tdee.toInt(),
       "protein": protein.toInt(),
       "fat": fat.toInt(),
-      "carbs": carbs.toInt()
+      "carbs": carbs.toInt(),
     };
   }
 }

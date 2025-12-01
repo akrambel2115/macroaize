@@ -9,15 +9,16 @@ class AutoWorkoutView extends GetView<AdjustGoalsController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AdjustGoalsController>(
-      builder: (c) => WorkoutStep(
-        selectedId: c.selectedWorkOut,
-        onSelect: c.onChangeWorkout,
-        onContinue: () {
-          if (c.selectedWorkOut.isNotEmpty) {
-            c.onChangeView(2);
-          }
-        },
-      ),
+      builder:
+          (c) => WorkoutStep(
+            selectedId: c.selectedWorkOut,
+            onSelect: c.onChangeWorkout,
+            onContinue: () {
+              if (c.selectedWorkOut.isNotEmpty) {
+                c.onChangeView(2);
+              }
+            },
+          ),
     );
   }
 }

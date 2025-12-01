@@ -18,7 +18,7 @@ class LeadingController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Check email verification on main screen access
+    // Check email verification
     _checkVerificationAsync();
   }
 
@@ -26,7 +26,6 @@ class LeadingController extends GetxController {
     if (!_verificationGuard.isSecurelyAuthenticated()) {
       final needsVerification = await _verificationGuard.needsVerification();
       if (needsVerification) {
-        // Use post-frame callback to avoid navigation during build
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (Get.currentRoute != Routes.emailVerificationView) {
             Get.offNamed(Routes.emailVerificationView);
@@ -46,7 +45,7 @@ class LeadingController extends GetxController {
   }
 
   void changeTabIndex(int index) async {
-  // Gate access to recipes tab (index 1) for premium users
+    // access to recipes tab (index 1) for premium users
     if (index == 1) {
       try {
         final appUserService = Get.find<AppUserService>();
@@ -56,7 +55,6 @@ class LeadingController extends GetxController {
           return;
         }
       } catch (_) {
-        // Fail closed on any error
         _showPremiumRequiredDialog();
         return;
       }

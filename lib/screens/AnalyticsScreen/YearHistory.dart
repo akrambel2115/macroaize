@@ -42,8 +42,8 @@ class YearHistory extends GetView<AnalyticsController> {
                             color:
                                 Theme.of(context).brightness == Brightness.dark
                                     ? Colors
-                                        .grey[300] // Light gray for dark mode
-                                    : null, // Use default theme color for light mode
+                                        .grey[300] // light gray for dark mode
+                                    : null, // default theme color for light
                           ),
                         ).paddingOnly(bottom: 15),
                       ],
@@ -68,12 +68,15 @@ class YearHistory extends GetView<AnalyticsController> {
                             yValueMapper: (SalesData sales, _) => sales.ml,
                             dataLabelSettings: DataLabelSettings(
                               isVisible: true,
-                              textStyle: context.theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 11,
-                color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[300]
-                  : null,
-                              ),
+                              textStyle: context.theme.textTheme.bodySmall
+                                  ?.copyWith(
+                                    fontSize: 11,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.grey[300]
+                                            : null,
+                                  ),
                             ),
                           ),
                         ],

@@ -2,7 +2,7 @@ import 'package:foodcalorietracker/screens/ChatScreen/ChatController.dart';
 import 'package:get/get.dart';
 import 'package:foodcalorietracker/shared/services/app_user_service.dart';
 
-class ChatBinding extends Bindings{
+class ChatBinding extends Bindings {
   @override
   void dependencies() {
     if (!Get.isRegistered<AppUserService>()) {
@@ -13,6 +13,6 @@ class ChatBinding extends Bindings{
       } catch (_) {}
     }
 
-    Get.lazyPut(() => ChatController(),);
+    Get.lazyPut(() => ChatController());
   }
 }

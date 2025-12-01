@@ -26,6 +26,7 @@ import '../../Model/openAIModel.dart';
 import 'package:foodcalorietracker/shared/services/app_config_service.dart';
 import '../../constant/FontFamily.dart';
 import '../../widgets/CropperUiSettings.dart';
+import '../../shared/services/rate_us_service.dart';
 
 class ChatController extends GetxController {
   Map<String, dynamic>? argument = Get.arguments;
@@ -56,11 +57,9 @@ class ChatController extends GetxController {
       rateLimitRemaining! <= 0 &&
       rateLimitReset != null &&
       DateTime.now().isBefore(rateLimitReset!);
-  
-  // Services
+
   final _usageService = UsageService();
   final _appUserService = AppUserService();
-  
 
   @override
   void onInit() {
@@ -99,7 +98,6 @@ class ChatController extends GetxController {
 
   void sendMsg({required String text}) async {
     try {
-      
       if (!_appUserService.checkAccountActivation('chat')) {
         return;
       }
@@ -117,13 +115,11 @@ class ChatController extends GetxController {
         return;
       }
 
-  if (text.isNotEmpty) {
-        
+      if (text.isNotEmpty) {
         try {
           final result = await _usageService.incrementUsage('chat');
 
           if (!result.success) {
-            // Usage limit reached -> show centralized notification
             if (result.limitReached) {
               NotificationService.showError(
                 result.message.isNotEmpty
@@ -136,7 +132,7 @@ class ChatController extends GetxController {
             return;
           }
         } catch (e) {
-          // Only redirect to login if actually unauthenticated; otherwise show error.
+          // redirect to login if actually unauthenticated
           final user = FirebaseAuth.instance.currentUser;
           if (user == null) {
             await _handleAuthenticationRequired();
@@ -153,7 +149,7 @@ class ChatController extends GetxController {
 
           NotificationService.showError('unable_to_send_message_try_again');
           return;
-    }
+        }
         text = text.trim();
         controller.clear();
         FocusManager.instance.primaryFocus?.unfocus();
@@ -168,7 +164,7 @@ class ChatController extends GetxController {
         messages.insert(0, ChatModel(false, "", imagePath?.path, false));
         update();
 
-  if (imagePath != null) {
+        if (imagePath != null) {
           File imageDemo = imagePath!;
           imagePath = null;
           final bytes = await imageDemo.readAsBytes();
@@ -196,56 +192,70 @@ class ChatController extends GetxController {
             'max_tokens': 500,
           };
 
-          final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+          final functions = FirebaseFunctions.instanceFor(
+            region: 'europe-west1',
+          );
           final callable = functions.httpsCallable('chatWithOpenRouter');
-      final responseData = await callable.call(parameters);
-      final raw = responseData.data;
-      final normalized = jsonDecode(jsonEncode(raw));
-      final decodedJson = (normalized is String) ? jsonDecode(normalized) : normalized;
+          final responseData = await callable.call(parameters);
+          final raw = responseData.data;
+          final normalized = jsonDecode(jsonEncode(raw));
+          final decodedJson =
+              (normalized is String) ? jsonDecode(normalized) : normalized;
 
-      try {
-        if (decodedJson is Map && decodedJson['error'] != null) {
-          final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
-          messages.first = ChatModel(false, errMsg.toString(), imageDemo.path, true);
-        } else {
-          OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-          final answer = data.choices?.isNotEmpty == true
-              ? (data.choices!.first.message?.content ?? "")
-              : "No response";
-          messages.first = ChatModel(false, answer, imageDemo.path, true);
-          if (answer.isNotEmpty) {
-            if (isMainChat) {
-              mainChatId = await dbHelper.insertMainChatModel(
-                MainChatModel(
-                  question: text,
-                  answer: answer,
-                  date: DateTime.now().toString(),
-                ),
+          try {
+            if (decodedJson is Map && decodedJson['error'] != null) {
+              final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
+              messages.first = ChatModel(
+                false,
+                errMsg.toString(),
+                imageDemo.path,
+                true,
               );
+            } else {
+              OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+              final answer =
+                  data.choices?.isNotEmpty == true
+                      ? (data.choices!.first.message?.content ?? "")
+                      : "No response";
+              messages.first = ChatModel(false, answer, imageDemo.path, true);
+              if (answer.isNotEmpty) {
+                if (isMainChat) {
+                  mainChatId = await dbHelper.insertMainChatModel(
+                    MainChatModel(
+                      question: text,
+                      answer: answer,
+                      date: DateTime.now().toString(),
+                    ),
+                  );
+                }
+                await dbHelper.insertSubChatModel(
+                  SubChatModel(
+                    question: text,
+                    answer: answer,
+                    date: DateTime.now().toString(),
+                    mainCharId: mainChatId,
+                    image: imageDemo.path,
+                  ),
+                );
+              }
             }
-            await dbHelper.insertSubChatModel(
-              SubChatModel(
-                question: text,
-                answer: answer,
-                date: DateTime.now().toString(),
-                mainCharId: mainChatId,
-                image: imageDemo.path,
-              ),
+          } catch (e) {
+            if (kDebugMode) {
+              print('Decode/image branch error: $e');
+              print('Body: $decodedJson');
+            }
+            messages.first = ChatModel(
+              false,
+              'Parse error',
+              imageDemo.path,
+              true,
             );
           }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Decode/image branch error: $e');
-          print('Body: $decodedJson');
-        }
-        messages.first = ChatModel(false, 'Parse error', imageDemo.path, true);
-      }
           streamedText = "";
           isStreamedText = false;
           update();
+          RateUsService.showRateUsIfEligible(RateUsService.actionChat);
         } else {
-          
           final parameters = {
             'model': Get.find<AppConfigService>().aiModel,
             'messages': [
@@ -258,52 +268,57 @@ class ChatController extends GetxController {
             ],
             'max_tokens': 500,
           };
-          final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+          final functions = FirebaseFunctions.instanceFor(
+            region: 'europe-west1',
+          );
           final callable = functions.httpsCallable('chatWithOpenRouter');
-      final result = await callable.call(parameters);
-      final raw = result.data;
-      final normalized = jsonDecode(jsonEncode(raw));
-      final decodedJson = (normalized is String) ? jsonDecode(normalized) : normalized;
-      try {
-        if (decodedJson is Map && decodedJson['error'] != null) {
-          final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
-          messages.first = ChatModel(false, errMsg.toString(), null, true);
-        } else {
-          OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-          final answer = data.choices?.isNotEmpty == true
-              ? (data.choices!.first.message?.content ?? "")
-              : "No response";
-          messages.first = ChatModel(false, answer, null, true);
-          if (answer.isNotEmpty) {
-            if (isMainChat) {
-              mainChatId = await dbHelper.insertMainChatModel(
-                MainChatModel(
-                  question: text,
-                  answer: answer,
-                  date: DateTime.now().toString(),
-                ),
-              );
+          final result = await callable.call(parameters);
+          final raw = result.data;
+          final normalized = jsonDecode(jsonEncode(raw));
+          final decodedJson =
+              (normalized is String) ? jsonDecode(normalized) : normalized;
+          try {
+            if (decodedJson is Map && decodedJson['error'] != null) {
+              final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
+              messages.first = ChatModel(false, errMsg.toString(), null, true);
+            } else {
+              OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+              final answer =
+                  data.choices?.isNotEmpty == true
+                      ? (data.choices!.first.message?.content ?? "")
+                      : "No response";
+              messages.first = ChatModel(false, answer, null, true);
+              if (answer.isNotEmpty) {
+                if (isMainChat) {
+                  mainChatId = await dbHelper.insertMainChatModel(
+                    MainChatModel(
+                      question: text,
+                      answer: answer,
+                      date: DateTime.now().toString(),
+                    ),
+                  );
+                }
+                await dbHelper.insertSubChatModel(
+                  SubChatModel(
+                    question: text,
+                    answer: answer,
+                    date: DateTime.now().toString(),
+                    mainCharId: mainChatId,
+                  ),
+                );
+              }
             }
-            await dbHelper.insertSubChatModel(
-              SubChatModel(
-                question: text,
-                answer: answer,
-                date: DateTime.now().toString(),
-                mainCharId: mainChatId,
-              ),
-            );
+          } catch (e) {
+            if (kDebugMode) {
+              print('Decode/text branch error: $e');
+              print('Body: $decodedJson');
+            }
+            messages.first = ChatModel(false, 'Parse error', null, true);
           }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Decode/text branch error: $e');
-          print('Body: $decodedJson');
-        }
-        messages.first = ChatModel(false, 'Parse error', null, true);
-      }
           streamedText = "";
           isStreamedText = false;
           update();
+          RateUsService.showRateUsIfEligible(RateUsService.actionChat);
         }
 
         await Future.delayed(const Duration(milliseconds: 100));
@@ -314,10 +329,8 @@ class ChatController extends GetxController {
         );
       }
     } catch (err) {
-      // Centralized error notification for unexpected failures
       NotificationService.showError('hmm_something_went_wrong');
 
-      // Print Error debug mode
       if (kDebugMode) {
         print("ERROR $err");
       }
@@ -331,7 +344,7 @@ class ChatController extends GetxController {
   }
 
   takeImage(ImageSource source, BuildContext context) async {
-    // Check if user has premium access for image attachments
+    // premium check
     try {
       final appUserService = Get.find<AppUserService>();
       final isPremium = await appUserService.isPremiumNow();
@@ -340,12 +353,11 @@ class ChatController extends GetxController {
         return;
       }
     } catch (_) {
-      // Fail closed on any error
+      // fail closed
       _showImageAttachmentPremiumDialog();
       return;
     }
 
-    // Premium user - proceed with image selection
     XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       File imagePath = File(image.path);
@@ -398,15 +410,13 @@ class ChatController extends GetxController {
   void onClose() {
     controller.dispose();
     scrollController.dispose();
-    // TODO: implement onClose
     super.onClose();
   }
 
   void startListening() async {
-    // Prepare a fresh listening session: clear previous transcript and flags
     if (!speechEnabled) {
       await _initSpeech();
-      if (!speechEnabled) return; // can't start if init failed/denied
+      if (!speechEnabled) return;
     }
     speechToText = "";
     _heardSpeech = false;
@@ -421,8 +431,8 @@ class ChatController extends GetxController {
 
   void stopListening(BuildContext context) async {
     await speech.stop();
-    // Give the speech recognizer a short moment to deliver any final result.
-    // Some devices or engines deliver the final chunk slightly after stop().
+    // Give the speech recognizer a short moment to deliver any final result
+    // Some devices or engines deliver the final chunk slightly after stop()
     int tries = 0;
     while (!_lastResultIsFinal && tries < 8) {
       await Future.delayed(const Duration(milliseconds: 100));
@@ -431,42 +441,34 @@ class ChatController extends GetxController {
 
     recording = false;
     soundLevel = 0.0;
-    // reset the final flag for next session
     _lastResultIsFinal = false;
 
-    // Only send if this listening session actually captured speech. This avoids
-    // re-sending the previous message when the user starts/stops without speaking.
+    // only send if heard speech
     if (_heardSpeech && speechToText.trim().isNotEmpty) {
       final textToSend = speechToText.trim();
-      // clear buffer so it won't be reused accidentally
       speechToText = "";
       _heardSpeech = false;
       sendMsg(text: textToSend);
     } else {
-      // No new speech captured; update UI but do not send.
       update();
     }
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
     speechToText = result.recognizedWords;
-    // mark that we heard something in this session
     try {
       if (result.recognizedWords.trim().isNotEmpty) {
         _heardSpeech = true;
       }
     } catch (_) {}
-    // record whether this result was the final chunk so stopListening can wait
     try {
       _lastResultIsFinal = result.finalResult;
-    } catch (_) {
-      // some implementations may not expose finalResult; ignore
-    }
+    } catch (_) {}
     update();
   }
 
   void _onSoundLevelChange(double level) {
-    // speech_to_text provides a sound level in a device-dependent range; normalize to 0..1
+    // normalize to 0..1
     final normalized = (level / 10.0).clamp(0.0, 1.0);
     soundLevel = normalized;
     update();
@@ -501,7 +503,7 @@ class ChatController extends GetxController {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(width: 48), // balance left-right IconButton
+                      SizedBox(width: 48),
 
                       Text(
                         'Help us do better',
@@ -509,7 +511,7 @@ class ChatController extends GetxController {
                       ),
                       IconButton(
                         onPressed: () {
-                          Navigator.pop(context); // User dismissed manually
+                          Navigator.pop(context);
                         },
                         icon: Icon(
                           Icons.close,
@@ -569,7 +571,6 @@ class ChatController extends GetxController {
                       feedController.clear();
                       messages.removeRange(index, index + 2);
                       update();
-                      // Return true on submit
                     },
                     child: Container(
                       margin: EdgeInsets.all(10),
@@ -600,14 +601,10 @@ class ChatController extends GetxController {
     );
   }
 
-  // chat limit dialog replaced by NotificationService.showError
-
   Future<void> _handleAuthenticationRequired() async {
-    // Show authentication modal
     final success = await AuthModal.show();
 
     if (success) {
-      // User logged in successfully - show success message
       Get.snackbar(
         'Welcome!',
         'You can now use the chat. Please try sending your message again.',
@@ -617,7 +614,6 @@ class ChatController extends GetxController {
         duration: const Duration(seconds: 3),
       );
     } else {
-      // User cancelled or failed to login
       Get.snackbar(
         'Authentication Required',
         'Please login to use the chat feature',

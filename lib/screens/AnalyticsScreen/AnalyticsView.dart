@@ -14,7 +14,6 @@ import 'package:foodcalorietracker/screens/AnalyticsScreen/YearHistory.dart';
 import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
 import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
 import 'package:foodcalorietracker/widgets/WeightJourney.dart';
-import 'package:foodcalorietracker/widgets/CelebrationStrip.dart';
 
 class AnalyticsView extends GetView<AnalyticsController> {
   const AnalyticsView({super.key});
@@ -22,7 +21,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => AnalyticsController());
-  return DefaultTabController(
+    return DefaultTabController(
       length: 3,
       child: Scaffold(
         backgroundColor: context.theme.scaffoldBackgroundColor,
@@ -70,12 +69,15 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
-  Widget _buildCombinedWeightSection(BuildContext context, AnalyticsController controller) {
+  Widget _buildCombinedWeightSection(
+    BuildContext context,
+    AnalyticsController controller,
+  ) {
     int currentWeight = ConstantUserMaster.weight;
     int goalWeight = ConstantUserMaster.desiredGoal;
     int difference = (goalWeight - currentWeight).abs();
     bool isLosing = currentWeight > goalWeight;
-    
+
     return ModernFadeSlideTransition(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,11 +93,15 @@ class AnalyticsView extends GetView<AnalyticsController> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: isLosing 
-                    ? AppColor.accent.withOpacity(0.1)
-                    : AppColor.success.withOpacity(0.1),
+                  color:
+                      isLosing
+                          ? AppColor.accent.withOpacity(0.1)
+                          : AppColor.success.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -122,17 +128,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
 
           const SizedBox(height: 16),
 
-          CelebrationStrip(
-            message: difference == 0
-                ? "goal_achieved_message".tr
-                : ((ConstantUserMaster.weight > ConstantUserMaster.desiredGoal)
-                    ? "on_a_roll_message".tr
-                    : "keep_momentum_message".tr),
-            height: 46,
-          ),
-
-          const SizedBox(height: 0),
-
           WeightJourney(
             currentWeight: currentWeight,
             goalWeight: goalWeight,
@@ -148,13 +143,34 @@ class AnalyticsView extends GetView<AnalyticsController> {
                     SharePrefKey.weight,
                     ConstantUserMaster.weight,
                   );
-                  final bmr = _estimateBMR(ConstantUserMaster.height, newWeight, ConstantUserMaster.age, ConstantUserMaster.gender);
-                  final activity = _getActivityFactor(ConstantUserMaster.workOutDay);
+                  final bmr = _estimateBMR(
+                    ConstantUserMaster.height,
+                    newWeight,
+                    ConstantUserMaster.age,
+                    ConstantUserMaster.gender,
+                  );
+                  final activity = _getActivityFactor(
+                    ConstantUserMaster.workOutDay,
+                  );
                   final tdee = bmr * activity;
-                  final adjustedCalories = adjustCaloriesForGoal(tdee, newWeight, ConstantUserMaster.desiredGoal, ConstantUserMaster.goalWeight);
-                  final macros = CUM.calculateMacrosFromTDEE(adjustedCalories.toDouble(), newWeight);
-                  await SharedPref.saveInt(SharePrefKey.calorie, macros['calories']);
-                  await SharedPref.saveInt(SharePrefKey.protein, macros['protein']);
+                  final adjustedCalories = adjustCaloriesForGoal(
+                    tdee,
+                    newWeight,
+                    ConstantUserMaster.desiredGoal,
+                    ConstantUserMaster.goalWeight,
+                  );
+                  final macros = CUM.calculateMacrosFromTDEE(
+                    adjustedCalories.toDouble(),
+                    newWeight,
+                  );
+                  await SharedPref.saveInt(
+                    SharePrefKey.calorie,
+                    macros['calories'],
+                  );
+                  await SharedPref.saveInt(
+                    SharePrefKey.protein,
+                    macros['protein'],
+                  );
                   await SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']);
                   await SharedPref.saveInt(SharePrefKey.fat, macros['fat']);
                   ConstantUserMaster.calorieGoal = macros['calories']!;
@@ -164,8 +180,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   NotificationService.showSuccess('update_targets_body');
                   try {
                     Get.find<HomeController>().getAllData();
-                  } catch (_) {
-                  }
+                  } catch (_) {}
                 },
               );
             },
@@ -181,13 +196,34 @@ class AnalyticsView extends GetView<AnalyticsController> {
                     SharePrefKey.desiredWeight,
                     ConstantUserMaster.desiredGoal,
                   );
-                  final bmr = _estimateBMR(ConstantUserMaster.height, ConstantUserMaster.weight, ConstantUserMaster.age, ConstantUserMaster.gender);
-                  final activity = _getActivityFactor(ConstantUserMaster.workOutDay);
+                  final bmr = _estimateBMR(
+                    ConstantUserMaster.height,
+                    ConstantUserMaster.weight,
+                    ConstantUserMaster.age,
+                    ConstantUserMaster.gender,
+                  );
+                  final activity = _getActivityFactor(
+                    ConstantUserMaster.workOutDay,
+                  );
                   final tdee = bmr * activity;
-                  final adjustedCalories = adjustCaloriesForGoal(tdee, ConstantUserMaster.weight, newGoal, ConstantUserMaster.goalWeight);
-                  final macros = CUM.calculateMacrosFromTDEE(adjustedCalories.toDouble(), ConstantUserMaster.weight);
-                  await SharedPref.saveInt(SharePrefKey.calorie, macros['calories']);
-                  await SharedPref.saveInt(SharePrefKey.protein, macros['protein']);
+                  final adjustedCalories = adjustCaloriesForGoal(
+                    tdee,
+                    ConstantUserMaster.weight,
+                    newGoal,
+                    ConstantUserMaster.goalWeight,
+                  );
+                  final macros = CUM.calculateMacrosFromTDEE(
+                    adjustedCalories.toDouble(),
+                    ConstantUserMaster.weight,
+                  );
+                  await SharedPref.saveInt(
+                    SharePrefKey.calorie,
+                    macros['calories'],
+                  );
+                  await SharedPref.saveInt(
+                    SharePrefKey.protein,
+                    macros['protein'],
+                  );
                   await SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']);
                   await SharedPref.saveInt(SharePrefKey.fat, macros['fat']);
                   ConstantUserMaster.calorieGoal = macros['calories']!;
@@ -197,8 +233,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   NotificationService.showSuccess('update_targets_body');
                   try {
                     Get.find<HomeController>().getAllData();
-                  } catch (_) {
-                  }
+                  } catch (_) {}
                 },
               );
             },
@@ -213,7 +248,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
   Widget _buildAnalyticsTabs(BuildContext context) {
     return ModernFadeSlideTransition(
       beginOffset: const Offset(0, 0.3),
-        child: Container(
+      child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: context.theme.cardColor,
@@ -283,9 +318,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
       beginOffset: const Offset(0, 0.4),
       child: Container(
         height: 400,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
         child: TabBarView(
           physics: const NeverScrollableScrollPhysics(),
           children: [
@@ -299,14 +332,11 @@ class AnalyticsView extends GetView<AnalyticsController> {
   }
 
   Widget _wrapWithCard(Widget child) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: child,
-    );
+    return Padding(padding: const EdgeInsets.all(16), child: child);
   }
 }
 
-// estimate BMR and activity factor.
+// estimate BMR and activity factor,
 double _estimateBMR(int heightCm, int weightKg, int age, String gender) {
   if (gender.toLowerCase() == 'male') {
     return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
@@ -326,4 +356,3 @@ double _getActivityFactor(String workOutDays) {
       return 1.2;
   }
 }
-

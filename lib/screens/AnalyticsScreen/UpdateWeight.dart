@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:foodcalorietracker/constant/AppColor.dart';
 
-void showUpdateWeightDialog(BuildContext context, String initialValue, Function(String) onUpdate) {
+void showUpdateWeightDialog(
+  BuildContext context,
+  String initialValue,
+  Function(String) onUpdate,
+) {
   const int minWeight = 20; // kg
   const int maxWeight = 150; // kg (cap)
 
@@ -13,27 +18,33 @@ void showUpdateWeightDialog(BuildContext context, String initialValue, Function(
     context: context,
     builder: (BuildContext context) {
       int selected = initial;
-      final FixedExtentScrollController scrollController = FixedExtentScrollController(
-        initialItem: initial - minWeight,
-      );
+      final FixedExtentScrollController scrollController =
+          FixedExtentScrollController(initialItem: initial - minWeight);
 
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
             backgroundColor: context.theme.cardColor,
-            title: Text("Update Weight Goal".tr, style: context.textTheme.headlineMedium),
+            title: Text(
+              "Update Weight Goal".tr,
+              style: context.textTheme.headlineMedium,
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Enter new weight (kg)".tr, style: context.theme.textTheme.titleSmall).paddingOnly(bottom: 10, top: 10),
+                Text(
+                  "Enter new weight (kg)".tr,
+                  style: context.theme.textTheme.titleSmall,
+                ).paddingOnly(bottom: 10, top: 10),
                 Container(
                   height: 160,
                   width: double.maxFinite,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey.shade900
-                        : context.theme.scaffoldBackgroundColor,
+                    color:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? AppColor.darkCard
+                            : context.theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: CupertinoPicker(
@@ -48,12 +59,13 @@ void showUpdateWeightDialog(BuildContext context, String initialValue, Function(
                       return Center(
                         child: Text(
                           "$value kg",
-              style: TextStyle(
-                fontSize: 18,
-              color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black,
-                ),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                          ),
                         ),
                       );
                     }),
@@ -64,7 +76,10 @@ void showUpdateWeightDialog(BuildContext context, String initialValue, Function(
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text("Cancel".tr, style: TextStyle(color: context.theme.primaryColor)),
+                child: Text(
+                  "Cancel".tr,
+                  style: TextStyle(color: context.theme.primaryColor),
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -72,7 +87,10 @@ void showUpdateWeightDialog(BuildContext context, String initialValue, Function(
                   onUpdate(selected.toString());
                   Navigator.of(context).pop();
                 },
-                child: Text("Update".tr, style: TextStyle(color: context.theme.focusColor)),
+                child: Text(
+                  "Update".tr,
+                  style: TextStyle(color: context.theme.focusColor),
+                ),
               ),
             ],
           );

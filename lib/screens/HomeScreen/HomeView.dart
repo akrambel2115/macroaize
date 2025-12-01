@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-// Ring painter moved to a shared widget; unused imports removed.
-// ...existing code...
 import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:foodcalorietracker/constant/AppAssets.dart';
 import 'package:foodcalorietracker/constant/AppColor.dart';
@@ -21,12 +19,8 @@ import 'package:foodcalorietracker/screens/RecipesScreen/RecipesController.dart'
 import '../../widgets/VerifyEmailButton.dart';
 
 class HomeView extends GetView<HomeController> {
-  // Spacing between meal history cards; keep configurable for tweaks.
   static const double _kMealCardSpacing = 8.0;
-  
-  // Tutorial GlobalKeys for interactive onboarding
-  static final GlobalKey addFoodButtonKey = GlobalKey();
-  
+
   const HomeView({super.key});
 
   @override
@@ -43,43 +37,31 @@ class HomeView extends GetView<HomeController> {
         color: AppColor.primaryOrange,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          // Layout padding
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 20,
-          ), // Consistent spacing using multiples of 8dp
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date selector
               _buildDateSelector(context),
 
-              const SizedBox(height: 24), // Consistent spacing
-              // Calorie tracking card
+              const SizedBox(height: 24),
               _buildCalorieTrackingCard(context),
 
               const SizedBox(height: 24),
 
-              // Nutrition progress
               _buildNutritionProgress(context),
 
-              const SizedBox(
-                height: 32,
-              ), // Increased spacing for better hierarchy
-              // Recipes section
+              const SizedBox(height: 32),
               _buildRecipesSection(context),
 
               const SizedBox(height: 32),
 
-              // History section
               _buildHistorySection(context),
 
               const SizedBox(height: 24),
 
-              // Meal cards
               _buildMealCards(context),
 
-              const SizedBox(height: 24), // Bottom padding for FAB
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -123,7 +105,6 @@ class HomeView extends GetView<HomeController> {
             text: '',
             style: ModernButtonStyle.ghost,
             size: ModernButtonSize.small,
-            // Open the premium view when the crown button is tapped
             onPressed: () => Get.toNamed(Routes.premiumView),
             icon: Image.asset(AppAssets.crownIcon, height: 24, width: 24),
           ),
@@ -159,7 +140,6 @@ class HomeView extends GetView<HomeController> {
                     bool isToday =
                         controller.dates[index].day == controller.today.day;
                     return Padding(
-                      // Use directional padding so horizontal gaps respect TextDirection (RTL/LTR)
                       padding: EdgeInsetsDirectional.only(
                         end:
                             index == controller.dates.length - 1
@@ -202,7 +182,6 @@ class HomeView extends GetView<HomeController> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    // Use translation keys for weekdays; keep English uppercase short names
                                     (() {
                                       final weekdayKeys = [
                                         'Mon',
@@ -223,7 +202,6 @@ class HomeView extends GetView<HomeController> {
                                                   .weekday -
                                               1];
                                       final label = key.tr;
-                                      // keep English in uppercase as previous design used uppercase short day names
                                       return lang == 'en'
                                           ? label.toUpperCase()
                                           : label;
@@ -299,7 +277,6 @@ class HomeView extends GetView<HomeController> {
                 enableGradient: true,
                 child: Column(
                   children: [
-                    // Header
                     Row(
                       children: [
                         Container(
@@ -322,7 +299,6 @@ class HomeView extends GetView<HomeController> {
                           ),
                         ),
                         const Spacer(),
-                        // Minimal inline edit icon aligned with title
                         _InlineEditIcon(
                           onTap: () => Get.toNamed(Routes.adjustGoalsView),
                         ),
@@ -331,11 +307,9 @@ class HomeView extends GetView<HomeController> {
 
                     const SizedBox(height: 24),
 
-                    // Calorie block: goal + nutrient rows and circular remaining calories
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Left column: Calorie goal + small nutrient progress rows
                         Expanded(
                           flex: 2,
                           child: Column(
@@ -368,10 +342,8 @@ class HomeView extends GetView<HomeController> {
                               ),
                               const SizedBox(height: 16),
 
-                              // Small nutrient rows
                               _buildMiniNutrientRow(
                                 context,
-                                // use existing translation keys (already present in language files)
                                 label: 'Protein'.tr,
                                 value: controller.consumedProtein,
                                 goal: ConstantUserMaster.proteinGoal,
@@ -399,8 +371,6 @@ class HomeView extends GetView<HomeController> {
 
                         const SizedBox(width: 16),
 
-                        // Right column: Circular remaining calories — use shared CalorieRing widget
-                        // Right column: Circular remaining calories using shared `CalorieRing`
                         Expanded(
                           flex: 2,
                           child: Center(
@@ -461,9 +431,9 @@ class HomeView extends GetView<HomeController> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    // Add button below goal calories
                     Center(
                       child: Material(
+                        key: controller.addFoodButtonKey, // tutorial key
                         color: AppColor.neutralGrey800,
                         shape: const CircleBorder(),
                         elevation: 4,
@@ -505,7 +475,6 @@ class HomeView extends GetView<HomeController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Energy Orbs
               EnergyOrbs(
                 proteinConsumed: controller.consumedProtein,
                 carbsConsumed: controller.consumedCarbs,
@@ -571,14 +540,11 @@ class HomeView extends GetView<HomeController> {
             return ModernFadeSlideTransition(
               beginOffset: Offset(0, 0.5 + (index * 0.1)),
               child: ModernCard(
-                // Keep horizontal gutters but remove vertical gap so cards touch.
                 margin: const EdgeInsets.fromLTRB(12, 0, 12, _kMealCardSpacing),
-                // Slightly reduce internal padding for denser layout while preserving touch targets.
                 padding: const EdgeInsets.symmetric(
                   vertical: 12,
                   horizontal: 14,
                 ),
-                // Reduce shadow intensity to avoid overlapping glow when cards touch.
                 boxShadow: [
                   BoxShadow(
                     color: AppColor.primaryOrange.withOpacity(0.04),
@@ -642,7 +608,6 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildModernFAB(BuildContext context) {
     return FloatingActionButton(
-      key: addFoodButtonKey, // Add GlobalKey for tutorial
       onPressed: () => showMealSelectionSheet(context),
       backgroundColor: AppColor.primaryOrange,
       shape: const CircleBorder(),
@@ -807,10 +772,7 @@ class HomeView extends GetView<HomeController> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(10),
-                              child: Image.asset(
-                                icons[index],
-                                // Keep original icon color for clarity and maintainability
-                              ),
+                              child: Image.asset(icons[index]),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -856,8 +818,6 @@ class HomeView extends GetView<HomeController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Left column flexible so subtitle can wrap/ellipsis
-                // Keep horizontal gutters; reduce vertical gap so cards touch visually.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -907,120 +867,187 @@ class HomeView extends GetView<HomeController> {
         const SizedBox(height: 16),
         SizedBox(
           height: 200,
-          child: Builder(builder: (ctx) {
-            if (!Get.isRegistered<RecipesController>()) {
-              Get.put(RecipesController());
-            }
-            return GetBuilder<RecipesController>(
-              builder: (rc) {
-              final list = rc.topRecipes.isNotEmpty
-                  ? rc.topRecipes
-                  : _getMockRecipes().map((m) => Recipe(
-                        id: m['title'] as String,
-                        title: m['title'] as String,
-                        imageUrl: (m['imageUrl'] as String?) ?? '',
-                        duration: m['duration'] as int,
-                        calories: m['calories'] as int,
-                      )).toList();
+          child: Builder(
+            builder: (ctx) {
+              if (!Get.isRegistered<RecipesController>()) {
+                Get.put(RecipesController());
+              }
+              return GetBuilder<RecipesController>(
+                builder: (rc) {
+                  final list =
+                      rc.topRecipes.isNotEmpty
+                          ? rc.topRecipes
+                          : _getMockRecipes()
+                              .map(
+                                (m) => Recipe(
+                                  id: m['title'] as String,
+                                  title: m['title'] as String,
+                                  imageUrl: (m['imageUrl'] as String?) ?? '',
+                                  duration: m['duration'] as int,
+                                  calories: m['calories'] as int,
+                                ),
+                              )
+                              .toList();
 
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final recipe = list[index];
-                  return GestureDetector(
-                    onTap: () async {
-                      try {
-                        final appUserService = Get.find<AppUserService>();
-                        final isPremium = await appUserService.isPremiumNow();
-                        if (!isPremium) {
-                          _showPremiumRequiredDialog();
-                          return;
-                        }
-                        Get.toNamed(
-                          Routes.recipeDetailView,
-                          arguments: {'recipe': recipe},
-                        );
-                      } catch (_) {
-                        _showPremiumRequiredDialog();
-                      }
-                    },
-                    child: Container(
-                      width: 160,
-                      margin: EdgeInsets.only(right: index == list.length - 1 ? 0 : 12),
-                      decoration: BoxDecoration(
-                        color: context.theme.cardColor,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      final recipe = list[index];
+                      return GestureDetector(
+                        onTap: () async {
+                          try {
+                            final appUserService = Get.find<AppUserService>();
+                            final isPremium =
+                                await appUserService.isPremiumNow();
+                            if (!isPremium) {
+                              _showPremiumRequiredDialog();
+                              return;
+                            }
+                            Get.toNamed(
+                              Routes.recipeDetailView,
+                              arguments: {'recipe': recipe},
+                            );
+                          } catch (_) {
+                            _showPremiumRequiredDialog();
+                          }
+                        },
+                        child: Container(
+                          width: 160,
+                          margin: EdgeInsets.only(
+                            right: index == list.length - 1 ? 0 : 12,
                           ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            recipe.imageUrl.isNotEmpty
-                                ? Image.network(recipe.imageUrl, fit: BoxFit.cover)
-                                : Container(
-                                    color: context.theme.cardColor,
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.restaurant_rounded,
-                                        size: 32,
-                                        color: AppColor.neutralGrey500,
+                          decoration: BoxDecoration(
+                            color: context.theme.cardColor,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                recipe.imageUrl.isNotEmpty
+                                    ? Image.network(
+                                      recipe.imageUrl,
+                                      fit: BoxFit.cover,
+                                    )
+                                    : Container(
+                                      color: context.theme.cardColor,
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.restaurant_rounded,
+                                          size: 32,
+                                          color: AppColor.neutralGrey500,
+                                        ),
+                                      ),
+                                    ),
+                                Positioned.fill(
+                                  child: Container(color: Colors.transparent),
+                                ),
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.7),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time_rounded,
+                                          size: 10,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          '${recipe.duration} ${'min'.tr}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColor.primaryOrange.withOpacity(
+                                        0.9,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      '${recipe.calories} ${'cal'.tr}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
-                            Positioned.fill(
-                              child: Container(color: Colors.transparent),
-                            ),
-                            Positioned(
-                              bottom: 8,
-                              left: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.7), borderRadius: BorderRadius.circular(10)),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.access_time_rounded, size: 10, color: Colors.white),
-                                    const SizedBox(width: 2),
-                                    Text('${recipe.duration} ${'min'.tr}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600)),
-                                  ],
                                 ),
-                              ),
+                                Positioned(
+                                  left: 12,
+                                  right: 12,
+                                  bottom: 36,
+                                  child: Text(
+                                    recipe.localizedTitle(
+                                      Get.locale?.languageCode ?? 'en',
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: context.theme.textTheme.titleSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                          height: 1.2,
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withOpacity(
+                                                0.6,
+                                              ),
+                                              offset: const Offset(0, 1),
+                                              blurRadius: 4,
+                                            ),
+                                          ],
+                                        ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                decoration: BoxDecoration(color: AppColor.primaryOrange.withOpacity(0.9), borderRadius: BorderRadius.circular(10)),
-                                child: Text('${recipe.calories} ${'cal'.tr}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600)),
-                              ),
-                            ),
-                            Positioned(
-                              left: 12,
-                              right: 12,
-                              bottom: 36,
-                              child: Text(recipe.localizedTitle(Get.locale?.languageCode ?? 'en'), maxLines: 2, overflow: TextOverflow.ellipsis, style: context.theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 12, height: 1.2, color: Colors.white, shadows: [Shadow(color: Colors.black.withOpacity(0.6), offset: const Offset(0,1), blurRadius: 4)])),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   );
                 },
               );
-              },
-            );
-          }),
+            },
+          ),
         ),
       ],
     );
@@ -1060,7 +1087,6 @@ class HomeView extends GetView<HomeController> {
   }
 }
 
-// Minimal inline edit icon used in the Track Food header.
 class _InlineEditIcon extends StatefulWidget {
   final VoidCallback onTap;
   const _InlineEditIcon({required this.onTap});
@@ -1126,7 +1152,6 @@ class _EditIcon extends StatelessWidget {
   const _EditIcon();
   @override
   Widget build(BuildContext context) {
-    // Resolve color from parent IconTheme to allow smooth updates
     return Icon(
       Icons.edit_outlined,
       size: 18,
@@ -1145,13 +1170,12 @@ void _navigateToRecipes() async {
       _showPremiumRequiredDialog();
     }
   } catch (_) {
-    // Fail closed on any error
     _showPremiumRequiredDialog();
   }
 }
 
 void _showPremiumRequiredDialog() {
-  final txtTheme = Get.textTheme; // use Get context-safe theme
+  final txtTheme = Get.textTheme;
   Get.dialog(
     PremiumRequiredDialog(
       title: 'premium_required'.tr,

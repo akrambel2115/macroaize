@@ -1,10 +1,9 @@
-
 import 'package:foodcalorietracker/screens/ChatHistoryScreen/ChatHistoryController.dart';
 import 'package:get/get.dart';
 
-class ChatHistoryBinding extends Bindings{
+class ChatHistoryBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => ChatHistoryController(),);
+    Get.lazyPut(() => ChatHistoryController());
   }
 }

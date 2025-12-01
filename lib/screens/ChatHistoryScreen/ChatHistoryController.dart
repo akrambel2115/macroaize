@@ -2,7 +2,7 @@ import 'package:foodcalorietracker/Model/MainChatModel.dart';
 import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
 import 'package:get/get.dart';
 
-class ChatHistoryController extends GetxController{
+class ChatHistoryController extends GetxController {
   List<MainChatModel> history = [];
   final dbHelper = DatabaseHelper();
   @override
@@ -10,14 +10,14 @@ class ChatHistoryController extends GetxController{
     super.onInit();
     getHistory();
   }
-  getHistory()
-  async {
+
+  getHistory() async {
     history = await dbHelper.getMainChat();
     history = history.reversed.toList();
     update();
   }
-  deleteChatHistory(int id)
-  async {
+
+  deleteChatHistory(int id) async {
     await dbHelper.deleteMainChat(id);
     getHistory();
   }

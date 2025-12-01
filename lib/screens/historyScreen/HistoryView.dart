@@ -75,8 +75,8 @@ class HistoryView extends GetView<HistoryController> {
                   ),
                 ),
                 onPressed: () {
-                    controller.toggleSort();
-                  },
+                  controller.toggleSort();
+                },
               );
             },
           ),
@@ -120,8 +120,7 @@ class HistoryView extends GetView<HistoryController> {
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          // Header with meal type and delete button
+        children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -129,16 +128,16 @@ class HistoryView extends GetView<HistoryController> {
               ModernScaleTransition(
                 child: GestureDetector(
                   onTap: () {
-                      showCustomDeleteDialog(
-                        onDelete: () {
-                          controller.dbHelper.deleteCalorieHistory(
-                            historyItem.id!,
-                          );
-                          controller.getHistory();
-                        },
-                        context: context,
-                      );
-                    },
+                    showCustomDeleteDialog(
+                      onDelete: () {
+                        controller.dbHelper.deleteCalorieHistory(
+                          historyItem.id!,
+                        );
+                        controller.getHistory();
+                      },
+                      context: context,
+                    );
+                  },
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -158,10 +157,9 @@ class HistoryView extends GetView<HistoryController> {
 
           const SizedBox(height: 20),
 
-          // Show title instead of image for both local and scanned meals
+          // show title instead of image
           Center(child: _buildHistoryTitle(context, historyItem.title)),
           const SizedBox(height: 16),
-          // Nutrition items rendered inline to avoid overflow.
           Row(
             children: [
               Expanded(
@@ -301,8 +299,6 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  // Nutrition logic extracted to `NutritionBadge` widget for reuse.
-
   Widget _buildTimestamp(BuildContext context) {
     return Row(
       children: [
@@ -313,7 +309,7 @@ class HistoryView extends GetView<HistoryController> {
         ),
         const SizedBox(width: 6),
         Text(
-    DateTime.now().toString().split(' ')[0],
+          DateTime.now().toString().split(' ')[0],
           style: context.textTheme.labelSmall?.copyWith(
             color: AppColor.neutralGrey500,
           ),
@@ -372,7 +368,6 @@ class HistoryView extends GetView<HistoryController> {
                 labelKey: 'Track Food',
                 icon: null,
                 onTap: () {
-                  // TODO: Navigate to scan food screen
                   Get.back();
                 },
               ),

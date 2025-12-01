@@ -25,9 +25,8 @@ class AccountDetailsView extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     final theme = Theme.of(context);
 
-  // controller
-  final repo = FirebaseAuthRepository();
-  final acct = Get.put(AccountController(repo), tag: 'account');
+    final repo = FirebaseAuthRepository();
+    final acct = Get.put(AccountController(repo), tag: 'account');
 
     return Scaffold(
       appBar: AppBar(
@@ -46,12 +45,10 @@ class AccountDetailsView extends StatelessWidget {
         backgroundColor: Colors.transparent,
         foregroundColor: theme.colorScheme.onSurface,
         actions: [
-          // Verify Email badge in top-right corner
           const Padding(
             padding: EdgeInsets.only(right: 8),
             child: VerifyEmailButton(),
           ),
-          // logout icon button
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -75,7 +72,6 @@ class AccountDetailsView extends StatelessWidget {
             return Column(
               children: [
                 const SizedBox(height: 8),
-              // avatar
                 CircleAvatar(
                   radius: 42,
                   backgroundColor: const Color(0xFF4A90E2),
@@ -106,186 +102,191 @@ class AccountDetailsView extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
 
-      // details card
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // name row (label)
-                    Row(
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.person, size: 20, color: Colors.grey[600]),
-                        const SizedBox(width: 8),
-                        Text(
-                          'name_label'.tr,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    // display name with inline edit icon
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 6,
-                      children: [
-                        // name text
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: double.infinity,
-                          ),
-                          child: Text(
-                            liveUser?.displayName ?? '-',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400,
-                color: theme.brightness == Brightness.dark
-                  ? Colors.grey.shade400
-                  : Colors.grey[800],
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.person,
+                              size: 20,
+                              color: Colors.grey[600],
                             ),
-                            softWrap: true,
-                          ),
-                        ),
-                        // small inline edit icon
-                        GestureDetector(
-                          onTap: () async {
-                            final res = await showModalBottomSheet<bool>(
-                              context: context,
-                              isScrollControlled: true,
-                              builder:
-                                  (ctx) => Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom:
-                                          MediaQuery.of(ctx).viewInsets.bottom,
-                                    ),
-                                    child: _EditDisplayNameSheet(
-                                      controller: acct,
-                                    ),
-                                  ),
-                            );
-                            if (res == true) {
-                              NotificationService.showSuccess(
-                                'display_name_updated'.tr,
-                              );
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 2),
-                            child: Icon(
-                              Icons.edit,
-                              size: 18,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // email row
-                    Row(
-                      children: [
-                        Icon(Icons.email, size: 20, color: Colors.grey[600]),
-                        const SizedBox(width: 8),
-                        Text(
-                          'email_label'.tr,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      liveUser?.email ?? '-',
-                      style: TextStyle(
-                        fontSize: 13,
-            color: theme.brightness == Brightness.dark
-              ? Colors.grey.shade400
-              : Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // change password (email/password accounts only)
-                    Builder(
-                      builder: (context) {
-                        final hasPasswordProvider =
-                            liveUser?.providerData.any(
-                              (p) => p.providerId == 'password',
-                            ) ??
-                            false;
-                        if (!hasPasswordProvider) {
-                          return const SizedBox.shrink();
-                        }
-                        return Center(
-                          child: TextButton(
-                            onPressed: () async {
-                              // navigate to change password page
-                              final res = await Get.to<String?>(
-                                () => ChangePasswordScreen(controller: acct),
-                              );
-                              if (res == 'password_changed') {
-                                NotificationService.showSuccess(
-                                  'password_changed_message'.tr,
-                                );
-                                Get.offAllNamed('/login');
-                              }
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: _kAccent,
-                              backgroundColor: theme.brightness == Brightness.dark
-                                  ? AppColor.darkCard
-                                  : Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(
-                              'change_password'.tr,
+                            const SizedBox(width: 8),
+                            Text(
+                              'name_label'.tr,
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey[700],
                               ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: double.infinity,
+                              ),
+                              child: Text(
+                                liveUser?.displayName ?? '-',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color:
+                                      theme.brightness == Brightness.dark
+                                          ? Colors.grey.shade400
+                                          : Colors.grey[800],
+                                ),
+                                softWrap: true,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                final res = await showModalBottomSheet<bool>(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder:
+                                      (ctx) => Padding(
+                                        padding: EdgeInsets.only(
+                                          bottom:
+                                              MediaQuery.of(
+                                                ctx,
+                                              ).viewInsets.bottom,
+                                        ),
+                                        child: _EditDisplayNameSheet(
+                                          controller: acct,
+                                        ),
+                                      ),
+                                );
+                                if (res == true) {
+                                  NotificationService.showSuccess(
+                                    'display_name_updated'.tr,
+                                  );
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 2),
+                                child: Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.email,
+                              size: 20,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'email_label'.tr,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          liveUser?.email ?? '-',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color:
+                                theme.brightness == Brightness.dark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey[800],
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 24),
+
+                        // password provider only
+                        Builder(
+                          builder: (context) {
+                            final hasPasswordProvider =
+                                liveUser?.providerData.any(
+                                  (p) => p.providerId == 'password',
+                                ) ??
+                                false;
+                            if (!hasPasswordProvider) {
+                              return const SizedBox.shrink();
+                            }
+                            return Center(
+                              child: TextButton(
+                                onPressed: () async {
+                                  final res = await Get.to<String?>(
+                                    () =>
+                                        ChangePasswordScreen(controller: acct),
+                                  );
+                                  if (res == 'password_changed') {
+                                    NotificationService.showSuccess(
+                                      'password_changed_message'.tr,
+                                    );
+                                    Get.offAllNamed('/login');
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: _kAccent,
+                                  backgroundColor:
+                                      theme.brightness == Brightness.dark
+                                          ? AppColor.darkCard
+                                          : Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 30,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'change_password'.tr,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-            // ...logout moved to AppBar as an IconButton
-            const SizedBox(height: 24),
-          ],
-        );
-      },
+                const SizedBox(height: 24),
+              ],
+            );
+          },
+        ),
       ),
-    ),
-  );
+    );
   }
 }
 
-// edit display name sheet
 class _EditDisplayNameSheet extends StatefulWidget {
   final AccountController controller;
   const _EditDisplayNameSheet({required this.controller});
@@ -311,7 +312,7 @@ class _EditDisplayNameSheetState extends State<_EditDisplayNameSheet> {
     initialNormalized = _normalize(initial);
     controller.displayNameController.text = initial;
     controller.displayNameController.addListener(_onChange);
-    // Defer initial validation to after first frame to avoid calling setState during build
+    // defer initial validation
     WidgetsBinding.instance.addPostFrameCallback((_) => _onChange());
   }
 
@@ -338,8 +339,6 @@ class _EditDisplayNameSheetState extends State<_EditDisplayNameSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // local accent is available as _kAccent
-    // Wrap content in a scroll view so the sheet can shrink when the keyboard is open
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -355,9 +354,7 @@ class _EditDisplayNameSheetState extends State<_EditDisplayNameSheet> {
               key: _formKey,
               child: TextFormField(
                 controller: controller.displayNameController,
-                decoration: InputDecoration(
-                  labelText: 'new_display_name'.tr,
-                ),
+                decoration: InputDecoration(labelText: 'new_display_name'.tr),
                 textCapitalization: TextCapitalization.words,
                 autofocus: true,
                 validator: _validateNameField,
@@ -425,5 +422,3 @@ class _EditDisplayNameSheetState extends State<_EditDisplayNameSheet> {
     );
   }
 }
-
-// ChangePasswordScreen moved to separate file 'change_password_screen.dart'

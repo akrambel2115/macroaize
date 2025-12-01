@@ -27,7 +27,7 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
         } else {
           controller.onChangeAutoGenerate(false);
         }
-        return Future(() => true,);
+        return Future(() => true);
       },
       child: Scaffold(
         backgroundColor: context.theme.scaffoldBackgroundColor,
@@ -49,218 +49,226 @@ class AdjustGoalsView extends GetView<AdjustGoalsController> {
           ),
           actions: const [],
         ),
-        body: GetBuilder<AdjustGoalsController>(builder: (controller) {
-          if(controller.isAutoGenerate)
-            {
-              if(controller.selectedUpdateGoalView==1)
-                {
-                  return AutoWorkoutView();
-                }else if(controller.selectedUpdateGoalView==2)
-              {
+        body: GetBuilder<AdjustGoalsController>(
+          builder: (controller) {
+            if (controller.isAutoGenerate) {
+              if (controller.selectedUpdateGoalView == 1) {
+                return AutoWorkoutView();
+              } else if (controller.selectedUpdateGoalView == 2) {
                 return AutoHeightWidth();
-              }else{
+              } else {
                 return AutoGoalView();
               }
-            }else{
-            return Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, top: 20),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: context.theme.cardColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          onTap: () {
-                            showUpdateGoalDialog(
-                              ConstantUserMaster.calorieGoal,
-                                  (p0) {
-                                controller.updateCalorieGoal(p0);
-                              },
-                              context,
-                              "Update Calorie Goal".tr,
-                            );
-                          },
-                          title: Text(
-                            "Calorie Goal".tr,
-                            style: context.theme.textTheme.titleSmall,
-                          ),
-                          subtitle: GetBuilder<AdjustGoalsController>(
-                            builder: (controller) {
-                              return Text(
-                                ConstantUserMaster.calorieGoal.toString(),
-                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                              );
-                            },
-                          ),
-                          trailing: Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: AppColor.primaryOrange,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Icon(
-                              Icons.edit,
-                              color: AppColor.neutralWhite,
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: FractionallySizedBox(
-                            widthFactor: 0.92,
-                            child: Divider(
-                              color: context.theme.brightness == Brightness.dark
-                                  ? AppColor.neutralGrey700
-                                  : AppColor.neutralGrey200,
-                            ),
-                          ),
-                        ),
-                        ListTile(
+            } else {
+              return Padding(
+                padding: const EdgeInsets.only(left: 8, right: 8, top: 20),
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: context.theme.cardColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        children: [
+                          ListTile(
                             onTap: () {
-                            showUpdateGoalDialog(
-                              ConstantUserMaster.proteinGoal,
-                                  (p0) {
-                                controller.updateProteinGoal(p0);
-                              },
-                              context,
-                              "Update Protein Goal".tr,
-                            );
-                          },
-                          title: Text(
-                            "Protein goal".tr,
-                            style: context.theme.textTheme.titleSmall,
-                          ),
-                          subtitle: GetBuilder<AdjustGoalsController>(
-                            builder: (controller) {
-                              return Text(
-                                 ConstantUserMaster.proteinGoal.toString(),
-                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              showUpdateGoalDialog(
+                                ConstantUserMaster.calorieGoal,
+                                (p0) {
+                                  controller.updateCalorieGoal(p0);
+                                },
+                                context,
+                                "Update Calorie Goal".tr,
                               );
                             },
-                          ),
-                          trailing: Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: AppColor.primaryOrange,
-                              borderRadius: BorderRadius.circular(20),
+                            title: Text(
+                              "Calorie Goal".tr,
+                              style: context.theme.textTheme.titleSmall,
                             ),
-                            child: Icon(
-                              Icons.edit,
-                              color: AppColor.neutralWhite,
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: FractionallySizedBox(
-                            widthFactor: 0.92,
-                            child: Divider(
-                              color: context.theme.brightness == Brightness.dark
-                                  ? AppColor.neutralGrey800
-                                  : AppColor.neutralGrey200,
-                            ),
-                          ),
-                        ),
-                        ListTile(
-                          onTap: () {
-                            showUpdateGoalDialog(
-                              ConstantUserMaster.carbGoal,
-                                  (p0) {
-                                controller.updateCarbGoal(p0);
+                            subtitle: GetBuilder<AdjustGoalsController>(
+                              builder: (controller) {
+                                return Text(
+                                  ConstantUserMaster.calorieGoal.toString(),
+                                  style: context.theme.textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                );
                               },
-                              context,
-                              "Update Carb Goal".tr,
-                            );
-                          },
-                          title: Text(
-                            "Carb goal".tr,
-                            style: context.theme.textTheme.titleSmall,
+                            ),
+                            trailing: Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: AppColor.primaryOrange,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                color: AppColor.neutralWhite,
+                              ),
+                            ),
                           ),
-                          subtitle: GetBuilder<AdjustGoalsController>(
-                            builder: (controller) {
-                              return Text(
-                                ConstantUserMaster.carbGoal.toString(),
-                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          Center(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.92,
+                              child: Divider(
+                                color:
+                                    context.theme.brightness == Brightness.dark
+                                        ? AppColor.neutralGrey700
+                                        : AppColor.neutralGrey200,
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            onTap: () {
+                              showUpdateGoalDialog(
+                                ConstantUserMaster.proteinGoal,
+                                (p0) {
+                                  controller.updateProteinGoal(p0);
+                                },
+                                context,
+                                "Update Protein Goal".tr,
                               );
                             },
-                          ),
-                          trailing: Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: AppColor.primaryOrange,
-                              borderRadius: BorderRadius.circular(20),
+                            title: Text(
+                              "Protein goal".tr,
+                              style: context.theme.textTheme.titleSmall,
                             ),
-                            child: Icon(
-                              Icons.edit,
-                              color: AppColor.neutralWhite,
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: FractionallySizedBox(
-                            widthFactor: 0.92,
-                            child: Divider(
-                              color: context.theme.brightness == Brightness.dark
-                                  ? AppColor.neutralGrey800
-                                  : AppColor.neutralGrey200,
-                            ),
-                          ),
-                        ),
-                        ListTile(
-                          onTap: () {
-                            showUpdateGoalDialog(
-                              ConstantUserMaster.fatsGoal,
-                                  (p0) {
-                                controller.updateFatGoal(p0);
+                            subtitle: GetBuilder<AdjustGoalsController>(
+                              builder: (controller) {
+                                return Text(
+                                  ConstantUserMaster.proteinGoal.toString(),
+                                  style: context.theme.textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                );
                               },
-                              context,
-                              "Update Fat Goal".tr,
-                            );
-                          },
-                          title: Text(
-                            "Fats".tr,
-                            style: context.theme.textTheme.titleSmall,
+                            ),
+                            trailing: Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: AppColor.primaryOrange,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                color: AppColor.neutralWhite,
+                              ),
+                            ),
                           ),
-                          subtitle: GetBuilder<AdjustGoalsController>(
-                            builder: (controller) {
-                              return Text(
-                                ConstantUserMaster.fatsGoal.toString(),
-                                style: context.theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          Center(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.92,
+                              child: Divider(
+                                color:
+                                    context.theme.brightness == Brightness.dark
+                                        ? AppColor.neutralGrey800
+                                        : AppColor.neutralGrey200,
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            onTap: () {
+                              showUpdateGoalDialog(
+                                ConstantUserMaster.carbGoal,
+                                (p0) {
+                                  controller.updateCarbGoal(p0);
+                                },
+                                context,
+                                "Update Carb Goal".tr,
                               );
                             },
-                          ),
-                          trailing: Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: AppColor.primaryOrange,
-                              borderRadius: BorderRadius.circular(20),
+                            title: Text(
+                              "Carb goal".tr,
+                              style: context.theme.textTheme.titleSmall,
                             ),
-                            child: Icon(
-                              Icons.edit,
-                              color: AppColor.neutralWhite,
+                            subtitle: GetBuilder<AdjustGoalsController>(
+                              builder: (controller) {
+                                return Text(
+                                  ConstantUserMaster.carbGoal.toString(),
+                                  style: context.theme.textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                );
+                              },
+                            ),
+                            trailing: Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: AppColor.primaryOrange,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                color: AppColor.neutralWhite,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ).paddingOnly(bottom: 10),
-                  CustomButtom(
-                    backgroundcolor: context.theme.focusColor,
-                    btncolor: context.theme.brightness == Brightness.light ? Colors.white : context.theme.primaryColor,
-                    btntext: "Auto Generate Goal".tr,
-                    ontap: () {
-                      controller.onChangeAutoGenerate(true);
-                    },
-                  ).paddingOnly(top: 20),
-                ],
-              ),
-            );
-          }
-
-        },),
+                          Center(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.92,
+                              child: Divider(
+                                color:
+                                    context.theme.brightness == Brightness.dark
+                                        ? AppColor.neutralGrey800
+                                        : AppColor.neutralGrey200,
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            onTap: () {
+                              showUpdateGoalDialog(
+                                ConstantUserMaster.fatsGoal,
+                                (p0) {
+                                  controller.updateFatGoal(p0);
+                                },
+                                context,
+                                "Update Fat Goal".tr,
+                              );
+                            },
+                            title: Text(
+                              "Fats".tr,
+                              style: context.theme.textTheme.titleSmall,
+                            ),
+                            subtitle: GetBuilder<AdjustGoalsController>(
+                              builder: (controller) {
+                                return Text(
+                                  ConstantUserMaster.fatsGoal.toString(),
+                                  style: context.theme.textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                );
+                              },
+                            ),
+                            trailing: Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: AppColor.primaryOrange,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                color: AppColor.neutralWhite,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).paddingOnly(bottom: 10),
+                    CustomButtom(
+                      backgroundcolor: context.theme.focusColor,
+                      btncolor:
+                          context.theme.brightness == Brightness.light
+                              ? Colors.white
+                              : context.theme.primaryColor,
+                      btntext: "Auto Generate Goal".tr,
+                      ontap: () {
+                        controller.onChangeAutoGenerate(true);
+                      },
+                    ).paddingOnly(top: 20),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }

@@ -54,7 +54,7 @@ class AnalyticsController extends GetxController {
 
     for (var dayData in filteredData) {
       DateTime dataDate = DateFormat('dd-MM-yyyy').parse(dayData.date);
-  // Use weekday integer to pick a stable English key (1=Mon,7=Sun)
+      // 1=Mon,7=Sun
       const dowMap = {
         1: 'Mon',
         2: 'Tue',
@@ -127,18 +127,18 @@ class AnalyticsController extends GetxController {
               entryDate.isBefore(formattedEndDate.add(Duration(days: 1)));
         }).toList();
     Map<int, int> yearlyConsumption = {
-      1: 0, // January
-      2: 0, // February
-      3: 0, // March
-      4: 0, // April
-      5: 0, // May
-      6: 0, // June
-      7: 0, // July
-      8: 0, // August
-      9: 0, // September
-      10: 0, // October
-      11: 0, // November
-      12: 0, // December
+      1: 0, // january
+      2: 0, // february
+      3: 0, // march
+      4: 0, // april
+      5: 0, // may
+      6: 0, // june
+      7: 0, // july
+      8: 0, // august
+      9: 0, // september
+      10: 0, // october
+      11: 0, // november
+      12: 0, // december
     };
     for (var dayData in yearlyWaterData) {
       DateTime dataDate = DateFormat('dd-MM-yyyy').parse(dayData.date);
@@ -149,10 +149,10 @@ class AnalyticsController extends GetxController {
       }
     }
 
-  // reset and add yearly data
+    // reset and add yearly data
     yearlyConsumption.forEach((month, amount) {
       String monthName = DateFormat.MMMM().format(DateTime(today.year, month));
-      yearData.add(SalesData(monthName.substring(0,3), amount));
+      yearData.add(SalesData(monthName.substring(0, 3), amount));
       yourYearGoal = yourYearGoal + amount;
     });
 
