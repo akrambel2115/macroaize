@@ -48,5 +48,11 @@ app.*.map.json
 /android/app/release
 
 *.md
-
 .vscode/
+
+*.jks
+*.keystore
+key.properties
+
+# Java Heap Dumps
+*.hprof
