@@ -428,6 +428,7 @@ const updateSubscriptionInFirestore = async (uid: string, data: {
             case 'PRODUCT_CHANGE':
             case 'UNCANCELLATION':
                 status = 'active';
+                isActive = true; // These events confirm active subscription
                 break;
             case 'CANCELLATION':
                 status = isActive ? 'canceled' : 'expired';
@@ -608,7 +609,10 @@ export const refreshSubscription = onCall(
             
             const store = targetSub.store || null;
             const isTrial = targetSub.is_sandbox === false && targetSub.period_type === 'trial';
-            const autoRenewStatus = targetSub.auto_renew_status === true;
+            // auto_renew_status: if not explicitly false, treat active subscriptions as auto-renewing
+            const autoRenewStatus: boolean = targetSub.auto_renew_status === false ? false 
+                : (targetSub.auto_renew_status === true || targetSub.auto_renew_status === 'true' 
+                    || (!!expirationAtMs && expirationAtMs > Date.now() && !targetSub.unsubscribe_detected_at));
             const cancellationReason = targetSub.unsubscribe_detected_at ? 'USER_CANCELLED' : null;
             
             const environment = targetSub.is_sandbox ? 'SANDBOX' : 'PRODUCTION';
@@ -805,6 +809,12 @@ export const revenuecatWebhook = onRequest(
                                     ev?.auto_renew_status === 'true' ||
                                     ev?.subscriber_attributes?.auto_renew_status?.value === 'true';
 
+            // For RENEWAL events, auto_renew_status is implicitly true if not explicitly false
+            const activeRenewalEvents = ['RENEWAL', 'INITIAL_PURCHASE', 'UNCANCELLATION', 'PRODUCT_CHANGE'];
+            const effectiveAutoRenewStatus = activeRenewalEvents.includes(typeRaw)
+                ? (ev?.auto_renew_status === false || ev?.auto_renew_status === 'false' ? false : true)
+                : autoRenewStatus;
+
             const cancellationReason = ev?.cancel_reason || ev?.cancellation_reason || null;
 
             const rawGracePeriodExpiresAtMs = ev?.grace_period_expires_at_ms ?? ev?.grace_period_expiration_at_ms ?? null;
@@ -846,7 +856,7 @@ export const revenuecatWebhook = onRequest(
                 store,
                 environment,
                 isTrial,
-                autoRenewStatus,
+                autoRenewStatus: effectiveAutoRenewStatus,
                 cancellationReason,
                 gracePeriodExpiresAtMs,
                 originalPurchasedAtMs,
