@@ -1,4 +1,3 @@
-
 class MealBreakdownItem {
   final String name;
   final String englishName;
@@ -139,5 +138,9 @@ class _ParsedAmount {
   final double amount;
   final String unit;
   final double grams;
-  const _ParsedAmount({required this.amount, required this.unit, required this.grams});
+  const _ParsedAmount({
+    required this.amount,
+    required this.unit,
+    required this.grams,
+  });
 }
