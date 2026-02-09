@@ -446,8 +446,8 @@ const Map<String, String> arabic = {
       "تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى.",
   "Current password incorrect": "كلمة المرور الحالية غير صحيحة.",
   "Too many attempts": "محاولات كثيرة جدًا. يرجى المحاولة لاحقًا.",
-    "too_many_attempts": "محاولات كثيرة جدًا. يرجى المحاولة لاحقًا.",
-    "please_relogin": "يرجى تسجيل الدخول مرة أخرى ثم المحاولة من جديد.",
+  "too_many_attempts": "محاولات كثيرة جدًا. يرجى المحاولة لاحقًا.",
+  "please_relogin": "يرجى تسجيل الدخول مرة أخرى ثم المحاولة من جديد.",
   "Please relogin": "يرجى إعادة تسجيل الدخول والمحاولة مرة أخرى.",
   "Operation failed": "فشلت العملية.",
   "Current password label": "كلمة المرور الحالية",
@@ -486,7 +486,8 @@ const Map<String, String> arabic = {
   "withdrawal_subtitle": "احصل على أرباحك المحولة إلى حسابك البنكي",
   "confirm_withdrawal": "تأكيد السحب",
   "rip_helper_text": "رقم حسابك البنكي المكون من 20 رقمًا (RIP)",
-  "withdrawal_info_message": "سيتم معالجة طلب السحب الخاص بك خلال 3-5 أيام عمل. ستتلقى بريدًا إلكترونيًا للتأكيد بمجرد الانتهاء.",
+  "withdrawal_info_message":
+      "سيتم معالجة طلب السحب الخاص بك خلال 3-5 أيام عمل. ستتلقى بريدًا إلكترونيًا للتأكيد بمجرد الانتهاء.",
   "minimum_withdrawal_amount": "الحد الأدنى للسحب: @amount دج",
   "withdrawal_history": "سجل السحوبات",
   "promo_code_expired": "انتهت صلاحية رمز الخصم",
@@ -933,24 +934,33 @@ const Map<String, String> arabic = {
   "parsed_successfully": "تم التحليل بنجاح",
   "edit": "تعديل",
   "upgrade": "ترقية",
-  "premium_feature_workout_ai": "تسجيل التمارين بالذكاء الاصطناعي ميزة مميزة. قم بالترقية للوصول!",
+  "premium_feature_workout_ai":
+      "تسجيل التمارين بالذكاء الاصطناعي ميزة مميزة. قم بالترقية للوصول!",
   "failed_to_parse_workout": "فشل في تحليل التمرين. يرجى إعادة الصياغة.",
-    "please_analyze_or_select_type": "يرجى التحليل بالذكاء الاصطناعي قبل الحفظ",
-    "failed_to_save_workout": "تعذر حفظ التمرين. يرجى المحاولة مرة أخرى.",  "confirm_workout": "تأكيد التمرين",
+  "please_analyze_or_select_type": "يرجى التحليل بالذكاء الاصطناعي قبل الحفظ",
+  "failed_to_save_workout": "تعذر حفظ التمرين. يرجى المحاولة مرة أخرى.",
+  "confirm_workout": "تأكيد التمرين",
   "calories_burned_label": "السعرات الحرارية التي ستحرقها",
-  "calories_explanation": "سيحرق هذا التمرين السعرات الحرارية ويزيد من مخصصك اليومي من السعرات الحرارية.",
+  "calories_explanation":
+      "سيحرق هذا التمرين السعرات الحرارية ويزيد من مخصصك اليومي من السعرات الحرارية.",
   "remaining_calories_increase": "ستزيد السعرات الحرارية المتبقية لديك",
   "confirm_save": "تأكيد وحفظ",
   "description_too_short": "الوصف قصير جداً. يرجى تقديم المزيد من التفاصيل.",
   "workout_saved": "تم حفظ التمرين بنجاح!",
 
   // Error Messages & Limits
-  "daily_scan_limit_reached": "لقد وصلت إلى الحد اليومي للمسح. اشترك في بريميوم لمسح غير محدود!",
-  "daily_chat_limit_reached": "لقد وصلت إلى الحد اليومي للمحادثة. اشترك في بريميوم لمحادثات غير محدودة!",
+  "daily_scan_limit_reached":
+      "لقد وصلت إلى الحد اليومي للمسح. اشترك في بريميوم لمسح غير محدود!",
+  "daily_chat_limit_reached":
+      "تم الوصول إلى الحد اليومي للدردشة. قم بالترقية للدردشة بلا حدود!",
+  "hmm_something_went_wrong": "همم، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
   "invalid_action": "طلب غير صالح.",
-  "daily_limit_reached_try_again": "تم الوصول إلى الحد اليومي. يرجى المحاولة مرة أخرى غدًا.",
-  "unable_to_process_scan_try_again": "تعذر معالجة المسح. يرجى المحاولة مرة أخرى.",
-  "unable_to_send_message_try_again": "تعذر إرسال الرسالة. يرجى المحاولة مرة أخرى.",
+  "daily_limit_reached_try_again":
+      "تم الوصول إلى الحد اليومي. يرجى المحاولة مرة أخرى غدًا.",
+  "unable_to_process_scan_try_again":
+      "تعذر معالجة المسح. يرجى المحاولة مرة أخرى.",
+  "unable_to_send_message_try_again":
+      "تعذر إرسال الرسالة. يرجى المحاولة مرة أخرى.",
   "amount_exceeds_balance": "المبلع يتجاوز الرصيد المتاح",
   "enter_withdrawal_amount": "يرجى إدخال مبلغ السحب",
   "enter_valid_amount": "يرجى إدخال مبلغ صالح",
@@ -958,19 +968,23 @@ const Map<String, String> arabic = {
   "rip_invalid_format": "يجب أن يتكون RIP من 20 رقمًا بالضبط",
   "auth_scan_success": "يمكنك الآن استخدام الماسح. يرجى محاولة المسح مرة أخرى.",
   "auth_scan_required": "يرجى تسجيل الدخول لاستخدام ميزة ماسح الطعام",
-  "auth_chat_success": "يمكنك الآن استخدام الدردشة. يرجى محاولة إرسال رسالتك مرة أخرى.",
+  "auth_chat_success":
+      "يمكنك الآن استخدام الدردشة. يرجى محاولة إرسال رسالتك مرة أخرى.",
   "auth_chat_required": "يرجى تسجيل الدخول لاستخدام ميزة مدرب الذكاء الاصطناعي",
 
   // Withdrawal Errors
-  "withdrawal_request_failed": "تعذر معالجة طلب السحب. يرجى المحاولة مرة أخرى لاحقاً.",
-  "withdrawal_service_unavailable": "خدمة السحب غير متاحة مؤقتاً. يرجى المحاولة مرة أخرى لاحقاً.",
+  "withdrawal_request_failed":
+      "تعذر معالجة طلب السحب. يرجى المحاولة مرة أخرى لاحقاً.",
+  "withdrawal_service_unavailable":
+      "خدمة السحب غير متاحة مؤقتاً. يرجى المحاولة مرة أخرى لاحقاً.",
   "withdrawal_permission_denied": "ليس لديك صلاحية لطلب السحب.",
   "withdrawal_minimum_not_met": "المبلغ أقل من الحد الأدنى للسحب.",
 
   // App Update
   "update_required_title": "تحديث مطلوب",
   "update_now": "تحديث الآن",
-  "update_default_message": "يلزم تحديث التطبيق للمتابعة. يرجى التحديث إلى أحدث إصدار.",
+  "update_default_message":
+      "يلزم تحديث التطبيق للمتابعة. يرجى التحديث إلى أحدث إصدار.",
 
   // Notification Settings
   "notification_settings": "إعدادات الإشعارات",
@@ -994,7 +1008,7 @@ const Map<String, String> arabic = {
   "weekly_summary_desc": "احصل على تقرير تقدمك الأسبوعي",
   "weight_reminders": "تسجيل الوزن",
   "weight_reminders_desc": "تذكير أسبوعي لتحديث وزنك",
-  
+
   // Test Notifications
   "test_notification": "إرسال إشعار تجريبي",
   "test_notification_desc": "تحقق من عمل الإشعارات",
