@@ -19,7 +19,10 @@ class AccountController extends GetxController {
 
   // Helpers
   Future<void> updateDisplayName() async {
-    final raw = displayNameController.text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final raw = displayNameController.text.trim().replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    );
     if (raw.length < 2 || raw.length > 50) {
       errorText.value = 'Name must be 2-50 chars';
       return;
@@ -37,7 +40,7 @@ class AccountController extends GetxController {
   }
 
   Future<void> changePassword() async {
-  // client-side validation
+    // client-side validation
     final cur = currentPassword.text;
     final nw = newPassword.text;
     final conf = confirmPassword.text;
@@ -69,7 +72,7 @@ class AccountController extends GetxController {
     if (isLoading.value) return;
     isLoading.value = true;
 
-  // reauthenticate
+    // reauthenticate
     final reauthFail = await repo.reauthenticateWithPassword(cur);
     if (reauthFail != null) {
       isLoading.value = false;
@@ -77,7 +80,7 @@ class AccountController extends GetxController {
       return;
     }
 
-  // update password
+    // update password
     final updateFail = await repo.updatePassword(nw);
     isLoading.value = false;
     if (updateFail != null) {
@@ -85,14 +88,18 @@ class AccountController extends GetxController {
       return;
     }
 
-  // clear sensitive data
+    // clear sensitive data
     currentPassword.text = '';
     newPassword.text = '';
     confirmPassword.text = '';
 
-  // sign out after password change to require re-login
+    // sign out after password change to require re-login
     await repo.signOut();
     Get.back(result: 'password_changed');
+  }
+
+  Future<void> signOut() async {
+    await repo.signOut();
   }
 
   String _mapFailure(AuthFailure f) {
@@ -100,13 +107,15 @@ class AccountController extends GetxController {
       switch (f.code) {
         case 'wrong-password':
         case 'invalid-credential':
-      return 'current_password_incorrect'.tr;
+          return 'current_password_incorrect'.tr;
         case 'too-many-requests':
-      return 'too_many_attempts'.tr;
+          return 'too_many_attempts'.tr;
         case 'requires-recent-login':
-      return 'please_relogin'.tr;
+          return 'please_relogin'.tr;
         default:
-      return f.message.isNotEmpty ? f.message : 'auth_authentication_error'.tr;
+          return f.message.isNotEmpty
+              ? f.message
+              : 'auth_authentication_error'.tr;
       }
     }
     if (f is NetworkFailure) return 'auth_network_error'.tr;
