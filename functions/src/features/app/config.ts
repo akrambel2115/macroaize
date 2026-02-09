@@ -9,7 +9,7 @@ import {
 } from '../../remote_config_service';
 import { getAiModel, getAndroidIapIds, getIosIapIds } from '../../config';
 
-export const getAppConfig = onCall({ region: 'europe-west1' }, async (_request: CallableRequest) => {
+export const getAppConfig = onCall({ region: 'europe-west1', memory: '256MiB', cpu: 0.083 }, async (_request: CallableRequest) => {
     const config = {
         aiModel: getAiModel(),
         limits: {
