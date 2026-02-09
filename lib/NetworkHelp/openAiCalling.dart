@@ -14,6 +14,7 @@ class OpenAiCalling {
       final base64Image = base64Encode(bytes);
       final parameters = {
         'model': Get.find<AppConfigService>().aiModel,
+        'context': 'scan',
         'messages': [
           {
             'role': 'system',
@@ -60,6 +61,7 @@ class OpenAiCalling {
       final base64Image = base64Encode(bytes);
       final parameters = {
         'model': Get.find<AppConfigService>().aiModel,
+        'context': 'scan',
         'messages': [
           {
             'role': 'system',
@@ -107,5 +109,67 @@ class OpenAiCalling {
     final languageMap = {'en': 'English', 'ar': 'Arabic', 'fr': 'French'};
 
     return languageMap[currentLang] ?? 'English';
+  }
+
+  /// AI-based nutrition estimation for a food item by name & weight.
+  /// Used as fallback when USDA returns no results.
+  /// Returns a map with kcalPer100g, proteinPer100g, carbsPer100g, fatPer100g
+  /// or null on failure.
+  static Future<Map<String, double>?> estimateNutritionByName(
+    String foodName,
+    double grams,
+  ) async {
+    try {
+      final parameters = {
+        'model': Get.find<AppConfigService>().aiModel,
+        'context': 'scan',
+        'messages': [
+          {
+            'role': 'system',
+            'content':
+                'You are a nutrition database. Given a food name, return ONLY compact JSON with numeric per-100g nutritional values. No commentary or markdown.\nJSON shape: {"kcalPer100g":<number>,"proteinPer100g":<number>,"carbsPer100g":<number>,"fatPer100g":<number>}\nUse realistic values. Never return all zeros.',
+          },
+          {
+            'role': 'user',
+            'content':
+                'Nutritional values per 100g for: "$foodName" (estimated portion ${grams.toInt()}g). Return ONLY the JSON.',
+          },
+        ],
+        'temperature': 0,
+        'max_tokens': 150,
+      };
+      final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+      final callable = functions.httpsCallable('chatWithOpenRouter');
+      final result = await callable.call(parameters);
+      final decodedJson =
+          jsonDecode(jsonEncode(result.data)) as Map<String, dynamic>;
+      OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+      final raw = data.choices!.first.message!.content.toString().trim();
+      String cleaned = raw;
+      if (cleaned.contains('```')) {
+        final start = cleaned.indexOf('```');
+        final end = cleaned.lastIndexOf('```');
+        if (end > start) {
+          cleaned = cleaned.substring(start + 3, end).trim();
+          if (cleaned.startsWith('json')) {
+            cleaned = cleaned.substring(4).trimLeft();
+          }
+        }
+      }
+      final parsed = jsonDecode(cleaned) as Map<String, dynamic>;
+      return {
+        'kcalPer100g':
+            (parsed['kcalPer100g'] as num?)?.toDouble() ?? 0.0,
+        'proteinPer100g':
+            (parsed['proteinPer100g'] as num?)?.toDouble() ?? 0.0,
+        'carbsPer100g':
+            (parsed['carbsPer100g'] as num?)?.toDouble() ?? 0.0,
+        'fatPer100g':
+            (parsed['fatPer100g'] as num?)?.toDouble() ?? 0.0,
+      };
+    } catch (e) {
+      if (kDebugMode) print("error estimateNutritionByName====> $e");
+      return null;
+    }
   }
 }
