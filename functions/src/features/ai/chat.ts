@@ -4,11 +4,10 @@ import { logger } from 'firebase-functions/v2';
 import crypto from 'crypto';
 import { GoogleGenerativeAI, Content, Part } from "@google/generative-ai";
 import { GEMINI_API_KEY, getAiModel } from '../../config';
-import { getChatLimitCfg } from '../../remote_config_service';
 import { validateRequestSize, validateAiJsonResponse } from '../../utils/validation';
 import { createStructuredError } from '../../utils/error';
 import { safeNow, toDayjs } from '../../utils/date';
-import { SubscriptionData, UsageData } from '../../types';
+import { SubscriptionData } from '../../types';
 
 const db = admin.firestore();
 
@@ -22,7 +21,7 @@ export const chatWithOpenRouter = onCall({
     const uid = request.auth?.uid;
     if (!uid) throw new Error('unauthenticated');
 
-    if (!validateRequestSize(request.data, 1024)) {
+    if (!validateRequestSize(request.data, 10240)) {
         throw createStructuredError('invalid-argument', 'Request payload too large', correlationId);
     }
 
@@ -67,37 +66,17 @@ export const chatWithOpenRouter = onCall({
         isPremium = false;
     }
 
+    const context = request.data?.context; // 'scan' | 'chat'
+
+    // Usage tracking is handled by the dedicated incrementUsage Cloud Function
+    // called from the client before reaching this point.
+    // We only log access level here — no duplicate counter increment.
     if (isPremium) {
         logger.info('Premium user accessing chat - unlimited access granted', { uid, correlationId });
+    } else if (context === 'scan') {
+        logger.info('Scan request - usage tracked by scan flow', { uid, correlationId });
     } else {
-        try {
-            const usageDoc = await db.collection('user_usage').doc(uid).get();
-            const d = usageDoc.data() as UsageData | undefined;
-            const last = d?.lastUsageDate;
-            const todayStart = safeNow().startOf('day');
-            let chatCount = 0;
-            if (last) {
-                const lastDate = toDayjs(last);
-                if (lastDate && lastDate.startOf('day').isSame(todayStart)) {
-                    chatCount = (d?.chatCount as number) || 0;
-                }
-            }
-            const CHAT_LIMIT = getChatLimitCfg();
-            if (chatCount >= CHAT_LIMIT) {
-                throw new Error('Daily chat limit reached. Upgrade to Premium for unlimited access.');
-            }
-            await db.collection('user_usage').doc(uid).set({
-                chatCount: chatCount + 1,
-                lastUsageDate: admin.firestore.FieldValue.serverTimestamp(),
-                userId: uid,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            }, { merge: true });
-        } catch (e) {
-            if (e instanceof Error && e.message.includes('Daily chat limit reached')) {
-                throw e;
-            }
-            logger.error('Error checking/updating usage for non-premium user', { uid, error: e });
-        }
+        logger.info('Free user chat request - usage tracked by client incrementUsage', { uid, correlationId });
     }
 
     const key = GEMINI_API_KEY.value();
