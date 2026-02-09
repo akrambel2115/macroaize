@@ -1,4 +1,4 @@
-import { onCall, CallableRequest } from 'firebase-functions/v2/https';
+import { onCall, CallableRequest, HttpsError } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { getInfluencerCommissionRate, getInfluencerEarnForCode } from '../../remote_config_service';
 import { isValidPromoCode } from '../../utils/validation';
@@ -9,18 +9,18 @@ const db = admin.firestore();
 export const validatePromoCode = onCall({ region: 'europe-west1' }, async (request: CallableRequest) => {
     const uid = request.auth?.uid;
     if (!uid) {
-        throw new Error('unauthenticated');
+        throw new HttpsError('unauthenticated', 'Authentication required.');
     }
 
     const promoCode = (request.data?.promoCode as string || '').toUpperCase().trim();
     const clientIP = request.rawRequest.ip || 'unknown';
 
-    if (!checkRateLimit(`promo_${clientIP}_${uid}`, 5, 1)) {
-        throw new Error('rate-limited');
+    if (!checkRateLimit(`promo_${clientIP}_${uid}`, 20, 1)) {
+        throw new HttpsError('resource-exhausted', 'Too many attempts. Please try again later.');
     }
 
     if (!isValidPromoCode(promoCode)) {
-        throw new Error('invalid-code');
+        throw new HttpsError('invalid-argument', 'Invalid promo code format.');
     }
 
     try {
@@ -31,7 +31,7 @@ export const validatePromoCode = onCall({ region: 'europe-west1' }, async (reque
             .get();
 
         if (influencersQuery.empty) {
-            throw new Error('invalid-code');
+            throw new HttpsError('not-found', 'Invalid promo code.');
         }
 
         const influencerDoc = influencersQuery.docs[0];
@@ -40,7 +40,7 @@ export const validatePromoCode = onCall({ region: 'europe-west1' }, async (reque
 
         const expirationDate = influencerData.expirationDate?.toDate?.() || new Date(influencerData.expirationDate);
         if (expirationDate && expirationDate < new Date()) {
-            throw new Error('invalid-code');
+            throw new HttpsError('failed-precondition', 'This promo code has expired.');
         }
 
         const existingSubscription = await db.collection('subscriptions')
@@ -50,7 +50,7 @@ export const validatePromoCode = onCall({ region: 'europe-west1' }, async (reque
             .get();
 
         if (!existingSubscription.empty) {
-            throw new Error('already-used');
+            throw new HttpsError('failed-precondition', 'This promo code has already been used.');
         }
 
         await db.collection('influencer_audit').add({
@@ -74,14 +74,11 @@ export const validatePromoCode = onCall({ region: 'europe-west1' }, async (reque
         };
 
     } catch (error) {
-        if (error instanceof Error) {
-            if (error.message === 'rate-limited') {
-                throw new Error('Too many attempts. Please try again later.');
-            }
-            if (error.message === 'already-used') {
-                throw new Error('This promo code has already been used.');
-            }
+        // re throw
+        if (error instanceof HttpsError) {
+            throw error;
         }
-        throw new Error('Invalid promo code.');
+        // Fallback
+        throw new HttpsError('not-found', 'Invalid promo code.');
     }
 });

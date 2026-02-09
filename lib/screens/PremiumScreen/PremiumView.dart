@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
-import 'package:foodcalorietracker/screens/PremiumScreen/PremiumController.dart';
-import 'package:foodcalorietracker/widgets/ContinueButton.dart';
+import 'package:macroaize/screens/PremiumScreen/PremiumController.dart';
+import 'package:macroaize/widgets/ContinueButton.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:foodcalorietracker/shared/services/subscription_service.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart'
+import 'package:macroaize/shared/services/subscription_service.dart';
+import 'package:macroaize/shared/models/subscription.dart'
     as sub_model;
-import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
+import 'package:macroaize/shared/services/revenuecat_service.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 class PremiumView extends StatefulWidget {
@@ -35,7 +35,7 @@ class _PremiumViewState extends State<PremiumView> {
     controller.fromOnboarding = args != null && args['fromOnboarding'] == true;
     if (delayClose) {
       showCloseLocal = false;
-      _timer = Timer(const Duration(seconds: 3), () {
+      _timer = Timer(const Duration(seconds: 5), () {
         if (mounted) setState(() => showCloseLocal = true);
       });
     }
@@ -219,40 +219,53 @@ class _PremiumViewState extends State<PremiumView> {
                                             PackageType.monthly;
 
                                         String? trialText;
-                                        if (product.introductoryPrice != null &&
-                                            product.introductoryPrice!.price ==
-                                                0) {
-                                          final intro =
-                                              product.introductoryPrice!;
-                                          final count =
-                                              intro.periodNumberOfUnits;
-                                          final unit = intro.periodUnit;
+                                        if ((product.introductoryPrice !=
+                                                    null &&
+                                                product
+                                                        .introductoryPrice!
+                                                        .price ==
+                                                    0) ||
+                                            product.price == 0) {
+                                          if (product.introductoryPrice !=
+                                              null) {
+                                            final intro =
+                                                product.introductoryPrice!;
+                                            final count =
+                                                intro.periodNumberOfUnits;
+                                            final unit = intro.periodUnit;
 
-                                          String unitText = '';
-                                          switch (unit) {
-                                            case PeriodUnit.day:
-                                              unitText =
-                                                  count == 1 ? 'Day' : 'Days';
-                                              break;
-                                            case PeriodUnit.week:
-                                              unitText =
-                                                  count == 1 ? 'Week' : 'Weeks';
-                                              break;
-                                            case PeriodUnit.month:
-                                              unitText =
-                                                  count == 1
-                                                      ? 'Month'
-                                                      : 'Months';
-                                              break;
-                                            case PeriodUnit.year:
-                                              unitText =
-                                                  count == 1 ? 'Year' : 'Years';
-                                              break;
-                                            case PeriodUnit.unknown:
-                                              unitText = 'Days';
-                                              break;
+                                            String unitText = '';
+                                            switch (unit) {
+                                              case PeriodUnit.day:
+                                                unitText =
+                                                    count == 1 ? 'Day' : 'Days';
+                                                break;
+                                              case PeriodUnit.week:
+                                                unitText =
+                                                    count == 1
+                                                        ? 'Week'
+                                                        : 'Weeks';
+                                                break;
+                                              case PeriodUnit.month:
+                                                unitText =
+                                                    count == 1
+                                                        ? 'Month'
+                                                        : 'Months';
+                                                break;
+                                              case PeriodUnit.year:
+                                                unitText =
+                                                    count == 1
+                                                        ? 'Year'
+                                                        : 'Years';
+                                                break;
+                                              case PeriodUnit.unknown:
+                                                unitText = 'Days';
+                                                break;
+                                            }
+                                            trialText = '$count $unitText Free';
+                                          } else {
+                                            trialText = 'Free';
                                           }
-                                          trialText = '$count $unitText Free';
                                         }
 
                                         String? saveText;
@@ -288,6 +301,16 @@ class _PremiumViewState extends State<PremiumView> {
                                           }
                                           monthlyBreakdown =
                                               '$symbol${yearlyMonthlyPrice.toStringAsFixed(2)}';
+                                        }
+
+                                        // Compute bonus days badge text if eligible
+                                        String? bonusDaysText;
+                                        if (c.promoEligible) {
+                                          if (isAnnual) {
+                                            bonusDaysText = 'bonus_1_month'.tr;
+                                          } else if (isMonthly) {
+                                            bonusDaysText = 'bonus_3_days'.tr;
+                                          }
                                         }
 
                                         return Padding(
@@ -327,6 +350,7 @@ class _PremiumViewState extends State<PremiumView> {
                                             monthlyBreakdownText:
                                                 monthlyBreakdown,
                                             freeTrialText: trialText,
+                                            bonusDaysText: bonusDaysText,
                                             onTap: () {
                                               c.onChangeSelectedIndex(index);
                                             },
@@ -456,10 +480,14 @@ class _PremiumViewState extends State<PremiumView> {
                                     c.selected < packages.length) {
                                   final p = packages[c.selected];
                                   hasTrial =
-                                      p.storeProduct.introductoryPrice !=
-                                          null &&
-                                      p.storeProduct.introductoryPrice!.price ==
-                                          0;
+                                      (p.storeProduct.introductoryPrice !=
+                                              null &&
+                                          p
+                                                  .storeProduct
+                                                  .introductoryPrice!
+                                                  .price ==
+                                              0) ||
+                                      p.storeProduct.price == 0;
                                 }
 
                                 return Column(
@@ -809,6 +837,7 @@ class _PlanCard extends StatelessWidget {
     this.discountedPrice,
     this.monthlyBreakdownText,
     this.freeTrialText,
+    this.bonusDaysText,
   });
 
   final String title;
@@ -824,6 +853,7 @@ class _PlanCard extends StatelessWidget {
   final String? discountedPrice;
   final String? monthlyBreakdownText;
   final String? freeTrialText;
+  final String? bonusDaysText;
 
   @override
   Widget build(BuildContext context) {
@@ -839,9 +869,7 @@ class _PlanCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(
-              0xFF1C1C1E,
-            ),
+            color: const Color(0xFF1C1C1E),
             borderRadius: BorderRadius.circular(12),
             border:
                 isSelected
@@ -871,6 +899,48 @@ class _PlanCard extends StatelessWidget {
                   ),
                   Row(
                     children: [
+                      if (bonusDaysText != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          margin: const EdgeInsets.only(right: 4),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF9500), Color(0xFFFF5E3A)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFF9500).withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.card_giftcard_rounded,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                bonusDaysText!,
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       if (freeTrialText != null)
                         Container(
                           padding: const EdgeInsets.symmetric(

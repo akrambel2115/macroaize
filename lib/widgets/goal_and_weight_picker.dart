@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 
 class GoalAndWeightPicker extends StatelessWidget {
   final String selectedGoal;

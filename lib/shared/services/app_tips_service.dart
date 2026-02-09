@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/constant/AppColor.dart';
 import 'package:get/get.dart';
 
 // app tips service
@@ -174,22 +174,45 @@ class _AppTipsOverlayState extends State<AppTipsOverlay> {
               ),
             ),
 
-            Expanded(
-              child: PageView.builder(
+            // Content
+            SizedBox(
+              height: 380, // Slightly reduced height to fit indicators below
+              child: PageView(
                 controller: _pageController,
                 onPageChanged: (index) {
                   setState(() {
                     _currentPage = index;
                   });
                 },
-                itemCount: _tips.length,
-                itemBuilder: (context, index) {
-                  return _TipCard(
-                    tip: _tips[index],
-                    currentPage: _currentPage,
-                    totalPages: _tips.length,
-                  );
-                },
+                children: _tips.map((tip) => _TipCard(tip: tip)).toList(),
+              ),
+            ),
+
+            // Page Indicator (Moved out of PageView)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _tips.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: _currentPage == index ? 24 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      gradient:
+                          _currentPage == index
+                              ? AppColor.primaryGradient
+                              : null,
+                      color:
+                          _currentPage == index
+                              ? null
+                              : AppColor.neutralGrey400,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
               ),
             ),
 
@@ -273,22 +296,13 @@ class _AppTipsOverlayState extends State<AppTipsOverlay> {
 // tip card widget
 class _TipCard extends StatelessWidget {
   final TipData tip;
-  final int currentPage;
-  final int totalPages;
 
-  const _TipCard({
-    required this.tip,
-    required this.currentPage,
-    required this.totalPages,
-  });
+  const _TipCard({required this.tip});
 
   @override
   Widget build(BuildContext context) {
-    print(
-      '🎨 DEBUG: Building _TipCard with currentPage=$currentPage, totalPages=$totalPages',
-    );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -329,28 +343,6 @@ class _TipCard extends StatelessWidget {
             style: context.theme.textTheme.bodyLarge?.copyWith(
               color: AppColor.neutralGrey600,
               height: 1.5,
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // page indicator
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              totalPages,
-              (index) => AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: currentPage == index ? 24 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  gradient:
-                      currentPage == index ? AppColor.primaryGradient : null,
-                  color: currentPage == index ? null : AppColor.neutralGrey400,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
             ),
           ),
         ],

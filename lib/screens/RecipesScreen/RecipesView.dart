@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipesController.dart';
-import 'package:foodcalorietracker/widgets/RecipeCard.dart';
-import 'package:foodcalorietracker/widgets/SharedSearchBar.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipesController.dart';
+import 'package:macroaize/widgets/RecipeCard.dart';
+import 'package:macroaize/widgets/SharedSearchBar.dart';
 
 class RecipesView extends StatefulWidget {
   const RecipesView({super.key});

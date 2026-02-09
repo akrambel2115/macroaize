@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsController.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsController.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -10,7 +10,7 @@ class MonthHistory extends GetView<AnalyticsController> {
   Widget build(BuildContext context) {
     Get.lazyPut(() => AnalyticsController());
     return Padding(
-      padding: const EdgeInsets.only(top: 20, left: 8, right: 8, bottom: 8),
+      padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 8),
       child: Column(
         children: [
           GetBuilder<AnalyticsController>(

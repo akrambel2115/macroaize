@@ -1,6 +1,6 @@
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
 import '../../SharePrefHelper/SharePref.dart';
 import '../../SharePrefHelper/SharePrefKey.dart';
 

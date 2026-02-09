@@ -11,6 +11,11 @@ import 'shared/services/update_guard_service.dart';
 import 'shared/services/revenuecat_service.dart';
 import 'shared/services/firebase_messaging_service.dart';
 import 'shared/services/app_tips_service.dart';
+import 'shared/services/usage_service.dart';
+import 'shared/services/remote_config_service.dart';
+import 'shared/services/local_notification_service.dart';
+import 'shared/services/notification_preferences_service.dart';
+import 'shared/services/promo_code_service.dart';
 import 'ThemeService/AppTheme.dart';
 import 'ThemeService/ThemeController.dart';
 import 'constant/DatabaseHelper.dart';
@@ -33,7 +38,7 @@ class MyHttpOverrides extends HttpOverrides {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // load env files
   try {
     if (kDebugMode) print('Loading .env file...');
@@ -45,32 +50,41 @@ Future<void> main() async {
   } catch (e) {
     if (kDebugMode) print('Failed to load .env: $e');
   }
-  
-  try { 
-    await dotenv.load(fileName: ".env.macroaize"); 
-    if (kDebugMode) print('.env.macroaize loaded');
-  } catch (_) {
-    if (kDebugMode) print('No .env.macroaize file found (optional)');
-  }
-  
-  HttpOverrides.global = MyHttpOverrides();
+
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  } catch (_) {}
+    await dotenv.load(fileName: ".env.macroaize");
+    if (kDebugMode) print('.env.macroaize loaded');
+  } catch (e) {
+    if (kDebugMode) print('No .env.macroaize file found (optional): $e');
+  }
+
+  HttpOverrides.global = MyHttpOverrides();
+  if (!kIsWeb) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    } catch (e) {
+      if (kDebugMode) print('Firebase init failed: $e');
+    }
+  }
   try {
     await Future.wait([
       initializeDateFormatting('en'),
       initializeDateFormatting('fr'),
       initializeDateFormatting('ar'),
     ]);
-  } catch (_) {}
+  } catch (e) {
+    if (kDebugMode) print('DateFormatting init failed: $e');
+  }
+  Get.put(UsageService());
   Get.put(MainController());
   try {
     await Get.putAsync<AppConfigService>(() async => AppConfigService().load());
-  } catch (_) {}
+  } catch (e) {
+    if (kDebugMode) print('AppConfigService load failed: $e');
+  }
   try {
     // init revenuecat
     if (kDebugMode) {
@@ -83,8 +97,10 @@ Future<void> main() async {
     if (kDebugMode) print('androidKey result: $androidKey');
 
     // fallback manual parse
-    if ((iosKey == null || iosKey.isEmpty) || (androidKey == null || androidKey.isEmpty)) {
-      if (kDebugMode) print('Dotenv returned empty keys, attempting manual .env parse...');
+    if ((iosKey == null || iosKey.isEmpty) ||
+        (androidKey == null || androidKey.isEmpty)) {
+      if (kDebugMode)
+        print('Dotenv returned empty keys, attempting manual .env parse...');
       try {
         final raw = await rootBundle.loadString('.env', cache: false);
         final Map<String, String> parsed = {};
@@ -97,7 +113,8 @@ Future<void> main() async {
           final value = line.substring(idx + 1).trim();
           parsed[key] = value;
         }
-        if (kDebugMode) print('Manually parsed env keys: ${parsed.keys.toList()}');
+        if (kDebugMode)
+          print('Manually parsed env keys: ${parsed.keys.toList()}');
         iosKey = parsed['IOS_PUBLIC_SDK_KEY'] ?? iosKey;
         androidKey = parsed['ANDROID_PUBLIC_SDK_KEY'] ?? androidKey;
 
@@ -105,7 +122,11 @@ Future<void> main() async {
         final testKey = parsed['REVENUECAT_TEST_SDK_KEY'];
         final useTestRaw = parsed['USE_REVENUECAT_TEST_STORE'];
         final useTest = (useTestRaw ?? '').toLowerCase().trim();
-        final useTestStore = useTest == 'true' || useTest == '1' || useTest == 'yes' || useTest == 'y';
+        final useTestStore =
+            useTest == 'true' ||
+            useTest == '1' ||
+            useTest == 'yes' ||
+            useTest == 'y';
         if (useTestStore && testKey != null && testKey.startsWith('test_')) {
           if (kDebugMode) print('Using RevenueCat Test Store key from .env');
           iosKey = testKey;
@@ -120,8 +141,15 @@ Future<void> main() async {
     final testKeyEnv = dotenv.env['REVENUECAT_TEST_SDK_KEY'];
     final useTestRawEnv = dotenv.env['USE_REVENUECAT_TEST_STORE'];
     final useTestEnv = (useTestRawEnv ?? '').toLowerCase().trim();
-    final useTestStoreEnv = useTestEnv == 'true' || useTestEnv == '1' || useTestEnv == 'yes' || useTestEnv == 'y';
-    if ((iosKey == null || androidKey == null) && useTestStoreEnv && testKeyEnv != null && testKeyEnv.startsWith('test_')) {
+    final useTestStoreEnv =
+        useTestEnv == 'true' ||
+        useTestEnv == '1' ||
+        useTestEnv == 'yes' ||
+        useTestEnv == 'y';
+    if ((iosKey == null || androidKey == null) &&
+        useTestStoreEnv &&
+        testKeyEnv != null &&
+        testKeyEnv.startsWith('test_')) {
       if (kDebugMode) print('Using RevenueCat Test Store key from dotenv');
       iosKey = testKeyEnv;
       androidKey = testKeyEnv;
@@ -130,7 +158,9 @@ Future<void> main() async {
     final iosKeyFinal = iosKey ?? '';
     final androidKeyFinal = androidKey ?? '';
     if (kDebugMode) {
-      print('Passing keys to RevenueCat: iOS=${iosKeyFinal.isNotEmpty} (${iosKeyFinal.length} chars), Android=${androidKeyFinal.isNotEmpty} (${androidKeyFinal.length} chars)');
+      print(
+        'Passing keys to RevenueCat: iOS=${iosKeyFinal.isNotEmpty} (${iosKeyFinal.length} chars), Android=${androidKeyFinal.isNotEmpty} (${androidKeyFinal.length} chars)',
+      );
       if (iosKeyFinal.isNotEmpty) {
         print('iOS key: ${iosKeyFinal.substring(0, 10)}...');
       }
@@ -139,7 +169,10 @@ Future<void> main() async {
       }
     }
 
-    await RevenueCatService().init(iosApiKey: iosKeyFinal, androidApiKey: androidKeyFinal);
+    await RevenueCatService().init(
+      iosApiKey: iosKeyFinal,
+      androidApiKey: androidKeyFinal,
+    );
   } catch (e) {
     if (kDebugMode) print('RevenueCat init failed: $e');
   }
@@ -147,7 +180,9 @@ Future<void> main() async {
     if (!Get.isRegistered<UpdateGuardService>()) {
       Get.put<UpdateGuardService>(UpdateGuardService(), permanent: true);
     }
-  } catch (_) {}
+  } catch (e) {
+    if (kDebugMode) print('UpdateGuardService init failed: $e');
+  }
   try {
     // register app user service
     if (!Get.isRegistered<AppUserService>()) {
@@ -155,29 +190,88 @@ Future<void> main() async {
       Get.put<AppUserService>(svc, permanent: true);
       try {
         svc.initialize();
-      } catch (_) {}
+      } catch (e) {
+        if (kDebugMode) print('AppUserService init failed: $e');
+      }
     }
   } catch (e) {}
 
+  // Initialize promo code service for post-login validation
   try {
-    if (!Get.isRegistered<FirebaseMessagingService>()) {
-      Get.put<FirebaseMessagingService>(
-        FirebaseMessagingService(),
-        permanent: true,
-      );
+    PromoCodeService().initialize();
+    if (kDebugMode) print('PromoCodeService initialized');
+  } catch (e) {
+    if (kDebugMode) print('PromoCodeService init failed: $e');
+  }
+
+  if (!kIsWeb) {
+    try {
+      if (!Get.isRegistered<FirebaseMessagingService>()) {
+        Get.put<FirebaseMessagingService>(
+          FirebaseMessagingService(),
+          permanent: true,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) print('FirebaseMessagingService init failed: $e');
     }
-  } catch (_) {}
+  }
 
   try {
     if (!Get.isRegistered<AppTipsService>()) {
       await Get.putAsync(() => AppTipsService().init());
     }
-  } catch (_) {}
+  } catch (e) {
+    if (kDebugMode) print('AppTipsService init failed: $e');
+  }
 
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  if (kDebugMode) print('FCM Token: $fcmToken');
-  final dBHelper = DatabaseHelper();
-  dBHelper.initDatabase();
+  // Initialize Remote Config service
+  if (!kIsWeb) {
+    try {
+      if (!Get.isRegistered<RemoteConfigService>()) {
+        await Get.putAsync<RemoteConfigService>(
+          () => RemoteConfigService().init(),
+          permanent: true,
+        );
+        if (kDebugMode) print('RemoteConfigService initialized');
+      }
+    } catch (e) {
+      if (kDebugMode) print('RemoteConfigService init failed: $e');
+    }
+
+    // Initialize Notification Preferences service
+    try {
+      if (!Get.isRegistered<NotificationPreferencesService>()) {
+        await Get.putAsync<NotificationPreferencesService>(
+          () => NotificationPreferencesService().init(),
+          permanent: true,
+        );
+        if (kDebugMode) print('NotificationPreferencesService initialized');
+      }
+    } catch (e) {
+      if (kDebugMode) print('NotificationPreferencesService init failed: $e');
+    }
+
+    // Initialize Local Notification service
+    try {
+      if (!Get.isRegistered<LocalNotificationService>()) {
+        await Get.putAsync<LocalNotificationService>(
+          () => LocalNotificationService().init(),
+          permanent: true,
+        );
+        if (kDebugMode) print('LocalNotificationService initialized');
+      }
+    } catch (e) {
+      if (kDebugMode) print('LocalNotificationService init failed: $e');
+    }
+  }
+
+  if (!kIsWeb) {
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (kDebugMode) print('FCM Token: $fcmToken');
+    final dBHelper = DatabaseHelper();
+    dBHelper.initDatabase();
+  }
   runApp(const MyApp());
 }
 
@@ -199,7 +293,9 @@ class _MyAppState extends State<MyApp> {
       _updateChecked = true;
       try {
         await Get.find<UpdateGuardService>().enforceMinimumVersion();
-      } catch (_) {}
+      } catch (e) {
+        if (kDebugMode) print('Update guard failed: $e');
+      }
     });
   }
 

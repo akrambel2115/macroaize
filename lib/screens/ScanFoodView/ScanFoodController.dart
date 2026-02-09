@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'package:foodcalorietracker/shared/services/usage_service.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
-import 'package:foodcalorietracker/shared/services/app_user_service.dart';
-import 'package:foodcalorietracker/shared/services/barcode_scanning_service.dart';
-import 'package:foodcalorietracker/shared/services/openfoodfacts_service.dart';
-import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
+import 'package:macroaize/shared/services/usage_service.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
+import 'package:macroaize/shared/services/app_user_service.dart';
+import 'package:macroaize/shared/services/barcode_scanning_service.dart';
+import 'package:macroaize/shared/services/openfoodfacts_service.dart';
+import 'package:macroaize/features/auth/presentation/auth_modal.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -134,6 +134,18 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       }
       // revert on fail
       isFlashOn = !isFlashOn;
+    }
+    update();
+  }
+
+  bool isBarcodeOnly = false;
+
+  void setBarcodeOnly(bool enabled) {
+    isBarcodeOnly = enabled;
+    if (enabled && !isBarcodeMode) {
+      toggleBarcodeMode();
+    } else if (!enabled && isBarcodeMode) {
+      toggleBarcodeMode();
     }
     update();
   }
@@ -358,6 +370,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     if (image != null) {
       imagePath = File(image.path);
       update();
+      if (!context.mounted) return;
       await cropImage(imagePath, context);
     }
   }
@@ -392,6 +405,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     }
     XFile imageFile = await cameraController!.takePicture();
     File originalFile = File(imageFile.path);
+    if (!context.mounted) return;
     cropImage(originalFile, context);
   }
 
@@ -473,8 +487,8 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
     if (success) {
       Get.snackbar(
-        'Welcome!',
-        'You can now use the scanner. Please try scanning again.',
+        'success'.tr,
+        'auth_scan_success'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -482,8 +496,8 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       );
     } else {
       Get.snackbar(
-        'Authentication Required',
-        'Please login to use the scanner feature',
+        'error'.tr,
+        'auth_scan_required'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange,
         colorText: Colors.white,

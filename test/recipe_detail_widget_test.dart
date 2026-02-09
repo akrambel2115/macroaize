@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/Model/Recipe.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipeDetailScreen.dart';
+import 'package:macroaize/Model/Recipe.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipeDetailScreen.dart';
 
 void main() {
   testWidgets('RecipeDetailScreen shows title and image', (tester) async {

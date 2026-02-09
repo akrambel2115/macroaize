@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/BornUpdate.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/CurrentWeightUpdate.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/GenderView.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/HeightUpdate.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/UpdateScreen/UpdateGoal.dart';
-import 'package:foodcalorietracker/screens/SettingScreen/SettingController.dart';
-import 'package:foodcalorietracker/widgets/AppWidgets.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/UpdateScreen/BornUpdate.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/UpdateScreen/CurrentWeightUpdate.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/GenderView.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/UpdateScreen/HeightUpdate.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/UpdateScreen/UpdateGoal.dart';
+import 'package:macroaize/screens/SettingScreen/SettingController.dart';
+import 'package:macroaize/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 
 class PersonalDetailsView extends GetView<PersonalDetailsController> {

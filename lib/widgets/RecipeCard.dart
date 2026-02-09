@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/Model/Recipe.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/Model/Recipe.dart';
+import 'package:macroaize/constant/AppColor.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;

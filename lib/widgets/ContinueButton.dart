@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
+import 'package:macroaize/widgets/PrimaryCTA.dart';
 
 /// Continue button with a localized default label.
 class ContinueButton extends StatelessWidget {

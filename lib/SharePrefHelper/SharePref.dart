@@ -16,7 +16,6 @@ class SharedPref {
   static clear() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
-
   }
 
   static saveString(String key, value) async {
@@ -62,6 +61,7 @@ class SharedPref {
     }
     return value;
   }
+
   static readBool(String key) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(key);

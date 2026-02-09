@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/screens/splash/SplashController.dart';
-import 'package:foodcalorietracker/constant/FontFamily.dart';
+import 'package:macroaize/screens/splash/SplashController.dart';
+import 'package:macroaize/constant/FontFamily.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});

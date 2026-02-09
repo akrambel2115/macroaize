@@ -1,19 +1,19 @@
 import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/screens/ScanCalorieScreen/ScanCalorieController.dart';
-import 'package:foodcalorietracker/widgets/AppWidgets.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
-import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
-import 'package:foodcalorietracker/widgets/ModernCard.dart';
+import 'package:macroaize/constant/AppAssets.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/screens/ScanCalorieScreen/ScanCalorieController.dart';
+import 'package:macroaize/widgets/AppWidgets.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/ModernButton.dart';
+import 'package:macroaize/widgets/PrimaryCTA.dart';
+import 'package:macroaize/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:foodcalorietracker/widgets/CapsuleMacroGrid.dart';
-import 'package:foodcalorietracker/widgets/UsdaBadge.dart';
+import 'package:macroaize/widgets/CapsuleMacroGrid.dart';
+import 'package:macroaize/widgets/UsdaBadge.dart';
 
 class ScanCalorieView extends GetView<ScanCalorieController> {
   const ScanCalorieView({super.key});
@@ -49,7 +49,23 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
           fontWeight: FontWeight.w600,
         ),
       ),
-      actions: [],
+      actions: [
+        GetBuilder<ScanCalorieController>(
+          builder: (controller) {
+            if (controller.calorie != 0 && !controller.isLoading) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.share_outlined),
+                  onPressed: () => controller.shareMealResult(),
+                  tooltip: 'Share Meal'.tr,
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ],
       elevation: 0,
       scrolledUnderElevation: 0,
     );
@@ -138,7 +154,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                   ),
                         ),
                       ),
-
                       Positioned.fill(
                         child: ColorFiltered(
                           colorFilter: ColorFilter.mode(
@@ -211,24 +226,18 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
       child: Column(
         children: [
           _buildHeroImageSection(context, controller),
-
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 if (controller.calorie != 0)
                   _buildMealInfoCard(context, controller),
-
                 const SizedBox(height: 16),
-
                 if (controller.hasBreakdown)
                   _buildMealBreakdown(context, controller),
-
                 if (controller.calorie != 0)
                   _buildQuantitySelector(context, controller),
-
                 const SizedBox(height: 20),
-
                 if (controller.calorie != 0)
                   CapsuleMacroGrid(
                     calories: controller.calorieQuantity,
@@ -236,12 +245,9 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                     carbs: controller.carbsQuantity,
                     fats: controller.fatsQuantity,
                   ),
-
                 const SizedBox(height: 20),
-
                 if (controller.calorie != 0)
                   _buildAIChatButton(context, controller),
-
                 if (controller.calorie == 0) _buildNoDataState(context),
               ],
             ),
@@ -327,24 +333,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColor.primaryGreen.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${controller.calorieQuantity} ${'kcal_unit'.tr}',
-                          style: context.textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       Text(
                         controller.displayMealName,
                         style: context.textTheme.headlineLarge?.copyWith(
@@ -355,6 +343,42 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                               color: Colors.black.withOpacity(0.5),
                               offset: const Offset(0, 2),
                               blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildMacroBadge(
+                              context,
+                              icon: AppAssets.calorie,
+                              label:
+                                  '${controller.calorieQuantity} ${'kcal_unit'.tr}',
+                              color: AppColor.primaryOrange,
+                            ),
+                            _buildMacroBadge(
+                              context,
+                              icon: AppAssets.protein,
+                              label:
+                                  '${controller.proteinQuantity.round()}${'g'.tr}',
+                              color: AppColor.primaryOrange,
+                            ),
+                            _buildMacroBadge(
+                              context,
+                              icon: AppAssets.carb,
+                              label:
+                                  '${controller.carbsQuantity.round()}${'g'.tr}',
+                              color: AppColor.primaryOrange,
+                            ),
+                            _buildMacroBadge(
+                              context,
+                              icon: AppAssets.fat,
+                              label:
+                                  '${controller.fatsQuantity.round()}${'g'.tr}',
+                              color: AppColor.primaryOrange,
                             ),
                           ],
                         ),
@@ -788,6 +812,43 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     }
   }
 
+  Widget _buildMacroBadge(
+    BuildContext context, {
+    required String icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(icon, width: 16, height: 16),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: context.textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStepperButton(
     BuildContext context,
     IconData icon,
@@ -999,10 +1060,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       ),
                   itemBuilder: (ctx, idx) {
                     final it = controller.items[idx];
-                    final units = const [
-                      'piece',
-                      'g',
-                    ];
+                    final units = const ['piece', 'g'];
                     String currentUnit = it.unit;
                     return Container(
                       padding: const EdgeInsets.all(16),
@@ -1100,7 +1158,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                             ],
                           ),
                           const SizedBox(height: 16),
-
                           Row(
                             children: [
                               Container(
@@ -1148,7 +1205,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                 ),
                               ),
                               const SizedBox(width: 10),
-
                               StatefulBuilder(
                                 builder: (ctx2, setState) {
                                   if (!['piece', 'g'].contains(currentUnit)) {
@@ -1212,9 +1268,7 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 12),
-
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -1289,7 +1343,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                         ),
                                       ],
                                     ),
-
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.end,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/widgets/AppWidgets.dart';
+import 'package:macroaize/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 import '../../MainController.dart';
 import 'languageController.dart';

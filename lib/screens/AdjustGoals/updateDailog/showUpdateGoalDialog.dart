@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/FontFamily.dart';
+import 'package:macroaize/constant/FontFamily.dart';
 import 'package:get/get.dart';
 
 void showUpdateGoalDialog(

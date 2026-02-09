@@ -25,6 +25,9 @@ abstract class Routes {
   static const accountDetailsView = Paths.accountDetailsView;
   static const emailVerificationView = Paths.emailVerificationView;
   static const withdrawalHistoryView = Paths.withdrawalHistoryView;
+  static const workoutView = Paths.workoutView;
+  static const dailyStreakView = Paths.dailyStreakView;
+  static const notificationSettingsView = Paths.notificationSettingsView;
 }
 
 abstract class Paths {
@@ -54,4 +57,7 @@ abstract class Paths {
   static const accountDetailsView = '/AccountDetailsView';
   static const emailVerificationView = '/EmailVerificationView';
   static const withdrawalHistoryView = '/WithdrawalHistoryView';
+  static const workoutView = '/WorkoutView';
+  static const dailyStreakView = '/DailyStreakView';
+  static const notificationSettingsView = '/NotificationSettingsView';
 }

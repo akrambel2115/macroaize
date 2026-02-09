@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 import 'package:get/utils.dart';
 
 class ScannerOverlay extends StatelessWidget {
@@ -7,6 +7,7 @@ class ScannerOverlay extends StatelessWidget {
   final double height;
   final double borderRadius;
   final Color borderColor;
+  final String? hintText;
 
   const ScannerOverlay({
     super.key,
@@ -14,6 +15,7 @@ class ScannerOverlay extends StatelessWidget {
     this.height = 280,
     this.borderRadius = 40,
     this.borderColor = AppColor.primaryOrange,
+    this.hintText,
   });
 
   @override
@@ -77,7 +79,7 @@ class ScannerOverlay extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Text(
-                'Center food in the frame and tap to scan'.tr,
+                hintText ?? 'Center food in the frame and tap to scan'.tr,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,

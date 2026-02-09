@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
-import 'package:foodcalorietracker/shared/models/influencer.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/ModernButton.dart';
+import 'package:macroaize/shared/models/influencer.dart';
 import 'WithdrawalHistoryController.dart';
 
 class WithdrawalHistoryView extends GetView<WithdrawalHistoryController> {

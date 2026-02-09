@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
 import '../../routes/app_routes.dart';
 
 // email verification guard

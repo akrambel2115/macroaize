@@ -1,52 +1,107 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
-import '../../SharePrefHelper/ConstantUserMaster.dart' as CUM;
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsController.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/MonthHistory.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/UpdateWeight.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/WeekHistory.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/YearHistory.dart';
-import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/WeightJourney.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsController.dart';
+import 'package:macroaize/screens/AnalyticsScreen/MonthHistory.dart';
+import 'package:macroaize/screens/AnalyticsScreen/UpdateWeight.dart';
+import 'package:macroaize/screens/AnalyticsScreen/WeekHistory.dart';
+import 'package:macroaize/screens/AnalyticsScreen/YearHistory.dart';
+import 'package:macroaize/screens/AnalyticsScreen/WeekWorkoutHistory.dart';
+import 'package:macroaize/screens/AnalyticsScreen/MonthWorkoutHistory.dart';
+import 'package:macroaize/screens/AnalyticsScreen/YearWorkoutHistory.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/WeightJourney.dart';
+import 'package:macroaize/widgets/WeightChart.dart';
 
-class AnalyticsView extends GetView<AnalyticsController> {
+class AnalyticsView extends StatefulWidget {
   const AnalyticsView({super.key});
 
   @override
+  State<AnalyticsView> createState() => _AnalyticsViewState();
+}
+
+class _AnalyticsViewState extends State<AnalyticsView>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
+  late TabController _workoutTabController;
+  final AnalyticsController controller = Get.put(AnalyticsController());
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
+    _workoutTabController = TabController(length: 3, vsync: this);
+    _workoutTabController.addListener(() {
+      if (!_workoutTabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _workoutTabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Get.lazyPut(() => AnalyticsController());
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        backgroundColor: context.theme.scaffoldBackgroundColor,
-        appBar: _buildModernAppBar(context),
-        body: GetBuilder<AnalyticsController>(
-          builder: (controller) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildCombinedWeightSection(context, controller),
+    return Scaffold(
+      backgroundColor: context.theme.scaffoldBackgroundColor,
+      appBar: _buildModernAppBar(context),
+      body: GetBuilder<AnalyticsController>(
+        builder: (controller) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCombinedWeightSection(context, controller),
 
-                  const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                  _buildAnalyticsTabs(context),
+                Text(
+                  "Calorie Overview".tr,
+                  style: context.theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
-                  const SizedBox(height: 20),
+                const SizedBox(height: 12),
 
-                  _buildTabContent(),
-                ],
-              ),
-            );
-          },
-        ),
+                _buildAnalyticsTabs(context),
+
+                const SizedBox(height: 20),
+
+                _buildTabContent(),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  "Workout Overview".tr,
+                  style: context.theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                _buildWorkoutTabs(context),
+
+                const SizedBox(height: 20),
+
+                _buildWorkoutTabContent(),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -135,109 +190,24 @@ class AnalyticsView extends GetView<AnalyticsController> {
               showUpdateWeightDialog(
                 context,
                 ConstantUserMaster.weight.toString(),
-                (value) async {
-                  final newWeight = int.parse(value);
-                  ConstantUserMaster.weight = newWeight;
-                  controller.update();
-                  await SharedPref.saveInt(
-                    SharePrefKey.weight,
-                    ConstantUserMaster.weight,
-                  );
-                  final bmr = _estimateBMR(
-                    ConstantUserMaster.height,
-                    newWeight,
-                    ConstantUserMaster.age,
-                    ConstantUserMaster.gender,
-                  );
-                  final activity = _getActivityFactor(
-                    ConstantUserMaster.workOutDay,
-                  );
-                  final tdee = bmr * activity;
-                  final adjustedCalories = adjustCaloriesForGoal(
-                    tdee,
-                    newWeight,
-                    ConstantUserMaster.desiredGoal,
-                    ConstantUserMaster.goalWeight,
-                  );
-                  final macros = CUM.calculateMacrosFromTDEE(
-                    adjustedCalories.toDouble(),
-                    newWeight,
-                  );
-                  await SharedPref.saveInt(
-                    SharePrefKey.calorie,
-                    macros['calories'],
-                  );
-                  await SharedPref.saveInt(
-                    SharePrefKey.protein,
-                    macros['protein'],
-                  );
-                  await SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']);
-                  await SharedPref.saveInt(SharePrefKey.fat, macros['fat']);
-                  ConstantUserMaster.calorieGoal = macros['calories']!;
-                  ConstantUserMaster.proteinGoal = macros['protein']!;
-                  ConstantUserMaster.carbGoal = macros['carbs']!;
-                  ConstantUserMaster.fatsGoal = macros['fat']!;
-                  NotificationService.showSuccess('update_targets_body');
-                  try {
-                    Get.find<HomeController>().getAllData();
-                  } catch (_) {}
-                },
+                (value) => controller.updateCurrentWeight(int.parse(value)),
+                title: 'Update Weight'.tr,
               );
             },
             onEditGoal: () {
               showUpdateWeightDialog(
                 context,
                 ConstantUserMaster.desiredGoal.toString(),
-                (value) async {
-                  final newGoal = int.parse(value);
-                  ConstantUserMaster.desiredGoal = newGoal;
-                  controller.update();
-                  await SharedPref.saveInt(
-                    SharePrefKey.desiredWeight,
-                    ConstantUserMaster.desiredGoal,
-                  );
-                  final bmr = _estimateBMR(
-                    ConstantUserMaster.height,
-                    ConstantUserMaster.weight,
-                    ConstantUserMaster.age,
-                    ConstantUserMaster.gender,
-                  );
-                  final activity = _getActivityFactor(
-                    ConstantUserMaster.workOutDay,
-                  );
-                  final tdee = bmr * activity;
-                  final adjustedCalories = adjustCaloriesForGoal(
-                    tdee,
-                    ConstantUserMaster.weight,
-                    newGoal,
-                    ConstantUserMaster.goalWeight,
-                  );
-                  final macros = CUM.calculateMacrosFromTDEE(
-                    adjustedCalories.toDouble(),
-                    ConstantUserMaster.weight,
-                  );
-                  await SharedPref.saveInt(
-                    SharePrefKey.calorie,
-                    macros['calories'],
-                  );
-                  await SharedPref.saveInt(
-                    SharePrefKey.protein,
-                    macros['protein'],
-                  );
-                  await SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']);
-                  await SharedPref.saveInt(SharePrefKey.fat, macros['fat']);
-                  ConstantUserMaster.calorieGoal = macros['calories']!;
-                  ConstantUserMaster.proteinGoal = macros['protein']!;
-                  ConstantUserMaster.carbGoal = macros['carbs']!;
-                  ConstantUserMaster.fatsGoal = macros['fat']!;
-                  NotificationService.showSuccess('update_targets_body');
-                  try {
-                    Get.find<HomeController>().getAllData();
-                  } catch (_) {}
-                },
+                (value) => controller.updateDesiredGoal(int.parse(value)),
+                title: 'Update Weight Goal'.tr,
               );
             },
           ),
+
+          const SizedBox(height: 16),
+
+          // Weight History Chart
+          const WeightChart(),
 
           const SizedBox(height: 4),
         ],
@@ -255,6 +225,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: TabBar(
+          controller: _tabController,
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,
           indicator: BoxDecoration(
@@ -314,45 +285,125 @@ class AnalyticsView extends GetView<AnalyticsController> {
   }
 
   Widget _buildTabContent() {
+    Widget content;
+    switch (_tabController.index) {
+      case 0:
+        content = WeekHistory();
+        break;
+      case 1:
+        content = MonthHistory();
+        break;
+      case 2:
+        content = YearHistory();
+        break;
+      default:
+        content = WeekHistory();
+    }
+
     return ModernFadeSlideTransition(
       beginOffset: const Offset(0, 0.4),
       child: Container(
-        height: 400,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
-        child: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            _wrapWithCard(WeekHistory()),
-            _wrapWithCard(MonthHistory()),
-            _wrapWithCard(YearHistory()),
+        child: _wrapWithCard(content),
+      ),
+    );
+  }
+
+  Widget _wrapWithCard(Widget child) {
+    return Padding(padding: const EdgeInsets.only(bottom: 16), child: child);
+  }
+
+  Widget _buildWorkoutTabs(BuildContext context) {
+    return ModernFadeSlideTransition(
+      beginOffset: const Offset(0, 0.3),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: context.theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: TabBar(
+          controller: _workoutTabController,
+          dividerColor: Colors.transparent,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicator: BoxDecoration(
+            color: AppColor.primaryOrange,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppColor.primaryOrange.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          labelColor: Colors.white,
+          unselectedLabelColor: AppColor.neutralGrey600,
+          labelStyle: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.calendar_view_week, size: 16),
+                  const SizedBox(width: 8),
+                  Text("Week".tr),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.calendar_view_month, size: 16),
+                  const SizedBox(width: 8),
+                  Text("Month".tr),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.calendar_today, size: 16),
+                  const SizedBox(width: 8),
+                  Text("Year".tr),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _wrapWithCard(Widget child) {
-    return Padding(padding: const EdgeInsets.all(16), child: child);
-  }
-}
+  Widget _buildWorkoutTabContent() {
+    Widget content;
+    switch (_workoutTabController.index) {
+      case 0:
+        content = WeekWorkoutHistory();
+        break;
+      case 1:
+        content = MonthWorkoutHistory();
+        break;
+      case 2:
+        content = YearWorkoutHistory();
+        break;
+      default:
+        content = WeekWorkoutHistory();
+    }
 
-// estimate BMR and activity factor,
-double _estimateBMR(int heightCm, int weightKg, int age, String gender) {
-  if (gender.toLowerCase() == 'male') {
-    return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
-  }
-  return (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
-}
-
-double _getActivityFactor(String workOutDays) {
-  switch (workOutDays) {
-    case '0-2':
-      return 1.2;
-    case '3-5':
-      return 1.55;
-    case '6+':
-      return 1.725;
-    default:
-      return 1.2;
+    return ModernFadeSlideTransition(
+      beginOffset: const Offset(0, 0.4),
+      child: Container(
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+        child: _wrapWithCard(content),
+      ),
+    );
   }
 }

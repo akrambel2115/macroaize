@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipesController.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipesController.dart';
 
 class RecipesBinding extends Bindings {
   @override

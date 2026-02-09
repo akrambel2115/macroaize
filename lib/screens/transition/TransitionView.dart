@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
+import 'package:macroaize/constant/AppAssets.dart';
 import 'TransitionController.dart';
 
 class TransitionView extends GetView<TransitionController> {

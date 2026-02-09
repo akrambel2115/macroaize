@@ -102,22 +102,4 @@ class OpenFoodFactsService {
     }
     return 0.0;
   }
-
-  double _convertEnergy(dynamic value, String unit) {
-    if (value == null) return 0.0;
-
-    double energy = 0.0;
-    if (value is num) {
-      energy = value.toDouble();
-    } else if (value is String) {
-      energy = double.tryParse(value) ?? 0.0;
-    }
-
-    // kj to kcal
-    if (unit.toLowerCase().contains('kj')) {
-      energy = energy / 4.184;
-    }
-
-    return energy;
-  }
 }

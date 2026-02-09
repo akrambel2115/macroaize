@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
 import 'package:get/get.dart';
 
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 
 class BornUpdate extends GetView<PersonalDetailsController> {
   const BornUpdate({super.key});

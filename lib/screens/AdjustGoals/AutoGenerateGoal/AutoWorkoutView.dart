@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsController.dart';
+import 'package:macroaize/screens/AdjustGoals/AdjustGoalsController.dart';
 import '../../../widgets/steps/workout_step.dart';
 import 'package:get/get.dart';
 

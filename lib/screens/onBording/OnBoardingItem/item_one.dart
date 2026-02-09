@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/services/app_config_service.dart';

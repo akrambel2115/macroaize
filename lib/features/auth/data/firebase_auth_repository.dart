@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:crypto/crypto.dart';
 import 'package:get/get.dart';
+import 'package:macroaize/shared/services/revenuecat_service.dart';
 
 import '../../../shared/services/email_verification_guard.dart';
 import '../../../shared/services/firebase_messaging_service.dart';
@@ -201,6 +202,12 @@ class FirebaseAuthRepository implements AuthRepository {
     try {
       await _google.signOut();
     } catch (_) {}
+
+    // detach RevenueCat app user to avoid entitlement transfer on next login
+    try {
+      await RevenueCatService().logOut();
+    } catch (_) {}
+
     await _auth.signOut();
   }
 

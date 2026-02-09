@@ -1,7 +1,14 @@
-import 'package:foodcalorietracker/Model/SqlCalorieModel.dart';
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
+import 'package:macroaize/Model/SqlCalorieModel.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
+import 'package:macroaize/screens/HomeScreen/HomeController.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart'
+    as CUM_HELPERS;
 
 class AnalyticsController extends GetxController {
   List<SalesData> weeklyData = [];
@@ -13,6 +20,19 @@ class AnalyticsController extends GetxController {
   final dbHelper = DatabaseHelper();
   List<SqlCalorieModel> calorieList = [];
 
+  // Weight history data
+  List<WeightData> weeklyWeightData = [];
+  List<WeightData> monthlyWeightData = [];
+  List<WeightData> yearlyWeightData = [];
+
+  // Workout history data
+  List<WorkoutData> workoutWeeklyData = [];
+  List<WorkoutData> workoutMonthData = [];
+  List<WorkoutData> workoutYearData = [];
+  int yourWeeklyWorkoutTotal = 0;
+  int yourMonthlyWorkoutTotal = 0;
+  int yourYearlyWorkoutTotal = 0;
+
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -20,6 +40,168 @@ class AnalyticsController extends GetxController {
     await getWeeklyData();
     await getMonthlyData();
     await getYearlyData();
+    await loadWeightHistory();
+    await loadWorkoutHistory();
+  }
+
+  Future<void> loadWeightHistory() async {
+    final now = DateTime.now();
+    final currentWeight = ConstantUserMaster.weight.toDouble();
+
+    // Use the very first recorded weight as baseline for days before tracking
+    final firstWeight = await dbHelper.getFirstWeightEntry();
+    double baselineWeight = firstWeight ?? currentWeight;
+
+    // Weekly: last 7 days
+    final weekStart = now.subtract(const Duration(days: 6));
+    final weekDataRaw = await dbHelper.getWeightHistory(
+      startDate: weekStart,
+      endDate: now,
+    );
+
+    final Map<String, double> weekMap = {};
+    for (final e in weekDataRaw) {
+      weekMap[e['date'] as String] = (e['weight'] as num).toDouble();
+    }
+
+    // Fill all 7 days, carrying forward from baseline or previous entry
+    List<WeightData> newWeeklyWeightData = [];
+    double lastWeight = baselineWeight;
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final dateStr = DateFormat('yyyy-MM-dd').format(date);
+      final dayLabel = DateFormat('E').format(date);
+
+      if (weekMap.containsKey(dateStr)) {
+        lastWeight = weekMap[dateStr]!;
+      }
+      newWeeklyWeightData.add(WeightData(dayLabel, lastWeight, date));
+    }
+    weeklyWeightData = newWeeklyWeightData;
+
+    // Monthly: last 30 days
+    final monthStart = now.subtract(const Duration(days: 29));
+    final monthDataRaw = await dbHelper.getWeightHistory(
+      startDate: monthStart,
+      endDate: now,
+    );
+
+    final Map<String, double> monthMap = {};
+    for (final e in monthDataRaw) {
+      monthMap[e['date'] as String] = (e['weight'] as num).toDouble();
+    }
+
+    List<WeightData> newMonthlyWeightData = [];
+    lastWeight = baselineWeight;
+    for (int i = 29; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final dateStr = DateFormat('yyyy-MM-dd').format(date);
+      final dayLabel = DateFormat('d').format(date);
+
+      if (monthMap.containsKey(dateStr)) {
+        lastWeight = monthMap[dateStr]!;
+      }
+      newMonthlyWeightData.add(WeightData(dayLabel, lastWeight, date));
+    }
+    monthlyWeightData = newMonthlyWeightData;
+
+    // Yearly: last 12 months
+    final yearStart = DateTime(now.year - 1, now.month, now.day);
+    final yearDataRaw = await dbHelper.getWeightHistory(
+      startDate: yearStart,
+      endDate: now,
+    );
+
+    final Map<String, double> yearMap = {};
+    for (final e in yearDataRaw) {
+      final date = DateTime.parse(e['date'] as String);
+      final monthKey = DateFormat('MMM').format(date);
+      yearMap[monthKey] = (e['weight'] as num).toDouble();
+    }
+
+    List<WeightData> newYearlyWeightData = [];
+    lastWeight = baselineWeight;
+    for (int i = 11; i >= 0; i--) {
+      final date = DateTime(now.year, now.month - i, 1);
+      final monthLabel = DateFormat('MMM').format(date);
+
+      if (yearMap.containsKey(monthLabel)) {
+        lastWeight = yearMap[monthLabel]!;
+      }
+      newYearlyWeightData.add(WeightData(monthLabel, lastWeight, date));
+    }
+    yearlyWeightData = newYearlyWeightData;
+
+    update();
+  }
+
+  Future<void> loadWorkoutHistory() async {
+    final now = DateTime.now();
+
+    // Weekly: last 7 days
+    final weekStart = now.subtract(const Duration(days: 6));
+    final weekDurationMap = await dbHelper.getWorkoutDurationByDate(
+      startDate: weekStart,
+      endDate: now,
+    );
+
+    workoutWeeklyData.clear();
+    yourWeeklyWorkoutTotal = 0;
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final dateStr = DateFormat('yyyy-MM-dd').format(date);
+      final dayLabel = weekDays[date.weekday % 7];
+      final minutes = weekDurationMap[dateStr] ?? 0;
+      workoutWeeklyData.add(WorkoutData(dayLabel, minutes));
+      yourWeeklyWorkoutTotal += minutes;
+    }
+
+    // Monthly: last 30 days
+    final monthStart = now.subtract(const Duration(days: 29));
+    final monthDurationMap = await dbHelper.getWorkoutDurationByDate(
+      startDate: monthStart,
+      endDate: now,
+    );
+
+    workoutMonthData.clear();
+    yourMonthlyWorkoutTotal = 0;
+    for (int i = 29; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final dateStr = DateFormat('yyyy-MM-dd').format(date);
+      final dayLabel = date.day.toString();
+      final minutes = monthDurationMap[dateStr] ?? 0;
+      workoutMonthData.add(WorkoutData(dayLabel, minutes));
+      yourMonthlyWorkoutTotal += minutes;
+    }
+
+    // Yearly: 12 months
+    final yearStart = DateTime(now.year - 1, now.month, now.day);
+    final yearDurationMap = await dbHelper.getWorkoutDurationByDate(
+      startDate: yearStart,
+      endDate: now,
+    );
+
+    // Group by month for yearly view
+    Map<String, int> monthlyTotals = {};
+    yearDurationMap.forEach((dateStr, minutes) {
+      final date = DateTime.parse(dateStr);
+      final monthKey = DateFormat('yyyy-MM').format(date);
+      monthlyTotals[monthKey] = (monthlyTotals[monthKey] ?? 0) + minutes;
+    });
+
+    workoutYearData.clear();
+    yourYearlyWorkoutTotal = 0;
+    for (int i = 11; i >= 0; i--) {
+      final date = DateTime(now.year, now.month - i, 1);
+      final monthKey = DateFormat('yyyy-MM').format(date);
+      final monthLabel = DateFormat('MMM').format(date);
+      final minutes = monthlyTotals[monthKey] ?? 0;
+      workoutYearData.add(WorkoutData(monthLabel, minutes));
+      yourYearlyWorkoutTotal += minutes;
+    }
+
+    update();
   }
 
   Future<void> getWeeklyData() async {
@@ -158,6 +340,73 @@ class AnalyticsController extends GetxController {
 
     update();
   }
+
+  Future<void> updateCurrentWeight(int newWeight) async {
+    ConstantUserMaster.weight = newWeight;
+    update();
+    await SharedPref.saveInt(SharePrefKey.weight, newWeight);
+
+    // Record weight history
+    await dbHelper.insertWeightEntry(newWeight.toDouble(), DateTime.now());
+    await loadWeightHistory();
+
+    await _recalculateAndSaveGoals(newWeight, ConstantUserMaster.desiredGoal);
+
+    NotificationService.showSuccess('update_targets_body');
+    _refreshHome();
+  }
+
+  Future<void> updateDesiredGoal(int newGoal) async {
+    ConstantUserMaster.desiredGoal = newGoal;
+    update();
+    await SharedPref.saveInt(SharePrefKey.desiredWeight, newGoal);
+
+    await _recalculateAndSaveGoals(ConstantUserMaster.weight, newGoal);
+
+    NotificationService.showSuccess('update_targets_body');
+    _refreshHome();
+  }
+
+  Future<void> _recalculateAndSaveGoals(int weight, int goal) async {
+    final bmr = CUM_HELPERS.estimateBMR(
+      ConstantUserMaster.height,
+      weight,
+      ConstantUserMaster.age,
+      ConstantUserMaster.gender,
+    );
+    final activity = CUM_HELPERS.getActivityFactor(
+      ConstantUserMaster.workOutDay,
+    );
+    final tdee = bmr * activity;
+
+    final adjustedCalories = CUM_HELPERS.adjustCaloriesForGoal(
+      tdee,
+      weight,
+      goal,
+      ConstantUserMaster.goalWeight,
+    );
+
+    final macros = CUM_HELPERS.calculateMacrosFromTDEE(
+      adjustedCalories.toDouble(),
+      weight,
+    );
+
+    await SharedPref.saveInt(SharePrefKey.calorie, macros['calories']!);
+    await SharedPref.saveInt(SharePrefKey.protein, macros['protein']!);
+    await SharedPref.saveInt(SharePrefKey.carbs, macros['carbs']!);
+    await SharedPref.saveInt(SharePrefKey.fat, macros['fat']!);
+
+    ConstantUserMaster.calorieGoal = macros['calories']!;
+    ConstantUserMaster.proteinGoal = macros['protein']!;
+    ConstantUserMaster.carbGoal = macros['carbs']!;
+    ConstantUserMaster.fatsGoal = macros['fat']!;
+  }
+
+  void _refreshHome() {
+    try {
+      Get.find<HomeController>().getAllData();
+    } catch (_) {}
+  }
 }
 
 class SalesData {
@@ -165,4 +414,19 @@ class SalesData {
 
   final String time;
   final int ml;
+}
+
+class WeightData {
+  WeightData(this.label, this.weight, this.date);
+
+  final String label;
+  final double weight;
+  final DateTime date;
+}
+
+class WorkoutData {
+  WorkoutData(this.label, this.minutes);
+
+  final String label;
+  final int minutes; // workout duration in minutes
 }

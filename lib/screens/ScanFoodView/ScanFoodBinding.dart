@@ -1,4 +1,4 @@
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodController.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodController.dart';
 import 'package:get/get.dart';
 
 class ScanFoodBinding extends Bindings {

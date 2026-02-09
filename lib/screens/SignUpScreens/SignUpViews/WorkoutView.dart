@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
-import 'package:foodcalorietracker/widgets/steps/workout_step.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpController.dart';
+import 'package:macroaize/widgets/steps/workout_step.dart';
 import 'package:get/get.dart';
 
 class WorkoutView extends GetView<SignUpController> {

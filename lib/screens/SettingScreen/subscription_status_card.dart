@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/shared/models/subscription.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
-import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 
 class SubscriptionStatusCard extends StatelessWidget {
   const SubscriptionStatusCard({super.key, required this.subscription});
@@ -16,14 +15,34 @@ class SubscriptionStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fmt = DateFormat.yMMMMd();
-    final start =
-        subscription.startDate != null
-            ? fmt.format(subscription.startDate!.toLocal())
-            : '-';
-    final end =
-        subscription.endDate != null
-            ? fmt.format(subscription.endDate!.toLocal())
-            : '-';
+    final startDate = subscription.startDate;
+    DateTime? endDate = subscription.endDate;
+
+    // UI-side guard: if end is missing or not after start, derive from plan duration
+    if (startDate != null && (endDate == null || !endDate.isAfter(startDate))) {
+      final isYearly = subscription.planType == 'yearly';
+      endDate =
+          isYearly
+              ? DateTime.utc(
+                startDate.year + 1,
+                startDate.month,
+                startDate.day,
+                startDate.hour,
+                startDate.minute,
+                startDate.second,
+              )
+              : DateTime.utc(
+                startDate.year,
+                startDate.month + 1,
+                startDate.day,
+                startDate.hour,
+                startDate.minute,
+                startDate.second,
+              );
+    }
+
+    final start = startDate != null ? fmt.format(startDate.toLocal()) : '-';
+    final end = endDate != null ? fmt.format(endDate.toLocal()) : '-';
     final plan = (subscription.planType ?? 'premium').toUpperCase();
 
     return Container(
@@ -132,19 +151,6 @@ class SubscriptionStatusCard extends StatelessWidget {
             'Manage on $storeName',
             style: const TextStyle(color: Colors.white),
           ),
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.white24),
-          ),
-        ),
-      );
-
-      actions.add(
-        OutlinedButton.icon(
-          onPressed: () async {
-            await RevenueCatService().restorePurchases();
-          },
-          icon: const Icon(Icons.restore, color: Colors.white),
-          label: const Text('Restore', style: TextStyle(color: Colors.white)),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Colors.white24),
           ),

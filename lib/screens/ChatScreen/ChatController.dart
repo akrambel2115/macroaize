@@ -1,19 +1,19 @@
-import 'package:foodcalorietracker/shared/widgets/PremiumRequiredDialog.dart';
+import 'package:macroaize/shared/widgets/PremiumRequiredDialog.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:foodcalorietracker/Model/MainChatModel.dart';
-import 'package:foodcalorietracker/Model/SubchatModel.dart';
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
-import 'package:foodcalorietracker/shared/services/usage_service.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
-import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:macroaize/Model/MainChatModel.dart';
+import 'package:macroaize/Model/SubchatModel.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
+import 'package:macroaize/shared/services/usage_service.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
+import 'package:macroaize/shared/services/app_user_service.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
-import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
+import 'package:macroaize/features/auth/presentation/auth_modal.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -23,7 +23,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../MainController.dart';
 import '../../Model/ChatModel.dart';
 import '../../Model/openAIModel.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 import '../../constant/FontFamily.dart';
 import '../../widgets/CropperUiSettings.dart';
 import '../../shared/services/rate_us_service.dart';
@@ -45,6 +45,7 @@ class ChatController extends GetxController {
   File? imagePath;
   bool isStreamedText = false;
   bool isTyping = false;
+  bool isSending = false; // New state to track sending status
   String streamedText = "";
   bool speechEnabled = false;
   int mainChatId = 0;
@@ -97,12 +98,58 @@ class ChatController extends GetxController {
   }
 
   void sendMsg({required String text}) async {
+    // 1. Prevent multiple sends
+    if (isSending) return;
+
+    if (text.isEmpty) return;
+
+    // 2. Optimistic Update
+    isSending = true;
+    text = text.trim();
+    final String textToSend = text; // Keep a copy
+    controller.clear();
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    // Add user message immediately
+    if (messages.isEmpty) {
+      isMainChat = true;
+    } else {
+      isMainChat = false;
+    }
+    messages.insert(0, ChatModel(true, textToSend, imagePath?.path, false));
+
+    // Add "Typing..." placeholder immediately
+    isStreamedText = true;
+    streamedText = ""; // Start empty or with "..."
+    messages.insert(
+      0,
+      ChatModel(false, "", imagePath?.path, false),
+    ); // Placeholder
+    isTyping = true; // Trigger typing animation if used
+
+    // Capture image before clearing
+    File? sentImage = imagePath;
+    imagePath = null; // Clear immediately from UI
+
+    update(); // Update UI to show messages
+
+    // Scroll to bottom
+    await Future.delayed(const Duration(milliseconds: 50));
+    scrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+
     try {
+      // 3. Perform Checks (Auth, Account, Rate Limit)
       if (!_appUserService.checkAccountActivation('chat')) {
+        _revertOptimisticUI();
         return;
       }
 
       if (isRateLimited) {
+        _revertOptimisticUI();
         Fluttertoast.showToast(
           msg:
               rateLimitReset != null
@@ -115,232 +162,265 @@ class ChatController extends GetxController {
         return;
       }
 
-      if (text.isNotEmpty) {
-        try {
-          final result = await _usageService.incrementUsage('chat');
+      try {
+        final result = await _usageService.incrementUsage('chat');
 
-          if (!result.success) {
-            if (result.limitReached) {
-              NotificationService.showError(
-                result.message.isNotEmpty
-                    ? result.message
-                    : 'daily_chat_limit_reached',
-              );
-            } else {
-              NotificationService.showError('unable_to_send_message_try_again');
-            }
-            return;
+        if (!result.success) {
+          _revertOptimisticUI();
+          if (result.limitReached) {
+            NotificationService.showError(
+              result.message.isNotEmpty
+                  ? result.message
+                  : 'daily_chat_limit_reached',
+            );
+          } else {
+            NotificationService.showError('unable_to_send_message_try_again');
           }
-        } catch (e) {
-          // redirect to login if actually unauthenticated
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) {
-            await _handleAuthenticationRequired();
-            return;
-          }
-
-          final el = e.toString().toLowerCase();
-          if (el.contains('limit') ||
-              el.contains('permission-denied') ||
-              el.contains('daily')) {
-            NotificationService.showError('daily_limit_reached_try_again');
-            return;
-          }
-
-          NotificationService.showError('unable_to_send_message_try_again');
           return;
         }
-        text = text.trim();
-        controller.clear();
-        FocusManager.instance.primaryFocus?.unfocus();
-        isTyping = true;
-        if (messages.isEmpty) {
-          isMainChat = true;
-        } else {
-          isMainChat = false;
+      } catch (e) {
+        _revertOptimisticUI();
+        // redirect to login if actually unauthenticated
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          await _handleAuthenticationRequired();
+          return;
         }
-        messages.insert(0, ChatModel(true, text, imagePath?.path, false));
-        isStreamedText = true;
-        messages.insert(0, ChatModel(false, "", imagePath?.path, false));
-        update();
 
-        if (imagePath != null) {
-          File imageDemo = imagePath!;
-          imagePath = null;
-          final bytes = await imageDemo.readAsBytes();
-          final base64Image = base64Encode(bytes);
-          update();
-          final parameters = {
-            'model': Get.find<AppConfigService>().aiModel,
-            'messages': [
-              {
-                'role': 'system',
-                'content':
-                    "You are a food nutrition expert AI. Reply ONLY in ${Get.find<MainController>().language} language unless told otherwise.",
-              },
-              {
-                'role': 'user',
-                'content': [
-                  {'type': 'text', 'text': text},
-                  {
-                    'type': 'image_url',
-                    'image_url': {'url': "data:image/jpeg;base64,$base64Image"},
-                  },
-                ],
-              },
-            ],
-            'max_tokens': 500,
-          };
+        final el = e.toString().toLowerCase();
+        if (el.contains('limit') ||
+            el.contains('permission-denied') ||
+            el.contains('daily')) {
+          NotificationService.showError('daily_limit_reached_try_again');
+          return;
+        }
 
-          final functions = FirebaseFunctions.instanceFor(
-            region: 'europe-west1',
-          );
-          final callable = functions.httpsCallable('chatWithOpenRouter');
-          final responseData = await callable.call(parameters);
-          final raw = responseData.data;
-          final normalized = jsonDecode(jsonEncode(raw));
-          final decodedJson =
-              (normalized is String) ? jsonDecode(normalized) : normalized;
+        NotificationService.showError('unable_to_send_message_try_again');
+        return;
+      }
 
-          try {
-            if (decodedJson is Map && decodedJson['error'] != null) {
-              final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
-              messages.first = ChatModel(
-                false,
-                errMsg.toString(),
-                imageDemo.path,
-                true,
-              );
-            } else {
-              OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-              final answer =
-                  data.choices?.isNotEmpty == true
-                      ? (data.choices!.first.message?.content ?? "")
-                      : "No response";
-              messages.first = ChatModel(false, answer, imageDemo.path, true);
-              if (answer.isNotEmpty) {
-                if (isMainChat) {
-                  mainChatId = await dbHelper.insertMainChatModel(
-                    MainChatModel(
-                      question: text,
-                      answer: answer,
-                      date: DateTime.now().toString(),
-                    ),
-                  );
-                }
-                await dbHelper.insertSubChatModel(
-                  SubChatModel(
-                    question: text,
-                    answer: answer,
-                    date: DateTime.now().toString(),
-                    mainCharId: mainChatId,
-                    image: imageDemo.path,
-                  ),
-                );
-              }
-            }
-          } catch (e) {
-            if (kDebugMode) {
-              print('Decode/image branch error: $e');
-              print('Body: $decodedJson');
-            }
+      // 4. Prepare API Call
+      update();
+
+      // Build History (Last 10 messages, excluding current user message and placeholder)
+      // Current state: [Placeholder, UserMsg, ...History...]
+      final history = messages.skip(2).take(10).toList().reversed.toList();
+      List<Map<String, dynamic>> contextMessages = [];
+
+      for (var msg in history) {
+        contextMessages.add({
+          'role': msg.isUser ? 'user' : 'assistant',
+          'content': msg.text,
+        });
+      }
+
+      final langName = Get.find<MainController>().getLanguageName();
+      final systemPrompt =
+          "You are the MacroAize AI Coach, an expert in food nutrition and tracking for the MacroAize app. "
+          "Your goal is to help users track their meals, understand nutrition, and reach their health goals. "
+          "Be concise, encouraging, and helpful. "
+          "If asked about yourself, strictly identify as the MacroAize AI Coach. "
+          "Reply ONLY in $langName.";
+
+      if (sentImage != null) {
+        File imageDemo = sentImage;
+        final bytes = await imageDemo.readAsBytes();
+        final base64Image = base64Encode(bytes);
+
+        final parameters = {
+          'model': Get.find<AppConfigService>().aiModel,
+          'messages': [
+            {'role': 'system', 'content': systemPrompt},
+            ...contextMessages,
+            {
+              'role': 'user',
+              'content': [
+                {'type': 'text', 'text': textToSend},
+                {
+                  'type': 'image_url',
+                  'image_url': {'url': "data:image/jpeg;base64,$base64Image"},
+                },
+              ],
+            },
+          ],
+          'max_tokens': 500,
+        };
+
+        final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+        final callable = functions.httpsCallable('chatWithOpenRouter');
+        final responseData = await callable.call(parameters);
+        final raw = responseData.data;
+        final normalized = jsonDecode(jsonEncode(raw));
+        final decodedJson =
+            (normalized is String) ? jsonDecode(normalized) : normalized;
+
+        try {
+          if (decodedJson is Map && decodedJson['error'] != null) {
+            final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
             messages.first = ChatModel(
               false,
-              'Parse error',
+              errMsg.toString(),
               imageDemo.path,
               true,
             );
-          }
-          streamedText = "";
-          isStreamedText = false;
-          update();
-          RateUsService.showRateUsIfEligible(RateUsService.actionChat);
-        } else {
-          final parameters = {
-            'model': Get.find<AppConfigService>().aiModel,
-            'messages': [
-              {
-                'role': 'system',
-                'content':
-                    'You are a Food Tracker expert. Reply ONLY in ${Get.find<MainController>().language}.',
-              },
-              {'role': 'user', 'content': text},
-            ],
-            'max_tokens': 500,
-          };
-          final functions = FirebaseFunctions.instanceFor(
-            region: 'europe-west1',
-          );
-          final callable = functions.httpsCallable('chatWithOpenRouter');
-          final result = await callable.call(parameters);
-          final raw = result.data;
-          final normalized = jsonDecode(jsonEncode(raw));
-          final decodedJson =
-              (normalized is String) ? jsonDecode(normalized) : normalized;
-          try {
-            if (decodedJson is Map && decodedJson['error'] != null) {
-              final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
-              messages.first = ChatModel(false, errMsg.toString(), null, true);
-            } else {
-              OpenAiModel data = OpenAiModel.fromJson(decodedJson);
-              final answer =
-                  data.choices?.isNotEmpty == true
-                      ? (data.choices!.first.message?.content ?? "")
-                      : "No response";
-              messages.first = ChatModel(false, answer, null, true);
-              if (answer.isNotEmpty) {
-                if (isMainChat) {
-                  mainChatId = await dbHelper.insertMainChatModel(
-                    MainChatModel(
-                      question: text,
-                      answer: answer,
-                      date: DateTime.now().toString(),
-                    ),
-                  );
-                }
-                await dbHelper.insertSubChatModel(
-                  SubChatModel(
-                    question: text,
+          } else {
+            OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+            final answer =
+                data.choices?.isNotEmpty == true
+                    ? (data.choices!.first.message?.content ?? "")
+                    : "No response";
+            messages.first = ChatModel(false, answer, imageDemo.path, true);
+            if (answer.isNotEmpty) {
+              if (isMainChat) {
+                mainChatId = await dbHelper.insertMainChatModel(
+                  MainChatModel(
+                    question: textToSend,
                     answer: answer,
                     date: DateTime.now().toString(),
-                    mainCharId: mainChatId,
                   ),
                 );
               }
+              await dbHelper.insertSubChatModel(
+                SubChatModel(
+                  question: textToSend,
+                  answer: answer,
+                  date: DateTime.now().toString(),
+                  mainCharId: mainChatId,
+                  image: imageDemo.path,
+                ),
+              );
             }
-          } catch (e) {
-            if (kDebugMode) {
-              print('Decode/text branch error: $e');
-              print('Body: $decodedJson');
-            }
-            messages.first = ChatModel(false, 'Parse error', null, true);
           }
-          streamedText = "";
-          isStreamedText = false;
-          update();
-          RateUsService.showRateUsIfEligible(RateUsService.actionChat);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Decode/image branch error: $e');
+            print('Body: $decodedJson');
+          }
+          messages.first = ChatModel(
+            false,
+            'Parse error',
+            imageDemo.path,
+            true,
+          );
         }
-
-        await Future.delayed(const Duration(milliseconds: 100));
-        scrollController.animateTo(
-          0.0,
-          duration: const Duration(seconds: 1),
-          curve: Curves.easeOut,
-        );
+        streamedText = "";
+        isStreamedText = false;
+        // isSending = false; // Will set at end
+        update();
+        RateUsService.showRateUsIfEligible(RateUsService.actionChat);
+      } else {
+        final parameters = {
+          'model': Get.find<AppConfigService>().aiModel,
+          'messages': [
+            {'role': 'system', 'content': systemPrompt},
+            ...contextMessages,
+            {'role': 'user', 'content': textToSend},
+          ],
+          'max_tokens': 500,
+        };
+        final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+        final callable = functions.httpsCallable('chatWithOpenRouter');
+        final result = await callable.call(parameters);
+        final raw = result.data;
+        final normalized = jsonDecode(jsonEncode(raw));
+        final decodedJson =
+            (normalized is String) ? jsonDecode(normalized) : normalized;
+        try {
+          if (decodedJson is Map && decodedJson['error'] != null) {
+            final errMsg = decodedJson['error']['message'] ?? 'Unknown error';
+            messages.first = ChatModel(false, errMsg.toString(), null, true);
+          } else {
+            OpenAiModel data = OpenAiModel.fromJson(decodedJson);
+            final answer =
+                data.choices?.isNotEmpty == true
+                    ? (data.choices!.first.message?.content ?? "")
+                    : "No response";
+            messages.first = ChatModel(false, answer, null, true);
+            if (answer.isNotEmpty) {
+              if (isMainChat) {
+                mainChatId = await dbHelper.insertMainChatModel(
+                  MainChatModel(
+                    question: textToSend,
+                    answer: answer,
+                    date: DateTime.now().toString(),
+                  ),
+                );
+              }
+              await dbHelper.insertSubChatModel(
+                SubChatModel(
+                  question: textToSend,
+                  answer: answer,
+                  date: DateTime.now().toString(),
+                  mainCharId: mainChatId,
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Decode/text branch error: $e');
+            print('Body: $decodedJson');
+          }
+          messages.first = ChatModel(false, 'Parse error', null, true);
+        }
+        streamedText = "";
+        isStreamedText = false;
+        // isSending = false; // Will set at end
+        update();
+        RateUsService.showRateUsIfEligible(RateUsService.actionChat);
       }
-    } catch (err) {
-      NotificationService.showError('hmm_something_went_wrong');
 
+      await Future.delayed(const Duration(milliseconds: 100));
+      scrollController.animateTo(
+        0.0,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeOut,
+      );
+    } catch (err) {
+      // 5. General Error Handling
+      // If we failed after adding the optimistic message, remove it or show error
+      // Since we already added messages, let's keep the user message but remove placeholder/error
+
+      // If we are here, it means something went wrong during API call mostly
+      NotificationService.showError('hmm_something_went_wrong');
       if (kDebugMode) {
         print("ERROR $err");
       }
-      isTyping = false;
+
+      // Remove the typing placeholder we added
+      if (messages.isNotEmpty && isStreamedText) {
+        messages.removeAt(0); // Remove typing placeholder
+      }
+      // If we want to remove the user message too:
+      if (messages.isNotEmpty && messages.first.isUser) {
+        messages.removeAt(0); // Remove user message if failed completely
+        // Restore text?
+        controller.text = text;
+      }
+
       imagePath = null;
       streamedText = "";
       isStreamedText = false;
-      messages.removeAt(0);
+      update();
+    } finally {
+      isSending = false;
+      isTyping = false; // Stop typing animation
       update();
     }
+  }
+
+  void _revertOptimisticUI() {
+    isSending = false;
+    isTyping = false;
+    isStreamedText = false;
+    streamedText = "";
+
+    // We added 2 messages: user msg and placeholder
+    if (messages.isNotEmpty) messages.removeAt(0); // Placeholder
+    if (messages.isNotEmpty) messages.removeAt(0); // User message
+
+    imagePath = null;
+    update();
   }
 
   takeImage(ImageSource source, BuildContext context) async {
@@ -362,6 +442,7 @@ class ChatController extends GetxController {
     if (image != null) {
       File imagePath = File(image.path);
       update();
+      if (!context.mounted) return;
       await cropImage(imagePath, context);
     }
   }
@@ -606,8 +687,8 @@ class ChatController extends GetxController {
 
     if (success) {
       Get.snackbar(
-        'Welcome!',
-        'You can now use the chat. Please try sending your message again.',
+        'success'.tr,
+        'auth_chat_success'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -615,8 +696,8 @@ class ChatController extends GetxController {
       );
     } else {
       Get.snackbar(
-        'Authentication Required',
-        'Please login to use the chat feature',
+        'error'.tr,
+        'auth_chat_required'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange,
         colorText: Colors.white,

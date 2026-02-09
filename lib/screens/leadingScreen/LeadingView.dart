@@ -1,17 +1,22 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsView.dart';
-import 'package:foodcalorietracker/screens/HomeScreen/HomeView.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipesView.dart';
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodView.dart';
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodController.dart';
-import 'package:foodcalorietracker/screens/SettingScreen/SettingView.dart';
-import 'package:foodcalorietracker/screens/leadingScreen/ExitDailog.dart';
-import 'package:foodcalorietracker/screens/leadingScreen/LeadingController.dart';
+import 'package:macroaize/constant/AppAssets.dart';
+import 'package:macroaize/constant/AppColor.dart';
+
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsController.dart';
+import 'package:macroaize/screens/AnalyticsScreen/UpdateWeight.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsView.dart';
+import 'package:macroaize/screens/HomeScreen/HomeView.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipesView.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodView.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodController.dart';
+import 'package:macroaize/screens/SettingScreen/SettingView.dart';
+import 'package:macroaize/screens/leadingScreen/ExitDailog.dart';
+import 'package:macroaize/screens/leadingScreen/LeadingController.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
+import 'package:macroaize/routes/app_routes.dart';
 
 class LeadingView extends StatefulWidget {
   // tutorial global keys
@@ -26,25 +31,51 @@ class LeadingView extends StatefulWidget {
   State<LeadingView> createState() => _LeadingViewState();
 }
 
-class _LeadingViewState extends State<LeadingView> {
+class _LeadingViewState extends State<LeadingView>
+    with SingleTickerProviderStateMixin {
   final LeadingController _controller = Get.find();
   int _localIndex = 0;
-  final GlobalKey _stackKey = GlobalKey();
-  final double _indicatorWidth = 48.0;
+
+  // Menu Animation
+  late AnimationController _menuController;
+  late Animation<double> _expandAnimation;
+  late Animation<double> _rotateAnimation;
+  late Animation<double> _fadeAnimation;
+  bool _isMenuOpen = false;
+
   // lazy tab pages
-  final List<Widget?> _pages = [
-    const HomeView(),
-    null,
-    null,
-    null,
-    null,
-  ];
+  final List<Widget?> _pages = [const HomeView(), null, null, null, null];
 
   @override
   void initState() {
     super.initState();
     _localIndex = _controller.currentIndex;
     _ensurePage(_localIndex);
+
+    _menuController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _menuController,
+      curve: Curves.easeOutBack,
+    );
+    _rotateAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.125, // 45 degrees (1/8 turn)
+    ).animate(
+      CurvedAnimation(parent: _menuController, curve: Curves.easeInOut),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _menuController,
+      curve: Curves.easeIn,
+    );
+  }
+
+  @override
+  void dispose() {
+    _menuController.dispose();
+    super.dispose();
   }
 
   void _animateTo(int newIndex) {
@@ -102,277 +133,418 @@ class _LeadingViewState extends State<LeadingView> {
     if (mounted) setState(() {});
   }
 
+  void _toggleMenu() {
+    setState(() {
+      _isMenuOpen = !_isMenuOpen;
+      if (_isMenuOpen) {
+        _menuController.forward();
+      } else {
+        _menuController.reverse();
+      }
+    });
+  }
+
+  void _closeMenu() {
+    if (_isMenuOpen) {
+      setState(() {
+        _isMenuOpen = false;
+        _menuController.reverse();
+      });
+    }
+  }
+
+  void _onMenuOptionSelected(int index) {
+    _closeMenu();
+    // Handle navigation based on option
+    switch (index) {
+      case 0: // Meal (Scanner)
+        _getOrPutScanController().setBarcodeOnly(false);
+        _controller.changeTabIndex(2);
+        break;
+      case 1: // Barcode
+        _getOrPutScanController().setBarcodeOnly(true);
+        _controller.changeTabIndex(2);
+        break;
+      case 2: // Weight
+        if (!Get.isRegistered<AnalyticsController>()) {
+          Get.put(AnalyticsController());
+        }
+        showUpdateWeightDialog(context, ConstantUserMaster.weight.toString(), (
+          value,
+        ) {
+          final controller = Get.find<AnalyticsController>();
+          controller.updateCurrentWeight(int.parse(value));
+          // Redirect after update
+          _controller.changeTabIndex(3);
+        }, title: 'Update Weight'.tr);
+        break;
+      case 3: // Workout
+        Get.toNamed(Routes.workoutView);
+        break;
+    }
+  }
+
+  ScanFoodController _getOrPutScanController() {
+    if (Get.isRegistered<ScanFoodController>()) {
+      return Get.find<ScanFoodController>();
+    }
+    return Get.put(ScanFoodController());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final barHeight = 76.0 + bottomPadding;
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        if (_isMenuOpen) {
+          _closeMenu();
+          return;
+        }
+
+        if (_localIndex != 0) {
+          // Verify controller exists before using
+          if (Get.isRegistered<LeadingController>()) {
+            _controller.changeTabIndex(0);
+          } else {
+            // Fallback if controller not found (unlikely in this structure)
+            Get.offAllNamed(Routes.leadingView);
+          }
+          return;
+        }
+
         showExitConfirmationDialog(context: context);
-        return Future(() => true);
       },
       child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: GetBuilder<LeadingController>(
-          builder: (controller) {
-            // hide on scanner
-            if (controller.currentIndex == 2) {
-              return const SizedBox.shrink();
-            }
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            // Body Content
+            Positioned.fill(
+              bottom:
+                  _localIndex == 2
+                      ? 0
+                      : barHeight - 20, // Full height for scanner
+              child: GetBuilder<LeadingController>(
+                builder: (controller) {
+                  // Sync logic
+                  if (_localIndex != controller.currentIndex) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) _animateTo(controller.currentIndex);
+                    });
+                  }
 
-            return FloatingActionButton(
-              key: LeadingView.aiCoachButtonKey,
-              onPressed: () {
-                Get.toNamed(Routes.chatView);
-              },
-              backgroundColor: context.theme.focusColor,
-              shape: const CircleBorder(),
-              elevation: 6,
-              child: SizedBox(
-                width: 44,
-                height: 44,
-                child: ColorFiltered(
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
-                    BlendMode.srcIn,
-                  ),
-                  child: Lottie.asset(
-                    'assets/lottie/chat.json',
-                    fit: BoxFit.contain,
-                    repeat: true,
-                  ),
-                ),
+                  final children = List<Widget>.generate(
+                    5,
+                    (i) => _pages[i] ?? const SizedBox.shrink(),
+                  );
+                  return IndexedStack(index: _localIndex, children: children);
+                },
               ),
-            );
-          },
-        ),
-        bottomNavigationBar: GetBuilder<LeadingController>(
-          builder: (controller) {
-            // sync external changes
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_localIndex != controller.currentIndex) {
-                _animateTo(controller.currentIndex);
-              }
-            });
-            return Container(
-              height: 76 + MediaQuery.of(context).padding.bottom,
-              decoration: BoxDecoration(
-                color: context.theme.scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, -8),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 6,
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final navCount = 5;
-                      final slotWidth = constraints.maxWidth / navCount;
-                      // rtl support
-                      final isRtl =
-                          Directionality.of(context) == TextDirection.rtl;
-                      final visualIndex =
-                          isRtl ? (navCount - 1 - _localIndex) : _localIndex;
-                      final centerX = slotWidth * visualIndex + slotWidth / 2;
-                      final left = centerX - _indicatorWidth / 2;
-                      final top =
-                          constraints.maxHeight / 2 - _indicatorWidth / 2;
+            ),
 
-                      return Stack(
-                        key: _stackKey,
-                        children: [
-                          // tab indicator
-                          AnimatedPositioned(
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.easeInOut,
-                            left: left,
-                            top: top,
-                            width: _indicatorWidth,
-                            height: _indicatorWidth,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              curve: Curves.easeOut,
-                              decoration: BoxDecoration(
-                                color: AppColor.primaryOrange,
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColor.primaryOrange.withOpacity(
-                                      0.28,
-                                    ),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                            ),
+            // Dim Overlay
+            if (_isMenuOpen)
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: _closeMenu,
+                  child: AnimatedBuilder(
+                    animation: _fadeAnimation,
+                    builder:
+                        (ctx, child) => Container(
+                          color: Colors.black.withOpacity(
+                            0.5 * _fadeAnimation.value,
                           ),
-
-                          // nav items
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildNavItem(
-                                  context,
-                                  controller,
-                                  0,
-                                  Icons.home_filled,
-                                  Icons.home_outlined,
-                                ),
-                              ),
-                              Expanded(
-                                child: _buildNavItem(
-                                  context,
-                                  controller,
-                                  1,
-                                  Icons.restaurant_menu_rounded,
-                                  Icons.restaurant_menu_outlined,
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  key: LeadingView.scannerTabKey,
-                                  child: _buildNavItem(
-                                    context,
-                                    controller,
-                                    2,
-                                    Icons.camera_alt_rounded,
-                                    Icons.camera_alt_outlined,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  key: LeadingView.analyticsTabKey,
-                                  child: _buildNavItem(
-                                    context,
-                                    controller,
-                                    3,
-                                    Icons.bar_chart_rounded,
-                                    Icons.bar_chart_outlined,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  key: LeadingView.profileTabKey,
-                                  child: _buildNavItem(
-                                    context,
-                                    controller,
-                                    4,
-                                    Icons.person_rounded,
-                                    Icons.person_outline_rounded,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    },
+                        ),
                   ),
                 ),
               ),
-            );
-          },
-        ),
 
-        body: GetBuilder<LeadingController>(
-          builder: (controller) {
-            final children = List<Widget>.generate(
-              5,
-              (i) => _pages[i] ?? const SizedBox.shrink(),
-            );
-            return IndexedStack(
-              index: controller.currentIndex,
-              children: children,
-            );
-          },
+            // Menu Items (Semi-Circle)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: barHeight - 20,
+              height: 300, // Ensure strictly large enough for the menu radius
+              child: _buildCircularMenu(),
+            ),
+
+            // Custom Bottom Bar
+            if (_localIndex != 2)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildBottomBar(barHeight),
+              ),
+
+            // Floating Custom Plus Button
+            if (_localIndex != 2)
+              Positioned(
+                bottom:
+                    bottomPadding + 28, // Center vertically in the bar mostly
+                child: _buildPlusButton(),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(
-    BuildContext context,
-    LeadingController controller,
-    int index,
-    IconData activeIcon,
-    IconData inactiveIcon,
-  ) {
-    final isSelected = controller.currentIndex == index;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final navCount = 5;
-    final visualIndex = isRtl ? (navCount - 1 - index) : index;
+  Widget _buildCircularMenu() {
+    return AnimatedBuilder(
+      animation: _expandAnimation,
+      builder: (context, child) {
+        final radius = 110.0 * _expandAnimation.value;
+        // Angles for 4 items: distributed from 180 (left) to 0 (right)?
+        // Or centered upwards. Let's do 4 items in a 180 arc.
+        // 180 degrees / 5 intervals = 36 deg per step?
+        // Angles: 162, 126, 90, 54, 18 ? No, that's 5 items.
+        // 4 items: 150, 110, 70, 30 ? roughly.
 
-    return Expanded(
-      child: Semantics(
-        button: true,
-        label: 'Bottom navigation item $visualIndex',
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => controller.changeTabIndex(index),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Builder(
-                  builder: (context) {
-                    final isCamera = index == 2;
-                    if (isCamera) {
-                      // scan icon
-                      return SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Center(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 120),
-                            child: Image.asset(
-                              AppAssets.scanHomeIcon,
-                              width: 22,
-                              height: 22,
-                              key: ValueKey(isSelected),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return SizedBox(
-                      width: 48,
-                      height: 48,
-                        child: Center(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 120),
-                          child: Icon(
-                            isSelected ? activeIcon : inactiveIcon,
-                            color:
-                                isSelected
-                                    ? Colors.white
-                                    : AppColor.neutralGrey400,
-                            size: 22,
-                            key: ValueKey(isSelected),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+        return Stack(
+          alignment: Alignment.bottomCenter,
+          clipBehavior: Clip.none,
+          children: [
+            _buildMenuItem(
+              2, // Index 2 is Weight
+              radius,
+              150, // Weight now at leftmost pos
+              AppAssets.maintain,
+              "Weight",
             ),
+            _buildMenuItem(
+              1, // Index 1 is Barcode
+              radius,
+              110,
+              AppAssets.barcode,
+              "Barcode",
+            ),
+            _buildMenuItem(
+              0, // Index 0 is Meal
+              radius,
+              70, // Meal now at middle-right pos
+              AppAssets.lunch,
+              "Meal",
+            ),
+            _buildMenuItem(
+              3, // Index 3 is Workout
+              radius,
+              30,
+              AppAssets.workoutIcon,
+              "Workout",
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuItem(
+    int index,
+    double radius,
+    double angleDeg,
+    String assetPath,
+    String label,
+  ) {
+    final angleRad = angleDeg * (math.pi / 180);
+    final x = radius * math.cos(angleRad);
+    final y = -radius * math.sin(angleRad); // negative because going up
+    // However, x is relative to center. Center is 0.
+    // cos(150) is negative (left), cos(30) is positive (right). Perfect.
+
+    final scale = _expandAnimation.value;
+    if (scale == 0) return const SizedBox.shrink();
+
+    return Transform.translate(
+      offset: Offset(x, y),
+      child: Opacity(
+        opacity: scale.clamp(0.0, 1.0),
+        child: Transform.scale(
+          scale: scale,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () => _onMenuOptionSelected(index),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: context.theme.cardColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Image.asset(assetPath, fit: BoxFit.contain),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlusButton() {
+    return GestureDetector(
+      key: LeadingView.scannerTabKey,
+      onTap: _toggleMenu,
+      child: AnimatedBuilder(
+        animation: _rotateAnimation,
+        builder: (context, child) {
+          return Transform.rotate(
+            angle:
+                _rotateAnimation.value *
+                2 *
+                math.pi, // 0 to 0.125 * 2pi = 45 deg
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColor.primaryOrange,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColor.primaryOrange.withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 36,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(double height) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: context.theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -8),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // 4 items (skip center slot)
+              return Row(
+                children: [
+                  Expanded(
+                    child: _buildNavItem(
+                      0,
+                      Icons.home_filled,
+                      Icons.home_outlined,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildNavItem(
+                      1,
+                      Icons.restaurant_menu_rounded,
+                      Icons.restaurant_menu_outlined,
+                    ),
+                  ),
+                  const SizedBox(width: 60), // Space for center FAB
+                  Expanded(
+                    child: Container(
+                      key: LeadingView.analyticsTabKey,
+                      child: _buildNavItem(
+                        3,
+                        Icons.bar_chart_rounded,
+                        Icons.bar_chart_outlined,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      key: LeadingView.profileTabKey,
+                      child: _buildNavItem(
+                        4,
+                        Icons.person_rounded,
+                        Icons.person_outline_rounded,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon) {
+    final isSelected = _localIndex == index;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (_isMenuOpen) _closeMenu();
+        _controller.changeTabIndex(index);
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Icon(
+              isSelected ? activeIcon : inactiveIcon,
+              key: ValueKey(isSelected),
+              color:
+                  isSelected ? AppColor.primaryOrange : AppColor.neutralGrey400,
+              size: 26,
+            ),
+          ),
+          const SizedBox(height: 4),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: isSelected ? 4 : 0,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColor.primaryOrange,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
       ),
     );
   }

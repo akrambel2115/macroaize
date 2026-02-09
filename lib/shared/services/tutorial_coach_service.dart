@@ -132,18 +132,32 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
     final targetContext = step.targetKey.currentContext;
 
     if (targetContext == null) {
-      // skip if widget missing
-      WidgetsBinding.instance.addPostFrameCallback((_) => _nextStep());
+      // Widget not found - complete tutorial instead of looping
+      debugPrint(
+        '⚠️ TutorialCoachService: Target widget not found for step $currentStep. Completing tutorial.',
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) => _completeTutorial());
       return const SizedBox.shrink();
     }
 
-    final renderBox = targetContext.findRenderObject() as RenderBox;
+    final renderBox = targetContext.findRenderObject() as RenderBox?;
+    if (renderBox == null) {
+      debugPrint(
+        '⚠️ TutorialCoachService: RenderBox null for step $currentStep. Completing tutorial.',
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) => _completeTutorial());
+      return const SizedBox.shrink();
+    }
+
     final targetSize = renderBox.size;
     final targetPosition = renderBox.localToGlobal(Offset.zero);
 
     if (targetSize.isEmpty) {
-      // skip if empty size
-      WidgetsBinding.instance.addPostFrameCallback((_) => _nextStep());
+      // Widget has no size - complete tutorial
+      debugPrint(
+        '⚠️ TutorialCoachService: Target widget empty size for step $currentStep. Completing tutorial.',
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) => _completeTutorial());
       return const SizedBox.shrink();
     }
 

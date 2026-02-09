@@ -1,26 +1,23 @@
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions/v2';
 
-// Cache types
 type RcCache = {
   params: Record<string, string>;
   fetchedAt: number;
   ttlMs: number;
 };
 
-// Remote Config service
 export class RemoteConfigService {
   private static instance: RemoteConfigService;
   private remoteConfig: admin.remoteConfig.RemoteConfig | null = null;
   private cache: Map<string, any> = new Map();
   private cacheExpiry: number = 0;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+  private readonly CACHE_DURATION = 5 * 60 * 1000;
 
-  // Parameter cache
   private static rcCache: RcCache | null = null;
 
   private constructor() {
-    // Lazy init
+    // lazy init
   }
 
   public static getInstance(): RemoteConfigService {
@@ -30,14 +27,12 @@ export class RemoteConfigService {
     return RemoteConfigService.instance;
   }
 
-  // Lazy init
   private initializeService(): void {
     if (!this.remoteConfig) {
       this.remoteConfig = admin.remoteConfig();
     }
   }
 
-  // Get cached template
   private async getTemplate(): Promise<admin.remoteConfig.RemoteConfigTemplate> {
     const now = Date.now();
 
@@ -46,7 +41,6 @@ export class RemoteConfigService {
     }
 
     try {
-      // Initialize service if needed
       this.initializeService();
 
       const template = await this.remoteConfig!.getTemplate();
@@ -66,10 +60,8 @@ export class RemoteConfigService {
     }
   }
 
-  // Fetch params
   private static async fetchRcTemplateParams(): Promise<Record<string, string>> {
     try {
-      // Skip if uninitialized
       if (!admin.apps.length) {
         return {};
       }
@@ -87,23 +79,20 @@ export class RemoteConfigService {
     }
   }
 
-  // Ensure cache
   private static async ensureRcCache(): Promise<void> {
     const now = Date.now();
     const needsFetch = !RemoteConfigService.rcCache || (now - RemoteConfigService.rcCache.fetchedAt) > (RemoteConfigService.rcCache.ttlMs);
     if (needsFetch) {
       const params = await RemoteConfigService.fetchRcTemplateParams();
-      RemoteConfigService.rcCache = { params, fetchedAt: now, ttlMs: 5 * 60 * 1000 }; // 5 minutes TTL
+      RemoteConfigService.rcCache = { params, fetchedAt: now, ttlMs: 5 * 60 * 1000 };
     }
   }
 
-  // Get cached param
   private static getCachedRcParam(key: string): string | undefined {
     if (!RemoteConfigService.rcCache) return undefined;
     return RemoteConfigService.rcCache.params[key];
   }
 
-  // Get string param
   public static async getRcString(key: string, fallback?: string): Promise<string> {
     await RemoteConfigService.ensureRcCache();
     const val = RemoteConfigService.getCachedRcParam(key);
@@ -111,7 +100,6 @@ export class RemoteConfigService {
     return fallback ?? '';
   }
 
-  // Get number param
   public static async getRcNumber(key: string, fallback: number = 0): Promise<number> {
     await RemoteConfigService.ensureRcCache();
     const val = RemoteConfigService.getCachedRcParam(key);
@@ -120,7 +108,6 @@ export class RemoteConfigService {
     return Number.isFinite(n) ? n : fallback;
   }
 
-  // Get param value
   async getParameter(key: string, fallback: any = null): Promise<any> {
     try {
       const template = await this.getTemplate();
@@ -134,7 +121,6 @@ export class RemoteConfigService {
         return fallback;
       }
 
-      // Return default
       const defaultValue = parameter.defaultValue;
       if (defaultValue && 'value' in defaultValue) {
         return defaultValue.value;
@@ -156,7 +142,6 @@ export class RemoteConfigService {
     }
   }
 
-  // Get message
   async getNotificationMessage(
     messageKey: string,
     fallbackMessage: string,
@@ -164,7 +149,6 @@ export class RemoteConfigService {
   ): Promise<string> {
     let message = await this.getParameter(messageKey, fallbackMessage);
 
-    // Validate string
     if (typeof message !== 'string') {
       logger.warn('Remote Config message is not a string, using fallback', {
         messageKey,
@@ -174,7 +158,6 @@ export class RemoteConfigService {
       message = fallbackMessage;
     }
 
-    // Substitute params
     for (const [key, value] of Object.entries(params)) {
       const placeholder = `{${key}}`;
       message = message.replace(new RegExp(placeholder, 'g'), value);
@@ -183,7 +166,6 @@ export class RemoteConfigService {
     return message;
   }
 
-  // Get time
   async getNotificationTime(timeKey: string, fallbackTime: string): Promise<{ hour: number; minute: number }> {
     const timeString = await this.getParameter(timeKey, fallbackTime);
 
@@ -198,7 +180,6 @@ export class RemoteConfigService {
     return this.parseTime(timeString);
   }
 
-  // Parse time
   private parseTime(timeString: string): { hour: number; minute: number } {
     const timeRegex = /^(\d{1,2}):(\d{2})$/;
     const match = timeString.match(timeRegex);
@@ -208,29 +189,27 @@ export class RemoteConfigService {
         timeString,
         expectedFormat: 'HH:mm'
       });
-      return { hour: 12, minute: 0 }; // Default to noon
+      return { hour: 12, minute: 0 };
     }
 
     const hour = parseInt(match[1], 10);
     const minute = parseInt(match[2], 10);
 
-    // Validate time
     if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
       logger.error('Invalid time values, using default', {
         timeString,
         hour,
         minute
       });
-      return { hour: 12, minute: 0 }; // Default to noon
+      return { hour: 12, minute: 0 };
     }
 
     return { hour, minute };
   }
 
-  // Check time match
   isCurrentTimeMatch(targetTime: { hour: number; minute: number }, toleranceMinutes: number = 5): boolean {
     const now = new Date();
-    // Convert timezone
+    // algeria timezone offset
     const algeriaTime = new Date(now.getTime() + (1 * 60 * 60 * 1000));
 
     const currentHour = algeriaTime.getUTCHours();
@@ -253,52 +232,32 @@ export class RemoteConfigService {
     return diff <= toleranceMinutes;
   }
 
-  // Clear cache
   clearCache(): void {
     this.cache.clear();
     this.cacheExpiry = 0;
     logger.info('Remote Config cache cleared');
   }
 
-  // Clear param cache
   static clearRcCache(): void {
     RemoteConfigService.rcCache = null;
     logger.info('Remote Config parameter cache cleared');
   }
 }
 
-// Default config
 export const DEFAULT_NOTIFICATION_CONFIG = {
-  // Timing
-  notification_lunch_time: "13:00",
-  notification_dinner_time: "20:30",
-
-  // Messages
-  notification_lunch_msg: "Don't forget to log your lunch!",
-  notification_dinner_msg: "Time to log your dinner! Don't skip your last meal.",
-  notification_end_of_day_msg: "Only a few hours left to reach your goal!",
-  notification_goal_50pct_msg: "You're halfway to your goal! Keep going!",
-  notification_goal_100pct_msg: "Goal achieved! Great job today!",
-  notification_daily_reset_msg: "Your daily scan & chat limits have been reset!",
   notification_promo_used_msg: "One of your promo codes was used by a new user!",
   notification_influencer_welcome_msg: "Congratulations! You're now an influencer. Share your code: {code}"
 };
 
-// Get service instance
 export function getRemoteConfigService(): RemoteConfigService {
   return RemoteConfigService.getInstance();
 }
 
-// =============================================================================
-// Sync functions
-// =============================================================================
-
-// Param cache
+// sync logic
 let rcCache: RcCache | null = null;
 
 async function fetchRcTemplateParams(): Promise<Record<string, string>> {
   try {
-    // Skip if uninitialized
     if (!admin.apps.length) {
       return {};
     }
@@ -321,7 +280,7 @@ async function ensureRcCache(): Promise<void> {
   const needsFetch = !rcCache || (now - rcCache.fetchedAt) > (rcCache.ttlMs);
   if (needsFetch) {
     const params = await fetchRcTemplateParams();
-    rcCache = { params, fetchedAt: now, ttlMs: 5 * 60 * 1000 }; // 5 minutes TTL
+    rcCache = { params, fetchedAt: now, ttlMs: 5 * 60 * 1000 };
   }
 }
 
@@ -349,113 +308,91 @@ export function getRcNumber(key: string, fallback: number = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-// =============================================================================
-// Config getters
-// =============================================================================
-
-// Premium monthly price
 export function getPremiumMonthlyDzd(): number {
   return getRcNumber('premium_monthly_price_dzd', Number(process.env.PREMIUM_MONTHLY_PRICE_DZD) || 450);
 }
 
-// Premium yearly price
 export function getPremiumYearlyDzd(): number {
   return getRcNumber('premium_yearly_price_dzd', Number(process.env.PREMIUM_YEARLY_PRICE_DZD) || 4500);
 }
 
-// Influencer commission
 export function getInfluencerCommissionRate(): number {
   return getRcNumber('influencer_commission_rate', Number(process.env.INFLUENCER_COMMISSION_RATE) || 0.15);
 }
 
-// Influencer earn amount
 export function getInfluencerEarnForCode(): number {
-  return getRcNumber('influencer_earn_for_code', Number(process.env.INFLUENCER_EARN_FOR_CODE) || 25);
+  return getRcNumber('influencer_earn_for_code', Number(process.env.INFLUENCER_EARN_FOR_CODE) || 100);
 }
 
-// Withdrawal processing days
 export function getInfluencerWithdrawalProcessingDays(): number {
   return getRcNumber('influencer_withdrawal_processing_days', Number(process.env.INFLUENCER_WITHDRAWAL_PROCESSING_DAYS) || 3);
 }
 
-// Min withdrawal amount
 export function getInfluencerMinWithdrawal(): number {
   return getRcNumber('influencer_min_withdrawal', Number(process.env.INFLUENCER_MIN_WITHDRAWAL) || 2500);
 }
 
-// Success URL
 export function getSuccessUrl(): string {
   return getRcString('success_url', process.env.SUCCESS_URL || "https://macroaize.com/success");
 }
 
-// Failure URL
 export function getFailureUrl(): string {
   return getRcString('failure_url', process.env.FAILURE_URL || "https://macroaize.com/failure");
 }
 
-// Terms link
 export function getTermsLink(): string {
   return getRcString('terms_link', process.env.TERMS_LINK || 'https://macroaize.com/terms');
 }
 
-// Privacy link
 export function getPrivacyLink(): string {
   return getRcString('privacy_link', process.env.PRIVACY_LINK || 'https://macroaize.com/privacy');
 }
 
-// Android share URL
 export function getShareUrlAndroid(): string {
-  // Backward compat: prefer new RC key play_store_url
   const rc = getRcString('play_store_url');
   if (rc) return rc;
   return process.env.SHARE_URL_ANDROID || '';
 }
 
-// iOS share URL
 export function getShareUrlIos(): string {
-  // Backward compat: prefer new RC key app_store_url
   const rc = getRcString('app_store_url');
   if (rc) return rc;
   return process.env.SHARE_URL_IOS || '';
 }
 
-// Scan limit
 export function getScanLimit(): number {
   return getRcNumber('scan_limit', Number(process.env.SCAN_LIMIT) || 1);
 }
 
-// Chat limit
 export function getChatLimit(): number {
   return getRcNumber('chat_limit', Number(process.env.CHAT_LIMIT) || 3);
 }
 
-// Min app version
 export function getMinRequiredAppVersion(): string {
   return getRcString('min_required_app_version');
 }
 
-// Update message
 export function getUpdateMessage(): string {
   return getRcString('update_message', 'A new version is required to continue using MacroAize.');
 }
 
-// =============================================================================
-// Sync wrappers
-// =============================================================================
-
-// Scan limit (sync)
 export function getScanLimitCfg(): number {
   return getScanLimit();
 }
 
-// Chat limit (sync)
 export function getChatLimitCfg(): number {
   return getChatLimit();
 }
 
-// Subscriptions enabled
 export function getSubscriptionsEnabled(): boolean {
-  // default false if not set
   const val = getRcString('subscriptions_enabled', process.env.SUBSCRIPTIONS_ENABLED || 'false');
   return String(val).toLowerCase() === 'true';
+}
+
+export function getPromoExtensionDaysMonthly(): number {
+  return getRcNumber('promo_extension_days_monthly', Number(process.env.PROMO_EXTENSION_DAYS_MONTHLY) || 3);
+}
+
+export function getPromoExtensionDaysYearly(): number {
+  return getRcNumber('promo_extension_days_yearly', Number(process.env.PROMO_EXTENSION_DAYS_YEARLY) || 30);
 }

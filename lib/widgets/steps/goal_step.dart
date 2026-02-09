@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:macroaize/widgets/ModernButton.dart';
 import '../goal_and_weight_picker.dart';
 
 class GoalStep extends StatefulWidget {
@@ -61,72 +61,82 @@ class _GoalStepState extends State<GoalStep> {
   @override
   Widget build(BuildContext context) {
     final hasSelection = widget.selectedGoal.isNotEmpty;
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Padding(
-        padding: widget.padding ?? const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.showHeaderBack && widget.onBack != null)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: widget.onBack,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          controller: _scrollController,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Padding(
+                padding: widget.padding ?? const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (widget.showHeaderBack && widget.onBack != null)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: widget.onBack,
+                        ),
+                      ),
+                    Text(
+                      (widget.title ?? 'What is your goal?').tr,
+                      style: context.theme.textTheme.headlineLarge,
+                    ).paddingOnly(top: 20),
+                    Text(
+                      (widget.subtitle ??
+                              'This helps us generate a plan for your calorie intake.')
+                          .tr,
+                      style: context.theme.textTheme.titleSmall,
+                    ).paddingOnly(top: 10, bottom: 10),
+                    GoalAndWeightPicker(
+                      selectedGoal: widget.selectedGoal,
+                      onSelectGoal: _handleGoalSelection,
+                      onDesiredWeightChanged: widget.onDesiredWeightChanged,
+                      initialWeight: widget.initialWeight,
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        if (widget.showFooterPrevious && widget.onBack != null)
+                          Expanded(
+                            child: ModernButton(
+                              text: 'Previous'.tr,
+                              onPressed: widget.onBack,
+                              style: ModernButtonStyle.secondary,
+                              size: ModernButtonSize.medium,
+                              borderRadius: BorderRadius.circular(30),
+                              height: 50,
+                            ),
+                          ),
+                        if (widget.showFooterPrevious && widget.onBack != null)
+                          const SizedBox(width: 10),
+                        Expanded(
+                          child: ModernButton(
+                            text: 'Continue'.tr,
+                            onPressed: hasSelection ? widget.onContinue : null,
+                            style: ModernButtonStyle.primary,
+                            size: ModernButtonSize.medium,
+                            borderRadius: BorderRadius.circular(30),
+                            icon: const Icon(
+                              Icons.arrow_forward_rounded,
+                              color: Colors.white,
+                            ),
+                            height: 50,
+                          ),
+                        ),
+                      ],
+                    ).paddingOnly(top: 30),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
-            Text(
-              (widget.title ?? 'What is your goal?').tr,
-              style: context.theme.textTheme.headlineLarge,
-            ).paddingOnly(top: 20),
-            Text(
-              (widget.subtitle ??
-                      'This helps is generate a plan for your calorie intake.')
-                  .tr,
-              style: context.theme.textTheme.titleSmall,
-            ).paddingOnly(top: 10, bottom: 10),
-            GoalAndWeightPicker(
-              selectedGoal: widget.selectedGoal,
-              onSelectGoal: _handleGoalSelection,
-              onDesiredWeightChanged: widget.onDesiredWeightChanged,
-              initialWeight: widget.initialWeight,
             ),
-            Row(
-              children: [
-                if (widget.showFooterPrevious && widget.onBack != null)
-                  Expanded(
-                    child: ModernButton(
-                      text: 'Previous'.tr,
-                      onPressed: widget.onBack,
-                      style: ModernButtonStyle.secondary,
-                      size: ModernButtonSize.medium,
-                      borderRadius: BorderRadius.circular(30),
-                      height: 50,
-                    ),
-                  ),
-                if (widget.showFooterPrevious && widget.onBack != null)
-                  const SizedBox(width: 10),
-                Expanded(
-                  child: ModernButton(
-                    text: 'Continue'.tr,
-                    onPressed: hasSelection ? widget.onContinue : null,
-                    style: ModernButtonStyle.primary,
-                    size: ModernButtonSize.medium,
-                    borderRadius: BorderRadius.circular(30),
-                    icon: const Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Colors.white,
-                    ),
-                    height: 50,
-                  ),
-                ),
-              ],
-            ).paddingOnly(top: 30),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

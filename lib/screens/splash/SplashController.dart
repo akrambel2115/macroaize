@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController mainController;

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsController.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/AutoGenerateGoal/AutoGoalView.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/AutoGenerateGoal/AutoHeightWidthView.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/AutoGenerateGoal/AutoWorkoutView.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/updateDailog/showUpdateGoalDialog.dart';
-import 'package:foodcalorietracker/widgets/AppWidgets.dart';
-import 'package:foodcalorietracker/widgets/customButton.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/screens/AdjustGoals/AdjustGoalsController.dart';
+import 'package:macroaize/screens/AdjustGoals/AutoGenerateGoal/AutoGoalView.dart';
+import 'package:macroaize/screens/AdjustGoals/AutoGenerateGoal/AutoHeightWidthView.dart';
+import 'package:macroaize/screens/AdjustGoals/AutoGenerateGoal/AutoWorkoutView.dart';
+import 'package:macroaize/screens/AdjustGoals/updateDailog/showUpdateGoalDialog.dart';
+import 'package:macroaize/widgets/AppWidgets.dart';
+import 'package:macroaize/widgets/customButton.dart';
 import 'package:get/get.dart';
 
 import '../../constant/AppColor.dart';

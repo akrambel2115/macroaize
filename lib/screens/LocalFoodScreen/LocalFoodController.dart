@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
-import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
+import 'package:macroaize/shared/services/app_user_service.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../Model/CalorieHistoryModel.dart';
 import '../../Model/SqlCalorieModel.dart';
@@ -17,6 +19,7 @@ import '../../shared/services/notification_service.dart';
 import '../../shared/widgets/PremiumRequiredDialog.dart';
 import '../../shared/services/rate_us_service.dart';
 import '../../shared/services/widget_promotion_service.dart';
+import '../../shared/services/meal_sync_service.dart';
 
 class LocalFoodController extends GetxController {
   Map<String, dynamic> argument = Get.arguments;
@@ -38,9 +41,25 @@ class LocalFoodController extends GetxController {
   // load food library
   Future<void> _loadFoodLibrary() async {
     try {
-      final jsonStr = await rootBundle.loadString(
-        'lib/constant/foodLibrary.json',
-      );
+      final foodLibraryUrl = dotenv.env['FOOD_LIBRARY'] ?? '';
+      String jsonStr;
+
+      if (foodLibraryUrl.isNotEmpty) {
+        // Fetch from remote URL
+        final response = await http.get(Uri.parse(foodLibraryUrl));
+        if (response.statusCode == 200) {
+          jsonStr = response.body;
+        } else {
+          // Fallback to local file if remote fails
+          jsonStr = await rootBundle.loadString(
+            'lib/constant/foodLibrary.json',
+          );
+        }
+      } else {
+        // Fallback to local file if URL not set
+        jsonStr = await rootBundle.loadString('lib/constant/foodLibrary.json');
+      }
+
       final List<dynamic> data = json.decode(jsonStr) as List<dynamic>;
       final locale = Get.locale?.languageCode ?? 'en';
 
@@ -184,6 +203,7 @@ class LocalFoodController extends GetxController {
     }
 
     if (selectedIndices.isEmpty) return;
+    if (!context.mounted) return;
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -338,6 +358,7 @@ class LocalFoodController extends GetxController {
 
   onAddButton(BuildContext context, FoodItem item) async {
     List<SqlCalorieModel> calorieData = await dbHelper.getCalorieData();
+    if (!context.mounted) return;
     addSqlData(type, item);
 
     if (calorieData.isEmpty) {
@@ -358,6 +379,15 @@ class LocalFoodController extends GetxController {
           calorie: item.calories,
           calorieId: id,
         ),
+      );
+      // Sync to Firestore for notifications
+      MealSyncService().syncMealLog(
+        mealType: type,
+        calories: item.calories,
+        protein: item.protein,
+        carbs: item.carbs,
+        fats: item.fats,
+        dailyGoal: ConstantUserMaster.calorieGoal,
       );
       Get.offAllNamed(Routes.leadingView);
       RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
@@ -388,6 +418,15 @@ class LocalFoodController extends GetxController {
               calorieId: calorieData.last.id!,
             ),
           );
+          // Sync to Firestore for notifications
+          MealSyncService().syncMealLog(
+            mealType: type,
+            calories: item.calories,
+            protein: item.protein,
+            carbs: item.carbs,
+            fats: item.fats,
+            dailyGoal: ConstantUserMaster.calorieGoal,
+          );
           Get.offAllNamed(Routes.leadingView);
           RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
           WidgetPromotionService().showPromotionIfNeeded();
@@ -410,6 +449,15 @@ class LocalFoodController extends GetxController {
             calorie: item.calories,
             calorieId: id,
           ),
+        );
+        // Sync to Firestore for notifications
+        MealSyncService().syncMealLog(
+          mealType: type,
+          calories: item.calories,
+          protein: item.protein,
+          carbs: item.carbs,
+          fats: item.fats,
+          dailyGoal: ConstantUserMaster.calorieGoal,
         );
         Get.offAllNamed(Routes.leadingView);
         RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);

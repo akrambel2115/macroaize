@@ -1,7 +1,7 @@
-// Rate limiting map
+
 export const promoCodeAttempts = new Map<string, { count: number; lastAttempt: number }>();
 
-// Cleanup old entries
+
 export function cleanupRateLimitMap(): void {
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
@@ -16,7 +16,7 @@ export function cleanupRateLimitMap(): void {
 // Run cleanup every 10 mins
 setInterval(cleanupRateLimitMap, 10 * 60 * 1000);
 
-// Check rate limit
+
 export function checkRateLimit(key: string, maxAttempts: number = 5, windowHours: number = 1): boolean {
     const now = Date.now();
     const windowMs = windowHours * 60 * 60 * 1000;

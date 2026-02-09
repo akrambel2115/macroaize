@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
 import 'package:get/get.dart';
 
 import '../../../constant/FontFamily.dart';
 
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 
 class GoalUpdate extends GetView<PersonalDetailsController> {
   const GoalUpdate({super.key});

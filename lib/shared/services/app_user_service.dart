@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart';
-import 'package:foodcalorietracker/shared/models/user_usage.dart';
-import 'package:foodcalorietracker/shared/services/subscription_service.dart';
-import 'package:foodcalorietracker/shared/services/usage_service.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
+import 'package:macroaize/shared/models/subscription.dart';
+import 'package:macroaize/shared/models/user_usage.dart';
+import 'package:macroaize/shared/services/subscription_service.dart';
+import 'package:macroaize/shared/services/usage_service.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
 import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 
 /// User combined authentication, subscription, and usage data
 class AppUser {
@@ -76,18 +77,23 @@ class AppUserService {
     final authStream =
         authStateStream ?? FirebaseAuth.instance.authStateChanges();
 
-    return authStream.asyncMap((firebaseUser) async {
-      if (firebaseUser == null) return const AppUser();
-      if (_subscriptionService == null || _usageService == null)
-        return AppUser(firebaseUser: firebaseUser);
+    return authStream.switchMap((firebaseUser) {
+      if (firebaseUser == null) {
+        return Stream.value(const AppUser());
+      }
 
-      final subscription = await _subscriptionService!.subscriptionStream.first;
-      final usage = await _usageService!.usageStream.first;
+      // Ensure services are initialized
+      final subService = _subscriptionService ?? SubscriptionService();
+      final usageService = _usageService ?? UsageService();
 
-      return AppUser(
-        firebaseUser: firebaseUser,
-        subscription: subscription,
-        usage: usage,
+      // Combine latest form of 3 streams: Auth (current user), Subscription, Usage
+      return Rx.combineLatest3<User, Subscription?, UserUsage?, AppUser>(
+        Stream.value(firebaseUser), // Constant stream for current auth user
+        subService.subscriptionStream,
+        usageService.usageStream,
+        (user, sub, usage) {
+          return AppUser(firebaseUser: user, subscription: sub, usage: usage);
+        },
       );
     });
   }

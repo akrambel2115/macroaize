@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/models/influencer.dart';
-import 'package:foodcalorietracker/shared/services/influencer_service.dart';
+import 'package:macroaize/shared/models/influencer.dart';
+import 'package:macroaize/shared/services/influencer_service.dart';
 
 class WithdrawalHistoryController extends GetxController {
   static final _influencerService = InfluencerService();

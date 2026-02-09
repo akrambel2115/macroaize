@@ -1,5 +1,5 @@
-import 'package:foodcalorietracker/Model/MainChatModel.dart';
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
+import 'package:macroaize/Model/MainChatModel.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
 import 'package:get/get.dart';
 
 class ChatHistoryController extends GetxController {

@@ -1,9 +1,9 @@
-import 'package:foodcalorietracker/widgets/PrimaryCTA.dart';
+import 'package:macroaize/widgets/PrimaryCTA.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/Model/Recipe.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/widgets/CalorieRing.dart';
+import 'package:macroaize/Model/Recipe.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/widgets/CalorieRing.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;

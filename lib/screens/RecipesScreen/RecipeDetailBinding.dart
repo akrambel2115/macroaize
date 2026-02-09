@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/Model/Recipe.dart';
+import 'package:macroaize/Model/Recipe.dart';
 
 class RecipeDetailBinding extends Bindings {
   final Recipe recipe;

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 
 class UserUsage {
   final int scanCount;

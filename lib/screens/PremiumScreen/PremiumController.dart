@@ -1,19 +1,25 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:foodcalorietracker/shared/services/app_user_service.dart';
-import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
-import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
+import 'package:macroaize/shared/services/app_user_service.dart';
+import 'package:macroaize/shared/services/subscription_service.dart';
+import 'package:macroaize/shared/models/subscription.dart';
+import 'package:macroaize/shared/services/revenuecat_service.dart';
+import 'package:macroaize/features/auth/presentation/auth_modal.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/widgets/ModernButton.dart';
 
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/usage_service.dart';
 import '../../shared/services/influencer_service.dart';
 import '../../routes/app_routes.dart';
 
@@ -36,8 +42,18 @@ class PremiumController extends GetxController {
   final _influencerService = InfluencerService();
   final _appUserService = AppUserService();
 
-  StreamSubscription<DocumentSnapshot>? _firestoreSubscription;
+  StreamSubscription<Subscription?>? _firestoreSubscription;
+  StreamSubscription<DocumentSnapshot>? _promoUsesSubscription;
   StreamSubscription<User?>? _authSubscription;
+
+  // Promo eligibility state
+  bool promoLinked = false;
+  bool _promoExtensionFromSubscription = false;
+  bool _promoExtensionFromPromoUses = false;
+  bool get promoExtensionApplied =>
+      _promoExtensionFromSubscription || _promoExtensionFromPromoUses;
+  bool get promoEligible =>
+      (promoLinked || promoCode.isNotEmpty) && !promoExtensionApplied;
 
   @override
   void onInit() {
@@ -76,6 +92,24 @@ class PremiumController extends GetxController {
         print('Error fetching offerings: $e');
       }
     } finally {
+      if (kDebugMode && offerings?.current != null) {
+        print(
+          '📦 RevenueCat: Current Offering ID: ${offerings!.current!.identifier}',
+        );
+        for (var p in offerings!.current!.availablePackages) {
+          print('🎁 RevenueCat Package: ${p.identifier}');
+          print('  🔹 Type: ${p.packageType}');
+          print('  💰 Price: ${p.storeProduct.price}');
+          print('  🏷️ PriceString: ${p.storeProduct.priceString}');
+          print('  🆓 IntroPrice: ${p.storeProduct.introductoryPrice?.price}');
+          print(
+            '  📅 IntroPeriod: ${p.storeProduct.introductoryPrice?.period}',
+          );
+          print(
+            '  🔄 IntroCycles: ${p.storeProduct.introductoryPrice?.cycles}',
+          );
+        }
+      }
       isLoading = false;
       update();
     }
@@ -86,8 +120,9 @@ class PremiumController extends GetxController {
     final packages = offerings!.current!.availablePackages;
     return packages.indexWhere(
       (p) =>
-          p.storeProduct.introductoryPrice != null &&
-          p.storeProduct.introductoryPrice!.price == 0,
+          (p.storeProduct.introductoryPrice != null &&
+              p.storeProduct.introductoryPrice!.price == 0) ||
+          p.storeProduct.price == 0,
     );
   }
 
@@ -116,7 +151,7 @@ class PremiumController extends GetxController {
     if (delayClose) {
       showClose = false;
       update(['close_btn']);
-      Future.delayed(const Duration(seconds: 3), () {
+      Future.delayed(const Duration(seconds: 5), () {
         showClose = true;
         update(['close_btn']);
       });
@@ -142,39 +177,375 @@ class PremiumController extends GetxController {
 
   void _subscribeToFirestore() {
     _firestoreSubscription?.cancel();
+    _promoUsesSubscription?.cancel();
 
     _authSubscription?.cancel();
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
       _firestoreSubscription?.cancel();
+      _promoUsesSubscription?.cancel();
 
       if (user == null) {
         if (isPremium) {
           isPremium = false;
           update();
         }
+        promoLinked = false;
+        _promoExtensionFromSubscription = false;
+        _promoExtensionFromPromoUses = false;
+        update();
         return;
       }
 
-      _firestoreSubscription = FirebaseFirestore.instance
-          .collection('subscriptions')
+      // Subscribe to subscription stream instead of Firestore direct
+      _firestoreSubscription = SubscriptionService().subscriptionStream.listen((
+        sub,
+      ) {
+        final active = sub?.isActive == true;
+        isPremium = active;
+        _promoExtensionFromSubscription = sub?.promoExtensionApplied == true;
+        update();
+      });
+
+      // Subscribe to promoUses doc to track promo eligibility (real-time)
+      _promoUsesSubscription = FirebaseFirestore.instance
+          .collection('promoUses')
           .doc(user.uid)
           .snapshots()
           .listen((doc) {
             final data = doc.data();
-            final now = DateTime.now().toUtc();
-            final active =
-                data != null &&
-                data['isPremium'] == true &&
-                DateTime.tryParse(
-                      data['endDate']?.toString() ?? '',
-                    )?.isAfter(now) ==
-                    true;
-            if (active != isPremium) {
-              isPremium = active;
-              update();
-            }
+            promoLinked =
+                (data != null &&
+                    (data['promoCode'] ?? '').toString().isNotEmpty);
+            _promoExtensionFromPromoUses = (data?['extensionApplied'] == true);
+            update();
           });
     });
+  }
+
+  /// Check if user has a linked promo code. If not, show dialog to enter one.
+  /// Returns true if user has promo (or entered one), false if skipped, null if cancelled.
+  Future<bool?> _checkAndPromptPromoCode() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return false;
+
+    try {
+      // Check if user already has a linked promo code
+      final promoDoc =
+          await FirebaseFirestore.instance
+              .collection('promoUses')
+              .doc(uid)
+              .get();
+
+      if (promoDoc.exists) {
+        // User already has a promo code linked
+        promoCode = promoDoc.data()?['promoCode'] ?? '';
+        if (kDebugMode) {
+          print('User already has promo code linked: $promoCode');
+        }
+        return true;
+      }
+
+      // No promo code linked - show dialog to enter one
+      return await _showPromoCodeDialog();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking promo code: $e');
+      }
+      // On error, allow purchase to proceed without promo
+      return false;
+    }
+  }
+
+  /// Shows a dialog prompting user to enter a promo code for extra days.
+  /// Returns true if promo entered successfully, false if skipped, null if cancelled.
+  /// Shows a dialog prompting user to enter a promo code for extra days.
+  /// Returns true if promo entered successfully, false if skipped, null if cancelled.
+  Future<bool?> _showPromoCodeDialog() async {
+    final TextEditingController promoController = TextEditingController();
+    String? errorMessage;
+    bool isValidating = false;
+    bool isLinked = false;
+
+    // Get the selected package type for showing correct benefit
+    final package = offerings?.current?.availablePackages[selected];
+    final isYearly = package?.packageType == PackageType.annual;
+    final bonusDaysText =
+        isYearly ? 'Get 1 Month Extra Free!' : 'Get 3 Days Extra Free!';
+
+    return await Get.bottomSheet<bool?>(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return Container(
+            decoration: BoxDecoration(
+              color: AppColor.darkBackground,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Header Handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[600],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Title
+                    Text(
+                      'Redeem Code',
+                      style: context.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Promo Offer Banner
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.card_giftcard_rounded,
+                            color: AppColor.primaryOrange,
+                            size: 32,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            bonusDaysText,
+                            style: const TextStyle(
+                              color: AppColor.primaryOrange,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Input Field
+                    TextField(
+                      controller: promoController,
+                      enabled: !isLinked,
+                      textCapitalization: TextCapitalization.characters,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText:
+                            'Enter promo code', // or 'enter_promo_code'.tr
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 20,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Colors.white12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: AppColor.primaryOrange,
+                          ),
+                        ),
+                        suffixIcon:
+                            isLinked
+                                ? const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                )
+                                : null,
+                        errorText: errorMessage,
+                      ),
+                    ),
+
+                    if (isLinked) ...[
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          'promo_code_linked_success'.tr,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 32),
+
+                    // Buttons
+                    if (!isLinked) ...[
+                      SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed:
+                              isValidating
+                                  ? null
+                                  : () async {
+                                    final code =
+                                        promoController.text
+                                            .toUpperCase()
+                                            .trim();
+                                    if (code.isEmpty) {
+                                      setState(
+                                        () =>
+                                            errorMessage =
+                                                'enter_promo_code'.tr,
+                                      );
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      isValidating = true;
+                                      errorMessage = null;
+                                    });
+
+                                    try {
+                                      // Validate promo code
+                                      final result = await _influencerService
+                                          .validatePromoCode(code);
+                                      if (!result.valid) {
+                                        setState(() {
+                                          isValidating = false;
+                                          errorMessage =
+                                              'invalid_promo_code'.tr;
+                                        });
+                                        return;
+                                      }
+
+                                      // Link promo code via Cloud Function
+                                      final functions =
+                                          FirebaseFunctions.instanceFor(
+                                            region: 'europe-west1',
+                                          );
+                                      await functions
+                                          .httpsCallable(
+                                            'storePromoCodeForPurchase',
+                                          )
+                                          .call({'promoCode': code});
+
+                                      promoCode = code;
+                                      setState(() {
+                                        isValidating = false;
+                                        isLinked = true;
+                                      });
+
+                                      // Auto-close or just let user click continue
+                                      // User asked for "Apply" button at bottom.
+                                      // After apply success, we can change button to "Continue" or close.
+                                      // The original logic closed it.
+                                      // Let's stick to closing or showing success state.
+
+                                      // Auto-close check
+                                      Future.delayed(
+                                        const Duration(milliseconds: 1000),
+                                        () {
+                                          if (Get.isBottomSheetOpen == true) {
+                                            Get.back(result: true);
+                                          }
+                                        },
+                                      );
+                                    } catch (e) {
+                                      setState(() {
+                                        isValidating = false;
+                                        errorMessage = 'invalid_promo_code'.tr;
+                                      });
+                                    }
+                                  },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColor.primaryOrange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
+                          child:
+                              isValidating
+                                  ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                  : Text(
+                                    'apply'.tr,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => Get.back(result: false),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey,
+                        ),
+                        child: Text(
+                          'skip'.tr,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ] else ...[
+                      SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () => Get.back(result: true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColor.primaryOrange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'continue'.tr,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: true,
+    );
   }
 
   Future<void> buy() async {
@@ -267,6 +638,13 @@ class PremiumController extends GetxController {
       return;
     }
 
+    // Check if user has a linked promo code, if not, show dialog to enter one
+    final hasLinkedPromo = await _checkAndPromptPromoCode();
+    if (hasLinkedPromo == null) {
+      // User cancelled the dialog
+      return;
+    }
+
     try {
       await RevenueCatService().identifyWithFirebaseUser();
 
@@ -275,7 +653,19 @@ class PremiumController extends GetxController {
       final result = await Purchases.purchasePackage(package);
 
       if (result.entitlements.active.isNotEmpty) {
-        Fluttertoast.showToast(msg: 'Purchase successful');
+        Fluttertoast.showToast(msg: 'Purchase successful. Verifying...');
+        try {
+          // Force sync immediately after successful purchase
+          await RevenueCatService().refreshSubscription();
+          await _appUserService.isPremiumUser();
+          // Refresh UsageService to update local isPremium and limits
+          if (Get.isRegistered<UsageService>()) {
+            await Get.find<UsageService>().getUsage();
+          }
+        } catch (e) {
+          if (kDebugMode) print('Post-purchase sync error: $e');
+        }
+        Fluttertoast.showToast(msg: 'Subscription active!');
         return;
       } else {
         Fluttertoast.showToast(msg: 'Purchase cancelled');
@@ -297,10 +687,42 @@ class PremiumController extends GetxController {
 
       String errorMsg = 'Purchase failed. Please try again.';
       if (e is PlatformException) {
-        errorMsg = 'Error: ${e.message ?? "Unknown error"}';
+        // Error Code 6: ProductAlreadyPurchasedError
+        if (e.code == '6' || e.message?.contains('already active') == true) {
+          if (kDebugMode) {
+            print('RevenueCat: Product already owned on this Play account.');
+          }
+          Fluttertoast.showToast(
+            msg:
+                'This subscription is already active on this Play account. Please sign in with the original app account that purchased it.',
+          );
+          // Do NOT restore here to avoid transferring entitlements between app accounts
+          return;
+        }
+
+        // Error Code 5: ProductNotAvailableForPurchaseError (ITEM_UNAVAILABLE)
+        if (e.code == '5' ||
+            e.message?.contains('not available for purchase') == true) {
+          if (kDebugMode) {
+            print(
+              'RevenueCat: Product not available for purchase (ITEM_UNAVAILABLE)',
+            );
+          }
+          Fluttertoast.showToast(
+            msg:
+                'This subscription is temporarily unavailable. Please try again later or contact support.',
+            toastLength: Toast.LENGTH_LONG,
+          );
+          return;
+        }
+
+        errorMsg =
+            e.message?.isNotEmpty == true
+                ? 'Error: ${e.message}'
+                : 'Purchase failed. Please try again.';
       }
 
-      Fluttertoast.showToast(msg: errorMsg);
+      Fluttertoast.showToast(msg: errorMsg, toastLength: Toast.LENGTH_LONG);
       return;
     }
   }
@@ -310,171 +732,6 @@ class PremiumController extends GetxController {
       await RevenueCatService().restorePurchases();
     } catch (_) {}
   }
-
-  // promo dialog removed
-  /*
-  Future<void> _showPromoCodeDialog() async {
-    final promoController = TextEditingController();
-    bool isValidating = false;
-    String? errorMessage;
-
-    await Get.dialog(
-      StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFF1C1C1E),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Text(
-              'promo_code_dialog_title'.tr,
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'promo_code_dialog_subtitle'.tr,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[300],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: context.theme.inputDecorationTheme.fillColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color:
-                          errorMessage != null
-                              ? Colors.red.withOpacity(0.5)
-                              : Colors.transparent,
-                      width: 1,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: promoController,
-                    style: TextStyle(
-                      color: context.theme.textTheme.bodyLarge?.color,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.5,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'enter_promo_code'.tr,
-                      hintStyle: TextStyle(
-                        color: Colors.grey[500],
-                        fontWeight: FontWeight.normal,
-                        letterSpacing: 0,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                    textCapitalization: TextCapitalization.characters,
-                    autocorrect: false,
-                  ),
-                ),
-                if (errorMessage != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    errorMessage!,
-                    style: TextStyle(color: Colors.red[600], fontSize: 12),
-                  ),
-                ],
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed:
-                    isValidating
-                        ? null
-                        : () {
-                          Get.back();
-                          _proceedToCheckout('chargily');
-                        },
-                child: Text(
-                  'skip_promo_code'.tr,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed:
-                    isValidating
-                        ? null
-                        : () async {
-                          final code =
-                              promoController.text.toUpperCase().trim();
-                          if (code.isEmpty) {
-                            setState(() {
-                              errorMessage = 'Please enter a promo code';
-                            });
-                            return;
-                          }
-
-                          setState(() {
-                            isValidating = true;
-                            errorMessage = null;
-                          });
-
-                          try {
-                            await _validatePromoCodeForDialog(code);
-                            setState(() {
-                              isValidating = false;
-                            });
-                            Get.back();
-                            Fluttertoast.showToast(
-                              msg: 'promo_code_applied'.tr,
-                            );
-                            _proceedToCheckout('chargily');
-                          } catch (e) {
-                            setState(() {
-                              isValidating = false;
-                              errorMessage = 'promo_code_invalid'.tr;
-                            });
-                          }
-                        },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.primaryOrange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child:
-                    isValidating
-                        ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                        : Text(
-                          'apply_promo_code'.tr,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-  */
 
   // promo validation removed
   /*
@@ -501,225 +758,9 @@ class PremiumController extends GetxController {
   }
   */
 
-  // chargily checkout removed
-  /*
-  Future<void> _proceedToCheckout([String? methodOverride]) async {
-    String planType = 'monthly';
-    if (products.isNotEmpty) {
-      final p = products[selected];
-      final id = p.id.toLowerCase();
-      final title = p.title.toLowerCase();
-      if (id.contains('year') ||
-          id.contains('annual') ||
-          title.contains('year') ||
-          title.contains('annual')) {
-        planType = 'yearly';
-      }
-    }
-
-    final cfg = Get.find<AppConfigService>();
-    final rcEnabled = cfg.subscriptionsEnabled && (Platform.isAndroid || Platform.isIOS);
-
-    if (rcEnabled) {
-      final method = methodOverride ?? await _choosePaymentMethod();
-      if (method == 'store') {
-        try {
-          await RevenueCatService().identifyWithFirebaseUser();
-          final ok = await RevenueCatService().purchasePlan(planType);
-          if (ok) {
-            Fluttertoast.showToast(msg: 'Purchase successful');
-            return;
-          } else {
-            Fluttertoast.showToast(msg: 'Purchase cancelled');
-            return;
-          }
-        } catch (_) {
-          Fluttertoast.showToast(msg: 'Purchase failed');
-          return;
-        }
-      } else if (method == 'chargily') {
-      } else {
-        return;
-      }
-    }
-
-    try {
-      final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
-      final callable = functions.httpsCallable('createChargilyPayment');
-      final result = await callable.call({
-        'userId': FirebaseAuth.instance.currentUser!.uid,
-        'planType': planType,
-        'timestamp': DateTime.now().toUtc().toIso8601String(),
-        if (isPromoValid && promoCode.isNotEmpty) 'promoCode': promoCode,
-      });
-
-      final data = result.data as Map;
-      final url = Uri.parse(data['checkoutUrl'] as String);
-
-      if (isPremium) {
-        Fluttertoast.showToast(
-          msg: 'Subscription status changed. Payment cancelled.',
-        );
-        return;
-      }
-
-      final launched = await launchUrl(
-        url,
-        mode: LaunchMode.externalApplication,
-      );
-
-      if (!launched) {
-        Fluttertoast.showToast(
-          msg: 'Could not open browser for checkout',
-        );
-        return;
-      }
-
-      Fluttertoast.showToast(
-        msg: 'Complete payment in your browser. Return to the app when done.',
-      );
-    } catch (e) {
-      if (kDebugMode) print('createChargilyPayment error: $e');
-
-      final errorMsg = e.toString().toLowerCase();
-      if (errorMsg.contains('already-subscribed') ||
-          errorMsg.contains('already') ||
-          errorMsg.contains('premium') ||
-          errorMsg.contains('active')) {
-        Fluttertoast.showToast(msg: 'You already have an active subscription');
-        isPremium = true;
-        update();
-        _subscribeToFirestore();
-      } else if (errorMsg.contains('unauthenticated')) {
-        Fluttertoast.showToast(msg: 'Please login and try again');
-        isPremium = false;
-        update();
-      } else if (errorMsg.contains('permission-denied')) {
-        Fluttertoast.showToast(msg: 'Permission denied. Please login again.');
-        isPremium = false;
-        update();
-      } else {
-        Fluttertoast.showToast(
-          msg: 'Payment creation failed. Please try again.',
-        );
-      }
-    }
-  }
-  */
-
-  // payment chooser removed
-  /*
-  Future<String?> _choosePaymentMethod() async {
-    final isIOS = Platform.isIOS;
-    final storePaymentName = isIOS ? 'Apple Pay' : 'Google Pay subscription';
-    final storeIcon = isIOS ? Icons.apple : Icons.android;
-    
-    return Get.dialog<String>(
-      AlertDialog(
-        backgroundColor: AppColor.darkBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          'Choose Payment Method'.tr,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => Get.back(result: 'store'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 20,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: Icon(storeIcon, size: 24),
-                label: Text(
-                  storePaymentName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => Get.back(result: 'chargily'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white54, width: 1),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 20,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: const Icon(Icons.credit_card, size: 24),
-                label: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Dahabia (External)'.tr,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'external browser checkout outside the app'.tr,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'Cancel'.tr,
-              style: const TextStyle(
-                color: Colors.white54,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-      barrierDismissible: true,
-    );
-  }
-  */
-
   onChangeSelectedIndex(int index) {
     selected = index;
-    update(['plan_selection']);
+    update();
   }
 
   getPremium() async {
@@ -824,6 +865,7 @@ class PremiumController extends GetxController {
   @override
   void onClose() {
     _firestoreSubscription?.cancel();
+    _promoUsesSubscription?.cancel();
     _authSubscription?.cancel();
     super.onClose();
   }

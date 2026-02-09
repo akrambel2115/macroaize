@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/PersonalDetailsController.dart';
 import 'package:get/get.dart';
 import '../../../constant/AppAssets.dart';
 

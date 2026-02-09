@@ -1,4 +1,4 @@
-import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsController.dart';
+import 'package:macroaize/screens/AdjustGoals/AdjustGoalsController.dart';
 import 'package:get/get.dart';
 
 class AdjustGoalsBinding extends Bindings {

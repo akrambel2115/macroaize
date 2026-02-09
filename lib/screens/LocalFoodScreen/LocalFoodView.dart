@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/screens/LocalFoodScreen/LocalFoodController.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernCard.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/screens/LocalFoodScreen/LocalFoodController.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 
 class LocalFoodView extends GetView<LocalFoodController> {
@@ -13,6 +13,12 @@ class LocalFoodView extends GetView<LocalFoodController> {
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: _buildAppBar(context),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddEditDialog(context, controller),
+        backgroundColor: AppColor.primaryOrange,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
       body: GetBuilder<LocalFoodController>(
         builder: (controller) {
           return Column(

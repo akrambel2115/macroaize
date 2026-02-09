@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'meal_sync_service.dart';
+import 'notification_preferences_service.dart';
 
 class FirebaseMessagingService extends GetxService {
   static const String _logTag = 'FCMService';
@@ -215,6 +217,12 @@ class FirebaseMessagingService extends GetxService {
           .doc(token)
           .set(tokenData, SetOptions(merge: true));
 
+      // Ensure main user document exists for notification queries
+      await MealSyncService().ensureUserDocument();
+      
+      // Sync notification preferences to Firestore for server-side FCM
+      await _syncNotificationPreferences();
+
       if (kDebugMode) {
         debugPrint('[$_logTag] Token stored in Firestore for user: ${user.uid}');
       }
@@ -274,6 +282,23 @@ class FirebaseMessagingService extends GetxService {
     } catch (e) {
       if (kDebugMode) {
         debugPrint('[$_logTag] Error unsubscribing from topic $topic: $e');
+      }
+    }
+  }
+
+  Future<void> _syncNotificationPreferences() async {
+    try {
+      if (Get.isRegistered<NotificationPreferencesService>()) {
+        final prefsService = Get.find<NotificationPreferencesService>();
+        await prefsService.syncOnLogin();
+        
+        if (kDebugMode) {
+          debugPrint('[$_logTag] Notification preferences synced to Firestore');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[$_logTag] Error syncing notification preferences: $e');
       }
     }
   }

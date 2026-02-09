@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/widgets/ScannerOverlay.dart';
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodView.dart';
+import 'package:macroaize/widgets/ScannerOverlay.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodView.dart';
 
 void main() {
   testWidgets(

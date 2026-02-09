@@ -1,17 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/BornView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/GenderView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/GoalScreen.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/HeightWidthView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/PlanReviewView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/PromoCodeView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/SetupView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/StoppingGoalView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpViews/WorkoutView.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/BornView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/GenderView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/GoalScreen.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/HeightWidthView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/PlanReviewView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/PromoCodeView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/AuthRequiredView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/SetupView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/StoppingGoalView.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/WorkoutView.dart';
 import 'package:get/get.dart';
 
 class SignUpController extends GetxController {
@@ -44,10 +45,7 @@ class SignUpController extends GetxController {
     'December',
   ];
 
-  List<int> years = List.generate(
-    50,
-    (index) => 1975 + index,
-  ); // years range
+  List<int> years = List.generate(50, (index) => 1975 + index); // years range
   List<int> days = List.generate(31, (index) => index + 1); // days range
   bool isMetric = true; // metric toggle
   int selectedFeet = 5;
@@ -69,7 +67,8 @@ class SignUpController extends GetxController {
     GoalScreen(),
     BornView(),
     StoppingGoalView(),
-    const PromoCodeView(),
+    const AuthRequiredView(), // Login required before promo code
+    PromoCodeView(),
     SetupView(),
     const PlanReviewView(),
   ];
@@ -123,20 +122,42 @@ class SignUpController extends GetxController {
     } else if (selectedView == 4) {
       selectedView = 5;
     } else if (selectedView == 5) {
-      selectedView = 6;
+      selectedView = 6; // Go to AuthRequiredView
     } else if (selectedView == 6) {
-      selectedView = 7;
+      selectedView = 7; // Go to PromoCodeView
+    } else if (selectedView == 7) {
+      // PromoCodeView -> SetupView (loading) -> PlanReviewView
+      selectedView = 8; // Show SetupView loading
       saveOnSql();
       Future.delayed(const Duration(seconds: 3)).then((value) {
         SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
         // go to plan review
-        selectedView = 8;
+        selectedView = 9;
         update();
       });
-    } else if (selectedView == 8) {
+    } else if (selectedView == 9) {
       // go to premium
       navigateToPremium();
     }
+    update();
+  }
+
+  // Skip auth and promo code - go directly to setup
+  void skipToSetup() {
+    selectedView = 8; // Go to SetupView loading
+    saveOnSql();
+    Future.delayed(const Duration(seconds: 3)).then((value) {
+      SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
+      // go to plan review
+      selectedView = 9;
+      update();
+    });
+    update();
+  }
+
+  // Skip auth but show promo code page
+  void skipToPromoCode() {
+    selectedView = 7; // Go to PromoCodeView
     update();
   }
 
@@ -219,9 +240,7 @@ class SignUpController extends GetxController {
   Map<String, int> calculateMacros(double tdee, int weightKg) {
     double protein = weightKg * 2.0; // protein per kg
     double fat = (tdee * 0.25) / 9; // fat calories
-    double carbs =
-        (tdee - ((protein * 4) + (fat * 9))) /
-        4; // remaining carbs
+    double carbs = (tdee - ((protein * 4) + (fat * 9))) / 4; // remaining carbs
 
     return {
       "calories": tdee.toInt(),

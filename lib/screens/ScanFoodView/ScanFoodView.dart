@@ -1,14 +1,16 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodController.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ContinueButton.dart';
-import 'package:foodcalorietracker/widgets/ScannerOverlay.dart';
-import 'package:foodcalorietracker/widgets/BottomModePicker.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodController.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/ContinueButton.dart';
+import 'package:macroaize/widgets/ScannerOverlay.dart';
+import 'package:macroaize/widgets/BottomModePicker.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../constant/AppAssets.dart';
+
+import 'package:macroaize/screens/leadingScreen/LeadingController.dart';
 
 class ScanFoodView extends GetView<ScanFoodController> {
   const ScanFoodView({super.key});
@@ -50,6 +52,10 @@ class ScanFoodView extends GetView<ScanFoodController> {
                             width: 300,
                             height: 260,
                             borderRadius: 36,
+                            hintText:
+                                controller.isBarcodeOnly
+                                    ? 'scan_barcode_hint'.tr
+                                    : null,
                           ),
                           if (controller
                                   .cameraController
@@ -87,10 +93,49 @@ class ScanFoodView extends GetView<ScanFoodController> {
                 ),
 
                 // flash toggle
+                // Back Button (Top Left)
                 if (!controller.isLoading)
                   Positioned(
                     top: 16,
                     left: 16,
+                    child: GestureDetector(
+                      onTap: () {
+                        try {
+                          if (Get.isRegistered<LeadingController>()) {
+                            Get.find<LeadingController>().changeTabIndex(0);
+                          } else {
+                            Get.back();
+                          }
+                        } catch (_) {
+                          Get.back();
+                        }
+                      },
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.35),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.14),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // barcode toggle
+                // Flash Toggle (Top Right)
+                if (!controller.isLoading)
+                  Positioned(
+                    top: 16,
+                    right: 16,
                     child: GestureDetector(
                       onTap: controller.toggleFlash,
                       child: Container(
@@ -133,53 +178,8 @@ class ScanFoodView extends GetView<ScanFoodController> {
                     ),
                   ),
 
-                // barcode toggle
-                if (!controller.isLoading)
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: GestureDetector(
-                      onTap: controller.toggleBarcodeMode,
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color:
-                              controller.isBarcodeMode
-                                  ? AppColor.primaryOrange
-                                  : Colors.black.withOpacity(0.35),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color:
-                                controller.isBarcodeMode
-                                    ? AppColor.primaryOrange
-                                    : Colors.white.withOpacity(0.14),
-                            width: controller.isBarcodeMode ? 2 : 1,
-                          ),
-                          boxShadow:
-                              controller.isBarcodeMode
-                                  ? [
-                                    BoxShadow(
-                                      color: AppColor.primaryOrange.withOpacity(
-                                        0.4,
-                                      ),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ]
-                                  : null,
-                        ),
-                        child: Icon(
-                          Icons.barcode_reader,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-
                 // bottom controls
-                if (!controller.isLoading)
+                if (!controller.isLoading && !controller.isBarcodeOnly)
                   Positioned(
                     bottom: 12,
                     left: 0,

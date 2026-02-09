@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
-import 'package:foodcalorietracker/widgets/ModernCard.dart';
-import 'package:foodcalorietracker/widgets/EnergyOrbs.dart';
-import 'package:foodcalorietracker/widgets/CalorieRing.dart';
-import 'package:foodcalorietracker/shared/services/app_user_service.dart';
-import 'package:foodcalorietracker/shared/widgets/PremiumRequiredDialog.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/constant/AppAssets.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/screens/HomeScreen/HomeController.dart';
+import '../../screens/DailyStreakScreen/DailyStreakView.dart';
+import '../../screens/DailyStreakScreen/DailyStreakController.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/ModernButton.dart';
+import 'package:macroaize/widgets/ModernCard.dart';
+import 'package:macroaize/widgets/EnergyOrbs.dart';
+import 'package:macroaize/widgets/CalorieRing.dart';
+import 'package:macroaize/shared/services/app_user_service.dart';
+import 'package:macroaize/shared/widgets/PremiumRequiredDialog.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:foodcalorietracker/Model/Recipe.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipesController.dart';
+import 'package:macroaize/Model/Recipe.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipesController.dart';
+import 'package:macroaize/screens/leadingScreen/LeadingView.dart';
 import '../../widgets/VerifyEmailButton.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeView extends GetView<HomeController> {
   static const double _kMealCardSpacing = 8.0;
@@ -66,7 +70,10 @@ class HomeView extends GetView<HomeController> {
           ),
         ),
       ),
-      floatingActionButton: _buildModernFAB(context),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: _buildModernFAB(context),
+      ),
     );
   }
 
@@ -98,6 +105,35 @@ class HomeView extends GetView<HomeController> {
         Padding(
           padding: const EdgeInsets.all(8),
           child: const VerifyEmailButton(),
+        ),
+        Obx(
+          () => InkWell(
+            onTap: () {
+              Get.put(DailyStreakController());
+              Get.bottomSheet(
+                const DailyStreakView(),
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+              );
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  Image.asset(AppAssets.fireIcon, width: 24, height: 24),
+                  const SizedBox(width: 4),
+                  Text(
+                    "${controller.streakCount.value}",
+                    style: context.theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.primaryOrange,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(8),
@@ -607,17 +643,24 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildModernFAB(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () => showMealSelectionSheet(context),
-      backgroundColor: AppColor.primaryOrange,
-      shape: const CircleBorder(),
-      elevation: 8,
-      child: Container(
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: AppColor.primaryGradient,
+    return SizedBox(
+      width: 65,
+      height: 65,
+      child: FloatingActionButton(
+        key: LeadingView.aiCoachButtonKey,
+        onPressed: () => Get.toNamed(Routes.chatView),
+        backgroundColor: AppColor.primaryOrange,
+        elevation: 4,
+        shape: const CircleBorder(),
+        child: ColorFiltered(
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          child: Lottie.asset(
+            'assets/lottie/chat.json',
+            width: 50,
+            height: 50,
+            fit: BoxFit.contain,
+          ),
         ),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
@@ -892,7 +935,7 @@ class HomeView extends GetView<HomeController> {
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
-                    itemCount: list.length,
+                    itemCount: list.length > 4 ? 4 : list.length,
                     itemBuilder: (context, index) {
                       final recipe = list[index];
                       return GestureDetector(

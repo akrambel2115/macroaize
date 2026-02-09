@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/screens/welcome/WelcomeController.dart';
-import 'package:foodcalorietracker/widgets/AnimatedBackground.dart';
+import 'package:macroaize/constant/AppAssets.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/screens/welcome/WelcomeController.dart';
+import 'package:macroaize/widgets/AnimatedBackground.dart';
 
 class WelcomeView extends GetView<WelcomeController> {
   const WelcomeView({super.key});
@@ -26,11 +26,13 @@ class WelcomeView extends GetView<WelcomeController> {
                     horizontal: 32,
                     vertical: 40,
                   ),
-                  child: Column(
-                    children: [
-                      const Spacer(flex: 1),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Spacer(),
 
-                      // Mascot Animation
+                        // Mascot Animation
                       AnimatedBuilder(
                         animation: controller.mascotAnimation,
                         builder: (context, child) {
@@ -146,8 +148,9 @@ class WelcomeView extends GetView<WelcomeController> {
                         },
                       ),
 
-                      const Spacer(flex: 2),
-                    ],
+                      const Spacer(),
+                      ],
+                    ),
                   ),
                 ),
               ),

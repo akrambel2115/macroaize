@@ -2,8 +2,8 @@ import { onCall, CallableRequest } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions/v2';
 import crypto from 'crypto';
-import axios from 'axios';
-import { OPENROUTER_API_KEY, getAiModel } from '../../config';
+import { GoogleGenerativeAI, Content, Part } from "@google/generative-ai";
+import { GEMINI_API_KEY, getAiModel } from '../../config';
 import { getChatLimitCfg } from '../../remote_config_service';
 import { validateRequestSize, validateAiJsonResponse } from '../../utils/validation';
 import { createStructuredError } from '../../utils/error';
@@ -14,7 +14,8 @@ const db = admin.firestore();
 
 export const chatWithOpenRouter = onCall({
     region: 'europe-west1',
-    secrets: [OPENROUTER_API_KEY]
+    secrets: [GEMINI_API_KEY],
+    maxInstances: 10,
 }, async (request: CallableRequest) => {
     const correlationId = crypto.randomUUID();
 
@@ -99,68 +100,77 @@ export const chatWithOpenRouter = onCall({
         }
     }
 
-    const key = OPENROUTER_API_KEY.value();
+    const key = GEMINI_API_KEY.value();
     if (!key) {
         throw new Error('AI service temporarily unavailable');
     }
 
-    const maxRetries = 3;
-    let lastError: any = null;
+    const genAI = new GoogleGenerativeAI(key);
+    const genModel = genAI.getGenerativeModel({ model: model });
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-            const resp = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-                model,
-                messages,
-                max_tokens: maxTokens,
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${key}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://macroaize.com',
-                    'X-Title': 'Food Calorie Tracker',
-                },
-                timeout: 30000,
-            });
+    // Convert OpenAI messages to Gemini contents
+    const contents: Content[] = [];
+    for (const msg of messages) {
+        const role = msg.role === 'assistant' ? 'model' : 'user';
+        const parts: Part[] = [];
 
-            const responseData = resp.data;
-            if (responseData?.choices?.[0]?.message?.content) {
-                const content = responseData.choices[0].message.content;
-                if (content.includes('food_name') || content.includes('calories')) {
-                    try { validateAiJsonResponse(content, 'nutrition'); } catch (_) { }
-                } else if (content.includes('mealItems')) {
-                    try { validateAiJsonResponse(content, 'mealItems'); } catch (_) { }
+        if (typeof msg.content === 'string') {
+            parts.push({ text: msg.content });
+        } else if (Array.isArray(msg.content)) {
+            for (const item of msg.content) {
+                if (item.type === 'text') {
+                    parts.push({ text: item.text });
+                } else if (item.type === 'image_url' && item.image_url?.url) {
+                    const url = item.image_url.url;
+                    if (url.startsWith('data:image/')) {
+                        const [header, data] = url.split(',');
+                        const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+                        parts.push({
+                            inlineData: {
+                                mimeType,
+                                data
+                            }
+                        });
+                    }
                 }
             }
-
-            return responseData;
-        } catch (e: any) {
-            lastError = e;
-            const status = e?.response?.status;
-
-            if (status === 429) {
-                if (attempt < maxRetries) {
-                    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    continue;
-                } else {
-                    throw new Error('ai_rate_limit_exceeded');
-                }
-            } else if (status === 400 || status === 401 || status === 403) {
-                throw new Error('ai_request_failed');
-            } else if (status >= 500 || !status) {
-                if (attempt < maxRetries) {
-                    const delay = Math.min(1000 * attempt, 3000);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    continue;
-                }
-            }
-            break;
         }
+        contents.push({ role, parts });
     }
 
-    const finalStatus = lastError?.response?.status;
-    if (finalStatus === 429) throw new Error('ai_rate_limit_exceeded');
-    if (finalStatus >= 500 || !finalStatus) throw new Error('ai_service_unavailable');
-    throw new Error('ai_request_failed');
+    try {
+        const result = await genModel.generateContent({
+            contents,
+            generationConfig: {
+                maxOutputTokens: maxTokens,
+                temperature: 0.4,
+            }
+        });
+
+        const response = result.response;
+        const text = response.text();
+
+        // Perform validations if needed
+        if (text.includes('food_name') || text.includes('calories')) {
+            try { validateAiJsonResponse(text, 'nutrition'); } catch (_) { }
+        } else if (text.includes('mealItems')) {
+            try { validateAiJsonResponse(text, 'mealItems'); } catch (_) { }
+        }
+
+        return {
+            choices: [
+                {
+                    message: {
+                        content: text
+                    }
+                }
+            ]
+        };
+    } catch (e: any) {
+        logger.error('GEMINI_API_ERROR', { uid, error: e, correlationId });
+        const msg = e?.message || '';
+        if (msg.includes('429')) throw new Error('ai_rate_limit_exceeded');
+        if (msg.includes('500')) throw new Error('ai_service_unavailable');
+        throw new Error('ai_request_failed');
+    }
 });

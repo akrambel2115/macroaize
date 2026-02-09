@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/constant/AppAssets.dart';
 
 class TransitionController extends GetxController
     with GetTickerProviderStateMixin {
@@ -29,8 +29,6 @@ class TransitionController extends GetxController
   String assetPath = AppAssets.transition;
 
   void _selectAsset() async {
-    final onboardingCompleted =
-        await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
     assetPath = AppAssets.transition;
     update();
   }

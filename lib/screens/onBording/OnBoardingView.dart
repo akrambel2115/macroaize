@@ -1,6 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'package:get/get.dart';
 import '../../widgets/customButton.dart';
 import 'OnBoardingController.dart';

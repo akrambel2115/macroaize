@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsController.dart';
+import 'package:macroaize/screens/AdjustGoals/AdjustGoalsController.dart';
 import 'package:get/get.dart';
 import '../../../widgets/steps/height_weight_step.dart';
 

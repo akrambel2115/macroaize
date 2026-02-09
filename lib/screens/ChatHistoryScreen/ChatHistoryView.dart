@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/screens/ChatHistoryScreen/DeleteDailog.dart';
-import 'package:foodcalorietracker/widgets/AppWidgets.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/screens/ChatHistoryScreen/DeleteDailog.dart';
+import 'package:macroaize/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 import 'ChatHistoryController.dart';
 

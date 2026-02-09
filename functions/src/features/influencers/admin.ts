@@ -1,9 +1,10 @@
 import { onCall, CallableRequest } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { RIP_ENCRYPTION_KEY_V1 } from '../../config';
-import { getInfluencerEarnForCode } from '../../remote_config_service';
+import { getInfluencerEarnForCode, getInfluencerMinWithdrawal } from '../../remote_config_service';
 import { decryptRip } from '../../crypto_rip';
 import { WithdrawalRecord } from '../../types';
+import { isValidPromoCode } from '../../utils/validation';
 
 const db = admin.firestore();
 
@@ -13,6 +14,108 @@ function requireAdmin(request: CallableRequest): void {
     if (!uid) throw new Error('unauthenticated');
     if (!isAdmin) throw new Error('permission-denied');
 }
+
+export const createInfluencer = onCall({ region: 'europe-west1' }, async (request: CallableRequest) => {
+    requireAdmin(request);
+
+    const userId = String(request.data?.userId || '').trim();
+    const promoCode = String(request.data?.promoCode || '').toUpperCase().trim();
+    const expirationDays = Number(request.data?.expirationDays) || 365;
+    const customEarnAmount = request.data?.earnAmount;
+    const customMinWithdrawal = request.data?.minWithdrawal;
+
+    // Validate inputs
+    if (!userId) {
+        throw new Error('userId is required');
+    }
+
+    if (!isValidPromoCode(promoCode)) {
+        throw new Error('Invalid promo code format. Must be 6-12 uppercase alphanumeric characters.');
+    }
+
+    try {
+        await admin.auth().getUser(userId);
+    } catch {
+        throw new Error('User not found in Firebase Auth');
+    }
+
+    const existingInfluencer = await db.collection('influencers').doc(userId).get();
+    if (existingInfluencer.exists) {
+        throw new Error('User is already an influencer');
+    }
+
+    // if promo code is already taken
+    const existingPromoCode = await db.collection('influencers')
+        .where('promoCode', '==', promoCode)
+        .limit(1)
+        .get();
+
+    if (!existingPromoCode.empty) {
+        throw new Error('Promo code is already in use by another influencer');
+    }
+
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + expirationDays);
+
+    const influencerData: Record<string, any> = {
+        promoCode,
+        isActive: true,
+        earningsDzd: 0,
+        totalEarningsDzd: 0,
+        usersCount: 0,
+        minWithdrawal: customMinWithdrawal ?? getInfluencerMinWithdrawal(),
+        expirationDate: admin.firestore.Timestamp.fromDate(expirationDate),
+        withdrawHistory: [],
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdBy: request.auth!.uid
+    };
+
+    // custom earn amount if provided
+    if (typeof customEarnAmount === 'number' && customEarnAmount > 0) {
+        influencerData.earnAmount = customEarnAmount;
+    }
+
+    await db.runTransaction(async (transaction) => {
+
+        transaction.set(db.collection('influencers').doc(userId), influencerData);
+
+
+        transaction.set(db.collection('promoCodes').doc(promoCode), {
+            ownerUid: userId,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        // log
+        transaction.create(db.collection('influencer_audit').doc(), {
+            userId,
+            action: 'influencer_created',
+            amount: 0,
+            details: {
+                promoCode,
+                expirationDate: expirationDate.toISOString(),
+                customEarnAmount: customEarnAmount ?? null,
+                customMinWithdrawal: customMinWithdrawal ?? null,
+                createdBy: request.auth!.uid
+            },
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            status: 'completed',
+            adminAction: true
+        });
+    });
+
+    return {
+        success: true,
+        message: `Influencer created successfully`,
+        influencer: {
+            userId,
+            promoCode,
+            expirationDate: expirationDate.toISOString(),
+            earnAmount: customEarnAmount ?? getInfluencerEarnForCode(),
+            minWithdrawal: customMinWithdrawal ?? getInfluencerMinWithdrawal()
+        }
+    };
+});
 
 export const fixPromoCommission = onCall({ region: 'europe-west1' }, async (request: CallableRequest) => {
     const uid = request.auth?.uid;
@@ -45,8 +148,12 @@ export const fixPromoCommission = onCall({ region: 'europe-west1' }, async (requ
 
         const influencerDoc = influencersQuery.docs[0];
         const influencerId = influencerDoc.id;
+        const influencerData = influencerDoc.data();
 
-        const earnAmount = getInfluencerEarnForCode();
+
+        const earnAmount = typeof influencerData.earnAmount === 'number' && influencerData.earnAmount > 0
+            ? influencerData.earnAmount
+            : getInfluencerEarnForCode();
 
         await db.runTransaction(async (tx) => {
             const influencerRef = db.collection('influencers').doc(influencerId);

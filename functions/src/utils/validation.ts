@@ -18,7 +18,7 @@ export function isValidPromoCode(code: string): boolean {
 
 export function validateAiJsonResponse(jsonString: string, schema: 'nutrition' | 'mealItems'): any {
     try {
-        // Basic sanitization
+
         let cleaned = jsonString.trim();
         if (cleaned.includes('```')) {
             const start = cleaned.indexOf('```');
@@ -44,10 +44,10 @@ export function validateAiJsonResponse(jsonString: string, schema: 'nutrition' |
         logger.warn('AI JSON validation failed', {
             error: error instanceof Error ? error.message : String(error),
             schema,
-            input: jsonString.substring(0, 200) // Log first 200 chars
+            input: jsonString.substring(0, 200) // log first 200 chars
         });
 
-        // Return safe fallback
+        // return safe fallback
         if (schema === 'nutrition') {
             return {
                 food_name: 'Unknown Food',
@@ -162,7 +162,7 @@ export function sanitizeUsdaResponse(rawResponse: any): any {
         }).filter((food: any) => food !== null);
 
         return {
-            foods: sanitizedFoods.slice(0, 10), // Limit to 10
+            foods: sanitizedFoods.slice(0, 10), // limit to 10
             totalHits: Number(rawResponse.totalHits) || 0,
             currentPage: Number(rawResponse.currentPage) || 1,
             totalPages: Number(rawResponse.totalPages) || 1

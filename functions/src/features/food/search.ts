@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import { logger } from 'firebase-functions/v2';
 import crypto from 'crypto';
 import axios from 'axios';
-import { USDA_API_KEY } from '../../config';
+import { USDA_API_KEY, USDA_URL } from '../../config';
 import { getScanLimitCfg } from '../../remote_config_service';
 import { validateRequestSize, sanitizeUsdaResponse } from '../../utils/validation';
 import { createStructuredError } from '../../utils/error';
@@ -79,7 +79,7 @@ export const searchUsdaFoods = onCall({
     if (!key) throw new Error('internal');
 
     try {
-        const url = 'https://api.nal.usda.gov/fdc/v1/foods/search';
+        const url = USDA_URL;
         const res = await axios.get(url, {
             params: { query, api_key: key, pageSize: String(limit) },
             timeout: 10000,

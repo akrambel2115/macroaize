@@ -9,7 +9,7 @@ class SharePrefKey {
   static String desiredWeight = "desiredWeight";
   static String age = "Age";
   static String bornDay = "BornDay";
-  static String stoppingGoal  = "StoppingGoal";
+  static String stoppingGoal = "StoppingGoal";
   static String firstMeal = "FirstMeal";
   static String secondMeal = "SecondMeal";
   static String thirdMeal = "ThirdMeal";
@@ -20,8 +20,6 @@ class SharePrefKey {
   static String isPremium = 'isPremium';
   static String premiumDate = 'PremiumDate';
   static String scanLimit = 'scanLimit';
-
-
 
   static String name = 'Name';
   static String userType = 'userType';
@@ -34,4 +32,18 @@ class SharePrefKey {
   static String onboardingCompleted = 'onboardingCompleted';
   static String hasSeenAppTips = 'hasSeenAppTips';
   static String hasCompletedTutorial = 'hasCompletedTutorial';
+
+  // Streak
+  static String streakCount = 'streakCount';
+  static String lastActiveDate = 'lastActiveDate';
+  static String streakHistory = 'streakHistory'; // List<String> of dates
+  static String lastStreakShownDate = 'lastStreakShownDate'; // String date
+
+  // Promo Code
+  static String pendingPromoCode =
+      'pendingPromoCode'; // Code entered during onboarding
+  static String promoCodeActivated =
+      'promoCodeActivated'; // Whether promo was validated
+  static String activatedPromoCode =
+      'activatedPromoCode'; // The actual activated code
 }

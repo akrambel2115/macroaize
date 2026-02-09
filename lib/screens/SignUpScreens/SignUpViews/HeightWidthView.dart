@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
 
-import 'package:foodcalorietracker/widgets/steps/height_weight_step.dart';
+import 'package:macroaize/widgets/steps/height_weight_step.dart';
 
 class HeightWidth extends GetView<SignUpController> {
   const HeightWidth({super.key});

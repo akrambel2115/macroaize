@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:lottie/lottie.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/widgets/ModernButton.dart';
 
 class GenderView extends GetView<SignUpController> {
   const GenderView({super.key});

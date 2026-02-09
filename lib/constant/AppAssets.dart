@@ -7,6 +7,7 @@ class AppAssets {
   static String scanComplete = "${basePathImages}1.png";
   static String soFar = "${basePathImages}2.webp";
   static String soClose = "${basePathImages}3.png";
+  static String widgetPreview = "${basePathImages}widget_preview.png";
 
   ///App Icon
   static String scanIcon = "${basePathIcons}scanning.png";
@@ -14,6 +15,7 @@ class AppAssets {
   static String aiIcon = "${basePathIcons}ai.png";
   static String coachIcon = "${basePathIcons}coach.png";
   static String crownIcon = "${basePathIcons}crown.png";
+  static String fireIcon = "${basePathIcons}fire.png";
   static String scanHomeIcon = "${basePathIcons}scan.png";
   static String galleryIcon = "${basePathIcons}gallery.png";
   static String clickPhoto = "${basePathIcons}clickPhoto.png";
@@ -29,6 +31,9 @@ class AppAssets {
   static String carb = "${basePathIcons}carb.png";
   static String fat = "${basePathIcons}fat.png";
   static String calorie = "${basePathIcons}calorie.png";
+  static String barcode = "${basePathIcons}barcode.png";
+  static String maintain = "${basePathIcons}maintain.png";
+  static String workoutIcon = "${basePathIcons}workout.png";
 
   ///App lottie
   static String loadingChat = "${basePathLottie}dot.json";

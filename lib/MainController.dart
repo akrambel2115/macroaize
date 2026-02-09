@@ -1,6 +1,6 @@
 import 'dart:ui';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,7 +27,7 @@ class MainController extends GetxController {
         prefs.getString(SharePrefKey.language) ?? 'language_english';
     languageKey = storedLangKey;
     language = storedLangKey.tr;
-    countryCode = prefs.getString('countryCode') ?? "US";
+    countryCode = prefs.getString('countryCode') ?? "DZ";
     Get.updateLocale(Locale(languageCode, countryCode));
     update();
   }
@@ -42,5 +42,16 @@ class MainController extends GetxController {
       }
     }
     update();
+  }
+
+  String getLanguageName() {
+    switch (languageCode) {
+      case 'fr':
+        return 'French';
+      case 'ar':
+        return 'Arabic';
+      default:
+        return 'English';
+    }
   }
 }

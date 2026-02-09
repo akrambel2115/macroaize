@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/shared/models/user_usage.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart';
-import 'package:foodcalorietracker/shared/services/usage_service.dart';
-import 'package:foodcalorietracker/shared/services/subscription_service.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/shared/models/user_usage.dart';
+import 'package:macroaize/shared/models/subscription.dart';
+import 'package:macroaize/shared/services/usage_service.dart';
+import 'package:macroaize/shared/services/subscription_service.dart';
 
 class UsageIndicatorWidget extends StatelessWidget {
   final bool showOnlyWhenLimited;

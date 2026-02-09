@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/Model/SqlCalorieModel.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
-import 'package:foodcalorietracker/shared/services/tutorial_coach_service.dart';
-import 'package:foodcalorietracker/screens/leadingScreen/LeadingView.dart';
+import 'package:macroaize/Model/SqlCalorieModel.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
+import 'package:macroaize/shared/services/tutorial_coach_service.dart';
+import 'package:macroaize/screens/leadingScreen/LeadingView.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/shared/services/widget_service.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/shared/services/widget_service.dart';
+import 'package:macroaize/shared/services/streak_service.dart';
 
 class HomeController extends GetxController {
+  RxInt streakCount = 0.obs;
+
   int consumedKcal = 0;
   int remainingKcal = 0;
   int consumedProtein = 0;
   int consumedCarbs = 0;
   int consumedFats = 0;
+  int caloriesBurned = 0; // Calories burned from workouts
 
   final GlobalKey addFoodButtonKey = GlobalKey();
 
@@ -64,12 +68,16 @@ class HomeController extends GetxController {
           // If already completed, just proceed normally (no blocking)
           Future.delayed(const Duration(milliseconds: 800), () {
             _showAppTipsIfNeeded();
+            // Check for daily streak notification
+            StreakService().checkAndShowNotification();
           });
         }
       });
     });
     isLoading = false;
     _updateWidgets();
+    // Sync streak widget with current app data
+    StreakService().syncWidget();
     update();
   }
 
@@ -153,7 +161,7 @@ class HomeController extends GetxController {
     }
   }
 
-  dateFilter(int index) {
+  dateFilter(int index) async {
     today = dates[index];
     List<SqlCalorieModel> matchingData =
         sqlCalorie
@@ -162,13 +170,18 @@ class HomeController extends GetxController {
                   element.date == DateFormat('dd-MM-yyyy').format(today),
             )
             .toList();
+    
+    // Get calories burned from workouts for this date
+    caloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(today);
+    
     if (matchingData.isNotEmpty &&
         matchingData.first.date == DateFormat('dd-MM-yyyy').format(today)) {
       consumedKcal = matchingData.first.calorie;
       consumedProtein = matchingData.first.protein;
       consumedCarbs = matchingData.first.carbs;
       consumedFats = matchingData.first.fats;
-      remainingKcal = ConstantUserMaster.calorieGoal - consumedKcal;
+      // Subtract calories burned from consumed calories
+      remainingKcal = ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
       if (remainingKcal < 0) {
         remainingKcal = 0;
       }
@@ -177,7 +190,7 @@ class HomeController extends GetxController {
       consumedProtein = 0;
       consumedCarbs = 0;
       consumedFats = 0;
-      remainingKcal = ConstantUserMaster.calorieGoal;
+      remainingKcal = ConstantUserMaster.calorieGoal + caloriesBurned;
     }
     _updateWidgets();
     update();
@@ -185,6 +198,10 @@ class HomeController extends GetxController {
 
   getSqlCalorie() async {
     sqlCalorie = await dbHelper.getCalorieData();
+    
+    // Get calories burned from workouts for today
+    caloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(DateTime.now());
+    
     if (sqlCalorie.isNotEmpty &&
         sqlCalorie.last.date ==
             DateFormat('dd-MM-yyyy').format(DateTime.now())) {
@@ -192,12 +209,13 @@ class HomeController extends GetxController {
       consumedProtein = sqlCalorie.last.protein;
       consumedCarbs = sqlCalorie.last.carbs;
       consumedFats = sqlCalorie.last.fats;
-      remainingKcal = ConstantUserMaster.calorieGoal - consumedKcal;
+      // Subtract calories burned from consumed calories
+      remainingKcal = ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
       if (remainingKcal < 0) {
         remainingKcal = 0;
       }
     } else {
-      remainingKcal = ConstantUserMaster.calorieGoal;
+      remainingKcal = ConstantUserMaster.calorieGoal + caloriesBurned;
     }
   }
 
@@ -247,6 +265,10 @@ class HomeController extends GetxController {
       SharePrefKey.stoppingGoal,
     );
     ConstantUserMaster.age = await SharedPref.readInt(SharePrefKey.age);
+
+    // Update streak
+    streakCount.value = await StreakService().getCurrentStreak();
+
     update();
   }
 }

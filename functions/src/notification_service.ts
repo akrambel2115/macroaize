@@ -4,10 +4,10 @@ import { getMessaging } from 'firebase-admin/messaging';
 import { logger } from 'firebase-functions/v2';
 import { defineSecret } from 'firebase-functions/params';
 
-// Firebase secret
+
 export const FIREBASE_SERVICE_ACCOUNT = defineSecret('FIREBASE_SERVICE_ACCOUNT');
 
-// Notification payload
+
 export interface NotificationPayload {
   title: string;
   body: string;
@@ -15,7 +15,7 @@ export interface NotificationPayload {
   imageUrl?: string;
 }
 
-// FCM token doc
+
 interface FCMTokenDoc {
   token: string;
   platform: string;
@@ -24,7 +24,7 @@ interface FCMTokenDoc {
   lastUsed: FirebaseFirestore.Timestamp;
 }
 
-// Notification service
+
 export class NotificationService {
   private static instance: NotificationService;
   private messaging: admin.messaging.Messaging | null = null;
@@ -41,7 +41,7 @@ export class NotificationService {
     return NotificationService.instance;
   }
 
-  // Init services
+
   private initializeServices(): void {
     if (!this.messaging) {
       this.messaging = getMessaging();
@@ -51,12 +51,12 @@ export class NotificationService {
     }
   }
 
-  // Send user notification
+
   async sendNotificationToUser(uid: string, payload: NotificationPayload): Promise<boolean> {
     const correlationId = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     try {
-      // Init services
+
       this.initializeServices();
 
       logger.info('Sending notification to user', {
@@ -66,7 +66,7 @@ export class NotificationService {
         hasData: !!payload.data
       });
 
-      // Fetch tokens
+
       const tokensSnapshot = await this.db!
         .collection('users')
         .doc(uid)
@@ -97,7 +97,7 @@ export class NotificationService {
         tokenCount: tokens.length
       });
 
-      // Prepare message
+
       const message = {
         notification: {
           title: payload.title,
@@ -142,7 +142,7 @@ export class NotificationService {
         failureCount: response.failureCount
       });
 
-      // Handle invalid tokens
+
       const invalidTokens: string[] = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success && resp.error) {
@@ -162,17 +162,17 @@ export class NotificationService {
         }
       });
 
-      // Cleanup tokens
+
       if (invalidTokens.length > 0) {
         await this.cleanupInvalidTokens(uid, invalidTokens, correlationId);
       }
 
-      // Update usage
+
       if (response.successCount > 0) {
         await this.updateTokenUsage(uid, tokens, correlationId);
       }
 
-      // Log audit
+
       await this.logNotificationAudit(uid, payload, response.successCount, response.failureCount, correlationId);
 
       return response.successCount > 0;
@@ -184,14 +184,14 @@ export class NotificationService {
         error: error instanceof Error ? error.message : String(error)
       });
 
-      // Log audit
+
       await this.logNotificationAudit(uid, payload, 0, 1, correlationId, error);
 
       return false;
     }
   }
 
-  // Send bulk notifications
+
   async sendNotificationToUsers(userIds: string[], payload: NotificationPayload): Promise<number> {
     const correlationId = `bulk_notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -203,7 +203,7 @@ export class NotificationService {
 
     let successCount = 0;
 
-    // Process batches
+
     const batchSize = 10;
     for (let i = 0; i < userIds.length; i += batchSize) {
       const batch = userIds.slice(i, i + batchSize);
@@ -228,12 +228,12 @@ export class NotificationService {
     return successCount;
   }
 
-  // Send topic notification
+
   async sendNotificationToTopic(topic: string, payload: NotificationPayload): Promise<boolean> {
     const correlationId = `topic_notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     try {
-      // Init services
+
       this.initializeServices();
 
       logger.info('Sending notification to topic', {
@@ -292,7 +292,7 @@ export class NotificationService {
     }
   }
 
-  // Cleanup invalid tokens
+
   private async cleanupInvalidTokens(uid: string, tokenDocIds: string[], correlationId: string): Promise<void> {
     try {
       const batch = this.db!.batch();
@@ -328,7 +328,7 @@ export class NotificationService {
     }
   }
 
-  // Update token usage
+
   private async updateTokenUsage(uid: string, tokens: any[], correlationId: string): Promise<void> {
     try {
       const batch = this.db!.batch();
@@ -356,7 +356,7 @@ export class NotificationService {
     }
   }
 
-  // Log audit
+
   private async logNotificationAudit(
     uid: string,
     payload: NotificationPayload,
@@ -391,7 +391,6 @@ export class NotificationService {
   }
 }
 
-// Get service instance
 export function getNotificationService(): NotificationService {
   return NotificationService.getInstance();
 }

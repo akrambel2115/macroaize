@@ -1,4 +1,4 @@
-import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsController.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsController.dart';
 import 'package:get/get.dart';
 
 class AnalyticsBinding extends Bindings {

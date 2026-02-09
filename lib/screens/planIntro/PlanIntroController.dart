@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
+import 'package:macroaize/routes/app_routes.dart';
 
 /// plan intro screen animations and navigation
 class PlanIntroController extends GetxController

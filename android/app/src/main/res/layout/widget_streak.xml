@@ -1,0 +1,46 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- Flame Icon -->
+        <ImageView
+            android:id="@+id/widget_flame_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/fire"
+            android:contentDescription="Streak Flame" />
+
+        <!-- Streak Count -->
+        <TextView
+            android:id="@+id/widget_streak_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Label -->
+        <TextView
+            android:id="@+id/widget_streak_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day Streak"
+            android:textColor="#B0B3B8"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium" />
+
+    </LinearLayout>
+
+</RelativeLayout>

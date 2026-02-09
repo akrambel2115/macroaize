@@ -1,10 +1,10 @@
 import { defineSecret } from 'firebase-functions/params';
 
-export const CHARGILY_SECRET_KEY = defineSecret('CHARGILY_SECRET_KEY');
-export const CHARGILY_PUBLIC_KEY = defineSecret('CHARGILY_PUBLIC_KEY');
 
-export const OPENROUTER_API_KEY = defineSecret('OPENROUTER_API_KEY');
+export const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
 export const USDA_API_KEY = defineSecret('USDA_API_KEY');
+// USDA API URL (configurable via environment / .env)
+export const USDA_URL = process.env.USDA_URL || 'https://api.nal.usda.gov/fdc/v1/foods/search';
 
 // RevenueCat secrets
 export const REVENUECAT_REST_API_KEY = defineSecret('REVENUECAT_REST_API_KEY');
@@ -34,7 +34,7 @@ export function getEmailToAddress(): string {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('CRITICAL: EMAIL_TO_ADDRESS is required in production but not configured');
     }
-    return "belbakhoucheakram2115@gmail.com"; // Development fallback
+    return "macroaize@gmail.com"; // Development fallback
   }
   return email;
 }
@@ -46,14 +46,14 @@ export function getEmailFromAddress(): string {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('CRITICAL: EMAIL_FROM_ADDRESS is required in production but not configured');
     }
-    return "belbakhoucheakram2115@gmail.com"; // Development fallback
+    return "macroaize@gmail.com"; // Development fallback
   }
   return email;
 }
 
 // AI model ID
 export function getAiModel(): string {
-  return process.env.AI_MODEL || 'mistralai/mistral-small-3.2-24b-instruct:free';
+  return process.env.AI_MODEL || 'gemini-2.5-flash-lite';
 }
 
 // Android IAP IDs

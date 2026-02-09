@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:foodcalorietracker/Model/Recipe.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipeDetailScreen.dart';
+import 'package:macroaize/Model/Recipe.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipeDetailScreen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 class RecipesController extends GetxController {
   final RxBool _isLoading = false.obs;
@@ -101,18 +103,23 @@ class RecipesController extends GetxController {
       update();
 
       await Future.delayed(const Duration(milliseconds: 500));
+      if (isClosed) return;
 
       await _loadAndCacheData();
+      if (isClosed) return;
 
       _currentPageIndex(0);
       _loadCurrentPage();
     } catch (e, st) {
+      if (isClosed) return;
       debugPrint('Error loading recipes: $e');
       debugPrint(st.toString());
       _handleLoadingError(e, st);
     } finally {
-      _isLoading(false);
-      update();
+      if (!isClosed) {
+        _isLoading(false);
+        update();
+      }
     }
   }
 
@@ -143,14 +150,17 @@ class RecipesController extends GetxController {
       update();
 
       await Future.delayed(const Duration(milliseconds: 200));
+      if (isClosed) return;
 
       _currentPageIndex(newPageIndex);
       _loadCurrentPage();
     } catch (e) {
       debugPrint('Error changing page: $e');
     } finally {
-      _isLoadingPage(false);
-      update();
+      if (!isClosed) {
+        _isLoadingPage(false);
+        update();
+      }
     }
   }
 
@@ -181,9 +191,32 @@ class RecipesController extends GetxController {
 
   Future<void> _loadAndCacheData() async {
     try {
-      final jsonStr = await rootBundle.loadString(
-        'lib/constant/recipeLibrary.json',
-      );
+      final recipesLibraryUrl = dotenv.env['RECIPES_LIBRARY'] ?? '';
+      String jsonStr;
+
+      if (recipesLibraryUrl.isNotEmpty) {
+        try {
+          // Fetch from remote URL
+          final response = await http.get(Uri.parse(recipesLibraryUrl));
+          if (response.statusCode == 200) {
+            jsonStr = response.body;
+          } else {
+            // Fallback to local file if remote fails
+            jsonStr = await rootBundle.loadString(
+              'lib/constant/recipeLibrary.json',
+            );
+          }
+        } catch (e) {
+          debugPrint('Remote recipe load failed, falling back to local: $e');
+          jsonStr = await rootBundle.loadString(
+            'lib/constant/recipeLibrary.json',
+          );
+        }
+      } else {
+        // Fallback to local file if URL not set
+        jsonStr = await rootBundle.loadString('lib/constant/recipeLibrary.json');
+      }
+
       final List<dynamic> data = json.decode(jsonStr);
 
       final all =

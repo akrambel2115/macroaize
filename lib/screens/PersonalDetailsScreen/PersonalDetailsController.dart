@@ -1,9 +1,9 @@
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
-import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
+import 'package:macroaize/screens/HomeScreen/HomeController.dart';
 import 'package:intl/intl.dart';
 
 /// managing personal details editing (weight, height, DOB, gender, goal).

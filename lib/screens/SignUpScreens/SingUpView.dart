@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/widgets/AppWidgets.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpController.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 
 class SignUpView extends StatefulWidget {

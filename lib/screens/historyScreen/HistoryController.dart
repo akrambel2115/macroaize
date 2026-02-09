@@ -1,4 +1,4 @@
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
 import 'package:get/get.dart';
 
 import '../../Model/CalorieHistoryModel.dart';

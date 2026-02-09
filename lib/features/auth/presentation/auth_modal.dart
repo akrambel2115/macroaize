@@ -11,7 +11,7 @@ import '../data/auth_service.dart';
 import 'auth_controller.dart';
 import 'auth_theme.dart';
 import '../../../shared/services/notification_service.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 
 class AuthModal extends StatelessWidget {
   final bool isFullScreen;

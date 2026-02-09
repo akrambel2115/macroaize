@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/constant/FontFamily.dart';
-import 'package:foodcalorietracker/screens/ChatScreen/ChatController.dart';
-import 'package:foodcalorietracker/shared/services/subscription_service.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart';
-import 'package:foodcalorietracker/widgets/AppWidgets.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/constant/FontFamily.dart';
+import 'package:macroaize/screens/ChatScreen/ChatController.dart';
+import 'package:macroaize/shared/services/subscription_service.dart';
+import 'package:macroaize/shared/models/subscription.dart';
+import 'package:macroaize/widgets/AppWidgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../widgets/VoiceVisualizer.dart';
@@ -82,6 +82,7 @@ class _ChatViewState extends State<ChatView> {
                 false;
             if (!seen) {
               SharedPref.saveBool(SharePrefKey.hasSeenChatHistoryNotice, true);
+              if (!mounted) return;
               // show and keep a reference so the lamp can toggle it
               _chatNoticeEntry = AppWidgets.showTopNotification(
                 context,
@@ -356,6 +357,9 @@ class _ChatViewState extends State<ChatView> {
                               // Circular send / mic button
                               GestureDetector(
                                 onTap: () {
+                                  if (controller.isSending)
+                                    return; // Prevent interaction while sending
+
                                   if (controller.recording) {
                                     controller.stopListening(context);
                                   } else if (controller
@@ -372,20 +376,37 @@ class _ChatViewState extends State<ChatView> {
                                 child: Container(
                                   height: 44,
                                   width: 44,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        controller.isSending
+                                            ? Colors
+                                                .grey
+                                                .shade800 // Dimmed color for loading state
+                                            : Colors.black,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(6),
-                                    child: Icon(
-                                      controller.controller.text.isNotEmpty ||
-                                              controller.recording
-                                          ? Icons.arrow_upward
-                                          : Icons.multitrack_audio,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
+                                    child:
+                                        controller.isSending
+                                            ? const Padding(
+                                              padding: EdgeInsets.all(5.0),
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                            : Icon(
+                                              controller
+                                                          .controller
+                                                          .text
+                                                          .isNotEmpty ||
+                                                      controller.recording
+                                                  ? Icons.arrow_upward
+                                                  : Icons.multitrack_audio,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
                                   ),
                                 ),
                               ),

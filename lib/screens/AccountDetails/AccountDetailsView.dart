@@ -5,7 +5,7 @@ import '../../shared/services/notification_service.dart';
 import '../../features/auth/data/firebase_auth_repository.dart';
 import '../../features/auth/presentation/account_controller.dart';
 import '../../widgets/VerifyEmailButton.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 import 'change_password_screen.dart';
 
 const Color _kAccent = Color(0xFFFF6B35);

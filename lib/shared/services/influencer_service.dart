@@ -4,6 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/influencer.dart';
 import 'dart:async';
 
+/// Exception for withdrawal-related errors with localization key
+class WithdrawalException implements Exception {
+  final String localizationKey;
+  const WithdrawalException(this.localizationKey);
+
+  @override
+  String toString() => localizationKey;
+}
+
 /// Influencer service
 class InfluencerService {
   InfluencerService({
@@ -65,13 +74,27 @@ class InfluencerService {
   }
 
   Future<PromoCodeValidationResult> validatePromoCode(String promoCode) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw StateError('Not authenticated');
+    // Promo validation is used during onboarding; ensure we have an authenticated
+    // user (anonymous is fine) because the callable enforces auth.
+    var user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      try {
+        await FirebaseAuth.instance.signInAnonymously();
+        user = FirebaseAuth.instance.currentUser;
+      } catch (_) {
+        throw const PromoCodeValidationException('please_relogin');
+      }
+    }
+    if (user == null) {
+      throw const PromoCodeValidationException('please_relogin');
+    }
+
+    final normalizedCode = promoCode.toUpperCase().trim();
 
     try {
       final callable = _functions.httpsCallable('validatePromoCode');
       final result = await callable.call({
-        'promoCode': promoCode.toUpperCase().trim(),
+        'promoCode': normalizedCode,
       });
 
       final data = result.data as Map<String, dynamic>;
@@ -80,15 +103,25 @@ class InfluencerService {
         discountRate: (data['discountRate'] as num?)?.toDouble() ?? 0.0,
         influencerId: data['influencerId']?.toString(),
       );
+    } on FirebaseFunctionsException catch (e) {
+      final message = (e.message ?? '').toLowerCase();
+      if (message.contains('unauthenticated')) {
+        throw const PromoCodeValidationException('please_relogin');
+      }
+      if (message.contains('too many attempts') || message.contains('rate')) {
+        throw const PromoCodeValidationException('too_many_attempts');
+      }
+
+      // Keep promo validation errors generic for security.
+      throw const PromoCodeValidationException('Invalid promo code');
     } catch (e) {
-      // Return generic error for security
-      throw Exception('Invalid promo code or validation failed');
+      throw const PromoCodeValidationException('Invalid promo code');
     }
   }
 
   Future<WithdrawalResult> processWithdrawal(double amount, String rip) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw StateError('Not authenticated');
+    if (user == null) throw const WithdrawalException('auth_required');
 
     try {
       final callable = _functions.httpsCallable('processWithdrawal');
@@ -100,9 +133,41 @@ class InfluencerService {
         withdrawalId: data['withdrawalId']?.toString(),
         message: data['message']?.toString() ?? 'Withdrawal processed',
       );
+    } on FirebaseFunctionsException catch (e) {
+      // Map Firebase error codes to user-friendly localization keys
+      switch (e.code) {
+        case 'unauthenticated':
+          throw const WithdrawalException('auth_required');
+        case 'permission-denied':
+          throw const WithdrawalException('withdrawal_permission_denied');
+        case 'invalid-argument':
+          throw WithdrawalException(_mapInvalidArgument(e.message));
+        case 'failed-precondition':
+          // Insufficient balance
+          throw const WithdrawalException('amount_exceeds_balance');
+        case 'not-found':
+          throw const WithdrawalException('withdrawal_permission_denied');
+        case 'internal':
+          // Server-side error - don't expose details to user
+          throw const WithdrawalException('withdrawal_service_unavailable');
+        default:
+          throw const WithdrawalException('withdrawal_request_failed');
+      }
     } catch (e) {
-      throw Exception(e.toString().replaceAll('Exception: ', ''));
+      // Catch-all for unexpected errors
+      throw const WithdrawalException('withdrawal_request_failed');
     }
+  }
+
+  /// Maps invalid-argument error messages to localization keys
+  String _mapInvalidArgument(String? message) {
+    if (message == null) return 'withdrawal_request_failed';
+    final lowerMessage = message.toLowerCase();
+    if (lowerMessage.contains('amount')) return 'enter_valid_amount';
+    if (lowerMessage.contains('rip') || lowerMessage.contains('20 digits')) return 'rip_invalid_format';
+    if (lowerMessage.contains('minimum')) return 'withdrawal_minimum_not_met';
+    if (lowerMessage.contains('insufficient') || lowerMessage.contains('balance')) return 'amount_exceeds_balance';
+    return 'withdrawal_request_failed';
   }
 
   Future<AdminWithdrawalDetails> adminGetWithdrawalRip(
@@ -168,6 +233,14 @@ class PromoCodeValidationResult {
     required this.discountRate,
     this.influencerId,
   });
+}
+
+class PromoCodeValidationException implements Exception {
+  final String messageKey;
+  const PromoCodeValidationException(this.messageKey);
+
+  @override
+  String toString() => messageKey;
 }
 
 class WithdrawalResult {

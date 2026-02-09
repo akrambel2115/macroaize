@@ -1,4 +1,4 @@
-class ConstantUserMaster{
+class ConstantUserMaster {
   static int calorieGoal = 0;
   static int proteinGoal = 1;
   static int carbGoal = 1;
@@ -10,14 +10,13 @@ class ConstantUserMaster{
 
   static String gender = "";
   static String workOutDay = "";
-  static int  height = 0;
-  static int  weight = 0;
+  static int height = 0;
+  static int weight = 0;
   static String goalWeight = "";
   static int desiredGoal = 0;
   static int age = 0;
   static String bornDay = "";
   static String stoppedGoal = "";
-
 }
 
 Map<String, int> calculateMacrosFromTDEE(double tdee, int weightKg) {
@@ -32,7 +31,12 @@ Map<String, int> calculateMacrosFromTDEE(double tdee, int weightKg) {
   };
 }
 
-double adjustCaloriesForGoal(double tdee, int currentWeight, int desiredGoal, String goalType) {
+double adjustCaloriesForGoal(
+  double tdee,
+  int currentWeight,
+  int desiredGoal,
+  String goalType,
+) {
   final goal = goalType.trim();
 
   if (goal == 'Maintain Weight' || goal.isEmpty) return tdee;
@@ -56,4 +60,24 @@ double adjustCaloriesForGoal(double tdee, int currentWeight, int desiredGoal, St
   }
 
   return tdee;
+}
+
+double estimateBMR(int heightCm, int weightKg, int age, String gender) {
+  if (gender.toLowerCase() == 'male') {
+    return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+  }
+  return (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+}
+
+double getActivityFactor(String workOutDays) {
+  switch (workOutDays) {
+    case '0-2':
+      return 1.2;
+    case '3-5':
+      return 1.55;
+    case '6+':
+      return 1.725;
+    default:
+      return 1.2;
+  }
 }

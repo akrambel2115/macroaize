@@ -1,4 +1,4 @@
-import 'package:foodcalorietracker/screens/HomeScreen/HomeController.dart';
+import 'package:macroaize/screens/HomeScreen/HomeController.dart';
 import 'package:get/get.dart';
 
 class HomeBinding extends Bindings {

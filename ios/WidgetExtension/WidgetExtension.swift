@@ -206,20 +206,94 @@ struct MacroRow: View {
     }
 }
 
-@main
-struct foodcalorietrackerWidget: Widget {
-    let kind: String = "foodcalorietrackerWidget"
+struct StreakWidgetEntry: TimelineEntry {
+    let date: Date
+    let streakCount: Int
+    let disciplineScore: Double
+    let isActiveToday: Bool
+}
+
+struct StreakWidgetProvider: TimelineProvider {
+    func placeholder(in context: Context) -> StreakWidgetEntry {
+        StreakWidgetEntry(date: Date(), streakCount: 5, disciplineScore: 80, isActiveToday: true)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (StreakWidgetEntry) -> ()) {
+        let entry = StreakWidgetEntry(date: Date(), streakCount: 5, disciplineScore: 80, isActiveToday: true)
+        completion(entry)
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
+        let data = UserDefaults.init(suiteName: widgetGroupId)
+        let entry = StreakWidgetEntry(
+            date: Date(),
+            streakCount: data?.integer(forKey: "streak_count") ?? 0,
+            disciplineScore: data?.double(forKey: "discipline_score") ?? 0.0,
+            isActiveToday: data?.bool(forKey: "is_active_today") ?? false
+        )
+        let timeline = Timeline(entries: [entry], policy: .atEnd)
+        completion(timeline)
+    }
+}
+
+struct StreakWidgetView: View {
+    var entry: StreakWidgetProvider.Entry
+    
+    var body: some View {
+        ZStack {
+            Color(red: 33/255, green: 38/255, blue: 45/255) // AppColor.darkCard
+            
+            VStack {
+                HStack {
+                    Image("fire")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 28, height: 28)
+                    
+                    Spacer()
+                    
+                    Text("STREAK")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255))
+                }
+                
+                Spacer()
+                
+                HStack(alignment: .bottom) {
+                    Text("\(entry.streakCount)")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text("Days")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255))
+                        .padding(.bottom, 6)
+                    
+                    Spacer()
+                }
+            }
+            .padding(16)
+        }
+    }
+}
+
+struct StreakWidget: Widget {
+    let kind: String = "StreakWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if let family = try? WidgetFamily.systemMedium, family == .systemMedium {
-                 LargeWidgetView(entry: entry)
-            } else {
-                 SmallWidgetView(entry: entry)
-            }
+        StaticConfiguration(kind: kind, provider: StreakWidgetProvider()) { entry in
+            StreakWidgetView(entry: entry)
         }
-        .configurationDisplayName("Calorie Tracker")
-        .description("Track your daily calories and macros.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .configurationDisplayName("Daily Streak")
+        .description("Keep your flame alive!")
+        .supportedFamilies([.systemSmall])
     }
+}
+
+@main
+struct foodcalorietrackerWidgets: WidgetBundle {
+   var body: some Widget {
+       foodcalorietrackerWidget()
+       StreakWidget()
+   }
 }

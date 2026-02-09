@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodView.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodView.dart';
 
 void main() {
   testWidgets('Meal selector animates and updates selection', (

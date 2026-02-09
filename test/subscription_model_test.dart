@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart';
+import 'package:macroaize/shared/models/subscription.dart';
 
 void main() {
   group('Subscription Model Tests', () {

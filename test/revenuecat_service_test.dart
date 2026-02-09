@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foodcalorietracker/shared/services/revenuecat_service.dart';
+import 'package:macroaize/shared/services/revenuecat_service.dart';
 
 void main() {
   group('RevenueCatService Tests', () {

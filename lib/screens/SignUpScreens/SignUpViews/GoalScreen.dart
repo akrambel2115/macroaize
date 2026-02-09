@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SignUpController.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpController.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/widgets/steps/goal_step.dart';
+import 'package:macroaize/widgets/steps/goal_step.dart';
 
 class GoalScreen extends GetView<SignUpController> {
   const GoalScreen({super.key});

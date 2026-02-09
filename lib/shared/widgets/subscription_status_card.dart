@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/shared/models/subscription.dart';
+import 'package:macroaize/constant/AppColor.dart';
 
 class SubscriptionStatusCard extends StatelessWidget {
   const SubscriptionStatusCard({super.key, required this.subscription});
@@ -10,14 +10,34 @@ class SubscriptionStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fmt = DateFormat.yMMMMd();
+    final startDate = subscription.startDate;
+    DateTime? endDate = subscription.endDate;
+
+    // UI guard to avoid identical from/to dates when provider sends bad or missing expiration
+    if (startDate != null && (endDate == null || !endDate.isAfter(startDate))) {
+      final isYearly = subscription.planType == 'yearly';
+      endDate = isYearly
+          ? DateTime.utc(
+              startDate.year + 1,
+              startDate.month,
+              startDate.day,
+              startDate.hour,
+              startDate.minute,
+              startDate.second,
+            )
+          : DateTime.utc(
+              startDate.year,
+              startDate.month + 1,
+              startDate.day,
+              startDate.hour,
+              startDate.minute,
+              startDate.second,
+            );
+    }
+
     final start =
-        subscription.startDate != null
-            ? fmt.format(subscription.startDate!.toLocal())
-            : '-';
-    final end =
-        subscription.endDate != null
-            ? fmt.format(subscription.endDate!.toLocal())
-            : '-';
+        startDate != null ? fmt.format(startDate.toLocal()) : '-';
+    final end = endDate != null ? fmt.format(endDate.toLocal()) : '-';
 
     return Container(
       decoration: BoxDecoration(

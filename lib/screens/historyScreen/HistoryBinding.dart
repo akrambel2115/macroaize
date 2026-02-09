@@ -1,4 +1,4 @@
-import 'package:foodcalorietracker/screens/historyScreen/HistoryController.dart';
+import 'package:macroaize/screens/historyScreen/HistoryController.dart';
 import 'package:get/get.dart';
 
 class HistoryBinding extends Bindings {

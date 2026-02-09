@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/shared/widgets/PremiumRequiredDialog.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsController.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipesController.dart';
-import 'package:foodcalorietracker/shared/services/app_user_service.dart';
-import 'package:foodcalorietracker/shared/services/email_verification_guard.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
+import 'package:macroaize/shared/widgets/PremiumRequiredDialog.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsController.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipesController.dart';
+import 'package:macroaize/shared/services/app_user_service.dart';
+import 'package:macroaize/shared/services/email_verification_guard.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 import '../HomeScreen/HomeController.dart';

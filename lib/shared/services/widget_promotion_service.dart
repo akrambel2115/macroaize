@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
+
+import 'package:macroaize/widgets/WidgetPreviewCards.dart';
 
 class WidgetPromotionService {
   static const String _prefsKey = 'widget_promotion_shown';
@@ -39,6 +41,13 @@ class WidgetPromotionService {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Preview Image
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: const WidgetPreviewCards(),
+              ),
+            ),
             Text(
               'widget_promo_android_instructions'.tr,
               style: const TextStyle(color: Colors.white70),
@@ -81,7 +90,15 @@ class WidgetPromotionService {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            // Preview Image
+            // Preview Image
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: const WidgetPreviewCards(),
+              ),
+            ),
             _buildStep(1, 'widget_promo_ios_step1'.tr),
             _buildStep(2, 'widget_promo_ios_step2'.tr),
             _buildStep(3, 'widget_promo_ios_step3'.tr),
@@ -107,7 +124,7 @@ class WidgetPromotionService {
                 ),
               ),
             ),
-            const SizedBox(height: 16), // Safe area spacing
+            const SizedBox(height: 16),
           ],
         ),
       ),

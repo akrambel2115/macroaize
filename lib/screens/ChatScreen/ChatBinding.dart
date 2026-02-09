@@ -1,6 +1,6 @@
-import 'package:foodcalorietracker/screens/ChatScreen/ChatController.dart';
+import 'package:macroaize/screens/ChatScreen/ChatController.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/app_user_service.dart';
+import 'package:macroaize/shared/services/app_user_service.dart';
 
 class ChatBinding extends Bindings {
   @override

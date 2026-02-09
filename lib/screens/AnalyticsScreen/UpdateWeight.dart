@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
+import 'package:macroaize/constant/AppColor.dart';
 
 void showUpdateWeightDialog(
   BuildContext context,
   String initialValue,
-  Function(String) onUpdate,
-) {
+  Function(String) onUpdate, {
+  String? title,
+}) {
   const int minWeight = 20; // kg
   const int maxWeight = 150; // kg (cap)
 
@@ -26,7 +27,7 @@ void showUpdateWeightDialog(
           return AlertDialog(
             backgroundColor: context.theme.cardColor,
             title: Text(
-              "Update Weight Goal".tr,
+              title ?? "Update Weight".tr,
               style: context.textTheme.headlineMedium,
             ),
             content: Column(

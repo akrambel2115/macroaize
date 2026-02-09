@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 
 class RevenueCatService {
   static final RevenueCatService _instance = RevenueCatService._internal();
@@ -32,9 +33,7 @@ class RevenueCatService {
       print('RevenueCat: Checking dotenv...');
       print('dotenv.isInitialized: ${dotenv.isInitialized}');
       print('All keys in dotenv: ${dotenv.env.keys.toList()}');
-      print(
-        'IOS_PUBLIC_SDK_KEY value: "${dotenv.env['IOS_PUBLIC_SDK_KEY']}"',
-      );
+      print('IOS_PUBLIC_SDK_KEY value: "${dotenv.env['IOS_PUBLIC_SDK_KEY']}"');
       print(
         'ANDROID_PUBLIC_SDK_KEY value: "${dotenv.env['ANDROID_PUBLIC_SDK_KEY']}"',
       );
@@ -123,8 +122,31 @@ class RevenueCatService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
+      if (kDebugMode) {
+        print('RevenueCat: Identifying with user ${user.uid}');
+      }
       await Purchases.logIn(user.uid);
-    } catch (_) {}
+      if (kDebugMode) {
+        print('RevenueCat: Successfully identified user ${user.uid}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('RevenueCat: Error identifying user: $e');
+      }
+    }
+  }
+
+  Future<void> logOut() async {
+    try {
+      await Purchases.logOut();
+      if (kDebugMode) {
+        print('RevenueCat: Logged out app user');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('RevenueCat: Error logging out app user: $e');
+      }
+    }
   }
 
   Future<bool> restorePurchases() async {
@@ -144,6 +166,24 @@ class RevenueCatService {
         print('RevenueCat: Error fetching offerings: $e');
       }
       return null;
+    }
+  }
+
+  Future<void> refreshSubscription() async {
+    try {
+      if (kDebugMode) {
+        print('RevenueCat: Forcing subscription refresh via Cloud Function...');
+      }
+      final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+      final callable = functions.httpsCallable('refreshSubscription');
+      await callable.call();
+      if (kDebugMode) {
+        print('RevenueCat: Subscription refresh triggered successfully.');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('RevenueCat: Error refreshing subscription: $e');
+      }
     }
   }
 
@@ -183,8 +223,26 @@ class RevenueCatService {
                     : (throw Exception('no-packages')),
       );
 
-      // store promo for tracking
+      // store promo for tracking - call Cloud Function so webhook can access it
       if (promoCode != null && promoCode.isNotEmpty) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          try {
+            final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
+            await functions.httpsCallable('storePromoCodeForPurchase').call({
+              'promoCode': promoCode,
+            });
+            if (kDebugMode) {
+              print('RevenueCat: Stored promo code via Cloud Function: $promoCode');
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('RevenueCat: Failed to store promo code: $e');
+            }
+            // Continue with purchase even if promo storage fails
+          }
+        }
+        // Also set as RevenueCat attribute for backup tracking
         await Purchases.setAttributes({
           'promo_code': promoCode,
           'promo_applied_at': DateTime.now().toIso8601String(),

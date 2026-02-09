@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingController extends GetxController {

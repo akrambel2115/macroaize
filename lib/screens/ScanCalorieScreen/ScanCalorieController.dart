@@ -3,21 +3,27 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/Model/CalorieHistoryModel.dart';
-import 'package:foodcalorietracker/Model/SqlCalorieModel.dart';
-import 'package:foodcalorietracker/NetworkHelp/openAiCalling.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
+import 'package:macroaize/Model/CalorieHistoryModel.dart';
+import 'package:macroaize/Model/SqlCalorieModel.dart';
+import 'package:macroaize/NetworkHelp/openAiCalling.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../Model/SqlDailyCalorieModel.dart';
 import '../../shared/services/UsdaApiService.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:macroaize/widgets/MealShareCard.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../Model/MealBreakdownItem.dart';
 import '../../shared/services/rate_us_service.dart';
 import '../../shared/services/widget_promotion_service.dart';
+import '../../shared/services/streak_service.dart';
+import '../../shared/services/meal_sync_service.dart';
+import '../../shared/services/local_notification_service.dart';
 
 enum ScanUnit { unit, gram, ml, cup }
 
@@ -29,8 +35,7 @@ class ScanCalorieController extends GetxController {
 
   // unit selection
   ScanUnit selectedUnit = ScanUnit.unit;
-  double customAmount =
-      1.0;
+  double customAmount = 1.0;
   double totalNetWeight = 100.0;
   String netWeightUnit = 'g';
   bool isBarcode = false;
@@ -53,7 +58,10 @@ class ScanCalorieController extends GetxController {
   final dbHelper = DatabaseHelper();
   int? usdaFdcId;
   bool usdaVerified = false;
-  final _usda = UsdaApiService();
+  UsdaApiService _usda = UsdaApiService();
+  ScreenshotController screenshotController = ScreenshotController();
+
+  MealShareCard? shareCard;
   List<UsdaFood> usdaOptions = const [];
 
   final List<MealBreakdownItem> items = [];
@@ -665,6 +673,7 @@ class ScanCalorieController extends GetxController {
 
   onAddButton(BuildContext context) async {
     List<SqlCalorieModel> calorieData = await dbHelper.getCalorieData();
+    if (!context.mounted) return;
     addSqlData(type);
     if (calorieData.isEmpty) {
       int id = await dbHelper.insertCalorie(
@@ -684,6 +693,21 @@ class ScanCalorieController extends GetxController {
           calorie: calorieQuantity,
           calorieId: id,
         ),
+      );
+      await StreakService().recordActivity();
+      // Sync to Firestore for notifications
+      MealSyncService().syncMealLog(
+        mealType: type,
+        calories: calorieQuantity,
+        protein: proteinQuantity.round(),
+        carbs: carbsQuantity.round(),
+        fats: fatsQuantity.round(),
+        dailyGoal: ConstantUserMaster.calorieGoal,
+      );
+      // Check goal progress for notification
+      _showGoalNotificationIfNeeded(
+        calorieQuantity,
+        ConstantUserMaster.calorieGoal,
       );
       Get.offAllNamed(Routes.leadingView);
       RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
@@ -715,6 +739,21 @@ class ScanCalorieController extends GetxController {
               calorieId: calorieData.last.id!,
             ),
           );
+          await StreakService().recordActivity();
+          // Sync to Firestore for notifications
+          MealSyncService().syncMealLog(
+            mealType: type,
+            calories: calorieQuantity,
+            protein: proteinQuantity.round(),
+            carbs: carbsQuantity.round(),
+            fats: fatsQuantity.round(),
+            dailyGoal: ConstantUserMaster.calorieGoal,
+          );
+          // Check goal progress for notification
+          _showGoalNotificationIfNeeded(
+            calorieData.last.calorie + calorieQuantity,
+            ConstantUserMaster.calorieGoal,
+          );
           Get.offAllNamed(Routes.leadingView);
           RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
           WidgetPromotionService().showPromotionIfNeeded();
@@ -737,6 +776,16 @@ class ScanCalorieController extends GetxController {
             calorie: calorieQuantity,
             calorieId: id,
           ),
+        );
+        await StreakService().recordActivity();
+        // Sync to Firestore for notifications
+        MealSyncService().syncMealLog(
+          mealType: type,
+          calories: calorieQuantity,
+          protein: proteinQuantity.round(),
+          carbs: carbsQuantity.round(),
+          fats: fatsQuantity.round(),
+          dailyGoal: ConstantUserMaster.calorieGoal,
         );
         Get.offAllNamed(Routes.leadingView);
         RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
@@ -941,5 +990,61 @@ class ScanCalorieController extends GetxController {
         );
       },
     );
+  }
+
+  Future<void> shareMealResult() async {
+    try {
+      final imageUint8List = await screenshotController.captureFromWidget(
+        MealShareCard(
+          mealImage: image,
+          calories: calorieQuantity,
+          protein: proteinQuantity,
+          carbs: carbsQuantity,
+          fats: fatsQuantity,
+        ),
+        delay: const Duration(milliseconds: 100),
+      );
+
+      final directory = await getTemporaryDirectory();
+      final imagePath =
+          '${directory.path}/meal_share_${DateTime.now().millisecondsSinceEpoch}.png';
+      final imageFile = File(imagePath);
+      await imageFile.writeAsBytes(imageUint8List);
+
+      await Share.shareXFiles([
+        XFile(imagePath),
+      ], text: 'Check out my meal on Macroaize! 🥗🔥');
+    } catch (e) {
+      log('SHARE_MEAL_ERROR => $e');
+      try {
+        Fluttertoast.showToast(msg: "Error sharing meal result");
+      } catch (_) {}
+    }
+  }
+
+  /// Show goal progress notification (50% and 100% milestones)
+  Future<void> _showGoalNotificationIfNeeded(
+    int totalCalories,
+    int goal,
+  ) async {
+    if (goal <= 0) return;
+
+    try {
+      if (!Get.isRegistered<LocalNotificationService>()) return;
+
+      final int percent = ((totalCalories / goal) * 100).round();
+      final localNotifService = Get.find<LocalNotificationService>();
+
+      // Show notification for 50% or 100% milestones
+      if (percent >= 100) {
+        await localNotifService.showGoalProgress(100);
+        if (kDebugMode) print('Goal progress notification: 100%');
+      } else if (percent >= 50 && percent < 100) {
+        await localNotifService.showGoalProgress(percent);
+        if (kDebugMode) print('Goal progress notification: $percent%');
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error showing goal progress notification: $e');
+    }
   }
 }

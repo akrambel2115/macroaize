@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../features/auth/domain/auth_repository.dart';
 import '../../shared/services/notification_service.dart';
 import '../../shared/services/email_verification_guard.dart';
+import '../../SharePrefHelper/SharePref.dart';
+import '../../SharePrefHelper/SharePrefKey.dart';
 import '../../routes/app_routes.dart';
 
 class EmailVerificationController extends GetxController {
@@ -62,11 +64,22 @@ class EmailVerificationController extends GetxController {
     }
   }
 
-  void _onVerificationSuccess() {
+  void _onVerificationSuccess() async {
     NotificationService.showSuccess('email_verification_success');
-    // Navigate to home or appropriate screen after build is complete
+
+    // Check if onboarding is complete before deciding where to navigate
+    final onboardingCompleted =
+        await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
+
+    // Navigate after build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.offAllNamed(Routes.leadingView);
+      if (onboardingCompleted) {
+        // Onboarding done, go to home
+        Get.offAllNamed(Routes.leadingView);
+      } else {
+        // Onboarding not complete, return to signup flow
+        Get.offAllNamed(Routes.signUpView);
+      }
     });
   }
 
@@ -122,14 +135,22 @@ class EmailVerificationController extends GetxController {
     });
   }
 
-  void skipVerification() {
+  void skipVerification() async {
     // Mark that user skipped verification for this session
     final guard = EmailVerificationGuard();
     guard.markVerificationSkipped();
 
-    // Navigate directly to home page
-    // User keeps unverified state - features will still require verification
-    Get.offAllNamed(Routes.leadingView);
+    // Check if onboarding is complete before deciding where to navigate
+    final onboardingCompleted =
+        await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
+
+    if (onboardingCompleted) {
+      // Onboarding done, go to home
+      Get.offAllNamed(Routes.leadingView);
+    } else {
+      // Onboarding not complete, return to signup flow
+      Get.offAllNamed(Routes.signUpView);
+    }
   }
 
   String _mapFailureToKey(failure) {

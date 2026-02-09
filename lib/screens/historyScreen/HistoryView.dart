@@ -1,13 +1,12 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/screens/historyScreen/DeleteDailog.dart';
-import 'package:foodcalorietracker/screens/historyScreen/HistoryController.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ContinueButton.dart';
-import 'package:foodcalorietracker/widgets/ModernCard.dart';
-import 'package:foodcalorietracker/widgets/NutritionBadge.dart';
+import 'package:macroaize/constant/AppAssets.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/screens/historyScreen/DeleteDailog.dart';
+import 'package:macroaize/screens/historyScreen/HistoryController.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/ContinueButton.dart';
+import 'package:macroaize/widgets/ModernCard.dart';
+import 'package:macroaize/widgets/NutritionBadge.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
 

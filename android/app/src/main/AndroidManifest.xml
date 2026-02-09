@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- Notifications (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:label="macroAize"
         android:name="${applicationName}"
@@ -60,6 +63,29 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info_large" />
         </receiver>
+
+        <receiver android:name=".StreakWidgetProvider" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info_streak" />
+        </receiver>
+
+        <!-- Boot receiver for rescheduling notifications after device restart -->
+        <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver" 
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+        
+        <!-- Notification action receiver -->
+        <receiver android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" 
+            android:exported="false" />
     </application>
     <queries>
         <intent>

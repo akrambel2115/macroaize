@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foodcalorietracker/widgets/password_field.dart';
+import 'package:macroaize/widgets/password_field.dart';
 
 void main() {
   testWidgets('PasswordField toggles obscure and limits parent rebuilds', (

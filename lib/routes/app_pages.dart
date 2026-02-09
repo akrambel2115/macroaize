@@ -1,55 +1,60 @@
-import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsBinding.dart';
-import 'package:foodcalorietracker/screens/AdjustGoals/AdjustGoalsView.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsBinding.dart';
-import 'package:foodcalorietracker/screens/AnalyticsScreen/AnalyticsView.dart';
-import 'package:foodcalorietracker/screens/ChatHistoryScreen/ChatHistoryBinding.dart';
-import 'package:foodcalorietracker/screens/ChatHistoryScreen/ChatHistoryView.dart';
-import 'package:foodcalorietracker/screens/ChatScreen/ChatBinding.dart';
-import 'package:foodcalorietracker/screens/ChatScreen/ChatView.dart';
-import 'package:foodcalorietracker/screens/HomeScreen/HomeBinding.dart';
-import 'package:foodcalorietracker/screens/HomeScreen/HomeView.dart';
-import 'package:foodcalorietracker/screens/LocalFoodScreen/LocalFoodBinding.dart';
-import 'package:foodcalorietracker/screens/LocalFoodScreen/LocalFoodView.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsBinding.dart';
-import 'package:foodcalorietracker/screens/PersonalDetailsScreen/PersonalDetailsView.dart';
-import 'package:foodcalorietracker/screens/PremiumScreen/PremiumBinding.dart';
-import 'package:foodcalorietracker/screens/PremiumScreen/PremiumView.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipesBinding.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipesView.dart';
-import 'package:foodcalorietracker/screens/ScanCalorieScreen/ScanCalorieBinding.dart';
-import 'package:foodcalorietracker/screens/ScanCalorieScreen/ScanCalorieView.dart';
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodBinding.dart';
-import 'package:foodcalorietracker/screens/ScanFoodView/ScanFoodView.dart';
-import 'package:foodcalorietracker/screens/SettingScreen/SettingBinding.dart';
-import 'package:foodcalorietracker/screens/SettingScreen/SettingView.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SingUpBinding.dart';
-import 'package:foodcalorietracker/screens/SignUpScreens/SingUpView.dart';
-import 'package:foodcalorietracker/screens/historyScreen/HistoryBinding.dart';
-import 'package:foodcalorietracker/screens/historyScreen/HistoryView.dart';
-import 'package:foodcalorietracker/screens/languageScreen/languageBinding.dart';
-import 'package:foodcalorietracker/screens/languageScreen/languageView.dart';
-import 'package:foodcalorietracker/screens/leadingScreen/LeadingBinding.dart';
-import 'package:foodcalorietracker/screens/leadingScreen/LeadingView.dart';
-import 'package:foodcalorietracker/screens/onBording/OnBoardingBinding.dart';
-import 'package:foodcalorietracker/screens/splash/SplashBinding.dart';
-import 'package:foodcalorietracker/screens/splash/SplashView.dart';
-import 'package:foodcalorietracker/screens/welcome/WelcomeBinding.dart';
-import 'package:foodcalorietracker/screens/welcome/WelcomeView.dart';
-import 'package:foodcalorietracker/screens/planIntro/PlanIntroBinding.dart';
-import 'package:foodcalorietracker/screens/planIntro/PlanIntroView.dart';
-import 'package:foodcalorietracker/screens/transition/TransitionBinding.dart';
-import 'package:foodcalorietracker/screens/transition/TransitionView.dart';
-import 'package:foodcalorietracker/screens/WithdrawalHistoryScreen/WithdrawalHistoryBinding.dart';
-import 'package:foodcalorietracker/screens/WithdrawalHistoryScreen/WithdrawalHistoryView.dart';
+import 'package:macroaize/screens/AdjustGoals/AdjustGoalsBinding.dart';
+import 'package:macroaize/screens/AdjustGoals/AdjustGoalsView.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsBinding.dart';
+import 'package:macroaize/screens/AnalyticsScreen/AnalyticsView.dart';
+import 'package:macroaize/screens/ChatHistoryScreen/ChatHistoryBinding.dart';
+import 'package:macroaize/screens/ChatHistoryScreen/ChatHistoryView.dart';
+import 'package:macroaize/screens/ChatScreen/ChatBinding.dart';
+import 'package:macroaize/screens/ChatScreen/ChatView.dart';
+import 'package:macroaize/screens/HomeScreen/HomeBinding.dart';
+import 'package:macroaize/screens/HomeScreen/HomeView.dart';
+import 'package:macroaize/screens/LocalFoodScreen/LocalFoodBinding.dart';
+import 'package:macroaize/screens/LocalFoodScreen/LocalFoodView.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/PersonalDetailsBinding.dart';
+import 'package:macroaize/screens/PersonalDetailsScreen/PersonalDetailsView.dart';
+import 'package:macroaize/screens/PremiumScreen/PremiumBinding.dart';
+import 'package:macroaize/screens/PremiumScreen/PremiumView.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipesBinding.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipesView.dart';
+import 'package:macroaize/screens/ScanCalorieScreen/ScanCalorieBinding.dart';
+import 'package:macroaize/screens/ScanCalorieScreen/ScanCalorieView.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodBinding.dart';
+import 'package:macroaize/screens/ScanFoodView/ScanFoodView.dart';
+import 'package:macroaize/screens/SettingScreen/SettingBinding.dart';
+import 'package:macroaize/screens/SettingScreen/SettingView.dart';
+import 'package:macroaize/screens/SignUpScreens/SingUpBinding.dart';
+import 'package:macroaize/screens/SignUpScreens/SingUpView.dart';
+import 'package:macroaize/screens/historyScreen/HistoryBinding.dart';
+import 'package:macroaize/screens/historyScreen/HistoryView.dart';
+import 'package:macroaize/screens/languageScreen/languageBinding.dart';
+import 'package:macroaize/screens/languageScreen/languageView.dart';
+import 'package:macroaize/screens/leadingScreen/LeadingBinding.dart';
+import 'package:macroaize/screens/leadingScreen/LeadingView.dart';
+import 'package:macroaize/screens/onBording/OnBoardingBinding.dart';
+import 'package:macroaize/screens/splash/SplashBinding.dart';
+import 'package:macroaize/screens/splash/SplashView.dart';
+import 'package:macroaize/screens/welcome/WelcomeBinding.dart';
+import 'package:macroaize/screens/welcome/WelcomeView.dart';
+import 'package:macroaize/screens/planIntro/PlanIntroBinding.dart';
+import 'package:macroaize/screens/planIntro/PlanIntroView.dart';
+import 'package:macroaize/screens/transition/TransitionBinding.dart';
+import 'package:macroaize/screens/transition/TransitionView.dart';
+import 'package:macroaize/screens/WithdrawalHistoryScreen/WithdrawalHistoryBinding.dart';
+import 'package:macroaize/screens/WithdrawalHistoryScreen/WithdrawalHistoryView.dart';
 import 'package:get/get.dart';
-import 'package:foodcalorietracker/screens/AccountDetails/AccountDetailsView.dart';
-import 'package:foodcalorietracker/routes/directional_transition.dart';
+import 'package:macroaize/screens/AccountDetails/AccountDetailsView.dart';
+import 'package:macroaize/routes/directional_transition.dart';
 import '../screens/onBording/OnBoardingView.dart';
 import 'app_routes.dart';
-import 'package:foodcalorietracker/Model/Recipe.dart';
-import 'package:foodcalorietracker/screens/RecipesScreen/RecipeDetailScreen.dart';
-import 'package:foodcalorietracker/screens/EmailVerificationScreen/EmailVerificationView.dart';
-import 'package:foodcalorietracker/screens/EmailVerificationScreen/EmailVerificationBinding.dart';
+import 'package:macroaize/Model/Recipe.dart';
+import 'package:macroaize/screens/RecipesScreen/RecipeDetailScreen.dart';
+import 'package:macroaize/screens/EmailVerificationScreen/EmailVerificationView.dart';
+import 'package:macroaize/screens/EmailVerificationScreen/EmailVerificationBinding.dart';
+import 'package:macroaize/screens/WorkoutScreen/WorkoutView.dart';
+import 'package:macroaize/screens/WorkoutScreen/WorkoutBinding.dart';
+import 'package:macroaize/screens/DailyStreakScreen/DailyStreakView.dart';
+import 'package:macroaize/screens/DailyStreakScreen/DailyStreakBinding.dart';
+import 'package:macroaize/screens/SettingScreen/notification_settings_view.dart';
 
 class AppPages {
   AppPages._();
@@ -204,6 +209,23 @@ class AppPages {
       binding: EmailVerificationBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: Paths.workoutView,
+      page: () => const WorkoutView(),
+      binding: WorkoutBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Paths.dailyStreakView,
+      page: () => const DailyStreakView(),
+      binding: DailyStreakBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Paths.notificationSettingsView,
+      page: () => const NotificationSettingsView(),
+      transition: Transition.rightToLeft,
     ),
   ];
 }

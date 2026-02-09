@@ -1,33 +1,34 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/MainController.dart';
-import 'package:foodcalorietracker/SharePrefHelper/ConstantUserMaster.dart';
-import 'package:foodcalorietracker/SharePrefHelper/SharePref.dart';
-import 'package:foodcalorietracker/constant/AppColor.dart';
-import 'package:foodcalorietracker/constant/AppAssets.dart';
-import 'package:foodcalorietracker/constant/DatabaseHelper.dart';
-import 'package:foodcalorietracker/routes/app_pages.dart';
-import 'package:foodcalorietracker/routes/app_routes.dart';
-import 'package:foodcalorietracker/screens/SettingScreen/SettingController.dart';
-import 'package:foodcalorietracker/widgets/ModernAnimations.dart';
-import 'package:foodcalorietracker/widgets/ModernButton.dart';
-import 'package:foodcalorietracker/widgets/ModernCard.dart';
+import 'package:macroaize/MainController.dart';
+import 'package:macroaize/SharePrefHelper/ConstantUserMaster.dart';
+import 'package:macroaize/SharePrefHelper/SharePref.dart';
+import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/constant/AppAssets.dart';
+import 'package:macroaize/constant/DatabaseHelper.dart';
+import 'package:macroaize/routes/app_pages.dart';
+import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/screens/SettingScreen/SettingController.dart';
+import 'package:macroaize/widgets/ModernAnimations.dart';
+import 'package:macroaize/widgets/ModernButton.dart';
+import 'package:macroaize/widgets/ModernCard.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:foodcalorietracker/features/auth/presentation/auth_modal.dart';
-import 'package:foodcalorietracker/shared/models/subscription.dart';
-import 'package:foodcalorietracker/shared/services/subscription_service.dart';
-import 'package:foodcalorietracker/shared/services/usage_service.dart';
-import 'package:foodcalorietracker/shared/models/user_usage.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
-import 'package:foodcalorietracker/shared/services/influencer_service.dart';
-import 'package:foodcalorietracker/shared/models/influencer.dart';
+import 'package:macroaize/features/auth/presentation/auth_modal.dart';
+import 'package:macroaize/shared/models/subscription.dart';
+import 'package:macroaize/shared/services/subscription_service.dart';
+import 'package:macroaize/shared/services/usage_service.dart';
+import 'package:macroaize/shared/models/user_usage.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/influencer_service.dart';
+import 'package:macroaize/shared/models/influencer.dart';
 import 'subscription_status_card.dart';
 import '../../ThemeService/ThemeController.dart';
-import 'package:foodcalorietracker/shared/services/notification_service.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:intl/intl.dart';
-import 'package:foodcalorietracker/shared/services/widget_promotion_service.dart';
+import 'package:macroaize/shared/services/widget_promotion_service.dart';
+import 'package:macroaize/widgets/WidgetPreviewCards.dart';
 
 // settings menu config
 class SettingConfig {
@@ -51,6 +52,12 @@ class SettingConfig {
       'icon': Icons.chat_bubble_outline,
       'color': AppColor.secondary,
       'route': Routes.chatHistoryView,
+    },
+    {
+      'title': 'notification_settings',
+      'icon': Icons.notifications_outlined,
+      'color': AppColor.tertiary,
+      'route': Routes.notificationSettingsView,
     },
     {
       'title': 'Home Screen Widgets',
@@ -261,7 +268,8 @@ class SettingView extends GetView<SettingController> {
                     }
 
                     // show live usage
-                    return StreamBuilder<UserUsage?>(                      stream: usageService.usageStream,
+                    return StreamBuilder<UserUsage?>(
+                      stream: usageService.usageStream,
                       builder: (context, usageSnapshot) {
                         if (usageSnapshot.connectionState ==
                                 ConnectionState.waiting ||
@@ -342,7 +350,8 @@ class SettingView extends GetView<SettingController> {
         }
 
         // listen subscription
-        return StreamBuilder<Subscription?>(          stream: _subscriptionService.subscriptionStream,
+        return StreamBuilder<Subscription?>(
+          stream: _subscriptionService.subscriptionStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -601,6 +610,10 @@ class SettingView extends GetView<SettingController> {
                             : null,
                         item['icon'] as IconData,
                         item['color'] as Color,
+                        previewWidget:
+                            item['action'] == 'widgets'
+                                ? const WidgetPreviewCards()
+                                : null,
                         onTap: () {
                           if (item.containsKey('route')) {
                             Get.toNamed(item['route'] as String);
@@ -772,6 +785,7 @@ class SettingView extends GetView<SettingController> {
     VoidCallback? onTap,
     Widget? trailing,
     Color? textColor,
+    Widget? previewWidget,
   }) {
     return Material(
       color: Colors.transparent,
@@ -785,50 +799,61 @@ class SettingView extends GetView<SettingController> {
           return AppColor.neutralGrey800.withOpacity(0.12);
         }),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
+          padding: const EdgeInsets.symmetric(
+            vertical: 8,
+          ), // Increased vertical padding
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: textColor,
-                      ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: iconColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: AppColor.neutralGrey600,
-                          fontSize:
-                              12.0, // reduced size for subtitle/description
+                    child: Icon(icon, color: iconColor, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: textColor,
+                          ),
                         ),
-                      ),
-                    ],
-                  ],
-                ),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: AppColor.neutralGrey600,
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (trailing != null)
+                    trailing
+                  else
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 14,
+                      color: context.theme.iconTheme.color?.withOpacity(0.5),
+                    ),
+                ],
               ),
-              if (trailing != null)
-                trailing
-              else if (onTap != null)
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppColor.neutralGrey400,
+              if (previewWidget != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, left: 0),
+                  child: previewWidget,
                 ),
             ],
           ),
@@ -1180,77 +1205,6 @@ class SettingView extends GetView<SettingController> {
     );
   }
 
-  Widget _buildWithdrawalHistoryItem(
-    BuildContext context,
-    WithdrawalRecord withdrawal,
-  ) {
-    Color statusColor;
-    switch (withdrawal.status.toLowerCase()) {
-      case 'completed':
-        statusColor = AppColor.success;
-        break;
-      case 'processing':
-        statusColor = AppColor.warning;
-        break;
-      case 'failed':
-        statusColor = AppColor.error;
-        break;
-      default:
-        statusColor = AppColor.neutralGrey600;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColor.neutralGrey200, width: 1),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${withdrawal.amount.toStringAsFixed(0)} DZD',
-                  style: context.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  withdrawal.requestedAt != null
-                      ? 'requested_on'.trParams({
-                        'date': _formatDate(withdrawal.requestedAt!),
-                      })
-                      : 'unknown_date'.tr,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: AppColor.neutralGrey600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              withdrawal.statusDisplay,
-              style: context.textTheme.labelSmall?.copyWith(
-                color: statusColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildExpirationInfo(BuildContext context, Influencer influencer) {
     if (influencer.isExpired) {
       return Container(
@@ -1321,519 +1275,408 @@ class SettingView extends GetView<SettingController> {
     bool isProcessing = false;
     String? errorMessage;
 
-    Get.dialog(
+    Get.bottomSheet(
       StatefulBuilder(
         builder: (context, setState) {
-          return AlertDialog(
-            backgroundColor: context.theme.cardColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+          return Container(
+            decoration: BoxDecoration(
+              color: context.theme.scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(28),
+                topRight: Radius.circular(28),
+              ),
             ),
-            scrollable: true,
-            title: Row(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    'request_withdrawal'.tr,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  color: AppColor.neutralGrey600,
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                  constraints: BoxConstraints.tightFor(width: 32, height: 32),
-                  onPressed: isProcessing ? null : () => Get.back(),
-                ),
-              ],
-            ),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // balance info
-                  Container(
-                    padding: const EdgeInsets.all(16),
+                // Drag handle
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 24),
+                    width: 48,
+                    height: 5,
                     decoration: BoxDecoration(
-                      color: AppColor.success.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColor.success.withOpacity(0.3),
-                        width: 1,
-                      ),
+                      color: AppColor.neutralGrey300.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Row(
+                  ),
+                ),
+
+                // Scrollable Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.account_balance_wallet,
-                          color: AppColor.success,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
+                        // Header text
                         Text(
-                          'available_balance'.tr,
-                          style: context.textTheme.labelMedium?.copyWith(
+                          'request_withdrawal'.tr,
+                          style: context.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'withdrawal_subtitle'.tr,
+                          style: context.textTheme.bodyMedium?.copyWith(
                             color: AppColor.neutralGrey600,
-                            fontWeight: FontWeight.w600,
+                            height: 1.4,
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          '${influencer.earningsDzd.toStringAsFixed(0)} ${'currency_dzd'.tr}',
-                          style: context.textTheme.titleMedium?.copyWith(
-                            color: AppColor.success,
-                            fontWeight: FontWeight.bold,
+
+                        const SizedBox(height: 32),
+
+                        // Hero Balance Display
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: context.theme.cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppColor.neutralGrey300.withOpacity(0.3),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // amount input
-                  Text(
-                    'withdrawal_amount'.tr,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: amountController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'enter_amount'.tr,
-                      suffixText: 'currency_dzd'.tr,
-                      errorStyle: context.textTheme.labelMedium?.copyWith(
-                        color: AppColor.error,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      errorText:
-                          errorMessage?.contains('amount') == true
-                              ? errorMessage
-                              : null,
-                    ),
-                    onChanged: (value) {
-                      if (errorMessage != null) {
-                        setState(() => errorMessage = null);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // rip input
-                  Text(
-                    'bank_account_rip'.tr,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: ripController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'enter_rip_number'.tr,
-                      errorStyle: context.textTheme.labelMedium?.copyWith(
-                        color: AppColor.error,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      errorText:
-                          errorMessage?.contains('RIP') == true
-                              ? errorMessage
-                              : null,
-                    ),
-                    onChanged: (value) {
-                      if (errorMessage != null) {
-                        setState(() => errorMessage = null);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: [
-              ModernButton(
-                text: isProcessing ? 'processing'.tr : 'request_withdrawal'.tr,
-                style:
-                    isProcessing
-                        ? ModernButtonStyle.outline
-                        : ModernButtonStyle.primary,
-                size: ModernButtonSize.medium,
-                onPressed:
-                    isProcessing
-                        ? null
-                        : () async {
-                          final amountText = amountController.text.trim();
-                          final ripText = ripController.text.trim();
-
-                          // validation
-                          if (amountText.isEmpty) {
-                            setState(
-                              () =>
-                                  errorMessage =
-                                      'Please enter withdrawal amount',
-                            );
-                            return;
-                          }
-
-                          final amount = double.tryParse(amountText);
-                          if (amount == null || amount <= 0) {
-                            setState(
-                              () =>
-                                  errorMessage = 'Please enter a valid amount',
-                            );
-                            return;
-                          }
-
-                          if (amount > influencer.earningsDzd) {
-                            NotificationService.showError(
-                              'Amount exceeds available balance',
-                            );
-                            return;
-                          }
-
-                          if (amount < influencer.minWithdrawal) {
-                            NotificationService.showError(
-                              'minimum_withdrawal_amount'.trParams({
-                                'amount': influencer.minWithdrawal
-                                    .toStringAsFixed(0),
-                              }),
-                            );
-                            return;
-                          }
-
-                          if (ripText.isEmpty) {
-                            setState(
-                              () =>
-                                  errorMessage = 'Please enter your RIP number',
-                            );
-                            return;
-                          }
-
-                          if (ripText.length < 20 || ripText.length > 24) {
-                            setState(
-                              () =>
-                                  errorMessage =
-                                      'RIP number must be 20-24 digits',
-                            );
-                            return;
-                          }
-
-                          // process withdrawal
-                          setState(() {
-                            isProcessing = true;
-                            errorMessage = null;
-                          });
-
-                          try {
-                            final result = await _influencerService
-                                .processWithdrawal(amount, ripText);
-
-                            Get.back();
-
-                            if (result.success) {
-                              _showProcessingTimeAlert(
-                                context,
-                                result.withdrawalId ?? 'Unknown',
-                                3,
-                              );
-                              NotificationService.showSuccess(result.message);
-                            } else {
-                              NotificationService.showError(result.message);
-                            }
-                          } catch (e) {
-                            setState(() {
-                              isProcessing = false;
-                            });
-                            NotificationService.showError(
-                              e.toString().replaceAll('Exception: ', ''),
-                            );
-                          }
-                        },
-              ),
-            ],
-          );
-        },
-      ),
-      barrierDismissible: !isProcessing,
-    );
-  }
-
-  // withdrawal history modal
-  void _showFullWithdrawalHistory(
-    BuildContext context,
-    List<WithdrawalRecord> withdrawalHistory,
-  ) {
-    Get.dialog(
-      Dialog(
-        backgroundColor: context.theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: Get.height * 0.8,
-            maxWidth: Get.width * 0.9,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // header
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColor.primaryOrange.withOpacity(0.1),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.history,
-                      color: AppColor.primaryOrange,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'withdrawal_history'.tr,
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColor.primaryOrange,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      color: AppColor.neutralGrey600,
-                      onPressed: () => Get.back(),
-                    ),
-                  ],
-                ),
-              ),
-
-              // content
-              Flexible(
-                child:
-                    withdrawalHistory.isEmpty
-                        ? Container(
-                          padding: const EdgeInsets.all(40),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                          child: Row(
                             children: [
-                              Icon(
-                                Icons.inbox_outlined,
-                                size: 48,
-                                color: AppColor.neutralGrey400,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'no_withdrawal_history'.tr,
-                                style: context.textTheme.titleMedium?.copyWith(
-                                  color: AppColor.neutralGrey600,
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColor.success.withOpacity(0.1),
+                                  shape: BoxShape.circle,
                                 ),
+                                child: Icon(
+                                  Icons.account_balance_wallet_rounded,
+                                  color: AppColor.success,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'available_balance'.tr.toUpperCase(),
+                                    style: context.textTheme.labelSmall
+                                        ?.copyWith(
+                                          color: AppColor.neutralGrey600,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 1,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${influencer.earningsDzd.toStringAsFixed(0)} ${'currency_dzd'.tr}',
+                                    style: context.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          color:
+                                              context
+                                                  .textTheme
+                                                  .bodyLarge
+                                                  ?.color,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        )
-                        : ListView.separated(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.all(20),
-                          itemCount: withdrawalHistory.length,
-                          separatorBuilder:
-                              (context, index) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final withdrawal = withdrawalHistory[index];
-                            return _buildEnhancedWithdrawalHistoryItem(
-                              context,
-                              withdrawal,
-                            );
-                          },
                         ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      barrierDismissible: true,
-    );
-  }
 
-  // enhanced history item
-  Widget _buildEnhancedWithdrawalHistoryItem(
-    BuildContext context,
-    WithdrawalRecord withdrawal,
-  ) {
-    Color statusColor;
-    IconData statusIcon;
+                        const SizedBox(height: 32),
 
-    switch (withdrawal.status.toLowerCase()) {
-      case 'completed':
-        statusColor = AppColor.success;
-        statusIcon = Icons.check_circle;
-        break;
-      case 'processing':
-        statusColor = AppColor.warning;
-        statusIcon = Icons.schedule;
-        break;
-      case 'failed':
-      case 'cancelled':
-        statusColor = AppColor.error;
-        statusIcon = Icons.cancel;
-        break;
-      default:
-        statusColor = AppColor.neutralGrey600;
-        statusIcon = Icons.info;
-    }
+                        // Amount Input
+                        Text(
+                          'withdrawal_amount'.tr,
+                          style: context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: amountController,
+                          keyboardType: TextInputType.number,
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onChanged: (_) {
+                            if (errorMessage != null)
+                              setState(() => errorMessage = null);
+                          },
+                          decoration: InputDecoration(
+                            hintText: '0',
+                            filled: true,
+                            fillColor: context.theme.cardColor,
+                            suffixIcon: Container(
+                              margin: const EdgeInsets.all(8),
+                              child: TextButton(
+                                onPressed: () {
+                                  amountController.text = influencer.earningsDzd
+                                      .toStringAsFixed(0);
+                                  if (errorMessage != null)
+                                    setState(() => errorMessage = null);
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: AppColor.primaryOrange
+                                      .withOpacity(0.1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  'MAX',
+                                  style: TextStyle(
+                                    color: AppColor.primaryOrange,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            suffixText: 'currency_dzd'.tr,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: AppColor.primaryOrange,
+                                width: 1.5,
+                              ),
+                            ),
+                            errorText:
+                                (errorMessage == 'enter_withdrawal_amount'.tr ||
+                                        errorMessage ==
+                                            'enter_valid_amount'.tr ||
+                                        errorMessage ==
+                                            'amount_exceeds_balance')
+                                    ? errorMessage
+                                    : null,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, left: 4),
+                          child: Text(
+                            'minimum_withdrawal_amount'.trParams({
+                              'amount': influencer.minWithdrawal
+                                  .toStringAsFixed(0),
+                            }),
+                            style: context.textTheme.labelSmall?.copyWith(
+                              color: AppColor.neutralGrey600,
+                            ),
+                          ),
+                        ),
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: statusColor.withOpacity(0.2), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // header row
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '${withdrawal.amount.toStringAsFixed(0)} ${'currency_dzd'.tr}',
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                        const SizedBox(height: 24),
+
+                        // RIP Input
+                        Text(
+                          'bank_account_rip'.tr,
+                          style: context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: ripController,
+                          keyboardType: TextInputType.number,
+                          style: context.textTheme.titleMedium?.copyWith(
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onChanged: (_) {
+                            if (errorMessage != null)
+                              setState(() => errorMessage = null);
+                          },
+                          decoration: InputDecoration(
+                            hintText: '0000 0000 0000 0000 0000',
+                            filled: true,
+                            fillColor: context.theme.cardColor,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: AppColor.primaryOrange,
+                                width: 1.5,
+                              ),
+                            ),
+                            errorText:
+                                (errorMessage == 'enter_rip_number_error'.tr ||
+                                        errorMessage == 'rip_invalid_format'.tr)
+                                    ? errorMessage
+                                    : null,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, left: 4),
+                          child: Text(
+                            'rip_helper_text'.tr,
+                            style: context.textTheme.labelSmall?.copyWith(
+                              color: AppColor.neutralGrey600,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Action Button
+                        ModernButton(
+                          text:
+                              isProcessing
+                                  ? 'processing'.tr
+                                  : 'confirm_withdrawal'.tr,
+                          style: ModernButtonStyle.primary,
+                          size: ModernButtonSize.medium,
+                          loading: isProcessing,
+                          width: double.infinity,
+                          onPressed:
+                              isProcessing
+                                  ? null
+                                  : () async {
+                                    final amountText =
+                                        amountController.text.trim();
+                                    final ripText = ripController.text.trim();
+
+                                    // validation checks
+                                    if (amountText.isEmpty) {
+                                      setState(
+                                        () =>
+                                            errorMessage =
+                                                'enter_withdrawal_amount'.tr,
+                                      );
+                                      return;
+                                    }
+
+                                    final amount = double.tryParse(amountText);
+                                    if (amount == null || amount <= 0) {
+                                      setState(
+                                        () =>
+                                            errorMessage =
+                                                'enter_valid_amount'.tr,
+                                      );
+                                      return;
+                                    }
+
+                                    if (amount > influencer.earningsDzd) {
+                                      setState(
+                                        () =>
+                                            errorMessage =
+                                                'amount_exceeds_balance',
+                                      );
+                                      return;
+                                    }
+
+                                    if (amount < influencer.minWithdrawal) {
+                                      NotificationService.showError(
+                                        'minimum_withdrawal_amount'.trParams({
+                                          'amount': influencer.minWithdrawal
+                                              .toStringAsFixed(0),
+                                        }),
+                                      );
+                                      return;
+                                    }
+
+                                    if (ripText.isEmpty) {
+                                      setState(
+                                        () =>
+                                            errorMessage =
+                                                'enter_rip_number_error'.tr,
+                                      );
+                                      return;
+                                    }
+
+                                    final cleanRip = ripText.replaceAll(
+                                      RegExp(r'\s+'),
+                                      '',
+                                    );
+                                    if (!RegExp(
+                                      r'^\d{20}$',
+                                    ).hasMatch(cleanRip)) {
+                                      setState(
+                                        () =>
+                                            errorMessage =
+                                                'rip_invalid_format'.tr,
+                                      );
+                                      return;
+                                    }
+
+                                    // Process
+                                    setState(() {
+                                      isProcessing = true;
+                                      errorMessage = null;
+                                    });
+
+                                    try {
+                                      final result = await _influencerService
+                                          .processWithdrawal(amount, cleanRip);
+                                      Get.back();
+                                      if (result.success) {
+                                        if (!context.mounted) return;
+                                        _showProcessingTimeAlert(
+                                          context,
+                                          result.withdrawalId ?? 'Unknown',
+                                          3,
+                                        );
+                                        NotificationService.showSuccess(
+                                          result.message,
+                                        );
+                                      } else {
+                                        NotificationService.showError(
+                                          result.message,
+                                        );
+                                      }
+                                    } on WithdrawalException catch (e) {
+                                      setState(() => isProcessing = false);
+                                      // Show localized error message
+                                      NotificationService.showError(
+                                        e.localizationKey.tr,
+                                      );
+                                    } catch (e) {
+                                      setState(() => isProcessing = false);
+                                      // Generic fallback for unexpected errors
+                                      NotificationService.showError(
+                                        'withdrawal_request_failed'.tr,
+                                      );
+                                    }
+                                  },
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 14, color: statusColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      withdrawal.statusDisplay,
-                      style: context.textTheme.labelSmall?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // details grid
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  'request_id_short'.tr,
-                  withdrawal.id,
-                  Icons.confirmation_number_outlined,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  'bank_account_short'.tr,
-                  withdrawal.ripMasked,
-                  Icons.account_balance,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  'requested_date'.tr,
-                  withdrawal.requestedAt != null
-                      ? _formatDate(withdrawal.requestedAt!)
-                      : 'unknown_date'.tr,
-                  Icons.calendar_today,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  'processing_deadline'.tr,
-                  withdrawal.estimatedProcessingDate ?? 'unknown_date'.tr,
-                  Icons.schedule,
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          );
+        },
       ),
-    );
-  }
-
-  // detail item helper
-  Widget _buildDetailItem(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: AppColor.neutralGrey500),
-        const SizedBox(width: 4),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColor.neutralGrey600,
-                  fontSize: 10,
-                ),
-              ),
-              Text(
-                value,
-                style: context.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: !isProcessing,
     );
   }
 
@@ -1844,93 +1687,172 @@ class SettingView extends GetView<SettingController> {
     int processingDays,
   ) {
     Get.dialog(
-      AlertDialog(
+      Dialog(
         backgroundColor: context.theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColor.success.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check_circle,
-                color: AppColor.success,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'withdrawal_submitted'.tr,
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'request_id'.trParams({'id': withdrawalId}),
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColor.primaryOrange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Success Icon with Glow Layering
+              Stack(
+                alignment: Alignment.center,
                 children: [
-                  Icon(Icons.schedule, color: AppColor.primaryOrange),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'processing_time'.trParams({
-                        'days': processingDays.toString(),
-                      }),
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: AppColor.success.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: const BoxDecoration(
+                      color: AppColor.success,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 32,
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'withdrawal_email_confirmation'.tr,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: AppColor.neutralGrey600,
+              const SizedBox(height: 24),
+
+              // Title
+              Text(
+                'withdrawal_submitted'.tr,
+                textAlign: TextAlign.center,
+                style: context.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  height: 1.2,
+                ),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          ModernButton(
-            text: 'got_it'.tr,
-            style: ModernButtonStyle.primary,
-            size: ModernButtonSize.medium,
-            onPressed: () => Get.back(),
+              const SizedBox(height: 12),
+
+              // Description
+              Text(
+                'withdrawal_email_confirmation'.tr,
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: AppColor.neutralGrey600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Receipt / Details Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: context.theme.scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: context.theme.dividerColor.withOpacity(0.1),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Processing Time Row (Primary Info)
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColor.primaryOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.access_time_rounded,
+                            size: 18,
+                            color: AppColor.primaryOrange,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'processing_time'.trParams({
+                                  'days': processingDays.toString(),
+                                }),
+                                style: context.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(
+                        height: 1,
+                        color: context.theme.dividerColor.withOpacity(0.1),
+                      ),
+                    ),
+                    // Reference ID Row (Secondary Info)
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColor.primaryOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.receipt_long_rounded,
+                            size: 18,
+                            color: AppColor.primaryOrange,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Ref ID: $withdrawalId',
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Action Button
+              ModernButton(
+                text: 'got_it'.tr,
+                style: ModernButtonStyle.primary,
+                size: ModernButtonSize.medium,
+                width: double.infinity,
+                onPressed: () => Get.back(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       barrierDismissible: true,
     );
-  }
-
-  String _formatDate(DateTime date) {
-    // format by locale
-    return '${date.day}/${date.month}/${date.year}';
   }
 
   Future<void> logoutUser() async {
@@ -1940,16 +1862,5 @@ class SettingView extends GetView<SettingController> {
     await Get.find<ThemeController>().toggleTheme(true);
     NotificationService.showSuccess("account_reset_success".tr);
     Get.offAllNamed(AppPages.initial);
-  }
-
-  // ignore: unused_element
-  String _maskRip(String rip) {
-    if (rip.isEmpty) return '';
-    if (rip.length <= 4) return rip;
-
-    // mask all but last 4
-    final lastFour = rip.substring(rip.length - 4);
-    final masked = '*' * (rip.length - 4);
-    return '$masked$lastFour';
   }
 }

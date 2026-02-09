@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import '../Model/openAIModel.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
 
 class OpenAiCalling {
   static Future<String> analyzeMealItems(File image) async {

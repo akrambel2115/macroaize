@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:foodcalorietracker/shared/services/app_config_service.dart';
-import 'package:foodcalorietracker/screens/onBording/OnBoardingController.dart';
+import 'package:macroaize/shared/services/app_config_service.dart';
+import 'package:macroaize/screens/onBording/OnBoardingController.dart';
 import 'package:get/get.dart';
 import '../../../constant/AppColor.dart';
 import '../../../widgets/customText.dart';

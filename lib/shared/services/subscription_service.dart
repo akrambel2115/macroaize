@@ -1,63 +1,106 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import '../models/subscription.dart';
 import 'dart:async';
 
 class SubscriptionService {
-	SubscriptionService({FirebaseFirestore? firestore, FirebaseFunctions? functions})
-			: _firestore = firestore ?? FirebaseFirestore.instance,
-				_functions = functions ?? FirebaseFunctions.instanceFor(region: 'europe-west1');
+  SubscriptionService({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
-	final FirebaseFirestore _firestore;
-	final FirebaseFunctions _functions;
+  final FirebaseFirestore _firestore;
 
-	// realtime subscription stream
+  // realtime subscription stream combining Firestore + Local RevenueCat
   Stream<Subscription?> get subscriptionStream {
     return _authAwareSubscriptionStream();
   }
 
-  Stream<Subscription?> _authAwareSubscriptionStream() async* {
-    await for (final user in FirebaseAuth.instance.authStateChanges()) {
+  Stream<Subscription?> _authAwareSubscriptionStream() {
+    return FirebaseAuth.instance.authStateChanges().switchMap((user) {
       if (user == null) {
-        yield null;
-        continue;
+        return Stream.value(null);
       }
-      
-      yield* _firestore
+
+      // 1. Firestore Stream
+      final firestoreStream = _firestore
           .collection('subscriptions')
           .doc(user.uid)
           .snapshots()
-          .map((doc) {
-        if (!doc.exists) return null;
-        final data = doc.data();
-        if (data == null) return null;
-        return Subscription.fromFirestore(data);
+          .map(
+            (doc) =>
+                doc.exists ? Subscription.fromFirestore(doc.data()!) : null,
+          );
+
+      // 2. Local RevenueCat Stream
+      final rcStream = Stream<CustomerInfo>.multi((controller) {
+        Purchases.addCustomerInfoUpdateListener((info) {
+          controller.add(info);
+        });
+        // Emit initial value
+        Purchases.getCustomerInfo()
+            .then((info) => controller.add(info))
+            .catchError((_) {});
       });
-    }
+
+      // Combine: Prefer Firestore if valid, fallback to RC if FS is expired/null but RC is active
+      return Rx.combineLatest2<Subscription?, CustomerInfo, Subscription?>(
+        firestoreStream,
+        rcStream,
+        (fsSub, rcInfo) {
+          final fsActive = fsSub?.isActive == true;
+          if (fsActive) return fsSub;
+
+          // Check local entitlements
+          final rcActive = rcInfo.entitlements.active.isNotEmpty;
+          if (rcActive) {
+            // Synthesize active subscription from local data
+            final ent = rcInfo.entitlements.active.values.first;
+            return Subscription(
+              isPremium: true,
+              planType:
+                  ent.productIdentifier.contains('year') ? 'yearly' : 'monthly',
+              startDate: DateTime.tryParse(ent.latestPurchaseDate)?.toUtc(),
+              endDate: DateTime.tryParse(ent.expirationDate ?? '')?.toUtc(),
+              provider: 'revenuecat_local',
+              status: 'active',
+              productId: ent.productIdentifier,
+            );
+          }
+
+          return fsSub;
+        },
+      );
+    });
   }
 
-  // create chargily checkout
-  Future<Uri> createChargilyPayment({required String planType}) async {
-		final user = FirebaseAuth.instance.currentUser;
-		if (user == null) {
-			throw StateError('Not authenticated');
-		}
-		final callable = _functions.httpsCallable('createChargilyPayment');
-		final res = await callable.call({'userId': user.uid, 'planType': planType});
-		final data = res.data as Map;
-		final url = data['checkoutUrl'] as String;
-		return Uri.parse(url);
-	}
-
   Future<Subscription?> getSubscriptionOnce() async {
+    // Try local RC first for immediate check
+    try {
+      final info = await Purchases.getCustomerInfo();
+      if (info.entitlements.active.isNotEmpty) {
+        final ent = info.entitlements.active.values.first;
+        return Subscription(
+          isPremium: true,
+          planType:
+              ent.productIdentifier.contains('year') ? 'yearly' : 'monthly',
+          startDate: DateTime.tryParse(ent.latestPurchaseDate)?.toUtc(),
+          endDate: DateTime.tryParse(ent.expirationDate ?? '')?.toUtc(),
+          provider: 'revenuecat_local',
+          status: 'active',
+          productId: ent.productIdentifier,
+        );
+      }
+    } catch (_) {}
+
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw StateError('Not authenticated');
-    final doc = await _firestore.collection('subscriptions').doc(user.uid).get();
+    if (user == null) return null;
+
+    final doc =
+        await _firestore.collection('subscriptions').doc(user.uid).get();
     if (!doc.exists) return null;
     final data = doc.data();
     if (data == null) return null;
     return Subscription.fromFirestore(data);
   }
 }
-
