@@ -499,7 +499,8 @@ const Map<String, String> english = {
   "withdrawal_subtitle": "Get your earnings transferred to your bank account",
   "confirm_withdrawal": "Confirm Withdrawal",
   "rip_helper_text": "Your 20-digit bank account number (RIP)",
-  "withdrawal_info_message": "Your withdrawal will be processed within 3-5 business days. You'll receive a confirmation email once completed.",
+  "withdrawal_info_message":
+      "Your withdrawal will be processed within 3-5 business days. You'll receive a confirmation email once completed.",
   "minimum_withdrawal_amount": "Minimum withdrawal amount: @amount DZD",
   "withdrawal_history": "Withdrawal History",
   "promo_code_expired": "Promo code expired",
@@ -526,9 +527,11 @@ const Map<String, String> english = {
       "If you continue without logging in, this promo code will NOT be activated. You will lose access to the discount.",
   "go_back": "Go Back",
   "auth_required_title": "Sign In to Continue",
-  "auth_required_desc": "Sign in to your account to use promo codes and save your progress across devices.",
+  "auth_required_desc":
+      "Sign in to your account to use promo codes and save your progress across devices.",
   "auth_ready_title": "You're Signed In!",
-  "auth_ready_desc": "You can now use promo codes and your progress will be saved.",
+  "auth_ready_desc":
+      "You can now use promo codes and your progress will be saved.",
   "login_or_register": "Login or Register",
   "skip_for_now": "Skip for now",
   "promo_code_dialog_title": "Have a promo code?",
@@ -541,7 +544,8 @@ const Map<String, String> english = {
   "Validate Code": "Validate Code",
   "Promo code applied successfully!": "Promo code applied successfully!",
   "promo_code_linked": "Promo code linked to your account!",
-  "promo_code_linked_success": "Promo code linked! You'll get extra days on your subscription.",
+  "promo_code_linked_success":
+      "Promo code linked! You'll get extra days on your subscription.",
   "promo_code_title": "Get Extra Days!",
   "promo_code_subtitle": "Enter a promo code to unlock bonus subscription days",
   "promo_benefit_title": "Your Bonus",
@@ -1008,7 +1012,8 @@ const Map<String, String> english = {
   "failed_to_save_workout": "Failed to save workout. Please try again.",
   "confirm_workout": "Confirm Workout",
   "calories_burned_label": "Calories You'll Burn",
-  "calories_explanation": "This workout will burn calories and increase your daily calorie allowance.",
+  "calories_explanation":
+      "This workout will burn calories and increase your daily calorie allowance.",
   "remaining_calories_increase": "Your remaining calories will increase",
   "confirm_save": "Confirm & Save",
   "add_exercise": "Add Exercise",
@@ -1054,37 +1059,51 @@ const Map<String, String> english = {
   "parsed_successfully": "Parsed Successfully",
   "edit": "Edit",
   "upgrade": "Upgrade",
-  "premium_feature_workout_ai": "AI workout logging is a premium feature. Upgrade to unlock!",
+  "premium_feature_workout_ai":
+      "AI workout logging is a premium feature. Upgrade to unlock!",
   "failed_to_parse_workout": "Failed to parse workout. Please try rephrasing.",
-  "description_too_short": "Description is too short. Please provide more details.",
+  "description_too_short":
+      "Description is too short. Please provide more details.",
 
   // Error Messages & Limits
-  "daily_scan_limit_reached": "Daily scan limit reached. Upgrade to Premium for unlimited scans!",
-  "daily_chat_limit_reached": "Daily chat limit reached. Upgrade to Premium for unlimited chat!",
+  "daily_scan_limit_reached":
+      "Daily scan limit reached. Upgrade to Premium for unlimited scans!",
+  "daily_chat_limit_reached":
+      "Daily chat limit reached. Upgrade to Premium for unlimited chat!",
+  "hmm_something_went_wrong": "Hmm, something went wrong. Please try again.",
   "invalid_action": "Invalid action requested.",
-  "daily_limit_reached_try_again": "Daily limit reached. Please try again tomorrow.",
-  "unable_to_process_scan_try_again": "Unable to process scan. Please try again.",
-  "unable_to_send_message_try_again": "Unable to send message. Please try again.",
+  "daily_limit_reached_try_again":
+      "Daily limit reached. Please try again tomorrow.",
+  "unable_to_process_scan_try_again":
+      "Unable to process scan. Please try again.",
+  "unable_to_send_message_try_again":
+      "Unable to send message. Please try again.",
   "amount_exceeds_balance": "Amount exceeds available balance",
   "enter_withdrawal_amount": "Please enter withdrawal amount",
   "enter_valid_amount": "Please enter a valid amount",
   "enter_rip_number_error": "Please enter your RIP number",
   "rip_invalid_format": "RIP must be exactly 20 digits",
-  "auth_scan_success": "You can now use the scanner. Please try scanning again.",
+  "auth_scan_success":
+      "You can now use the scanner. Please try scanning again.",
   "auth_scan_required": "Please sign in to use the food scanner",
-  "auth_chat_success": "You can now use the chat. Please try sending your message again.",
+  "auth_chat_success":
+      "You can now use the chat. Please try sending your message again.",
   "auth_chat_required": "Please sign in to use the AI coach",
 
   // Withdrawal Errors
-  "withdrawal_request_failed": "Unable to process withdrawal. Please try again later.",
-  "withdrawal_service_unavailable": "Withdrawal service is temporarily unavailable. Please try again later.",
-  "withdrawal_permission_denied": "You don't have permission to request withdrawals.",
+  "withdrawal_request_failed":
+      "Unable to process withdrawal. Please try again later.",
+  "withdrawal_service_unavailable":
+      "Withdrawal service is temporarily unavailable. Please try again later.",
+  "withdrawal_permission_denied":
+      "You don't have permission to request withdrawals.",
   "withdrawal_minimum_not_met": "Amount is below the minimum withdrawal limit.",
 
   // App Update
   "update_required_title": "Update Required",
   "update_now": "Update Now",
-  "update_default_message": "A new version is required to continue using the app. Please update to the latest version.",
+  "update_default_message":
+      "A new version is required to continue using the app. Please update to the latest version.",
 
   // Notification Settings
   "notification_settings": "Notification Settings",
@@ -1108,7 +1127,7 @@ const Map<String, String> english = {
   "weekly_summary_desc": "Get your weekly progress report",
   "weight_reminders": "Weight Check-In",
   "weight_reminders_desc": "Weekly reminder to update your weight",
-  
+
   // Test Notifications
   "test_notification": "Send Test Notification",
   "test_notification_desc": "Verify notifications are working",
