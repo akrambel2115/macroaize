@@ -35,6 +35,13 @@ class UsageService {
   int get scanCount => _scanCount;
   int get chatCount => _chatCount;
 
+  void setPremium(bool value) {
+    if (_isPremium != value) {
+      _isPremium = value;
+      _emitUsageSnapshot();
+    }
+  }
+
   // reactive usage stream
   Stream<UserUsage> get usageStream {
     if (!_streamInitialized) {
@@ -167,10 +174,8 @@ class UsageService {
         if (!signedIn) rethrow;
         try {
           await getUsage();
-        } catch (_) {
-        }
-      } catch (_) {
-      }
+        } catch (_) {}
+      } catch (_) {}
     }
     if (_hydrated && _isPremium) {
       await _maybeSync();
