@@ -445,6 +445,10 @@ class ScanCalorieController extends GetxController {
             if (estimatedWeight > 0) {
               item = item.copyWith(grams: estimatedWeight);
             }
+            // Safety: never allow grams=0 — default to 100g
+            if (item.grams <= 0) {
+              item = item.copyWith(grams: 100.0);
+            }
             return item;
           }).toList();
 
@@ -458,7 +462,12 @@ class ScanCalorieController extends GetxController {
 
   Future<void> _enrichItemsWithUsda(List<MealBreakdownItem> list) async {
     for (var i = 0; i < list.length; i++) {
-      final it = list[i];
+      var it = list[i];
+      // Ensure grams > 0 before any nutrition calc
+      if (it.grams <= 0) {
+        it = it.copyWith(grams: 100.0);
+        list[i] = it;
+      }
       try {
         final results = await _usda.searchFood(it.englishName, limit: 1);
         if (results.isNotEmpty) {
@@ -476,44 +485,65 @@ class ScanCalorieController extends GetxController {
                   .recalcFromPer100g();
           list[i] = updated;
         } else {
-          final nameLower = it.englishName.toLowerCase();
-          if (nameLower.contains('egg')) {
-            list[i] =
-                it
-                    .copyWith(
-                      usdaVerified: false,
-                      kcalPer100g: 146.0,
-                      proteinPer100g: 12.0,
-                      carbsPer100g: 1.1,
-                      fatPer100g: 10.0,
-                    )
-                    .recalcFromPer100g();
-            log('USDA_FALLBACK => applied egg fallback for ${it.englishName}');
-          } else {
-            list[i] = it.copyWith(usdaVerified: false).recalcFromPer100g();
-          }
+          // USDA returned no results — try AI estimation fallback
+          list[i] = await _applyAiFallback(it);
         }
       } catch (e) {
-        final nameLower = it.englishName.toLowerCase();
-        if (nameLower.contains('egg')) {
-          list[i] =
-              it
-                  .copyWith(
-                    usdaVerified: false,
-                    kcalPer100g: 146.0,
-                    proteinPer100g: 12.0,
-                    carbsPer100g: 1.1,
-                    fatPer100g: 10.0,
-                  )
-                  .recalcFromPer100g();
-          log(
-            'USDA_FALLBACK_ERROR => applied egg fallback for ${it.englishName}',
-          );
-        } else {
-          list[i] = it.copyWith(usdaVerified: false).recalcFromPer100g();
-        }
+        log('USDA_ERROR for ${it.englishName} => $e');
+        // USDA call failed — try AI estimation fallback
+        list[i] = await _applyAiFallback(it);
       }
     }
+  }
+
+  /// AI-based nutrition fallback when USDA returns no results or errors.
+  Future<MealBreakdownItem> _applyAiFallback(MealBreakdownItem it) async {
+    // Ensure grams > 0 before any recalc — default to 100g
+    if (it.grams <= 0) {
+      it = it.copyWith(grams: 100.0);
+    }
+
+    // Hardcoded fallback for common items
+    final nameLower = it.englishName.toLowerCase();
+    if (nameLower.contains('egg')) {
+      log('USDA_FALLBACK => applied egg fallback for ${it.englishName}');
+      return it
+          .copyWith(
+            usdaVerified: false,
+            kcalPer100g: 146.0,
+            proteinPer100g: 12.0,
+            carbsPer100g: 1.1,
+            fatPer100g: 10.0,
+          )
+          .recalcFromPer100g();
+    }
+
+    // Try AI estimation
+    try {
+      final aiNutrition = await OpenAiCalling.estimateNutritionByName(
+        it.englishName,
+        it.grams,
+      );
+      if (aiNutrition != null &&
+          (aiNutrition['kcalPer100g'] ?? 0) > 0) {
+        log('AI_FALLBACK => estimated nutrition for ${it.englishName}: $aiNutrition');
+        return it
+            .copyWith(
+              usdaVerified: false,
+              kcalPer100g: aiNutrition['kcalPer100g']!,
+              proteinPer100g: aiNutrition['proteinPer100g']!,
+              carbsPer100g: aiNutrition['carbsPer100g']!,
+              fatPer100g: aiNutrition['fatPer100g']!,
+            )
+            .recalcFromPer100g();
+      }
+    } catch (e) {
+      log('AI_FALLBACK_ERROR for ${it.englishName} => $e');
+    }
+
+    // Last resort: mark as estimated with no data
+    log('NO_NUTRITION_DATA for ${it.englishName} — all zeros');
+    return it.copyWith(usdaVerified: false).recalcFromPer100g();
   }
 
   // item editing
@@ -521,8 +551,9 @@ class ScanCalorieController extends GetxController {
     if (index < 0 || index >= items.length) return;
     final it = items[index];
     double grams = it.grams;
-    switch (unit) {
+    switch (unit) { 
       case 'piece':
+      case 'pieces':
         grams = newAmount * 50;
         break;
       default:
@@ -1013,7 +1044,7 @@ class ScanCalorieController extends GetxController {
 
       await Share.shareXFiles([
         XFile(imagePath),
-      ], text: 'Check out my meal on Macroaize! 🥗🔥');
+      ], text: 'Check out my meal on Macroaize!');
     } catch (e) {
       log('SHARE_MEAL_ERROR => $e');
       try {
