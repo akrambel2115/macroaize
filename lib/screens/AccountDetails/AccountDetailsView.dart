@@ -53,7 +53,7 @@ class AccountDetailsView extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               try {
-                await FirebaseAuth.instance.signOut();
+                await acct.signOut();
                 Get.back();
                 NotificationService.showSuccess('auth_logout_success');
               } catch (e) {
