@@ -70,6 +70,12 @@ class AppUserService {
   }) {
     _subscriptionService = subscriptionService ?? SubscriptionService();
     _usageService = usageService ?? UsageService();
+
+    // Sync premium status from subscription to usage service
+    _subscriptionService!.subscriptionStream.listen((sub) {
+      _usageService!.setPremium(sub?.isActive == true);
+    });
+
     _userStream = _createUserStream(authStateStream: authStateStream);
   }
 
