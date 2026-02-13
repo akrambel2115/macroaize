@@ -19,12 +19,12 @@ class LocalNotificationService extends GetxService {
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher',
       );
-      const darwinSettings = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
+      final darwinSettings = DarwinInitializationSettings(
+        requestAlertPermission: !Platform.isIOS,
+        requestBadgePermission: !Platform.isIOS,
+        requestSoundPermission: !Platform.isIOS,
       );
-      const initSettings = InitializationSettings(
+      final initSettings = InitializationSettings(
         android: androidSettings,
         iOS: darwinSettings,
       );

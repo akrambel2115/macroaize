@@ -167,7 +167,14 @@ class FirebaseMessagingService extends GetxService {
 
   Future<void> _handleTokenManagement() async {
     try {
-      final String? token = await _firebaseMessaging.getToken();
+      final String? token = await _firebaseMessaging
+          .getToken()
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        if (kDebugMode) {
+          debugPrint('[$_logTag] getToken() timed out – APNS token may not be available');
+        }
+        return null;
+      });
       if (token != null) {
         _currentToken.value = token;
         await _storeTokenInFirestore(token);

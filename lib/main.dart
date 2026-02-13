@@ -267,12 +267,31 @@ Future<void> main() async {
   }
 
   if (!kIsWeb) {
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-    if (kDebugMode) print('FCM Token: $fcmToken');
-    final dBHelper = DatabaseHelper();
-    dBHelper.initDatabase();
+    _initFcmTokenAndDb();
   }
   runApp(const MyApp());
+}
+
+void _initFcmTokenAndDb() {
+  Future(() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance
+          .getToken()
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        if (kDebugMode) print('FCM getToken timed out on iOS – continuing without token');
+        return null;
+      });
+      if (kDebugMode) print('FCM Token: $fcmToken');
+    } catch (e) {
+      if (kDebugMode) print('FCM getToken failed: $e');
+    }
+    try {
+      final dBHelper = DatabaseHelper();
+      dBHelper.initDatabase();
+    } catch (e) {
+      if (kDebugMode) print('DatabaseHelper init failed: $e');
+    }
+  });
 }
 
 class MyApp extends StatefulWidget {
