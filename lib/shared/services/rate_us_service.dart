@@ -55,4 +55,19 @@ class RateUsService {
       }
     }
   }
-}
+
+  static Future<void> showRateUsForOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasShown = prefs.getBool(_kRateUsShownKey) ?? false;
+
+    if (hasShown) return;
+
+    final InAppReview inAppReview = InAppReview.instance;
+    final isAvailable = await inAppReview.isAvailable();
+
+    if (isAvailable) {
+      await prefs.setBool(_kRateUsShownKey, true);
+      await inAppReview.requestReview();
+    }
+  }
+}  

@@ -82,7 +82,7 @@ export class NotificationService {
         return false;
       }
 
-      const tokens = tokensSnapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => {
+      const rawTokens = tokensSnapshot.docs.map((doc: admin.firestore.QueryDocumentSnapshot) => {
         const data = doc.data() as FCMTokenDoc;
         return {
           token: data.token,
@@ -91,12 +91,55 @@ export class NotificationService {
         };
       });
 
+      // --- Defense-in-depth: ownership validation ---
+      // The client-side transaction ensures a device token is owned by exactly
+      // one user, but we verify here too in case of races or stale data.
+      // Fetch all deviceTokens/{token} docs in a single batch read.
+      const ownershipRefs = rawTokens.map((t) =>
+        this.db!.collection('deviceTokens').doc(t.token)
+      );
+      const ownershipSnaps = ownershipRefs.length > 0
+        ? await this.db!.getAll(...ownershipRefs)
+        : [];
+
+      const tokens = rawTokens.filter((t, idx) => {
+        const ownerData = ownershipSnaps[idx]?.data();
+        // Accept token if: (a) ownership record confirms this uid, OR
+        // (b) ownership record doesn't exist yet (legacy / offline write).
+        return !ownerData || ownerData['ownerUid'] === uid;
+      });
+
+      const staleDocIds = rawTokens
+        .filter((t, idx) => {
+          const ownerData = ownershipSnaps[idx]?.data();
+          return ownerData && ownerData['ownerUid'] !== uid;
+        })
+        .map((t) => t.docId);
+
+      if (staleDocIds.length > 0) {
+        logger.warn('Filtered tokens owned by a different user (stale)', {
+          correlationId,
+          uid,
+          staleCount: staleDocIds.length
+        });
+        // Deactivate stale entries in the background — do not await.
+        this.cleanupInvalidTokens(uid, staleDocIds, correlationId).catch(() => {});
+      }
+
       logger.info('Found FCM tokens for user', {
         correlationId,
         uid,
-        tokenCount: tokens.length
+        rawCount: rawTokens.length,
+        validCount: tokens.length
       });
 
+      if (tokens.length === 0) {
+        logger.warn('No valid (owned) FCM tokens remain for user after ownership check', {
+          correlationId,
+          uid
+        });
+        return false;
+      }
 
       const message = {
         notification: {

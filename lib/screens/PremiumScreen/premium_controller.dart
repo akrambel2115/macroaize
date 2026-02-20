@@ -162,16 +162,7 @@ class PremiumController extends GetxController {
 
   void onClosePressed() {
     if (fromOnboarding) {
-      try {
-        Get.offAllNamed(Routes.leadingView);
-      } catch (_) {}
-      Future.delayed(const Duration(milliseconds: 200), () {
-        if (Get.currentRoute != Routes.leadingView) {
-          try {
-            Get.toNamed(Routes.leadingView);
-          } catch (_) {}
-        }
-      });
+      Get.offAllNamed(Routes.leadingView);
     } else {
       Get.back();
     }

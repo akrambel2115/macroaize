@@ -1,7 +1,7 @@
 import WidgetKit
 import SwiftUI
 
-private let widgetGroupId = "group.com.macroaize.app" // MUST MATCH App Group ID
+private let widgetGroupId = "group.com.macroaize.app"
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
@@ -82,7 +82,7 @@ struct SmallWidgetView: View {
                 
                 Spacer()
                 
-                Link(destination: URL(string: "foodcalorietracker://log")!) {
+                Link(destination: URL(string: "macroaize://log")!) {
                     ZStack {
                         Circle()
                             .fill(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
@@ -147,7 +147,7 @@ struct LargeWidgetView: View {
                     MacroRow(label: "Carbs", value: entry.carbs, color: Color(red: 78/255, green: 205/255, blue: 196/255), max: 250, icon: "leaf.fill")
                     MacroRow(label: "Fats", value: entry.fats, color: Color(red: 255/255, green: 230/255, blue: 109/255), max: 80, icon: "drop.fill")
                     
-                    Link(destination: URL(string: "foodcalorietracker://log")!) {
+                    Link(destination: URL(string: "macroaize://log")!) {
                         ZStack {
                             Circle()
                                 .fill(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
@@ -291,9 +291,9 @@ struct StreakWidget: Widget {
 }
 
 @main
-struct foodcalorietrackerWidgets: WidgetBundle {
+struct macroaizeWidgets: WidgetBundle {
    var body: some Widget {
-       foodcalorietrackerWidget()
+       macroaizeWidget()
        StreakWidget()
    }
 }

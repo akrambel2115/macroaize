@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,16 +9,21 @@ import 'package:flutter/material.dart';
 import 'meal_sync_service.dart';
 import 'notification_preferences_service.dart';
 
+
+const _kDeviceTokensCollection = 'deviceTokens';
+
 class FirebaseMessagingService extends GetxService {
   static const String _logTag = 'FCMService';
-  
+
   final FirebaseMessaging _firebaseMessaging;
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-  
+
   final RxBool _isInitialized = false.obs;
   final RxString _currentToken = ''.obs;
-  
+
+  StreamSubscription<User?>? _authSubscription;
+
   FirebaseMessagingService({
     FirebaseMessaging? messaging,
     FirebaseFirestore? firestore,
@@ -33,6 +39,7 @@ class FirebaseMessagingService extends GetxService {
   Future<void> onInit() async {
     super.onInit();
     await _initializeMessaging();
+    _listenToAuthChanges();
   }
 
   Future<void> _initializeMessaging() async {
@@ -44,9 +51,9 @@ class FirebaseMessagingService extends GetxService {
       await _requestPermissions();
       _setupMessageHandlers();
       await _handleTokenManagement();
-      
+
       _isInitialized.value = true;
-      
+
       if (kDebugMode) {
         debugPrint('[$_logTag] Firebase Messaging initialized successfully');
       }
@@ -56,6 +63,17 @@ class FirebaseMessagingService extends GetxService {
       }
       // allow app without fcm
     }
+  }
+
+  void _listenToAuthChanges() {
+    _authSubscription = _auth.authStateChanges().listen((User? user) async {
+      final token = _currentToken.value;
+      if (token.isEmpty) return;
+
+      if (user != null) {
+        await _storeTokenInFirestore(token);
+      }
+    });
   }
 
   Future<void> _requestPermissions() async {
@@ -209,25 +227,69 @@ class FirebaseMessagingService extends GetxService {
         return;
       }
 
-      final tokenData = {
-        'token': token,
-        'platform': Platform.isAndroid ? 'android' : 'ios',
-        'createdAt': FieldValue.serverTimestamp(),
-        'lastUsed': FieldValue.serverTimestamp(),
-        'isActive': true,
-      };
+      final ownershipRef =
+          _firestore.collection(_kDeviceTokensCollection).doc(token);
 
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('fcmTokens')
-          .doc(token)
-          .set(tokenData, SetOptions(merge: true));
+      await _firestore.runTransaction((tx) async {
+        final ownershipSnap = await tx.get(ownershipRef);
 
-      // Ensure main user document exists for notification queries
+        final previousOwnerUid =
+            ownershipSnap.exists
+                ? (ownershipSnap.data()?['ownerUid'] as String?)
+                : null;
+
+        // Deactivate the token under the previous owner if it's a different account.
+        if (previousOwnerUid != null && previousOwnerUid != user.uid) {
+          final oldTokenRef = _firestore
+              .collection('users')
+              .doc(previousOwnerUid)
+              .collection('fcmTokens')
+              .doc(token);
+
+          tx.set(
+            oldTokenRef,
+            {
+              'isActive': false,
+              'supersededByUid': user.uid,
+              'supersededAt': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+
+          if (kDebugMode) {
+            debugPrint(
+              '[$_logTag] Token ownership transferred from $previousOwnerUid → ${user.uid}',
+            );
+          }
+        }
+
+        // Claim ownership for the current user.
+        tx.set(ownershipRef, {
+          'ownerUid': user.uid,
+          'platform': Platform.isAndroid ? 'android' : 'ios',
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        final newTokenRef = _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('fcmTokens')
+            .doc(token);
+
+        final newTokenSnap = await tx.get(newTokenRef);
+        final tokenFields = <String, dynamic>{
+          'token': token,
+          'platform': Platform.isAndroid ? 'android' : 'ios',
+          'lastUsed': FieldValue.serverTimestamp(),
+          'isActive': true,
+        };
+        if (!newTokenSnap.exists) {
+          tokenFields['createdAt'] = FieldValue.serverTimestamp();
+        }
+        tx.set(newTokenRef, tokenFields, SetOptions(merge: true));
+      });
+
       await MealSyncService().ensureUserDocument();
-      
-      // Sync notification preferences to Firestore for server-side FCM
       await _syncNotificationPreferences();
 
       if (kDebugMode) {
@@ -244,21 +306,31 @@ class FirebaseMessagingService extends GetxService {
     try {
       final User? user = _auth.currentUser;
       final String token = _currentToken.value;
-      
+
       if (user == null || token.isEmpty) return;
 
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('fcmTokens')
-          .doc(token)
-          .update({
-        'isActive': false,
-        'removedAt': FieldValue.serverTimestamp(),
-      });
+      final batch = _firestore.batch();
+
+      // Mark the token inactive under the user's subcollection.
+      batch.set(
+        _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('fcmTokens')
+            .doc(token),
+        {
+          'isActive': false,
+          'removedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+
+      batch.delete(_firestore.collection(_kDeviceTokensCollection).doc(token));
+
+      await batch.commit();
 
       if (kDebugMode) {
-        debugPrint('[$_logTag] Token marked as inactive for user: ${user.uid}');
+        debugPrint('[$_logTag] Token deregistered for user: ${user.uid}');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -312,6 +384,7 @@ class FirebaseMessagingService extends GetxService {
 
   @override
   void onClose() {
+    _authSubscription?.cancel();
     if (_auth.currentUser != null) {
       removeTokenFromFirestore();
     }

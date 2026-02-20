@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:macroaize/SharePrefHelper/share_pref.dart';
+import 'package:macroaize/shared/services/rate_us_service.dart';
 import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
 import 'package:macroaize/routes/app_routes.dart';
 import 'package:macroaize/screens/SignUpScreens/SignUpViews/born_view.dart';
@@ -162,12 +163,15 @@ class SignUpController extends GetxController {
   }
 
   // navigate to premium
-  void navigateToPremium() {
+  Future<void> navigateToPremium() async {
     // save values
     SharedPref.saveInt(SharePrefKey.calorie, calculatedCalories.value);
     SharedPref.saveInt(SharePrefKey.protein, calculatedProtein.value);
     SharedPref.saveInt(SharePrefKey.carbs, calculatedCarbs.value);
     SharedPref.saveInt(SharePrefKey.fat, calculatedFat.value);
+
+    // show rate us popup before premium screen (first-time onboarding only)
+    await RateUsService.showRateUsForOnboarding();
 
     Get.toNamed(
       Routes.premiumView,

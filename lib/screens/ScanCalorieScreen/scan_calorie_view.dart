@@ -55,10 +55,19 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
             if (controller.calorie != 0 && !controller.isLoading) {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: IconButton(
-                  icon: const Icon(Icons.share_outlined),
-                  onPressed: () => controller.shareMealResult(),
-                  tooltip: 'Share Meal'.tr,
+                child: Builder(
+                  builder: (ctx) => IconButton(
+                    icon: const Icon(Icons.share_outlined),
+                    onPressed: () {
+                      final box = ctx.findRenderObject() as RenderBox?;
+                      final rect = box != null
+                          ? box.localToGlobal(Offset.zero) & box.size
+                          : null;
+                      controller.shareMealResult(
+                          sharePositionOrigin: rect);
+                    },
+                    tooltip: 'Share Meal'.tr,
+                  ),
                 ),
               );
             }

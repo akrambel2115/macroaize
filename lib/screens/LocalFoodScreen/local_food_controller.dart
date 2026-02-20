@@ -521,6 +521,9 @@ class LocalFoodController extends GetxController {
                   ),
                 );
 
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
                 Get.offAllNamed(Routes.leadingView);
                 RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
                 WidgetPromotionService().showPromotionIfNeeded();

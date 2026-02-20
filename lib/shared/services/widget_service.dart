@@ -2,7 +2,7 @@ import 'package:home_widget/home_widget.dart';
 
 class WidgetService {
   static const String androidWidgetProvider = 'HomeWidgetProvider';
-  static const String iOSWidgetName = 'foodcalorietrackerWidget';
+  static const String iOSWidgetName = 'macroaizeWidget';
 
   static Future<void> updateWidgetData({
     required int calories,

@@ -1009,6 +1009,10 @@ class ScanCalorieController extends GetxController {
                   ),
                 );
 
+                // Close dialog first to prevent orphaned overlay
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
                 Get.offAllNamed(Routes.leadingView);
                 WidgetPromotionService().showPromotionIfNeeded();
               },
@@ -1027,7 +1031,7 @@ class ScanCalorieController extends GetxController {
     );
   }
 
-  Future<void> shareMealResult() async {
+  Future<void> shareMealResult({Rect? sharePositionOrigin}) async {
     try {
       final imageUint8List = await screenshotController.captureFromWidget(
         MealShareCard(
@@ -1046,9 +1050,11 @@ class ScanCalorieController extends GetxController {
       final imageFile = File(imagePath);
       await imageFile.writeAsBytes(imageUint8List);
 
-      await Share.shareXFiles([
-        XFile(imagePath),
-      ], text: 'Check out my meal on Macroaize!');
+      await Share.shareXFiles(
+        [XFile(imagePath)],
+        text: 'Check out my meal on Macroaize!',
+        sharePositionOrigin: sharePositionOrigin,
+      );
     } catch (e) {
       log('SHARE_MEAL_ERROR => $e');
       try {

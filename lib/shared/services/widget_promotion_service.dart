@@ -9,12 +9,12 @@ import 'package:macroaize/widgets/widget_preview_cards.dart';
 class WidgetPromotionService {
   static const String _prefsKey = 'widget_promotion_shown';
 
-  /// Shows promotion if it hasn't been shown before
   Future<void> showPromotionIfNeeded() async {
     final prefs = await SharedPreferences.getInstance();
     final hasShown = prefs.getBool(_prefsKey) ?? false;
 
     if (!hasShown) {
+      await Future.delayed(const Duration(milliseconds: 600));
       await showPromotion();
       await prefs.setBool(_prefsKey, true);
     }
@@ -26,6 +26,18 @@ class WidgetPromotionService {
       _showAndroidInstructionDialog();
     } else if (Platform.isIOS) {
       _showIOSBottomSheet();
+    }
+  }
+
+  /// Dismisses the promotion popup safely on both platforms.
+  /// Uses Navigator.pop via overlayContext to bypass GetX state issues
+  /// with PopScope(canPop: false) on the underlying route.
+  void _dismiss() {
+    final ctx = Get.overlayContext;
+    if (ctx != null) {
+      Navigator.of(ctx).pop();
+    } else {
+      Get.back();
     }
   }
 
@@ -55,7 +67,7 @@ class WidgetPromotionService {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('ok'.tr)),
+          TextButton(onPressed: () => _dismiss(), child: Text('ok'.tr)),
         ],
       ),
     );
@@ -63,69 +75,75 @@ class WidgetPromotionService {
 
   void _showIOSBottomSheet() {
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColor.darkBackground,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: AppColor.darkBackground,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'widget_promo_title'.tr,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'widget_promo_title'.tr,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white54),
+                      onPressed: () => _dismiss(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Preview Image
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: const WidgetPreviewCards(),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white54),
-                  onPressed: () => Get.back(),
+                _buildStep(1, 'widget_promo_ios_step1'.tr),
+                _buildStep(2, 'widget_promo_ios_step2'.tr),
+                _buildStep(3, 'widget_promo_ios_step3'.tr),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _dismiss(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.primaryOrange,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'widget_promo_got_it'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
+                const SizedBox(height: 16),
               ],
             ),
-            const SizedBox(height: 24),
-            // Preview Image
-            // Preview Image
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: const WidgetPreviewCards(),
-              ),
-            ),
-            _buildStep(1, 'widget_promo_ios_step1'.tr),
-            _buildStep(2, 'widget_promo_ios_step2'.tr),
-            _buildStep(3, 'widget_promo_ios_step3'.tr),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.primaryOrange,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'widget_promo_got_it'.tr,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
       isScrollControlled: true,

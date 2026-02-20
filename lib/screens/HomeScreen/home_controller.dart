@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:macroaize/Model/sql_calorie_model.dart';
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
@@ -32,6 +33,8 @@ class HomeController extends GetxController {
   final dbHelper = DatabaseHelper();
   bool isLoading = true;
 
+  Timer? _blockingDialogTimer;
+
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -55,8 +58,7 @@ class HomeController extends GetxController {
             barrierColor: Colors.transparent,
           );
 
-          // Wait for the delay
-          Future.delayed(const Duration(milliseconds: 800), () {
+          _blockingDialogTimer = Timer(const Duration(milliseconds: 800), () {
             // Close the blocking dialog
             if (Get.isDialogOpen == true) {
               Get.back();
@@ -65,8 +67,7 @@ class HomeController extends GetxController {
             _showAppTipsIfNeeded();
           });
         } else {
-          // If already completed, just proceed normally (no blocking)
-          Future.delayed(const Duration(milliseconds: 800), () {
+          _blockingDialogTimer = Timer(const Duration(milliseconds: 800), () {
             _showAppTipsIfNeeded();
             // Check for daily streak notification
             StreakService().checkAndShowNotification();
@@ -79,6 +80,15 @@ class HomeController extends GetxController {
     // Sync streak widget with current app data
     StreakService().syncWidget();
     update();
+  }
+
+  @override
+  void onClose() {
+    _blockingDialogTimer?.cancel();
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+    super.onClose();
   }
 
   void _updateWidgets() {
