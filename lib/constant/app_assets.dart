@@ -7,6 +7,7 @@ class AppAssets {
   static String scanComplete = "${basePathImages}1.png";
   static String soFar = "${basePathImages}2.webp";
   static String soClose = "${basePathImages}3.png";
+  static String widgetPreview = "${basePathImages}widget_preview.png";
 
   ///App Icon
   static String scanIcon = "${basePathIcons}scanning.png";
