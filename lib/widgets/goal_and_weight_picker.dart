@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/constant/app_color.dart';
 
 class GoalAndWeightPicker extends StatelessWidget {
   final String selectedGoal;
@@ -106,7 +106,7 @@ class _SplitGoalCard extends StatelessWidget {
           color: Theme.of(context).cardColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -122,10 +122,11 @@ class _SplitGoalCard extends StatelessWidget {
                   child: Container(
                     width: 2,
                     height: topH + botH,
-                    color: Colors.white.withOpacity(
-                      Theme.of(context).brightness == Brightness.light
-                          ? 0.5
-                          : 0.2,
+                    color: Colors.white.withValues(
+                      alpha:
+                          Theme.of(context).brightness == Brightness.light
+                              ? 0.5
+                              : 0.2,
                     ),
                   ),
                 ),
@@ -216,7 +217,7 @@ class _HalfTile extends StatelessWidget {
                   colors:
                       selected
                           ? gradient
-                          : gradient.map((c) => c.withOpacity(0.8)).toList(),
+                          : gradient.map((c) => c.withValues(alpha: 0.8)).toList(),
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),

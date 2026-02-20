@@ -26,7 +26,7 @@ class UserUsage {
       return null;
     }
 
-    int _toInt(dynamic v) {
+    int toInt(dynamic v) {
       if (v == null) return 0;
       if (v is num) return v.toInt();
       if (v is String) return int.tryParse(v) ?? 0;
@@ -43,12 +43,12 @@ class UserUsage {
       chatCount: (data['chatCount'] as num?)?.toInt() ?? 0,
       lastUsageDate: parseDate(data['lastUsageDate']),
       scanLimit:
-          _toInt(data['scanLimit']) != 0
-              ? _toInt(data['scanLimit'])
+          toInt(data['scanLimit']) != 0
+              ? toInt(data['scanLimit'])
               : (cfg?.freeScanLimit ?? 2),
       chatLimit:
-          _toInt(data['chatLimit']) != 0
-              ? _toInt(data['chatLimit'])
+          toInt(data['chatLimit']) != 0
+              ? toInt(data['chatLimit'])
               : (cfg?.freeChatLimit ?? 5),
     );
   }

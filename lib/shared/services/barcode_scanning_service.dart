@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'package:flutter/foundation.dart';
@@ -85,6 +86,17 @@ class BarcodeScanningService {
   // convert for ml kit
   InputImage? _convertCameraImage(CameraImage image) {
     try {
+      // Determine the correct image format based on platform
+      final InputImageFormat imageFormat;
+      if (Platform.isAndroid) {
+        imageFormat = InputImageFormat.nv21;
+      } else if (Platform.isIOS) {
+        imageFormat = InputImageFormat.bgra8888;
+      } else {
+        // Unsupported platform
+        return null;
+      }
+
       final WriteBuffer allBytes = WriteBuffer();
       for (final Plane plane in image.planes) {
         allBytes.putUint8List(plane.bytes);
@@ -93,8 +105,8 @@ class BarcodeScanningService {
 
       final inputImageData = InputImageMetadata(
         size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: InputImageRotation.rotation0deg,
-        format: InputImageFormat.nv21,
+        rotation: _getImageRotation(),
+        format: imageFormat,
         bytesPerRow: image.planes[0].bytesPerRow,
       );
 
@@ -105,6 +117,16 @@ class BarcodeScanningService {
       }
       return null;
     }
+  }
+
+
+  InputImageRotation _getImageRotation() {
+    if (Platform.isIOS) {
+      // iOS camera images are pre-rotated to the correct orientation
+      return InputImageRotation.rotation0deg;
+    }
+    // Android default portrait
+    return InputImageRotation.rotation0deg;
   }
 
   // reset last scan

@@ -3,26 +3,26 @@ import 'package:flutter/material.dart';
 // existing imports
 import 'package:get/get.dart';
 // AppAssets removed
-import '../../../constant/AppColor.dart';
+import '../../../constant/app_color.dart';
 import '../../../shared/services/app_config_service.dart';
-import '../../../widgets/customText.dart';
+import '../../../widgets/custom_text.dart';
 
 class OnBoardingThree extends StatelessWidget {
   const OnBoardingThree({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.2),
+      backgroundColor: Colors.black.withValues(alpha: 0.2),
       body: Stack(
         children: [
           SizedBox(
-            height: Height * 0.8,
+            height: height * 0.8,
             child: Column(
               children: [
                 Container(
-                  height: Height * 0.13,
+                  height: height * 0.13,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -37,9 +37,9 @@ class OnBoardingThree extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(height: Height * 0.54, color: Colors.black),
+                Container(height: height * 0.54, color: Colors.black),
                 Container(
-                  height: Height * 0.13,
+                  height: height * 0.13,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [

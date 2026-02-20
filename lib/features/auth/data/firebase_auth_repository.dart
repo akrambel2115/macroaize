@@ -20,7 +20,13 @@ class FirebaseAuthRepository implements AuthRepository {
 
   FirebaseAuthRepository({FirebaseAuth? auth, GoogleSignIn? google})
     : _auth = auth ?? FirebaseAuth.instance,
-      _google = google ?? GoogleSignIn(scopes: ['email']);
+      _google = google ?? GoogleSignIn(
+        scopes: ['email'],
+
+        clientId: Platform.isIOS
+            ? '582471032450-ek1mh77ula8jd013uv0t5f3oeksvberc.apps.googleusercontent.com'
+            : null,
+      );
 
   @override
   Stream<User?> authStateChanges() => _auth.authStateChanges();
@@ -83,9 +89,6 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<(User?, AuthFailure?)> signInWithGoogle() async {
     try {
-      if (Platform.isIOS) {
-    // default scopes fine
-      }
       final account = await _google.signIn();
       if (account == null) {
         return (null, CredentialFailure('canceled', 'Canceled'));

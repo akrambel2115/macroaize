@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/constant/app_color.dart';
 
 class HeightWeightPicker extends StatelessWidget {
   final void Function(int cm)? onHeightCmChanged;

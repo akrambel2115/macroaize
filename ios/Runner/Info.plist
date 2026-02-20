@@ -9,9 +9,11 @@
 		<key>NSHealthUpdateUsageDescription</key>
 		<string>We will sync your data with the Apple Health app to give you better insights</string>
 		<key>NSCameraUsageDescription</key>
-		<string>your usage description here</string>
+		<string>macroAize needs camera access to scan food items and barcodes for calorie tracking</string>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>your usage description here</string>
+		<string>macroAize needs microphone access for voice input in the AI chat assistant</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>macroAize needs photo library access to select food images for calorie analysis</string>
 		<key>NSSpeechRecognitionUsageDescription</key>
 		<string>This app uses speech recognition to convert your speech to text.</string>
 		<key>CFBundleDisplayName</key>
@@ -25,7 +27,7 @@
 				<string>Editor</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<string>com.googleusercontent.apps.582471032450-2ksaql5o10cmlu8d903r7oij11dg7skq</string>
+					<string>com.googleusercontent.apps.582471032450-ek1mh77ula8jd013uv0t5f3oeksvberc</string>
 				</array>
 			</dict>
 		</array>

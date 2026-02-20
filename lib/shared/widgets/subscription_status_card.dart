@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:macroaize/shared/models/subscription.dart';
-import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/constant/app_color.dart';
 
 class SubscriptionStatusCard extends StatelessWidget {
   const SubscriptionStatusCard({super.key, required this.subscription});
@@ -42,14 +42,14 @@ class SubscriptionStatusCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColor.success, AppColor.success.withOpacity(0.7)],
+          colors: [AppColor.success, AppColor.success.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColor.success.withOpacity(0.25),
+            color: AppColor.success.withValues(alpha: 0.25),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -62,7 +62,7 @@ class SubscriptionStatusCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -87,14 +87,14 @@ class SubscriptionStatusCard extends StatelessWidget {
                 Text(
                   'Plan: ${subscription.planType ?? '—'}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.95),
+                    color: Colors.white.withValues(alpha: 0.95),
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'From $start to $end',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],

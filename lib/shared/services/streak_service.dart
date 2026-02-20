@@ -1,9 +1,9 @@
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../../SharePrefHelper/SharePref.dart';
-import '../../SharePrefHelper/SharePrefKey.dart';
-import '../../widgets/StreakNotificationWidget.dart';
+import '../../SharePrefHelper/share_pref.dart';
+import '../../SharePrefHelper/share_pref_key.dart';
+import '../../widgets/streak_notification_widget.dart';
 import 'streak_widget_service.dart';
 
 class StreakService {

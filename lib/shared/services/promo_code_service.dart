@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:macroaize/SharePrefHelper/SharePref.dart';
-import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
+import 'package:macroaize/SharePrefHelper/share_pref.dart';
+import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
 import 'dart:async';
 
 /// Service to handle promo code storage and post-login validation

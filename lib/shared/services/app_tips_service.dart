@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:macroaize/SharePrefHelper/SharePref.dart';
-import 'package:macroaize/SharePrefHelper/SharePrefKey.dart';
-import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/SharePrefHelper/share_pref.dart';
+import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
+import 'package:macroaize/constant/app_color.dart';
 import 'package:get/get.dart';
 
 // app tips service
@@ -139,7 +139,7 @@ class _AppTipsOverlayState extends State<AppTipsOverlay> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 30,
               offset: const Offset(0, 10),
             ),
@@ -254,7 +254,7 @@ class _AppTipsOverlayState extends State<AppTipsOverlay> {
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColor.primaryOrange.withOpacity(0.4),
+                            color: AppColor.primaryOrange.withValues(alpha: 0.4),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -314,7 +314,7 @@ class _TipCard extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: tip.gradient.colors.first.withOpacity(0.4),
+                  color: tip.gradient.colors.first.withValues(alpha: 0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),

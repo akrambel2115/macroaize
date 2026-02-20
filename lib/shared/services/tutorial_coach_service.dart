@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../SharePrefHelper/SharePrefKey.dart';
+import '../../SharePrefHelper/share_pref_key.dart';
 
 class TutorialCoachService {
   static final TutorialCoachService _instance =
@@ -75,7 +75,7 @@ enum TooltipPosition { top, bottom, left, right }
 class TutorialOverlay extends StatefulWidget {
   final List<TutorialStep> steps;
 
-  const TutorialOverlay({Key? key, required this.steps}) : super(key: key);
+  const TutorialOverlay({super.key, required this.steps});
 
   @override
   State<TutorialOverlay> createState() => _TutorialOverlayState();
@@ -228,7 +228,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.5 : 0.3),
+            color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.3),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -273,8 +273,8 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
                         index == currentStep
                             ? (isDark ? Colors.white : Colors.black87)
                             : (isDark
-                                ? Colors.white.withOpacity(0.4)
-                                : Colors.black.withOpacity(0.3)),
+                                ? Colors.white.withValues(alpha: 0.4)
+                                : Colors.black.withValues(alpha: 0.3)),
                   ),
                 ),
               ),
@@ -295,7 +295,7 @@ class SpotlightPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final overlayPaint =
         Paint()
-          ..color = Colors.black.withOpacity(0.85)
+          ..color = Colors.black.withValues(alpha: 0.85)
           ..style = PaintingStyle.fill;
 
     // circular spotlight center
@@ -330,7 +330,7 @@ class SpotlightPainter extends CustomPainter {
       safeRadius,
       dashWidth: 8,
       dashSpace: 4,
-      color: Colors.white.withOpacity(0.9),
+      color: Colors.white.withValues(alpha: 0.9),
       strokeWidth: 3,
     );
   }

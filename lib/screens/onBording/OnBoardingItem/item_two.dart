@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:macroaize/shared/services/app_config_service.dart';
-import 'package:macroaize/screens/onBording/OnBoardingController.dart';
+import 'package:macroaize/screens/onBording/onboarding_controller.dart';
 import 'package:get/get.dart';
-import '../../../constant/AppColor.dart';
-import '../../../widgets/customText.dart';
+import '../../../constant/app_color.dart';
+import '../../../widgets/custom_text.dart';
 
 class OnBoardingTwo extends GetView<OnBoardingController> {
   const OnBoardingTwo({super.key});
@@ -12,7 +12,7 @@ class OnBoardingTwo extends GetView<OnBoardingController> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.2),
+      backgroundColor: Colors.black.withValues(alpha: 0.2),
       body: Stack(
         children: [
           SizedBox(

@@ -1,0 +1,54 @@
+import 'package:flutter/material.dart';
+
+class UsdaBadge extends StatelessWidget {
+  final bool verified;
+  final bool filled;
+  final VoidCallback? onTap;
+  const UsdaBadge({super.key, this.verified = false, this.filled = false, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = verified ? Colors.green : Colors.orange;
+    final text = verified ? 'Verified' : 'Not Verified';
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: filled ? color.withValues(alpha: 0.9) : color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: filled ? color.withValues(alpha: 0.9) : color.withValues(alpha: 0.4)),
+          boxShadow: filled
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              verified ? Icons.verified_rounded : Icons.warning_rounded, 
+              size: 14, 
+              color: filled ? Colors.white : color
+            ),
+            const SizedBox(width: 4),
+            Text(
+              text,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: filled ? Colors.white : color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

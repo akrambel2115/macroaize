@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:macroaize/widgets/ScannerOverlay.dart';
+import 'package:macroaize/widgets/scanner_overlay.dart';
 
 void main() {
   testWidgets('ScannerOverlay has rounded border radius', (

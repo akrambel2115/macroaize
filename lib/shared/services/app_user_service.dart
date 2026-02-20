@@ -107,8 +107,9 @@ class AppUserService {
   Future<AppUser> getCurrentUser() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) return const AppUser();
-    if (_subscriptionService == null || _usageService == null)
+    if (_subscriptionService == null || _usageService == null) {
       return AppUser(firebaseUser: firebaseUser);
+    }
 
     final subscription = await _subscriptionService!.subscriptionStream.first;
     final usage = await _usageService!.usageStream.first;

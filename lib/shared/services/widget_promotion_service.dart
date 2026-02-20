@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/constant/app_color.dart';
 
-import 'package:macroaize/widgets/WidgetPreviewCards.dart';
+import 'package:macroaize/widgets/widget_preview_cards.dart';
 
 class WidgetPromotionService {
   static const String _prefsKey = 'widget_promotion_shown';
@@ -142,7 +142,7 @@ class WidgetPromotionService {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: AppColor.primaryOrange.withOpacity(0.2),
+              color: AppColor.primaryOrange.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:macroaize/widgets/ModernButton.dart';
+import 'package:macroaize/widgets/modern_button.dart';
 import '../height_weight_picker.dart';
 
 class HeightWeightStep extends StatelessWidget {

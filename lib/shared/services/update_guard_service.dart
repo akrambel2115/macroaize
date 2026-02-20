@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'app_config_service.dart';
-import 'package:macroaize/constant/AppColor.dart';
+import 'package:macroaize/constant/app_color.dart';
 
 /// Enforces minimum app version with a blocking update dialog.
 /// 
@@ -132,7 +132,7 @@ class UpdateGuardService extends GetxService with WidgetsBindingObserver {
       PopScope(
         canPop: false,
         child: AlertDialog(
-          backgroundColor: Get.theme.dialogBackgroundColor,
+          backgroundColor: Get.theme.dialogTheme.backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

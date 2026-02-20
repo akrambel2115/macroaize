@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -192,7 +193,9 @@ class EmailVerificationGuard {
       try {
         await user.reload();
       } catch (e) {
-        print('Error reloading user verification status: $e');
+        if (kDebugMode) {
+          print('Error reloading user verification status: $e');
+        }
       }
     }
   }

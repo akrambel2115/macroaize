@@ -4,7 +4,7 @@ import { RIP_ENCRYPTION_KEY_V1 } from '../../config';
 import { getInfluencerEarnForCode, getInfluencerMinWithdrawal } from '../../remote_config_service';
 import { decryptRip } from '../../crypto_rip';
 import { WithdrawalRecord } from '../../types';
-import { isValidPromoCode } from '../../utils/validation';
+import { isValidPromoCode, sanitizeDocumentId } from '../../utils/validation';
 
 const db = admin.firestore();
 
@@ -123,10 +123,11 @@ export const fixPromoCommission = onCall({ region: 'europe-west1' }, async (requ
     const isAdmin = request.auth?.token?.admin === true;
     if (!isAdmin) throw new Error('permission-denied');
 
-    const subscriptionUserId = request.data?.subscriptionUserId as string;
-    const promoCode = request.data?.promoCode as string;
+    const subscriptionUserId = sanitizeDocumentId(String(request.data?.subscriptionUserId || ''));
+    const promoCode = String(request.data?.promoCode || '').toUpperCase().trim();
 
     if (!subscriptionUserId || !promoCode) throw new Error('invalid-argument');
+    if (!isValidPromoCode(promoCode)) throw new Error('Invalid promo code format');
 
     try {
         const subscriptionDoc = await db.collection('subscriptions').doc(subscriptionUserId).get();
@@ -218,7 +219,7 @@ export const adminGetWithdrawalRip = onCall({
 }, async (request: CallableRequest) => {
     requireAdmin(request);
 
-    const withdrawalId = String(request.data?.withdrawalId || '').trim();
+    const withdrawalId = sanitizeDocumentId(String(request.data?.withdrawalId || ''));
     if (!withdrawalId) throw new Error('invalid-argument');
 
     try {
@@ -261,7 +262,7 @@ export const adminCompleteWithdrawal = onCall({
 }, async (request: CallableRequest) => {
     requireAdmin(request);
 
-    const withdrawalId = String(request.data?.withdrawalId || '').trim();
+    const withdrawalId = sanitizeDocumentId(String(request.data?.withdrawalId || ''));
     const status = String(request.data?.status || '').trim();
 
     if (!withdrawalId || !['completed', 'failed'].includes(status)) {

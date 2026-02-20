@@ -16,6 +16,20 @@ export function isValidPromoCode(code: string): boolean {
     return /^[A-Z0-9]+$/.test(code);
 }
 
+export function sanitizeDocumentId(input: string): string {
+    if (!input || typeof input !== 'string') {
+        throw new Error('Document ID is required');
+    }
+    const trimmed = input.trim();
+    // Only allow alphanumeric, hyphens, and underscores
+    const match = trimmed.match(/^[A-Za-z0-9_-]+$/);
+    if (!match || trimmed.length === 0 || trimmed.length > 1500) {
+        throw new Error('Invalid document ID format');
+    }
+    // Return a new string to break taint tracking
+    return String(match[0]);
+}
+
 export function validateAiJsonResponse(jsonString: string, schema: 'nutrition' | 'mealItems'): any {
     try {
 

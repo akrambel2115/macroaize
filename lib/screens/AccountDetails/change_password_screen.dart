@@ -115,7 +115,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 }
                               : null,
                           style: TextButton.styleFrom(
-                            foregroundColor: enabled ? Colors.green : Colors.green.withOpacity(0.5),
+                            foregroundColor: enabled ? Colors.green : Colors.green.withValues(alpha: 0.5),
                             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),

@@ -90,8 +90,9 @@ class LocalNotificationService extends GetxService {
             ? Get.find<NotificationPreferencesService>()
             : null;
 
-    if (prefsService != null && !prefsService.goalRemindersEnabled.value)
+    if (prefsService != null && !prefsService.goalRemindersEnabled.value) {
       return;
+    }
 
     final configService =
         Get.isRegistered<RemoteConfigService>()

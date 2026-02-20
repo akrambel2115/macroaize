@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:macroaize/constant/AppColor.dart';
-import 'package:macroaize/widgets/ModernCard.dart';
+import 'package:macroaize/constant/app_color.dart';
+import 'package:macroaize/widgets/modern_card.dart';
 import 'package:macroaize/shared/services/notification_preferences_service.dart';
 
 class NotificationSettingsView extends StatefulWidget {
@@ -225,7 +225,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.12),
+            color: iconColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: iconColor, size: 22),
@@ -304,7 +304,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.12),
+                color: iconColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: iconColor, size: 20),
@@ -321,7 +321,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: context.theme.hintColor.withOpacity(0.1),
+                color: context.theme.hintColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

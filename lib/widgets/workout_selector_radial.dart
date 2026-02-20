@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../constant/AppColor.dart';
+import '../constant/app_color.dart';
 
 class WorkoutSelectorRadial extends StatelessWidget {
   final String selectedId;
@@ -81,7 +81,7 @@ class WorkoutSelectorRadial extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColor.primaryOrange.withOpacity(0.12),
+                    color: AppColor.primaryOrange.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

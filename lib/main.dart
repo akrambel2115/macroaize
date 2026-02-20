@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'MainController.dart';
+import 'main_controller.dart';
 import 'shared/services/app_user_service.dart';
 import 'shared/services/app_config_service.dart';
 import 'shared/services/update_guard_service.dart';
@@ -16,12 +16,12 @@ import 'shared/services/remote_config_service.dart';
 import 'shared/services/local_notification_service.dart';
 import 'shared/services/notification_preferences_service.dart';
 import 'shared/services/promo_code_service.dart';
-import 'ThemeService/AppTheme.dart';
-import 'ThemeService/ThemeController.dart';
-import 'constant/DatabaseHelper.dart';
-import 'constant/LocalString.dart';
+import 'ThemeService/app_theme.dart';
+import 'ThemeService/theme_controller.dart';
+import 'constant/database_helper.dart';
+import 'constant/local_string.dart';
 import 'routes/app_pages.dart';
-import 'screens/PremiumScreen/PremiumController.dart';
+import 'screens/PremiumScreen/premium_controller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'app/auth/firebase_options.dart';
@@ -99,8 +99,9 @@ Future<void> main() async {
     // fallback manual parse
     if ((iosKey == null || iosKey.isEmpty) ||
         (androidKey == null || androidKey.isEmpty)) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('Dotenv returned empty keys, attempting manual .env parse...');
+      }
       try {
         final raw = await rootBundle.loadString('.env', cache: false);
         final Map<String, String> parsed = {};
@@ -113,8 +114,9 @@ Future<void> main() async {
           final value = line.substring(idx + 1).trim();
           parsed[key] = value;
         }
-        if (kDebugMode)
+        if (kDebugMode) {
           print('Manually parsed env keys: ${parsed.keys.toList()}');
+        }
         iosKey = parsed['IOS_PUBLIC_SDK_KEY'] ?? iosKey;
         androidKey = parsed['ANDROID_PUBLIC_SDK_KEY'] ?? androidKey;
 
@@ -194,7 +196,9 @@ Future<void> main() async {
         if (kDebugMode) print('AppUserService init failed: $e');
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    // Outer init errors are non-fatal; services recover lazily.
+  }
 
   // Initialize promo code service for post-login validation
   try {

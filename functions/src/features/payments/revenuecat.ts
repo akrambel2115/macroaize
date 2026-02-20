@@ -705,9 +705,15 @@ export const revenuecatWebhook = onRequest(
             return;
         }
 
-        let event: any;
+        let event: Record<string, any>;
         try {
-            event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+            const parsed = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+            // Validate the parsed body is a non-null, non-array object
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                res.status(400).send('Bad Request');
+                return;
+            }
+            event = parsed as Record<string, any>;
         } catch (e) {
             res.status(400).send('Bad Request');
             return;
@@ -715,7 +721,8 @@ export const revenuecatWebhook = onRequest(
 
         const eventId: string = String(
             event?.event_timestamp_ms ||
-            event?.event?.id ||
+            (typeof event?.event === 'object' && event.event !== null && !Array.isArray(event.event)
+                ? (event.event as Record<string, any>).id : undefined) ||
             event?.id ||
             crypto.randomUUID()
         );
@@ -743,11 +750,15 @@ export const revenuecatWebhook = onRequest(
         }
 
         try {
-            const ev = event?.event || event || {};
+            // Validate nested event object type before accessing properties
+            const ev: Record<string, any> =
+                (typeof event?.event === 'object' && event.event !== null && !Array.isArray(event.event))
+                    ? (event.event as Record<string, any>)
+                    : event;
             const typeRaw = String(ev?.type || event?.type || 'unknown').toUpperCase();
-            const uidRaw: string | undefined =
+            const uidRaw: any =
                 ev?.app_user_id || event?.app_user_id || ev?.appUserId || event?.appUserId;
-            const uid = uidRaw && typeof uidRaw === 'string' ? uidRaw : undefined;
+            const uid = (typeof uidRaw === 'string' && uidRaw.length > 0) ? uidRaw : undefined;
 
             logger.info('Processing RevenueCat payload', {
                 type: typeRaw,
