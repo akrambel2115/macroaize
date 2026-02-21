@@ -252,24 +252,40 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
   Future<void> _handleBarcodeDetected(String barcode) async {
     try {
-      // stop stream
       await _stopBarcodeScanning();
 
-      // show loading
       isLoading = true;
       update();
 
-      // fetch product
-      final productData = await _openFoodFactsService.fetchProductByBarcode(
-        barcode,
-      );
+      final results = await Future.wait([
+        // picture capture
+        () async {
+          try {
+            if (cameraController != null &&
+                cameraController!.value.isInitialized &&
+                !cameraController!.value.isTakingPicture) {
+              await Future.delayed(const Duration(milliseconds: 150));
+              final XFile pic = await cameraController!.takePicture();
+              return File(pic.path);
+            }
+          } catch (_) {
+            // non-fatal – return null
+          }
+          return null;
+        }(),
+        // product lookup
+        _openFoodFactsService.fetchProductByBarcode(barcode),
+      ]);
+
+      final capturedBarcodeImage = results[0] as File?;
+      final productData = results[1] as Map<String, dynamic>?;
 
       isLoading = false;
       update();
 
       if (productData != null) {
         // navigate results
-        await _navigateToResults(productData);
+        await _navigateToResults(productData, capturedImage: capturedBarcodeImage);
       } else {
         // product not found
         NotificationService.showError('product_not_found');
@@ -297,7 +313,10 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _navigateToResults(Map<String, dynamic> productData) async {
+  Future<void> _navigateToResults(
+    Map<String, dynamic> productData, {
+    File? capturedImage,
+  }) async {
     // format food data
     final foodData = {
       'calorie': productData['calories']?.round() ?? 0,
@@ -330,8 +349,15 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
         'fromBarcode': true,
         'netWeight': productData['product_quantity'],
         'unit': productData['product_quantity_unit'],
+        'image': capturedImage, // captured frame shown in results
       },
     );
+
+    if (isClosed) return;
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (isClosed) return;
 
     // reinit camera
     await ensureCameraActive();
@@ -437,10 +463,20 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           if (result.success) {
             // proceed scan
             releaseCamera();
-            Get.toNamed(
+            await Get.toNamed(
               Routes.scanCalorieView,
               arguments: {'image': image, 'type': isIdentify},
             );
+            
+            if (isClosed) return;
+            
+            isLoading = false;
+            update();
+            
+            await Future.delayed(const Duration(milliseconds: 500));
+            if (isClosed) return;
+            
+            await ensureCameraActive();
           } else {
             // limit reached
             releaseCamera();
