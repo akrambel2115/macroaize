@@ -69,7 +69,7 @@ class OpenAiCalling {
           {
             'role': 'system',
             'content':
-                "You are a nutrition analysis assistant with advanced portion estimation capabilities. Given a food photo, return ONLY compact JSON listing distinct items with portion analysis. No commentary or markdown.\n\nJSON shape:\n{\n  \"mealItems\": [\n    {\n      \"name\": <string in $currentLang>,\n      \"english_name\": <string in English>,\n      \"portionType\": \"pieces\" | \"grams\",\n      \"count\": <number, only if portionType is pieces>,\n      \"estimatedWeight\": <number in grams>\n    }\n  ]\n}\n\nBe conservative with portion estimates. Common references:\n- Medium egg ≈ 50g\n- Large egg ≤ 60g\n- Thin bread slice ≈ 25g\n- Thick bread slice ≈ 35g\n- Medium apple ≈ 150g\n- Banana ≈ 120g\n\nProvide count AND realistic total weight for piece-based items. For weight-based items, estimate total grams conservatively.",
+                "You are a nutrition analysis assistant with advanced portion estimation capabilities. Given a photo, first determine whether the image contains food or a beverage. If the image does NOT contain any food or drink, return ONLY: {\"is_food\": false}. Do NOT invent nutritional values for non-food images.\n\nIf the image DOES contain food, return ONLY compact JSON listing distinct items with portion analysis. No commentary or markdown.\n\nJSON shape:\n{\n  \"is_food\": true,\n  \"mealItems\": [\n    {\n      \"name\": <string in $currentLang>,\n      \"english_name\": <string in English>,\n      \"portionType\": \"pieces\" | \"grams\",\n      \"count\": <number, only if portionType is pieces>,\n      \"estimatedWeight\": <number in grams>\n    }\n  ]\n}\n\nBe conservative with portion estimates. Common references:\n- Medium egg ≈ 50g\n- Large egg ≤ 60g\n- Thin bread slice ≈ 25g\n- Thick bread slice ≈ 35g\n- Medium apple ≈ 150g\n- Banana ≈ 120g\n\nProvide count AND realistic total weight for piece-based items. For weight-based items, estimate total grams conservatively.",
           },
           {
             'role': 'user',
@@ -116,7 +116,7 @@ class OpenAiCalling {
           {
             'role': 'system',
             'content':
-                "You are a nutrition analysis assistant. Given a food photo return ONLY compact JSON with integer kcal/gram values. No commentary or markdown. If multiple foods are present, estimate TOTAL combined values. JSON shape: {\\n  \"food_name\": <string>,\\n  \"food_name_english\": <string>,\\n  \"calories\": <int>,\\n  \"protein_g\": <int>,\\n  \"carbohydrates_g\": <int>,\\n  \"fats_g\": <int>\\n}. food_name should be in $currentLang, food_name_english always in English. If unsure, give best estimate; avoid 0 unless clearly no food.",
+                "You are a nutrition analysis assistant. Given a photo, first determine if it contains food or a beverage. If it does NOT contain any food or drink, return ONLY: {\\n  \"is_food\": false\\n}. Do NOT invent nutritional values for non-food images.\\n\\nIf it DOES contain food, return ONLY compact JSON with integer kcal/gram values. No commentary or markdown. If multiple foods are present, estimate TOTAL combined values. JSON shape: {\\n  \"is_food\": true,\\n  \"food_name\": <string>,\\n  \"food_name_english\": <string>,\\n  \"calories\": <int>,\\n  \"protein_g\": <int>,\\n  \"carbohydrates_g\": <int>,\\n  \"fats_g\": <int>\\n}. food_name should be in $currentLang, food_name_english always in English.",
           },
           {
             'role': 'user',
