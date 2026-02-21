@@ -20,6 +20,8 @@ import '../../shared/widgets/premium_required_dialog.dart';
 import '../../shared/services/rate_us_service.dart';
 import '../../shared/services/widget_promotion_service.dart';
 import '../../shared/services/meal_sync_service.dart';
+import '../HomeScreen/home_controller.dart';
+import '../leadingScreen/leading_controller.dart';
 
 class LocalFoodController extends GetxController {
   Map<String, dynamic> argument = Get.arguments;
@@ -389,7 +391,8 @@ class LocalFoodController extends GetxController {
         fats: item.fats,
         dailyGoal: ConstantUserMaster.calorieGoal,
       );
-      Get.offAllNamed(Routes.leadingView);
+      Get.until((route) => route.settings.name == Routes.leadingView);
+      _switchToHomeTab();
       RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
       WidgetPromotionService().showPromotionIfNeeded();
     } else {
@@ -427,7 +430,8 @@ class LocalFoodController extends GetxController {
             fats: item.fats,
             dailyGoal: ConstantUserMaster.calorieGoal,
           );
-          Get.offAllNamed(Routes.leadingView);
+          Get.until((route) => route.settings.name == Routes.leadingView);
+          _switchToHomeTab();
           RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
           WidgetPromotionService().showPromotionIfNeeded();
         }
@@ -459,11 +463,27 @@ class LocalFoodController extends GetxController {
           fats: item.fats,
           dailyGoal: ConstantUserMaster.calorieGoal,
         );
-        Get.offAllNamed(Routes.leadingView);
+        Get.until((route) => route.settings.name == Routes.leadingView);
+        _switchToHomeTab();
         RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
         WidgetPromotionService().showPromotionIfNeeded();
       }
     }
+  }
+
+  void _switchToHomeTab() async {
+    try {
+      if (Get.isRegistered<LeadingController>()) {
+        final lc = Get.find<LeadingController>();
+        lc.currentIndex = 0;
+        lc.update();
+      }
+      if (Get.isRegistered<HomeController>()) {
+        final hc = Get.find<HomeController>();
+        await hc.getSqlCalorie();
+        hc.update();
+      }
+    } catch (_) {}
   }
 
   showCalorieCompleteDialog(
@@ -524,7 +544,8 @@ class LocalFoodController extends GetxController {
                 if (context.mounted) {
                   Navigator.of(context).pop();
                 }
-                Get.offAllNamed(Routes.leadingView);
+                Get.until((route) => route.settings.name == Routes.leadingView);
+                _switchToHomeTab();
                 RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);
                 WidgetPromotionService().showPromotionIfNeeded();
               },
