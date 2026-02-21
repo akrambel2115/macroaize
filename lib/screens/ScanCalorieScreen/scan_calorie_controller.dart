@@ -24,6 +24,8 @@ import '../../shared/services/widget_promotion_service.dart';
 import '../../shared/services/streak_service.dart';
 import '../../shared/services/meal_sync_service.dart';
 import '../../shared/services/local_notification_service.dart';
+import '../leadingScreen/leading_controller.dart';
+import '../HomeScreen/home_controller.dart';
 
 enum ScanUnit { unit, gram, ml, cup }
 
@@ -278,6 +280,14 @@ class ScanCalorieController extends GetxController {
 
     if (image != null) {
       final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image!);
+
+      if (_isNotFoodResponse(itemsJsonStr)) {
+        isLoading = false;
+        calorie = 0;
+        update();
+        return;
+      }
+
       final parsedItems = _parseMealItems(itemsJsonStr);
       if (parsedItems.isNotEmpty) {
         await _enrichItemsWithUsda(parsedItems);
@@ -297,6 +307,12 @@ class ScanCalorieController extends GetxController {
         await OpenAiCalling.sentImageApi(image!).then((value) async {
           response = value;
           log('RAW_AI_RESPONSE => $response');
+
+          if (_isNotFoodResponse(response)) {
+            calorie = 0;
+            return;
+          }
+
           Map<String, dynamic> parsed = parseNutritionWithName(response);
           Map<String, int> nutrition = {
             'calories': parsed['calories'] ?? 0,
@@ -368,6 +384,21 @@ class ScanCalorieController extends GetxController {
     }
     isLoading = false;
     update();
+  }
+
+  bool _isNotFoodResponse(String text) {
+    final lower = text.toLowerCase();
+
+    if (lower.contains('"is_food"') && lower.contains('false')) return true;
+
+    if (lower.contains('not a food') ||
+        lower.contains('not food') ||
+        lower.contains('cannot identify food') ||
+        lower.contains('no food') ||
+        lower.contains('not edible')) {
+      return true;
+    }
+    return false;
   }
 
   String _buildCompositeName(List<MealBreakdownItem> list) {
@@ -738,7 +769,8 @@ class ScanCalorieController extends GetxController {
         calorieQuantity,
         ConstantUserMaster.calorieGoal,
       );
-      Get.offAllNamed(Routes.leadingView);
+      Get.until((route) => route.settings.name == Routes.leadingView);
+      _switchToHomeTab();
       RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
       WidgetPromotionService().showPromotionIfNeeded();
     } else {
@@ -785,7 +817,8 @@ class ScanCalorieController extends GetxController {
             calorieData.last.calorie + calorieQuantity,
             ConstantUserMaster.calorieGoal,
           );
-          Get.offAllNamed(Routes.leadingView);
+          Get.until((route) => route.settings.name == Routes.leadingView);
+          _switchToHomeTab();
           RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
           WidgetPromotionService().showPromotionIfNeeded();
         }
@@ -818,11 +851,29 @@ class ScanCalorieController extends GetxController {
           fats: fatsQuantity.round(),
           dailyGoal: ConstantUserMaster.calorieGoal,
         );
-        Get.offAllNamed(Routes.leadingView);
+        Get.until((route) => route.settings.name == Routes.leadingView);
+        _switchToHomeTab();
         RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
         WidgetPromotionService().showPromotionIfNeeded();
       }
     }
+  }
+
+  void _switchToHomeTab() async {
+    try {
+      if (Get.isRegistered<LeadingController>()) {
+        final lc = Get.find<LeadingController>();
+        lc.currentIndex = 0;
+        lc.update();
+      }
+
+      // show the newly logged meal.
+      if (Get.isRegistered<HomeController>()) {
+        final hc = Get.find<HomeController>();
+        await hc.getSqlCalorie();
+        hc.update();
+      }
+    } catch (_) {}
   }
 
   Map<String, int> extractNutritionalValues(String text) {
@@ -1013,7 +1064,8 @@ class ScanCalorieController extends GetxController {
                 if (context.mounted) {
                   Navigator.of(context).pop();
                 }
-                Get.offAllNamed(Routes.leadingView);
+                Get.until((route) => route.settings.name == Routes.leadingView);
+                _switchToHomeTab();
                 WidgetPromotionService().showPromotionIfNeeded();
               },
               child: Text(
