@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'meal_sync_service.dart';
 import 'notification_preferences_service.dart';
 
-
 const _kDeviceTokensCollection = 'deviceTokens';
 
 class FirebaseMessagingService extends GetxService {
@@ -78,18 +77,21 @@ class FirebaseMessagingService extends GetxService {
 
   Future<void> _requestPermissions() async {
     try {
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
-        alert: true,
-        announcement: false,
-        badge: true,
-        carPlay: false,
-        criticalAlert: false,
-        provisional: false,
-        sound: true,
-      );
+      NotificationSettings settings = await _firebaseMessaging
+          .requestPermission(
+            alert: true,
+            announcement: false,
+            badge: true,
+            carPlay: false,
+            criticalAlert: false,
+            provisional: false,
+            sound: true,
+          );
 
       if (kDebugMode) {
-        debugPrint('[$_logTag] Permission status: ${settings.authorizationStatus}');
+        debugPrint(
+          '[$_logTag] Permission status: ${settings.authorizationStatus}',
+        );
       }
 
       switch (settings.authorizationStatus) {
@@ -129,7 +131,9 @@ class FirebaseMessagingService extends GetxService {
 
   void _handleForegroundMessage(RemoteMessage message) {
     if (kDebugMode) {
-      debugPrint('[$_logTag] Received foreground message: ${message.messageId}');
+      debugPrint(
+        '[$_logTag] Received foreground message: ${message.messageId}',
+      );
       debugPrint('[$_logTag] Title: ${message.notification?.title}');
       debugPrint('[$_logTag] Body: ${message.notification?.body}');
       debugPrint('[$_logTag] Data: ${message.data}');
@@ -139,7 +143,7 @@ class FirebaseMessagingService extends GetxService {
 
   void _handleNotificationTap(RemoteMessage? message) {
     if (message == null) return;
-    
+
     if (kDebugMode) {
       debugPrint('[$_logTag] Notification tapped: ${message.messageId}');
       debugPrint('[$_logTag] Data: ${message.data}');
@@ -149,19 +153,19 @@ class FirebaseMessagingService extends GetxService {
 
   void _showLocalNotification(RemoteMessage message) {
     if (message.notification?.body != null) {
-      Get.showSnackbar(GetSnackBar(
+      Get.rawSnackbar(
         title: message.notification?.title ?? 'Notification',
         message: message.notification!.body!,
         backgroundColor: Colors.blue,
         duration: const Duration(seconds: 4),
         snackPosition: SnackPosition.TOP,
-      ));
+      );
     }
   }
 
   void _handleNotificationNavigation(Map<String, dynamic> data) {
     final String? type = data['type'];
-    
+
     switch (type) {
       case 'promo_used':
         if (Get.currentRoute != '/influencer') {
@@ -185,18 +189,21 @@ class FirebaseMessagingService extends GetxService {
 
   Future<void> _handleTokenManagement() async {
     try {
-      final String? token = await _firebaseMessaging
-          .getToken()
-          .timeout(const Duration(seconds: 10), onTimeout: () {
-        if (kDebugMode) {
-          debugPrint('[$_logTag] getToken() timed out – APNS token may not be available');
-        }
-        return null;
-      });
+      final String? token = await _firebaseMessaging.getToken().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          if (kDebugMode) {
+            debugPrint(
+              '[$_logTag] getToken() timed out – APNS token may not be available',
+            );
+          }
+          return null;
+        },
+      );
       if (token != null) {
         _currentToken.value = token;
         await _storeTokenInFirestore(token);
-        
+
         if (kDebugMode) {
           debugPrint('[$_logTag] Initial FCM token: $token');
         }
@@ -205,7 +212,7 @@ class FirebaseMessagingService extends GetxService {
       _firebaseMessaging.onTokenRefresh.listen((String newToken) async {
         _currentToken.value = newToken;
         await _storeTokenInFirestore(newToken);
-        
+
         if (kDebugMode) {
           debugPrint('[$_logTag] Token refreshed: $newToken');
         }
@@ -222,13 +229,16 @@ class FirebaseMessagingService extends GetxService {
       final User? user = _auth.currentUser;
       if (user == null) {
         if (kDebugMode) {
-          debugPrint('[$_logTag] No authenticated user, skipping token storage');
+          debugPrint(
+            '[$_logTag] No authenticated user, skipping token storage',
+          );
         }
         return;
       }
 
-      final ownershipRef =
-          _firestore.collection(_kDeviceTokensCollection).doc(token);
+      final ownershipRef = _firestore
+          .collection(_kDeviceTokensCollection)
+          .doc(token);
 
       await _firestore.runTransaction((tx) async {
         final ownershipSnap = await tx.get(ownershipRef);
@@ -246,15 +256,11 @@ class FirebaseMessagingService extends GetxService {
               .collection('fcmTokens')
               .doc(token);
 
-          tx.set(
-            oldTokenRef,
-            {
-              'isActive': false,
-              'supersededByUid': user.uid,
-              'supersededAt': FieldValue.serverTimestamp(),
-            },
-            SetOptions(merge: true),
-          );
+          tx.set(oldTokenRef, {
+            'isActive': false,
+            'supersededByUid': user.uid,
+            'supersededAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
 
           if (kDebugMode) {
             debugPrint(
@@ -293,7 +299,9 @@ class FirebaseMessagingService extends GetxService {
       await _syncNotificationPreferences();
 
       if (kDebugMode) {
-        debugPrint('[$_logTag] Token stored in Firestore for user: ${user.uid}');
+        debugPrint(
+          '[$_logTag] Token stored in Firestore for user: ${user.uid}',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -318,10 +326,7 @@ class FirebaseMessagingService extends GetxService {
             .doc(user.uid)
             .collection('fcmTokens')
             .doc(token),
-        {
-          'isActive': false,
-          'removedAt': FieldValue.serverTimestamp(),
-        },
+        {'isActive': false, 'removedAt': FieldValue.serverTimestamp()},
         SetOptions(merge: true),
       );
 
@@ -370,7 +375,7 @@ class FirebaseMessagingService extends GetxService {
       if (Get.isRegistered<NotificationPreferencesService>()) {
         final prefsService = Get.find<NotificationPreferencesService>();
         await prefsService.syncOnLogin();
-        
+
         if (kDebugMode) {
           debugPrint('[$_logTag] Notification preferences synced to Firestore');
         }

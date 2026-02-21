@@ -11,13 +11,6 @@ class NotificationService {
       title: 'success'.tr,
       message: message,
       backgroundColor: AppColor.success,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: EdgeInsets.only(
-        left: 12,
-        right: 12,
-        bottom: _bottomSafeArea + 12,
-      ),
-      borderRadius: 12,
       duration: const Duration(seconds: 3),
     );
   }
@@ -75,16 +68,13 @@ class NotificationService {
     if (Get.isSnackbarOpen) {
       Get.closeCurrentSnackbar();
     }
-    Get.showSnackbar(
-      GetSnackBar(
-        messageText: _buildContent(title: title, message: message),
-        backgroundColor: backgroundColor,
-        snackPosition: SnackPosition.BOTTOM,
-        snackStyle: SnackStyle.FLOATING,
-        margin: EdgeInsets.only(left: 12, right: 12, bottom: marginBottom),
-        borderRadius: 12,
-        duration: duration,
-      ),
+    Get.rawSnackbar(
+      backgroundColor: backgroundColor,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: EdgeInsets.only(left: 12, right: 12, bottom: marginBottom),
+      borderRadius: 12,
+      duration: duration,
+      messageText: _buildContent(title: title, message: message),
     );
   }
 

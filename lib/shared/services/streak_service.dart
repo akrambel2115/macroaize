@@ -12,7 +12,6 @@ class StreakService {
   factory StreakService() => _instance;
   StreakService._internal();
 
-
   Future<int> getCurrentStreak() async {
     final int storedCount =
         await SharedPref.readInt(SharePrefKey.streakCount) ?? 0;
@@ -131,22 +130,20 @@ class StreakService {
       final int streak = await getCurrentStreak();
       final history = await getLast7DaysHistory();
 
-      Get.showSnackbar(
-        GetSnackBar(
-          backgroundColor: Colors.transparent,
-          messageText: StreakNotificationWidget(
-            streakCount: streak,
-            history: history,
-          ),
-          snackPosition: SnackPosition.TOP,
-          duration: const Duration(seconds: 4),
-          animationDuration: const Duration(milliseconds: 500),
-          overlayBlur: 0.0,
-          margin: const EdgeInsets.only(top: 10, left: 16, right: 16),
-          borderRadius: 20,
-          padding: EdgeInsets.zero,
-          isDismissible: true,
+      Get.rawSnackbar(
+        backgroundColor: Colors.transparent,
+        messageText: StreakNotificationWidget(
+          streakCount: streak,
+          history: history,
         ),
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 4),
+        animationDuration: const Duration(milliseconds: 500),
+        overlayBlur: 0.0,
+        margin: const EdgeInsets.only(top: 10, left: 16, right: 16),
+        borderRadius: 20,
+        padding: EdgeInsets.zero,
+        isDismissible: true,
       );
 
       await SharedPref.saveString(SharePrefKey.lastStreakShownDate, todayStr);
