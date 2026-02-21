@@ -23,19 +23,22 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.theme.scaffoldBackgroundColor,
-      appBar: _buildModernAppBar(context),
-      bottomNavigationBar: _buildBottomCTA(context),
-      body: GetBuilder<ScanCalorieController>(
-        builder: (controller) {
-          if (controller.isLoading) {
-            return _buildLoadingState(context);
-          } else {
-            return _buildResultContent(context, controller);
-          }
-        },
-      ),
+    return GetBuilder<ScanCalorieController>(
+      builder: (controller) {
+        final showAppBar = !controller.isLoading && controller.calorie != 0;
+        return Scaffold(
+          backgroundColor: context.theme.scaffoldBackgroundColor,
+          appBar: showAppBar ? _buildModernAppBar(context) : null,
+          bottomNavigationBar: _buildBottomCTA(context),
+          body: SafeArea(
+            top: !showAppBar,
+            bottom: false,
+            child: controller.isLoading
+                ? _buildLoadingState(context)
+                : _buildResultContent(context, controller),
+          ),
+        );
+      },
     );
   }
 
@@ -119,110 +122,120 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        height: 300,
-        width: 300,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                child: Container(
-                  width: 250,
-                  height: 250,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 1,
+    return Stack(
+      children: [
+        Center(
+          child: SizedBox(
+            height: 300,
+            width: 300,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                    child: Container(
+                      width: 250,
+                      height: 250,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Opacity(
+                              opacity: 0.7,
+                              child:
+                                  controller.image != null
+                                      ? Image.file(
+                                        controller.image!,
+                                        fit: BoxFit.cover,
+                                      )
+                                      : Container(
+                                        color: Colors.grey[900],
+                                        child: const Icon(
+                                          Icons.fastfood,
+                                          color: Colors.white24,
+                                          size: 64,
+                                        ),
+                                      ),
+                            ),
+                          ),
+                          Positioned.fill(
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.mode(
+                                AppColor.primaryOrange.withValues(alpha: 0.9),
+                                BlendMode.srcIn,
+                              ),
+                              child: Lottie.asset(
+                                AppAssets.scanFood,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Opacity(
-                          opacity: 0.7,
-                          child:
-                              controller.image != null
-                                  ? Image.file(
-                                    controller.image!,
-                                    fit: BoxFit.cover,
-                                  )
-                                  : Container(
-                                    color: Colors.grey[900],
-                                    child: const Icon(
-                                      Icons.fastfood,
-                                      color: Colors.white24,
-                                      size: 64,
-                                    ),
-                                  ),
-                        ),
+                ),
+                Positioned(
+                  bottom: 20,
+                  child: ModernFadeSlideTransition(
+                    beginOffset: const Offset(0, 0.5),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
                       ),
-                      Positioned.fill(
-                        child: ColorFiltered(
-                          colorFilter: ColorFilter.mode(
-                            AppColor.primaryOrange.withValues(alpha: 0.9),
-                            BlendMode.srcIn,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                          child: Lottie.asset(
-                            AppAssets.scanFood,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                        ],
                       ),
-                    ],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const ModernLoadingIndicator(
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Analyzing nutrition...'.tr,
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-            Positioned(
-              bottom: 20,
-              child: ModernFadeSlideTransition(
-                beginOffset: const Offset(0, 0.5),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const ModernLoadingIndicator(
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Analyzing nutrition...'.tr,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        // back button when app bar is hidden
+        Positioned(
+          top: 8,
+          left: 8,
+          child: AppWidgets.backButton(context, () => Get.back()),
+        ),
+      ],
     );
   }
 
@@ -230,39 +243,50 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
     BuildContext context,
     ScanCalorieController controller,
   ) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: 100),
-      child: Column(
-        children: [
-          _buildHeroImageSection(context, controller),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                if (controller.calorie != 0)
-                  _buildMealInfoCard(context, controller),
-                const SizedBox(height: 16),
-                if (controller.hasBreakdown)
-                  _buildMealBreakdown(context, controller),
-                if (controller.calorie != 0)
-                  _buildQuantitySelector(context, controller),
-                const SizedBox(height: 20),
-                if (controller.calorie != 0)
-                  CapsuleMacroGrid(
-                    calories: controller.calorieQuantity,
-                    protein: controller.proteinQuantity,
-                    carbs: controller.carbsQuantity,
-                    fats: controller.fatsQuantity,
-                  ),
-                const SizedBox(height: 20),
-                if (controller.calorie != 0)
-                  _buildAIChatButton(context, controller),
-                if (controller.calorie == 0) _buildNoDataState(context),
-              ],
-            ),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 100),
+          child: Column(
+            children: [
+              _buildHeroImageSection(context, controller),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    if (controller.calorie != 0)
+                      _buildMealInfoCard(context, controller),
+                    const SizedBox(height: 16),
+                    if (controller.hasBreakdown)
+                      _buildMealBreakdown(context, controller),
+                    if (controller.calorie != 0)
+                      _buildQuantitySelector(context, controller),
+                    const SizedBox(height: 20),
+                    if (controller.calorie != 0)
+                      CapsuleMacroGrid(
+                        calories: controller.calorieQuantity,
+                        protein: controller.proteinQuantity,
+                        carbs: controller.carbsQuantity,
+                        fats: controller.fatsQuantity,
+                      ),
+                    const SizedBox(height: 20),
+                    if (controller.calorie != 0)
+                      _buildAIChatButton(context, controller),
+                    if (controller.calorie == 0) _buildNoDataState(context),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        // show a back button when app bar is hidden (no data)
+        if (controller.calorie == 0)
+          Positioned(
+            top: 8,
+            left: 8,
+            child: AppWidgets.backButton(context, () => Get.back()),
+          ),
+      ],
     );
   }
 
