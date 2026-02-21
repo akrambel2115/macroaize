@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../features/auth/presentation/account_controller.dart';
 import '../../widgets/password_field.dart';
+import 'package:macroaize/widgets/app_widgets.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   final AccountController controller;
@@ -35,10 +36,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
-        ),
+        leading: AppWidgets.backButton(context, () => Get.back()),
   title: Text('change_password'.tr, style: theme.textTheme.titleMedium?.copyWith(fontSize: 20, fontWeight: FontWeight.w600)),
         elevation: 0,
         backgroundColor: Colors.transparent,
