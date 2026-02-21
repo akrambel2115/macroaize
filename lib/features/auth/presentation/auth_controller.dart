@@ -185,7 +185,13 @@ class AuthController extends GetxController {
   String _mapFailure(AuthFailure f) {
     if (f is CredentialFailure) {
       switch (f.code) {
+        // OAuth / token failures – generic message (not email-specific)
         case 'invalid-credential':
+        case 'apple-no-token':
+        case 'failed':
+        case 'invalid-response':
+          return 'auth_authentication_error';
+        // email + password specific
         case 'wrong-password':
           return 'auth_wrong_credentials';
         case 'user-not-found':
