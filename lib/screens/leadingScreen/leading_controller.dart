@@ -60,9 +60,6 @@ class LeadingController extends GetxController {
       }
     }
     currentIndex = index;
-    Get.delete<HomeController>();
-    Get.delete<RecipesController>();
-    Get.delete<AnalyticsController>();
     update();
   }
 
