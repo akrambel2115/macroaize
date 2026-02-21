@@ -18,10 +18,10 @@ class ScanFoodView extends GetView<ScanFoodController> {
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => ScanFoodController());
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: GetBuilder<ScanFoodController>(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: GetBuilder<ScanFoodController>(
           builder: (controller) {
             final meals = ['BreakFast', 'Lunch', 'snack(s)', 'Dinner'];
 
@@ -96,7 +96,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                 // Back Button (Top Left)
                 if (!controller.isLoading)
                   Positioned(
-                    top: 16,
+                    top: MediaQuery.of(context).padding.top + 16,
                     left: 16,
                     child: GestureDetector(
                       onTap: () {
@@ -134,7 +134,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                 // Flash Toggle (Top Right)
                 if (!controller.isLoading)
                   Positioned(
-                    top: 16,
+                    top: MediaQuery.of(context).padding.top + 16,
                     right: 16,
                     child: GestureDetector(
                       onTap: controller.toggleFlash,
@@ -334,6 +334,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SafeArea(
+            bottom: false,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
