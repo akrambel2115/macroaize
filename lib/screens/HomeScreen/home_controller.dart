@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:macroaize/Model/sql_calorie_model.dart';
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
@@ -33,8 +32,6 @@ class HomeController extends GetxController {
   final dbHelper = DatabaseHelper();
   bool isLoading = true;
 
-  Timer? _blockingDialogTimer;
-
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -48,7 +45,6 @@ class HomeController extends GetxController {
       // Check if tutorial is needed
       TutorialCoachService().hasCompletedTutorial().then((hasCompleted) {
         if (!hasCompleted) {
-          // Block interaction immediately
           Get.dialog(
             const PopScope(
               canPop: false,
@@ -58,20 +54,12 @@ class HomeController extends GetxController {
             barrierColor: Colors.transparent,
           );
 
-          _blockingDialogTimer = Timer(const Duration(milliseconds: 800), () {
-            // Close the blocking dialog
-            if (Get.isDialogOpen == true) {
-              Get.back();
-            }
-            // Show the actual tutorial
-            _showAppTipsIfNeeded();
-          });
+          if (Get.isDialogOpen == true) {
+            Get.back();
+          }
+          _showAppTipsIfNeeded();
         } else {
-          _blockingDialogTimer = Timer(const Duration(milliseconds: 800), () {
-            _showAppTipsIfNeeded();
-            // Check for daily streak notification
-            StreakService().checkAndShowNotification();
-          });
+          StreakService().checkAndShowNotification();
         }
       });
     });
@@ -84,7 +72,6 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
-    _blockingDialogTimer?.cancel();
     if (Get.isDialogOpen == true) {
       Get.back();
     }
@@ -225,8 +212,13 @@ class HomeController extends GetxController {
         remainingKcal = 0;
       }
     } else {
+      consumedKcal = 0;
+      consumedProtein = 0;
+      consumedCarbs = 0;
+      consumedFats = 0;
       remainingKcal = ConstantUserMaster.calorieGoal + caloriesBurned;
     }
+    _updateWidgets();
   }
 
   List<DateTime> getPreviousDays() {
