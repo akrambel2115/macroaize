@@ -9,21 +9,20 @@ class LanguageView extends GetView<LanguageController> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: context.theme.scaffoldBackgroundColor,
+      appBar: AppBar(
         backgroundColor: context.theme.scaffoldBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: context.theme.scaffoldBackgroundColor,
-          elevation: 0,
-          title: Text(
-            "Language".tr,
-            style: TextStyle(color: context.theme.primaryColor),
-          ),
-          leading: AppWidgets.backButton(context, () {
-            Get.back();
-          }),
+        elevation: 0,
+        title: Text(
+          "Language".tr,
+          style: TextStyle(color: context.theme.primaryColor),
         ),
-        body: GetBuilder<LanguageController>(
+        leading: AppWidgets.backButton(context, () {
+          Get.back();
+        }),
+      ),
+      body: GetBuilder<LanguageController>(
           builder: (controller) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
@@ -67,7 +66,6 @@ class LanguageView extends GetView<LanguageController> {
             );
           },
         ),
-      ),
-    );
+      );
   }
 }
