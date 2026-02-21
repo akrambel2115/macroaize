@@ -112,6 +112,14 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
   // release camera resources
   void releaseCamera() {
+    _stopBarcodeScanning();
+    isBarcodeMode = false;
+    _isProcessingBarcode = false;
+    _barcodeScanner?.dispose();
+    _barcodeScanner = null;
+    if (Get.isSnackbarOpen) {
+      Get.closeCurrentSnackbar();
+    }
     try {
       cameraController?.dispose();
     } catch (_) {}
@@ -161,26 +169,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       // start scanning
       await _startBarcodeScanning();
 
-      // show notification
-      Get.showSnackbar(
-        GetSnackBar(
-          messageText: Text(
-            'barcode_activated'.tr,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: Colors.black.withValues(alpha: 0.8),
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.TOP,
-          margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
-          borderRadius: 12,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        ),
-      );
+      NotificationService.showInfo('barcode_activated'.tr);
     } else {
       // stop scanning
       await _stopBarcodeScanning();
@@ -189,26 +178,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       _barcodeScanner?.dispose();
       _barcodeScanner = null;
 
-      // show notification
-      Get.showSnackbar(
-        GetSnackBar(
-          messageText: Text(
-            'barcode_deactivated'.tr,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: Colors.black.withValues(alpha: 0.8),
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.TOP,
-          margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
-          borderRadius: 12,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        ),
-      );
+      NotificationService.showInfo('barcode_deactivated'.tr);
     }
 
     update();
@@ -285,7 +255,10 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
       if (productData != null) {
         // navigate results
-        await _navigateToResults(productData, capturedImage: capturedBarcodeImage);
+        await _navigateToResults(
+          productData,
+          capturedImage: capturedBarcodeImage,
+        );
       } else {
         // product not found
         NotificationService.showError('product_not_found');
@@ -469,15 +442,15 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
               Routes.scanCalorieView,
               arguments: {'image': image, 'type': isIdentify},
             );
-            
+
             if (isClosed) return;
-            
+
             isLoading = false;
             update();
-            
+
             await Future.delayed(const Duration(milliseconds: 500));
             if (isClosed) return;
-            
+
             await ensureCameraActive();
           } else {
             // limit reached
@@ -525,23 +498,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     final success = await AuthModal.show();
 
     if (success) {
-      Get.snackbar(
-        'success'.tr,
-        'auth_scan_success'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
+      NotificationService.showSuccess('auth_scan_success');
     } else {
-      Get.snackbar(
-        'error'.tr,
-        'auth_scan_required'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
+      NotificationService.showError('auth_scan_required');
     }
   }
 

@@ -17,7 +17,6 @@ class ScanFoodView extends GetView<ScanFoodController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.lazyPut(() => ScanFoodController());
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -282,7 +281,10 @@ class ScanFoodView extends GetView<ScanFoodController> {
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.35),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.14), width: 1),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.14),
+            width: 1,
+          ),
         ),
         child: Center(child: Icon(icon, color: Colors.white, size: iconSize)),
       ),
