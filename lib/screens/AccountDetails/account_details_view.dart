@@ -6,6 +6,7 @@ import '../../features/auth/data/firebase_auth_repository.dart';
 import '../../features/auth/presentation/account_controller.dart';
 import '../../widgets/verify_email_button.dart';
 import 'package:macroaize/constant/app_color.dart';
+import 'package:macroaize/widgets/app_widgets.dart';
 import 'change_password_screen.dart';
 
 const Color _kAccent = Color(0xFFFF6B35);
@@ -30,10 +31,7 @@ class AccountDetailsView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
-        ),
+        leading: AppWidgets.backButton(context, () => Get.back()),
         title: Text(
           'account_details_title'.tr,
           style: theme.textTheme.titleMedium?.copyWith(
