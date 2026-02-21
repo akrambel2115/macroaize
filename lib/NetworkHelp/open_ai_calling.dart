@@ -9,15 +9,18 @@ import 'package:macroaize/shared/services/app_config_service.dart';
 
 class OpenAiCalling {
 
-  static const int _maxImageDimension = 1024;
+  static const int _maxImageDimension = 768;
 
-  static const int _compressQuality = 80;
+  static const int _compressQuality = 70;
 
   static const int _maxImageBytes = 3 * 1024 * 1024;
 
-  static Future<Uint8List> _compressImage(File imageFile) async {
+  static Future<Uint8List> compressImage(File imageFile) async {
     final rawBytes = await imageFile.readAsBytes();
 
+    if (rawBytes.length <= 2 * 1024 * 1024) {
+      return rawBytes;
+    }
 
     final decoded = await compute(_decodeAndResize, rawBytes);
     if (decoded == null) {
@@ -60,7 +63,7 @@ class OpenAiCalling {
   static Future<String> analyzeMealItems(File image) async {
     try {
       final currentLang = _getLanguageName();
-      final bytes = await _compressImage(image);
+      final bytes = await compressImage(image);
       final base64Image = base64Encode(bytes);
       final parameters = {
         'model': Get.find<AppConfigService>().aiModel,
@@ -81,7 +84,10 @@ class OpenAiCalling {
               },
               {
                 'type': 'image_url',
-                'image_url': {'url': "data:image/jpeg;base64,$base64Image"},
+                'image_url': {
+                  'url': "data:image/jpeg;base64,$base64Image",
+                  'detail': 'low'
+                },
               },
             ],
           },
@@ -107,7 +113,7 @@ class OpenAiCalling {
     try {
       // get current app language for localization
       final currentLang = _getLanguageName();
-      final bytes = await _compressImage(image);
+      final bytes = await compressImage(image);
       final base64Image = base64Encode(bytes);
       final parameters = {
         'model': Get.find<AppConfigService>().aiModel,
@@ -128,7 +134,10 @@ class OpenAiCalling {
               },
               {
                 'type': 'image_url',
-                'image_url': {'url': "data:image/jpeg;base64,$base64Image"},
+                'image_url': {
+                  'url': "data:image/jpeg;base64,$base64Image",
+                  'detail': 'low'
+                },
               },
             ],
           },

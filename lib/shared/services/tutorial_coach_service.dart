@@ -32,8 +32,7 @@ class TutorialCoachService {
   ) async {
     final hasCompleted = await hasCompletedTutorial();
     if (!hasCompleted && steps.isNotEmpty) {
-      // delay for widget render
-      await Future.delayed(const Duration(milliseconds: 1200));
+      await Future.delayed(const Duration(milliseconds: 100));
       if (context.mounted) {
         showTutorial(context, steps);
       }

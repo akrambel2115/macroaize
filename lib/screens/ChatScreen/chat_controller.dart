@@ -22,6 +22,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../main_controller.dart';
 import '../../Model/chat_model.dart';
 import '../../Model/ai_model.dart';
+import 'package:macroaize/NetworkHelp/open_ai_calling.dart';
 import 'package:macroaize/shared/services/app_config_service.dart';
 import '../../constant/font_family.dart';
 import '../../widgets/cropper_ui_settings.dart';
@@ -117,22 +118,19 @@ class ChatController extends GetxController {
     }
     messages.insert(0, ChatModel(true, textToSend, imagePath?.path, false));
 
-    // Add "Typing..." placeholder immediately
     isStreamedText = true;
     streamedText = ""; // Start empty or with "..."
     messages.insert(
       0,
       ChatModel(false, "", imagePath?.path, false),
     ); // Placeholder
-    isTyping = true; // Trigger typing animation if used
+    isTyping = true; 
 
-    // Capture image before clearing
     File? sentImage = imagePath;
     imagePath = null; // Clear immediately from UI
 
     update(); // Update UI to show messages
 
-    // Scroll to bottom
     await Future.delayed(const Duration(milliseconds: 50));
     scrollController.animateTo(
       0.0,
@@ -219,7 +217,7 @@ class ChatController extends GetxController {
 
       if (sentImage != null) {
         File imageDemo = sentImage;
-        final bytes = await imageDemo.readAsBytes();
+        final bytes = await OpenAiCalling.compressImage(imageDemo);
         final base64Image = base64Encode(bytes);
 
         final parameters = {
@@ -233,7 +231,10 @@ class ChatController extends GetxController {
                 {'type': 'text', 'text': textToSend},
                 {
                   'type': 'image_url',
-                  'image_url': {'url': "data:image/jpeg;base64,$base64Image"},
+                  'image_url': {
+                    'url': "data:image/jpeg;base64,$base64Image",
+                    'detail': 'low'
+                  },
                 },
               ],
             },
@@ -470,7 +471,9 @@ class ChatController extends GetxController {
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: image.path,
         compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 100,
+        compressQuality: 70,
+        maxWidth: 768,
+        maxHeight: 768,
         uiSettings: cropperUiSettings(context),
       );
       if (croppedFile != null) {

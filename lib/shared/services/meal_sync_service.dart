@@ -21,7 +21,7 @@ class MealSyncService {
     required int fats,
     required int dailyGoal,
   }) async {
-    debugPrint('[$_logTag] 🚀 syncMealLog called: $mealType, $calories cal');
+    debugPrint('[$_logTag]  syncMealLog called: $mealType, $calories cal');
 
     try {
       final user = _auth.currentUser;
@@ -30,7 +30,7 @@ class MealSyncService {
         return;
       }
 
-      debugPrint('[$_logTag] 👤 User: ${user.uid}');
+      debugPrint('[$_logTag]  User: ${user.uid}');
 
       final now = DateTime.now();
       final todayStr = DateFormat('yyyy-MM-dd').format(now);
@@ -39,7 +39,7 @@ class MealSyncService {
       final userRef = _firestore.collection('users').doc(userId);
       final mealTimeField = _getMealTimeField(mealType);
 
-      debugPrint('[$_logTag] 📝 Writing to users/$userId...');
+      debugPrint('[$_logTag]  Writing to users/$userId...');
 
       await userRef.set({
         'lastMealLog': FieldValue.serverTimestamp(),
@@ -47,14 +47,14 @@ class MealSyncService {
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      debugPrint('[$_logTag] ✅ User document updated!');
+      debugPrint('[$_logTag]  User document updated!');
 
       final historyRef = _firestore
           .collection('calorie_history')
           .doc('${userId}_$todayStr');
 
       debugPrint(
-        '[$_logTag] 📝 Writing to calorie_history/${userId}_$todayStr...',
+        '[$_logTag]  Writing to calorie_history/${userId}_$todayStr...',
       );
 
       await _firestore.runTransaction((transaction) async {
@@ -95,9 +95,9 @@ class MealSyncService {
         }
       });
 
-      debugPrint('[$_logTag] ✅ Calorie history updated!');
+      debugPrint('[$_logTag]  Calorie history updated!');
       debugPrint(
-        '[$_logTag] 🎉 Meal sync complete: $mealType, $calories cal for user $userId',
+        '[$_logTag]  Meal sync complete: $mealType, $calories cal for user $userId',
       );
     } catch (e, stackTrace) {
       debugPrint('[$_logTag] ❌ Error syncing meal: $e');

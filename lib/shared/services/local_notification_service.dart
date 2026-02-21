@@ -103,7 +103,7 @@ class LocalNotificationService extends GetxService {
     String body;
 
     if (percent >= 100) {
-      title = 'Goal Achieved! 🎉';
+      title = 'Goal Achieved! ';
       body =
           configService?.goal100pctMsg ??
           'Amazing! You\'ve reached your daily calorie goal!';

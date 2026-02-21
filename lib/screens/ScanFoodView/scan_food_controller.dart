@@ -444,7 +444,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: image.path,
         compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 85,
+        compressQuality: 70,
+        maxWidth: 768,
+        maxHeight: 768,
         uiSettings: cropperUiSettings(context),
       );
 

@@ -35,7 +35,7 @@ class RemoteConfigService extends GetxService {
     'notification_goal_50pct_msg':
         '🎯 Halfway there! You\'ve logged {percent}% of your daily goal.',
     'notification_goal_100pct_msg':
-        '🎉 Amazing! You\'ve reached your daily calorie goal!',
+        ' Amazing! You\'ve reached your daily calorie goal!',
     'notification_daily_reset_msg':
         '🌅 A new day begins! Your daily counters have been reset.',
     'notification_end_of_day_msg':
