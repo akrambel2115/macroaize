@@ -51,111 +51,6 @@ class _PromoCodeViewState extends State<PromoCodeView> {
     }
   }
 
-  Widget _buildCreativeBenefit(
-    BuildContext context,
-    String emoji,
-    String planType,
-    String bonus,
-    String description,
-    Color accentColor,
-  ) {
-    return Stack(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              // Emoji with background
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                planType,
-                style: context.theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [accentColor, accentColor.withValues(alpha: 0.8)],
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  bonus,
-                  style: context.theme.textTheme.labelSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                textAlign: TextAlign.center,
-                style: context.theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white60,
-                  fontSize: 10,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Positioned.fill(
-          child: IgnorePointer(
-            ignoring: _isLinked,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeInOut,
-              opacity: _isLinked ? 0.0 : 1.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.lock_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Future<void> _validatePromo() async {
     if (_isValidating || _isLinked) return;
 
@@ -284,80 +179,27 @@ class _PromoCodeViewState extends State<PromoCodeView> {
         ).paddingOnly(top: 20),
 
         Expanded(
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Lottie animation
-                  Lottie.asset(
-                    'assets/lottie/gift.json',
-                    width: 180,
-                    height: 180,
-                    fit: BoxFit.contain,
-                    repeat: true,
-                  ),
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Lottie animation
+                Lottie.asset(
+                  'assets/lottie/gift.json',
+                  width: 180,
+                  height: 180,
+                  fit: BoxFit.contain,
+                  repeat: true,
+                ),
 
-                  const SizedBox(height: 8),
+                const SizedBox(height: 28),
 
-                  // Benefit explanation section - only show when logged in
-                  if (_isUserLoggedIn)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Centered header
-                          Text(
-                            'Your Bonus',
-                            textAlign: TextAlign.center,
-                            style: context.theme.textTheme.headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: -0.5,
-                                ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Side-by-side benefit items
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildCreativeBenefit(
-                                  context,
-                                  '🗓️',
-                                  'Monthly',
-                                  '+3 days',
-                                  'Extra time',
-                                  const Color(0xFF4ECDC4),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildCreativeBenefit(
-                                  context,
-                                  '📅',
-                                  'Yearly',
-                                  '+1 month',
-                                  'Full month',
-                                  const Color(0xFFFF6B9D),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  const SizedBox(height: 28),
-
-                  // Playful subtitle
+                // Playful subtitle
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: Text(
@@ -500,7 +342,8 @@ class _PromoCodeViewState extends State<PromoCodeView> {
               ),
             ),
           ),
-        ),
+
+        const SizedBox(height: 16),
 
         Row(
           children: [
