@@ -143,10 +143,21 @@ class FirebaseAuthRepository implements AuthRepository {
         nonce: hashedNonce,
       );
 
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        return (
+          null,
+          const CredentialFailure(
+            'apple-no-token',
+            'Apple did not return an identity token. Please try again.',
+          ),
+        );
+      }
+
       // create OAuth credential for Firebase including the raw nonce
       final oauth = OAuthProvider(
         'apple.com',
-      ).credential(idToken: credential.identityToken, rawNonce: rawNonce);
+      ).credential(idToken: idToken, rawNonce: rawNonce);
 
   // sign-in with Firebase
       final res = await _auth.signInWithCredential(oauth);
@@ -173,7 +184,7 @@ class FirebaseAuthRepository implements AuthRepository {
         AuthorizationErrorCode.invalidResponse => 'invalid-response',
         AuthorizationErrorCode.notHandled => 'not-handled',
         AuthorizationErrorCode.notInteractive => 'not-interactive',
-        AuthorizationErrorCode.unknown => 'unknown',
+        _ => 'unknown',
       };
       return (null, CredentialFailure(code, e.message));
     } on FirebaseAuthException catch (e) {
@@ -259,9 +270,16 @@ class FirebaseAuthRepository implements AuthRepository {
         ],
         nonce: hashedNonce,
       );
+      final linkIdToken = credential.identityToken;
+      if (linkIdToken == null) {
+        return const CredentialFailure(
+          'apple-no-token',
+          'Apple did not return an identity token. Please try again.',
+        );
+      }
       final oauth = OAuthProvider(
         'apple.com',
-      ).credential(idToken: credential.identityToken, rawNonce: rawNonce);
+      ).credential(idToken: linkIdToken, rawNonce: rawNonce);
       await user.linkWithCredential(oauth);
       return null;
     } on FirebaseAuthException catch (e) {
@@ -273,7 +291,7 @@ class FirebaseAuthRepository implements AuthRepository {
         AuthorizationErrorCode.invalidResponse => 'invalid-response',
         AuthorizationErrorCode.notHandled => 'not-handled',
         AuthorizationErrorCode.notInteractive => 'not-interactive',
-        AuthorizationErrorCode.unknown => 'unknown',
+        _ => 'unknown',
       };
       return CredentialFailure(code, e.message);
     } catch (e) {
