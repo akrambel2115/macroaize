@@ -345,6 +345,8 @@ class _MyAppState extends State<MyApp> {
           darkTheme: AppTheme.dark,
           themeMode:
               themeController.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          defaultTransition: Transition.cupertino,
+          popGesture: true,
           // system ui overlay
           builder: (context, child) {
             final isDark = themeController.isDarkMode;
