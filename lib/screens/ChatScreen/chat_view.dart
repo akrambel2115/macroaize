@@ -56,8 +56,8 @@ class _ChatViewState extends State<ChatView> {
                 this.context,
                 'The coach does not memorize chat history. Each interaction is independent.'
                     .tr,
-                duration: const Duration(seconds: 10),
-                autoDismissAfter: const Duration(seconds: 10),
+                duration: const Duration(seconds: 3),
+                autoDismissAfter: const Duration(seconds: 3),
                 persistent: true,
                 onDismissed: () {
                   _chatNoticeEntry = null;
@@ -89,8 +89,8 @@ class _ChatViewState extends State<ChatView> {
                 this.context,
                 'The coach does not memorize chat history. Each interaction is independent.'
                     .tr,
-                duration: const Duration(seconds: 10),
-                autoDismissAfter: const Duration(seconds: 10),
+                duration: const Duration(seconds: 3),
+                autoDismissAfter: const Duration(seconds: 3),
                 persistent: true,
                 onDismissed: () {
                   _chatNoticeEntry = null;
