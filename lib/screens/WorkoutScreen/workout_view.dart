@@ -14,6 +14,7 @@ class WorkoutView extends GetView<WorkoutController> {
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text(
           'log_workout'.tr,
           style: context.textTheme.titleLarge?.copyWith(
@@ -23,6 +24,7 @@ class WorkoutView extends GetView<WorkoutController> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: context.theme.iconTheme.color),
           onPressed: () => Get.back(),

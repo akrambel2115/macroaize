@@ -15,6 +15,8 @@ const Map<String, String> arabic = {
   "Add": "إضافة",
   "Update": "تحديث",
   "Delete": "حذف",
+  "delete_item": "حذف العنصر",
+  "delete_item_confirmation": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
   "Delete Item": "حذف العنصر",
   "Are you sure you want to delete this item?":
       "هل أنت متأكد من رغبتك في حذف هذا العنصر؟",

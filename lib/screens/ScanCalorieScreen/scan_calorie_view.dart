@@ -31,11 +31,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
           appBar: showAppBar ? _buildModernAppBar(context) : null,
           bottomNavigationBar: _buildBottomCTA(context),
           body: SafeArea(
-            top: !showAppBar,
             bottom: false,
-            child: controller.isLoading
-                ? _buildLoadingState(context)
-                : _buildResultContent(context, controller),
+            child:
+                controller.isLoading
+                    ? _buildLoadingState(context)
+                    : _buildResultContent(context, controller),
           ),
         );
       },
@@ -59,18 +59,19 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Builder(
-                  builder: (ctx) => IconButton(
-                    icon: const Icon(Icons.share_outlined),
-                    onPressed: () {
-                      final box = ctx.findRenderObject() as RenderBox?;
-                      final rect = box != null
-                          ? box.localToGlobal(Offset.zero) & box.size
-                          : null;
-                      controller.shareMealResult(
-                          sharePositionOrigin: rect);
-                    },
-                    tooltip: 'Share Meal'.tr,
-                  ),
+                  builder:
+                      (ctx) => IconButton(
+                        icon: const Icon(Icons.share_outlined),
+                        onPressed: () {
+                          final box = ctx.findRenderObject() as RenderBox?;
+                          final rect =
+                              box != null
+                                  ? box.localToGlobal(Offset.zero) & box.size
+                                  : null;
+                          controller.shareMealResult(sharePositionOrigin: rect);
+                        },
+                        tooltip: 'Share Meal'.tr,
+                      ),
                 ),
               );
             }
@@ -1327,7 +1328,9 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                               ),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: AppColor.primaryGreen.withValues(alpha: 0.1),
+                                color: AppColor.primaryGreen.withValues(
+                                  alpha: 0.1,
+                                ),
                                 width: 1,
                               ),
                             ),

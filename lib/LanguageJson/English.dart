@@ -18,6 +18,8 @@ const Map<String, String> english = {
   "add": "Add",
   "Update": "Update",
   "Delete": "Delete",
+  "delete_item": "Delete Item",
+  "delete_item_confirmation": "Are you sure you want to delete this item?",
   "Delete Item": "Delete Item",
   "Are you sure you want to delete this item?":
       "Are you sure you want to delete this item?",

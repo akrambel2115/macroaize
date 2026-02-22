@@ -15,6 +15,9 @@ const Map<String, String> french = {
   "add": "Ajouter",
   "Update": "Mettre à jour",
   "Delete": "Supprimer",
+  "delete_item": "Supprimer l'élément",
+  "delete_item_confirmation":
+      "Êtes-vous sûr de vouloir supprimer cet élément ?",
   "Delete Item": "Supprimer l'élément",
   "Are you sure you want to delete this item?":
       "Êtes-vous sûr de vouloir supprimer cet élément ?",
