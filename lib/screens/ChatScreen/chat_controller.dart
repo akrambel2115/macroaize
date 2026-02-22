@@ -124,7 +124,7 @@ class ChatController extends GetxController {
       0,
       ChatModel(false, "", imagePath?.path, false),
     ); // Placeholder
-    isTyping = true; 
+    isTyping = true;
 
     File? sentImage = imagePath;
     imagePath = null; // Clear immediately from UI
@@ -233,7 +233,7 @@ class ChatController extends GetxController {
                   'type': 'image_url',
                   'image_url': {
                     'url': "data:image/jpeg;base64,$base64Image",
-                    'detail': 'low'
+                    'detail': 'low',
                   },
                 },
               ],
@@ -695,6 +695,7 @@ class ChatController extends GetxController {
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
       );
+      Get.offAllNamed(Routes.leadingView);
     } else {
       Get.snackbar(
         'error'.tr,

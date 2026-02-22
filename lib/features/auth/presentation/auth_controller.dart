@@ -191,6 +191,12 @@ class AuthController extends GetxController {
         case 'failed':
         case 'invalid-response':
           return 'auth_authentication_error';
+        case 'canceled':
+          return 'auth_apple_cancelled';
+        case 'not-handled':
+          return 'auth_apple_not_handled';
+        case 'not-interactive':
+          return 'auth_apple_not_interactive';
         // email + password specific
         case 'wrong-password':
           return 'auth_wrong_credentials';

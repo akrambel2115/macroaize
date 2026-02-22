@@ -560,6 +560,7 @@ class PremiumController extends GetxController {
         NotificationService.showError('Please login to continue');
         return;
       }
+      Get.offAllNamed(Routes.leadingView);
       user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         NotificationService.showError('Authentication failed');

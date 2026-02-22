@@ -499,6 +499,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
     if (success) {
       NotificationService.showSuccess('auth_scan_success');
+      Get.offAllNamed(Routes.leadingView);
     } else {
       NotificationService.showError('auth_scan_required');
     }

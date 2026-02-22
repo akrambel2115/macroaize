@@ -7,6 +7,7 @@ import '../../features/auth/presentation/account_controller.dart';
 import '../../widgets/verify_email_button.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/widgets/app_widgets.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'change_password_screen.dart';
 
 const Color _kAccent = Color(0xFFFF6B35);
@@ -54,6 +55,7 @@ class AccountDetailsView extends StatelessWidget {
                 await acct.signOut();
                 Get.back();
                 NotificationService.showSuccess('auth_logout_success');
+                Get.offAllNamed(Routes.signUpView);
               } catch (e) {
                 NotificationService.showError('auth_logout_failed');
               }

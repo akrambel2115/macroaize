@@ -117,8 +117,14 @@ class _TopNotificationState extends State<_TopNotification>
 class AppWidgets {
   static Widget backButton(BuildContext context, VoidCallback onTap) {
     return IconButton(
-      padding: EdgeInsets.all(0),
-      onPressed: onTap,
+      padding: EdgeInsets.zero,
+      onPressed: () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          onTap();
+        }
+      },
       icon: Icon(Icons.arrow_back_ios, color: context.theme.primaryColor),
     );
   }
