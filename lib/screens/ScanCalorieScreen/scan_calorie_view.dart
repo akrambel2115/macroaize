@@ -30,13 +30,10 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
           backgroundColor: context.theme.scaffoldBackgroundColor,
           appBar: showAppBar ? _buildModernAppBar(context) : null,
           bottomNavigationBar: _buildBottomCTA(context),
-          body: SafeArea(
-            bottom: false,
-            child:
-                controller.isLoading
-                    ? _buildLoadingState(context)
-                    : _buildResultContent(context, controller),
-          ),
+          body:
+              controller.isLoading
+                  ? _buildLoadingState(context)
+                  : _buildResultContent(context, controller),
         );
       },
     );

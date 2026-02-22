@@ -19,198 +19,192 @@ class ScanFoodView extends GetView<ScanFoodController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
-        child: GetBuilder<ScanFoodController>(
-          builder: (controller) {
-            final meals = ['BreakFast', 'Lunch', 'snack(s)', 'Dinner'];
+      body: GetBuilder<ScanFoodController>(
+        builder: (controller) {
+          final meals = ['BreakFast', 'Lunch', 'snack(s)', 'Dinner'];
 
-            return Stack(
-              children: [
-                // camera preview
-                if (controller.cameraController?.value.isInitialized == true)
-                  Positioned.fill(
-                    child: CameraPreview(controller.cameraController!),
-                  ),
-
-                // scanner overlay
+          return Stack(
+            children: [
+              // camera preview
+              if (controller.cameraController?.value.isInitialized == true)
                 Positioned.fill(
-                  child: Center(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        // trigger camera permission
+                  child: CameraPreview(controller.cameraController!),
+                ),
+
+              // scanner overlay
+              Positioned.fill(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      // trigger camera permission
+                      if (controller.cameraController?.value.isInitialized !=
+                          true) {
+                        controller.ensureCameraActive();
+                      }
+                    },
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ScannerOverlay(
+                          width: 300,
+                          height: 260,
+                          borderRadius: 36,
+                          hintText:
+                              controller.isBarcodeOnly
+                                  ? 'scan_barcode_hint'.tr
+                                  : null,
+                        ),
                         if (controller.cameraController?.value.isInitialized !=
-                            true) {
-                          controller.ensureCameraActive();
-                        }
-                      },
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          ScannerOverlay(
+                            true)
+                          Container(
                             width: 300,
                             height: 260,
-                            borderRadius: 36,
-                            hintText:
-                                controller.isBarcodeOnly
-                                    ? 'scan_barcode_hint'.tr
-                                    : null,
-                          ),
-                          if (controller
-                                  .cameraController
-                                  ?.value
-                                  .isInitialized !=
-                              true)
-                            Container(
-                              width: 300,
-                              height: 260,
-                              alignment: Alignment.center,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.photo_camera_outlined,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.photo_camera_outlined,
+                                  color: Colors.white70,
+                                  size: 36,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'grant_camera_access_in_scanner'.tr,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
                                     color: Colors.white70,
-                                    size: 36,
+                                    fontSize: 14,
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'grant_camera_access_in_scanner'.tr,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                        ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // flash toggle
+              // Back Button (Top Left)
+              if (!controller.isLoading)
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  left: 16,
+                  child: GestureDetector(
+                    onTap: () {
+                      try {
+                        if (Get.isRegistered<LeadingController>()) {
+                          Get.find<LeadingController>().changeTabIndex(0);
+                        } else {
+                          Get.back();
+                        }
+                      } catch (_) {
+                        Get.back();
+                      }
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.14),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 24,
                       ),
                     ),
                   ),
                 ),
 
-                // flash toggle
-                // Back Button (Top Left)
-                if (!controller.isLoading)
-                  Positioned(
-                    top: MediaQuery.of(context).padding.top + 16,
-                    left: 16,
-                    child: GestureDetector(
-                      onTap: () {
-                        try {
-                          if (Get.isRegistered<LeadingController>()) {
-                            Get.find<LeadingController>().changeTabIndex(0);
-                          } else {
-                            Get.back();
-                          }
-                        } catch (_) {
-                          Get.back();
-                        }
-                      },
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.14),
-                            width: 1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // barcode toggle
-                // Flash Toggle (Top Right)
-                if (!controller.isLoading)
-                  Positioned(
-                    top: MediaQuery.of(context).padding.top + 16,
-                    right: 16,
-                    child: GestureDetector(
-                      onTap: controller.toggleFlash,
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
+              // barcode toggle
+              // Flash Toggle (Top Right)
+              if (!controller.isLoading)
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  right: 16,
+                  child: GestureDetector(
+                    onTap: controller.toggleFlash,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color:
+                            controller.isFlashOn
+                                ? AppColor.primaryOrange
+                                : Colors.black.withValues(alpha: 0.35),
+                        shape: BoxShape.circle,
+                        border: Border.all(
                           color:
                               controller.isFlashOn
                                   ? AppColor.primaryOrange
-                                  : Colors.black.withValues(alpha: 0.35),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color:
-                                controller.isFlashOn
-                                    ? AppColor.primaryOrange
-                                    : Colors.white.withValues(alpha: 0.14),
-                            width: controller.isFlashOn ? 2 : 1,
-                          ),
-                          boxShadow:
-                              controller.isFlashOn
-                                  ? [
-                                    BoxShadow(
-                                      color: AppColor.primaryOrange.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
+                                  : Colors.white.withValues(alpha: 0.14),
+                          width: controller.isFlashOn ? 2 : 1,
+                        ),
+                        boxShadow:
+                            controller.isFlashOn
+                                ? [
+                                  BoxShadow(
+                                    color: AppColor.primaryOrange.withValues(
+                                      alpha: 0.4,
                                     ),
-                                  ]
-                                  : null,
-                        ),
-                        child: Icon(
-                          controller.isFlashOn
-                              ? Icons.flash_on_rounded
-                              : Icons.flash_off_rounded,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                                : null,
+                      ),
+                      child: Icon(
+                        controller.isFlashOn
+                            ? Icons.flash_on_rounded
+                            : Icons.flash_off_rounded,
+                        color: Colors.white,
+                        size: 24,
                       ),
                     ),
                   ),
+                ),
 
-                // bottom controls
-                if (!controller.isLoading && !controller.isBarcodeOnly)
-                  Positioned(
-                    bottom: 12,
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // control buttons
-                        _buildControlButtons(context, controller),
-                        const SizedBox(height: 6),
-                        // meal picker
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: BottomModePicker(
-                            items: meals,
-                            currentIndex: meals.indexOf(controller.isIdentify),
-                            onChanged:
-                                (idx) =>
-                                    controller.onChangeIdentify(meals[idx]),
-                            height: 42,
-                          ),
+              // bottom controls
+              if (!controller.isLoading && !controller.isBarcodeOnly)
+                Positioned(
+                  bottom: 12,
+                  left: 0,
+                  right: 0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // control buttons
+                      _buildControlButtons(context, controller),
+                      const SizedBox(height: 6),
+                      // meal picker
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: BottomModePicker(
+                          items: meals,
+                          currentIndex: meals.indexOf(controller.isIdentify),
+                          onChanged:
+                              (idx) => controller.onChangeIdentify(meals[idx]),
+                          height: 42,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
 
-                // loading overlay
-                if (controller.isLoading) _buildLoadingOverlay(context),
-              ],
-            );
-          },
-        ),
+              // loading overlay
+              if (controller.isLoading) _buildLoadingOverlay(context),
+            ],
+          );
+        },
       ),
     );
   }

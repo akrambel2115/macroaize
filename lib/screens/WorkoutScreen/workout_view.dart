@@ -5,6 +5,7 @@ import 'package:macroaize/Model/parsed_workout.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/WorkoutScreen/workout_controller.dart';
 import 'package:macroaize/widgets/modern_animations.dart';
+import 'package:macroaize/widgets/app_widgets.dart';
 
 class WorkoutView extends GetView<WorkoutController> {
   const WorkoutView({super.key});
@@ -25,10 +26,7 @@ class WorkoutView extends GetView<WorkoutController> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.theme.iconTheme.color),
-          onPressed: () => Get.back(),
-        ),
+        leading: AppWidgets.backButton(context, () => Get.back()),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
