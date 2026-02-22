@@ -53,9 +53,8 @@ class AccountDetailsView extends StatelessWidget {
             onPressed: () async {
               try {
                 await acct.signOut();
-                Get.back();
                 NotificationService.showSuccess('auth_logout_success');
-                Get.offAllNamed(Routes.signUpView);
+                Get.offAllNamed(Routes.leadingView, arguments: {'index': 4});
               } catch (e) {
                 NotificationService.showError('auth_logout_failed');
               }

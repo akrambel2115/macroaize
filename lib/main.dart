@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:home_widget/home_widget.dart';
 import 'main_controller.dart';
 import 'shared/services/app_user_service.dart';
 import 'shared/services/app_config_service.dart';
@@ -38,6 +39,10 @@ class MyHttpOverrides extends HttpOverrides {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb && Platform.isIOS) {
+    await HomeWidget.setAppGroupId('group.com.macroaize.app');
+  }
 
   // load env files
   try {

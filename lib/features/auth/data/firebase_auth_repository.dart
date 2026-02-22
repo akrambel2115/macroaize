@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -186,10 +187,21 @@ class FirebaseAuthRepository implements AuthRepository {
         AuthorizationErrorCode.notInteractive => 'not-interactive',
         _ => 'unknown',
       };
+      if (kDebugMode) {
+        print('[AppleSignIn] AuthorizationException – code: $code, '
+            'message: ${e.message}');
+      }
       return (null, CredentialFailure(code, e.message));
     } on FirebaseAuthException catch (e) {
+      if (kDebugMode) {
+        print('[AppleSignIn] FirebaseAuthException – code: ${e.code}, '
+            'message: ${e.message}');
+      }
       return (null, CredentialFailure(e.code, e.message ?? ''));
     } catch (e) {
+      if (kDebugMode) {
+        print('[AppleSignIn] Unknown error: $e');
+      }
       return (null, UnknownFailure(e.toString()));
     }
   }
@@ -283,6 +295,10 @@ class FirebaseAuthRepository implements AuthRepository {
       await user.linkWithCredential(oauth);
       return null;
     } on FirebaseAuthException catch (e) {
+      if (kDebugMode) {
+        print('[AppleLink] FirebaseAuthException – code: ${e.code}, '
+            'message: ${e.message}');
+      }
       return CredentialFailure(e.code, e.message ?? '');
     } on SignInWithAppleAuthorizationException catch (e) {
       final code = switch (e.code) {
@@ -293,8 +309,15 @@ class FirebaseAuthRepository implements AuthRepository {
         AuthorizationErrorCode.notInteractive => 'not-interactive',
         _ => 'unknown',
       };
+      if (kDebugMode) {
+        print('[AppleLink] AuthorizationException – code: $code, '
+            'message: ${e.message}');
+      }
       return CredentialFailure(code, e.message);
     } catch (e) {
+      if (kDebugMode) {
+        print('[AppleLink] Unknown error: $e');
+      }
       return UnknownFailure(e.toString());
     }
   }

@@ -5,7 +5,6 @@ import 'package:macroaize/Model/parsed_workout.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/WorkoutScreen/workout_controller.dart';
 import 'package:macroaize/widgets/modern_animations.dart';
-import 'package:macroaize/widgets/app_widgets.dart';
 
 class WorkoutView extends GetView<WorkoutController> {
   const WorkoutView({super.key});
@@ -15,18 +14,29 @@ class WorkoutView extends GetView<WorkoutController> {
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        scrolledUnderElevation: 0,
-        title: Text(
-          'log_workout'.tr,
-          style: context.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: AppWidgets.backButton(context, () => Get.back()),
+        leading: Padding(
+          padding: const EdgeInsets.all(8),
+          child: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_rounded,
+              color: AppColor.neutralGrey700,
+            ),
+            onPressed: () => Get.back(),
+          ),
+        ),
+        title: Text(
+          'log_workout'.tr,
+          style: context.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color:
+                context.theme.brightness == Brightness.dark
+                    ? AppColor.darkText
+                    : AppColor.neutralGrey900,
+          ),
+        ),
+        actions: [],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

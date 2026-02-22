@@ -547,10 +547,10 @@ class _SocialButtons extends GetView<AuthController> {
                 return Column(
                   children: [
                     OutlinedButton.icon(
-                      icon: const Icon(
+                      icon: Icon(
                         FontAwesomeIcons.apple,
                         size: 18,
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       label: Text('continue_with_apple'.tr),
                       style: modernOutlinedButton(context),

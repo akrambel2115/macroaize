@@ -277,6 +277,33 @@ struct StreakWidgetView: View {
     }
 }
 
+
+struct MacroaizeSmallWidget: Widget {
+    let kind: String = "MacroaizeSmallWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            SmallWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Daily Progress")
+        .description("Track your daily calorie progress at a glance.")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+struct MacroaizeLargeWidget: Widget {
+    let kind: String = "MacroaizeLargeWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            LargeWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Calories & Macros")
+        .description("View calories and macronutrient breakdown.")
+        .supportedFamilies([.systemMedium])
+    }
+}
+
 struct StreakWidget: Widget {
     let kind: String = "StreakWidget"
 
@@ -291,9 +318,10 @@ struct StreakWidget: Widget {
 }
 
 @main
-struct macroaizeWidgets: WidgetBundle {
-   var body: some Widget {
-       macroaizeWidget()
-       StreakWidget()
-   }
+struct MacroaizeWidgets: WidgetBundle {
+    var body: some Widget {
+        MacroaizeSmallWidget()
+        MacroaizeLargeWidget()
+        StreakWidget()
+    }
 }
