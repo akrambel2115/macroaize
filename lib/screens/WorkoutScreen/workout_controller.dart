@@ -8,6 +8,7 @@ import 'package:macroaize/screens/AnalyticsScreen/analytics_controller.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:macroaize/shared/services/usage_service.dart';
 import 'package:macroaize/Model/parsed_workout.dart';
+import 'package:macroaize/routes/app_routes.dart';
 
 class WorkoutController extends GetxController {
   final dbHelper = DatabaseHelper();
@@ -27,6 +28,9 @@ class WorkoutController extends GetxController {
   final RxBool _isPremium = false.obs;
   bool get isPremium => _isPremium.value;
 
+  final RxBool isPoppingBack = false.obs;
+  bool _isClosed = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -43,8 +47,54 @@ class WorkoutController extends GetxController {
 
   @override
   void onClose() {
+    _isClosed = true;
     descriptionController.dispose();
     super.onClose();
+  }
+
+  Future<void> safeBack() async {
+    if (_isClosed) return;
+    if (isPoppingBack.value) return;
+    isPoppingBack.value = true;
+
+    try {
+      // Schedule to avoid Navigator lock assertions.
+      await Future<void>.delayed(Duration.zero);
+      if (_isClosed) return;
+
+      final navigator = Get.key.currentState;
+      if (navigator == null) {
+        Get.offAllNamed(Routes.leadingView);
+        return;
+      }
+
+      try {
+        final popped = await navigator.maybePop();
+        if (!popped && !_isClosed) {
+          // Fallback so the page is always dismissible.
+          Get.offAllNamed(Routes.leadingView);
+        }
+      } catch (_) {
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+        if (_isClosed) return;
+        try {
+          final popped = await navigator.maybePop();
+          if (!popped && !_isClosed) {
+            Get.offAllNamed(Routes.leadingView);
+          }
+        } catch (_) {
+          if (!_isClosed) {
+            Get.offAllNamed(Routes.leadingView);
+          }
+        }
+      }
+    } catch (_) {
+      // swallow
+    } finally {
+      if (!_isClosed) {
+        isPoppingBack.value = false;
+      }
+    }
   }
 
   Future<void> parseWorkoutWithAI() async {
@@ -145,7 +195,9 @@ class WorkoutController extends GetxController {
       await _saveAIWorkoutInternal();
 
       NotificationService.showSuccess('workout_saved');
-      Get.back();
+      if (!_isClosed) {
+        await safeBack();
+      }
     } catch (_) {
       NotificationService.showError('failed_to_save_workout');
     } finally {
@@ -354,7 +406,9 @@ class WorkoutController extends GetxController {
       await _saveAIWorkoutInternal();
       NotificationService.showSuccess('workout_saved');
       await Future.delayed(const Duration(milliseconds: 100));
-      Get.back();
+      if (!_isClosed) {
+        await safeBack();
+      }
     } catch (_) {
       NotificationService.showError('failed_to_save_workout');
       saveError.value = 'failed_to_save_workout'.tr;

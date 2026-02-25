@@ -10,12 +10,12 @@ import 'package:macroaize/screens/leadingScreen/leading_view.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/shared/services/step_tracking_service.dart';
 import 'package:macroaize/shared/services/widget_service.dart';
 import 'package:macroaize/shared/services/streak_service.dart';
-import 'package:pedometer/pedometer.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:macroaize/screens/AdjustGoals/updateDailog/show_update_goal_dialog.dart';
 import 'package:macroaize/screens/AnalyticsScreen/update_weight.dart';
+import 'package:macroaize/shared/services/weight_update_service.dart';
 
 class HomeController extends GetxController {
   RxInt streakCount = 0.obs;
@@ -25,14 +25,19 @@ class HomeController extends GetxController {
   int consumedProtein = 0;
   int consumedCarbs = 0;
   int consumedFats = 0;
-  int caloriesBurned = 0; // Calories burned from workouts
+  int caloriesBurned = 0;
+  int workoutCaloriesBurned = 0;
+  int stepCaloriesBurned = 0;
   int workoutCount = 0;
   int workoutDuration = 0; // minutes
 
   // pedometer
   int currentSteps = 0;
-  Stream<StepCount>? _stepCountStream;
   bool isStepTrackingAvailable = false;
+  Worker? _stepMetricsWorker;
+
+  final StepTrackingService _stepTrackingService =
+      Get.find<StepTrackingService>();
 
   // carousel page state
   final PageController trackingPageController = PageController();
@@ -47,6 +52,7 @@ class HomeController extends GetxController {
   static const int maxGlasses = 8;
   static const int glassVolumeMl = 250;
   int waterGlasses = 0;
+  int displayedWeight = 0;
 
   final GlobalKey addFoodButtonKey = GlobalKey();
 
@@ -60,15 +66,21 @@ class HomeController extends GetxController {
 
   CalorieHistoryModel? lastLoggedMeal;
 
+  bool get isSelectedDateToday => _isSameDate(today, DateTime.now());
+
   @override
   Future<void> onInit() async {
     super.onInit();
     await getAllData();
     await getSqlCalorie();
     await getRecentHistory();
-    await loadWaterData();
     await loadStepData();
-    initPedometer();
+    await _syncStepsFromService();
+    _stepMetricsWorker = everAll([
+      _stepTrackingService.dailySteps,
+      _stepTrackingService.stepCaloriesBurned,
+      _stepTrackingService.isTrackingAvailable,
+    ], (_) => _onStepMetricsChanged());
     dates = getPreviousDays();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scrollToTodayCentered();
@@ -104,6 +116,7 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
+    _stepMetricsWorker?.dispose();
     trackingPageController.dispose();
     if (Get.isDialogOpen == true) {
       Get.back();
@@ -122,20 +135,23 @@ class HomeController extends GetxController {
   }
 
   // water tracking helpers
-  String get _waterKey =>
-      'water_glasses_${DateFormat('yyyy-MM-dd').format(DateTime.now())}';
+  String _waterKeyForDate(DateTime date) =>
+      'water_glasses_${DateFormat('yyyy-MM-dd').format(date)}';
 
-  Future<void> loadWaterData() async {
-    final saved = await SharedPref.readInt(_waterKey);
+  Future<void> loadWaterData([DateTime? date]) async {
+    final targetDate = date ?? today;
+    final saved = await SharedPref.readInt(_waterKeyForDate(targetDate));
     waterGlasses = saved ?? 0;
     update();
   }
 
-  Future<void> _saveWaterData() async {
-    await SharedPref.saveInt(_waterKey, waterGlasses);
+  Future<void> _saveWaterData([DateTime? date]) async {
+    final targetDate = date ?? today;
+    await SharedPref.saveInt(_waterKeyForDate(targetDate), waterGlasses);
   }
 
   void addWaterGlass() {
+    if (!isSelectedDateToday) return;
     if (waterGlasses < maxGlasses) {
       waterGlasses++;
       _saveWaterData();
@@ -144,6 +160,7 @@ class HomeController extends GetxController {
   }
 
   void removeWaterGlass() {
+    if (!isSelectedDateToday) return;
     if (waterGlasses > 0) {
       waterGlasses--;
       _saveWaterData();
@@ -230,33 +247,41 @@ class HomeController extends GetxController {
     }
   }
 
-  void initPedometer() async {
-    // For iOS, NSMotionUsageDescription is automatically used by the system when requesting.
-    // For Android, we request the activity recognition permission explicitly.
-    PermissionStatus status = await Permission.activityRecognition.request();
+  Future<void> _syncStepsFromService() async {
+    isStepTrackingAvailable = _stepTrackingService.isTrackingAvailable.value;
 
-    // Note: on some older Androids, PermissionStatus might return as restricted or denied
-    // but the sensor still works if declared in Manifest, handle carefully.
-    if (status.isGranted || status.isRestricted || status.isLimited) {
-      try {
-        isStepTrackingAvailable = true;
-        _stepCountStream = Pedometer.stepCountStream;
-        _stepCountStream!
-            .listen((StepCount event) {
-              currentSteps = event.steps;
-              update();
-            })
-            .onError((error) {
-              isStepTrackingAvailable = false;
-              update();
-            });
-      } catch (e) {
-        isStepTrackingAvailable = false;
-      }
+    if (_isSameDate(today, DateTime.now())) {
+      currentSteps = _stepTrackingService.dailySteps.value;
+      stepCaloriesBurned = _stepTrackingService.stepCaloriesBurned.value;
     } else {
-      isStepTrackingAvailable = false;
-      update();
+      currentSteps = await _stepTrackingService.getDailyStepsForDate(today);
+      stepCaloriesBurned = await _stepTrackingService.getStepCaloriesForDate(
+        today,
+      );
     }
+
+    caloriesBurned = workoutCaloriesBurned + stepCaloriesBurned;
+  }
+
+  Future<void> _onStepMetricsChanged() async {
+    final isViewingToday = _isSameDate(today, DateTime.now());
+    isStepTrackingAvailable = _stepTrackingService.isTrackingAvailable.value;
+
+    if (!isViewingToday) {
+      return;
+    }
+
+    currentSteps = _stepTrackingService.dailySteps.value;
+    stepCaloriesBurned = _stepTrackingService.stepCaloriesBurned.value;
+    caloriesBurned = workoutCaloriesBurned + stepCaloriesBurned;
+
+    remainingKcal =
+        ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
+    if (remainingKcal < 0) {
+      remainingKcal = 0;
+    }
+
+    update();
   }
 
   void editStepGoal() {
@@ -278,19 +303,23 @@ class HomeController extends GetxController {
   }
 
   void editWeight() {
+    if (!isSelectedDateToday) return;
     showUpdateWeightDialog(Get.context!, ConstantUserMaster.weight.toString(), (
       newWeightString,
     ) async {
       int newWeight = int.tryParse(newWeightString) ?? 0;
       if (newWeight > 0) {
-        ConstantUserMaster.weight = newWeight;
-        await SharedPref.saveInt(
-          "weight", // Note: share_pref_key usually stores keys as strings
-          ConstantUserMaster.weight,
-        );
+        await WeightUpdateService.updateWeight(newWeight);
+        await getAllData();
+        displayedWeight = ConstantUserMaster.weight;
         update();
       }
     }, title: 'Update Weight'.tr);
+  }
+
+  Future<void> _loadDisplayedWeightForSelectedDate() async {
+    final latest = await dbHelper.getLatestWeightOnOrBefore(today);
+    displayedWeight = (latest?.round() ?? ConstantUserMaster.weight);
   }
 
   dateFilter(int index) async {
@@ -303,8 +332,15 @@ class HomeController extends GetxController {
             )
             .toList();
 
-    // Get workout data for this date
-    caloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(today);
+    // Get workout + step calories for this date
+    workoutCaloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(today);
+    stepCaloriesBurned = await _stepTrackingService.getStepCaloriesForDate(
+      today,
+    );
+    caloriesBurned = workoutCaloriesBurned + stepCaloriesBurned;
+    currentSteps = await _stepTrackingService.getDailyStepsForDate(today);
+    await loadWaterData(today);
+    await _loadDisplayedWeightForSelectedDate();
     workoutCount = await dbHelper.getWorkoutCountForDate(today);
     workoutDuration = await dbHelper.getTotalWorkoutDurationForDate(today);
 
@@ -334,22 +370,32 @@ class HomeController extends GetxController {
   getSqlCalorie() async {
     sqlCalorie = await dbHelper.getCalorieData();
 
-    // Get workout data for today
-    caloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(
-      DateTime.now(),
+    // Get workout + step calories for selected day
+    workoutCaloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(today);
+    stepCaloriesBurned = await _stepTrackingService.getStepCaloriesForDate(
+      today,
     );
-    workoutCount = await dbHelper.getWorkoutCountForDate(DateTime.now());
-    workoutDuration = await dbHelper.getTotalWorkoutDurationForDate(
-      DateTime.now(),
-    );
+    caloriesBurned = workoutCaloriesBurned + stepCaloriesBurned;
+    currentSteps = await _stepTrackingService.getDailyStepsForDate(today);
+    await loadWaterData(today);
+    await _loadDisplayedWeightForSelectedDate();
+    workoutCount = await dbHelper.getWorkoutCountForDate(today);
+    workoutDuration = await dbHelper.getTotalWorkoutDurationForDate(today);
 
     if (sqlCalorie.isNotEmpty &&
-        sqlCalorie.last.date ==
-            DateFormat('dd-MM-yyyy').format(DateTime.now())) {
-      consumedKcal = sqlCalorie.last.calorie;
-      consumedProtein = sqlCalorie.last.protein;
-      consumedCarbs = sqlCalorie.last.carbs;
-      consumedFats = sqlCalorie.last.fats;
+        sqlCalorie.any(
+          (e) => e.date == DateFormat('dd-MM-yyyy').format(today),
+        )) {
+      final selected =
+          sqlCalorie
+              .where((e) => e.date == DateFormat('dd-MM-yyyy').format(today))
+              .toList()
+            ..sort((a, b) => (a.id ?? 0).compareTo(b.id ?? 0));
+
+      consumedKcal = selected.last.calorie;
+      consumedProtein = selected.last.protein;
+      consumedCarbs = selected.last.carbs;
+      consumedFats = selected.last.fats;
       // Subtract calories burned from consumed calories
       remainingKcal =
           ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
@@ -425,10 +471,15 @@ class HomeController extends GetxController {
       SharePrefKey.stoppingGoal,
     );
     ConstantUserMaster.age = await SharedPref.readInt(SharePrefKey.age);
+    displayedWeight = ConstantUserMaster.weight;
 
     // Update streak
     streakCount.value = await StreakService().getCurrentStreak();
 
     update();
+  }
+
+  bool _isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }

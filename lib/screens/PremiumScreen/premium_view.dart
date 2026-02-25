@@ -61,11 +61,6 @@ class _PremiumViewState extends State<PremiumView> {
       ),
       child: PopScope(
         canPop: showCloseLocal,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop && showCloseLocal) {
-            controller.onClosePressed();
-          }
-        },
         child: Scaffold(
           backgroundColor: AppColor.darkBackground,
           body: SafeArea(

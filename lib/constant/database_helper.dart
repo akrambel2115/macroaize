@@ -304,6 +304,19 @@ class DatabaseHelper {
     }
   }
 
+  Future<CalorieHistoryModel?> getLastCalorieHistoryEntry() async {
+    if (kIsWeb) return null;
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      history,
+      orderBy: 'id DESC',
+      limit: 1,
+    );
+
+    if (maps.isEmpty) return null;
+    return CalorieHistoryModel.fromMap(maps.first);
+  }
+
   Future<void> deleteCalorieHistory(int id) async {
     if (kIsWeb) return;
     final db = await database;
@@ -409,6 +422,24 @@ class DatabaseHelper {
     }
 
     return await db.rawQuery(query, args);
+  }
+
+  Future<double?> getLatestWeightOnOrBefore(DateTime date) async {
+    if (kIsWeb) return null;
+    final db = await database;
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+    final result = await db.query(
+      weightHistory,
+      columns: ['weight'],
+      where: 'date <= ?',
+      whereArgs: [dateStr],
+      orderBy: 'date DESC, id DESC',
+      limit: 1,
+    );
+
+    if (result.isEmpty) return null;
+    return (result.first['weight'] as num).toDouble();
   }
 
   // Workout History Methods

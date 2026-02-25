@@ -228,30 +228,25 @@ class HistoryView extends GetView<HistoryController> {
   }
 
   Widget _buildMealTypeChip(BuildContext context, String mealType) {
-    Color chipColor;
+    const Color chipColor = AppColor.primaryOrange;
     String chipIconAsset = '';
 
     switch (mealType.toLowerCase()) {
       case 'breakfast':
-        chipColor = AppColor.warning;
         chipIconAsset = AppAssets.breakfast;
         break;
       case 'lunch':
-        chipColor = AppColor.primaryGreen;
         chipIconAsset = AppAssets.lunch;
         break;
       case 'dinner':
-        chipColor = AppColor.info;
         chipIconAsset = AppAssets.dinner;
         break;
       case 'snack(s)':
       case 'snacks':
       case 'snack':
-        chipColor = AppColor.accent;
         chipIconAsset = AppAssets.snacks;
         break;
       default:
-        chipColor = AppColor.accent;
         chipIconAsset = AppAssets.moreIcon;
     }
 
@@ -261,8 +256,8 @@ class HistoryView extends GetView<HistoryController> {
         mainAxisSize: MainAxisSize.min,
         children: [
           chipIconAsset.isNotEmpty
-              ? Image.asset(chipIconAsset, width: 16, height: 16)
-              : Icon(Icons.cookie_outlined, size: 16, color: chipColor),
+              ? Image.asset(chipIconAsset, width: 24, height: 24)
+              : Icon(Icons.cookie_outlined, size: 24, color: chipColor),
           const SizedBox(width: 6),
           Text(
             mealType.tr,

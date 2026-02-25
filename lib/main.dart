@@ -17,6 +17,7 @@ import 'shared/services/remote_config_service.dart';
 import 'shared/services/local_notification_service.dart';
 import 'shared/services/notification_preferences_service.dart';
 import 'shared/services/promo_code_service.dart';
+import 'shared/services/step_tracking_service.dart';
 import 'ThemeService/app_theme.dart';
 import 'ThemeService/theme_controller.dart';
 import 'constant/database_helper.dart';
@@ -213,6 +214,19 @@ Future<void> main() async {
     if (kDebugMode) print('PromoCodeService init failed: $e');
   }
 
+  // Initialize step tracking service once for app-wide realtime updates
+  try {
+    if (!Get.isRegistered<StepTrackingService>()) {
+      await Get.putAsync<StepTrackingService>(
+        () => StepTrackingService().init(),
+        permanent: true,
+      );
+      if (kDebugMode) print('StepTrackingService initialized');
+    }
+  } catch (e) {
+    if (kDebugMode) print('StepTrackingService init failed: $e');
+  }
+
   if (!kIsWeb) {
     try {
       if (!Get.isRegistered<FirebaseMessagingService>()) {
@@ -284,12 +298,15 @@ Future<void> main() async {
 void _initFcmTokenAndDb() {
   Future(() async {
     try {
-      final fcmToken = await FirebaseMessaging.instance
-          .getToken()
-          .timeout(const Duration(seconds: 10), onTimeout: () {
-        if (kDebugMode) print('FCM getToken timed out on iOS – continuing without token');
-        return null;
-      });
+      final fcmToken = await FirebaseMessaging.instance.getToken().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          if (kDebugMode) {
+            print('FCM getToken timed out on iOS – continuing without token');
+          }
+          return null;
+        },
+      );
       if (kDebugMode) print('FCM Token: $fcmToken');
     } catch (e) {
       if (kDebugMode) print('FCM getToken failed: $e');

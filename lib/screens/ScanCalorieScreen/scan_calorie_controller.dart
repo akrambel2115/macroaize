@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:macroaize/Model/calorie_history_model.dart';
@@ -385,10 +386,54 @@ class ScanCalorieController extends GetxController {
           } catch (_) {}
         }
       }
+
+      await _applyLastLoggedIfSameMeal();
     }
     _stopProgressTimer();
     isLoading = false;
     update();
+  }
+
+  Future<void> _applyLastLoggedIfSameMeal() async {
+    try {
+      if (calorie <= 0) return;
+
+      final last = await dbHelper.getLastCalorieHistoryEntry();
+      if (last == null) return;
+
+      final hasFdcMatch =
+          usdaFdcId != null && last.fdcId != null && usdaFdcId == last.fdcId;
+
+      final currentName =
+          mealNameEnglish.trim().isNotEmpty
+              ? mealNameEnglish.trim()
+              : mealName.trim();
+      final currentKey = _normalizeMealKey(currentName);
+      final lastKey = _normalizeMealKey(last.title ?? '');
+
+      final hasNameMatch =
+          currentKey.isNotEmpty && lastKey.isNotEmpty && currentKey == lastKey;
+
+      if (!hasFdcMatch && !hasNameMatch) return;
+
+      calorie = last.calorie;
+      protein = last.protein.toDouble();
+      carbs = last.carbs.toDouble();
+      fats = last.fats.toDouble();
+
+      calorieQuantity = math.max(0, calorie * quantity);
+      proteinQuantity = protein * quantity;
+      carbsQuantity = carbs * quantity;
+      fatsQuantity = fats * quantity;
+    } catch (_) {}
+  }
+
+  String _normalizeMealKey(String value) {
+    return value
+        .toLowerCase()
+        .trim()
+        .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ');
   }
 
   void _startProgressTimer() {

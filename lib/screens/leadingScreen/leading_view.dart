@@ -5,7 +5,6 @@ import 'package:macroaize/constant/app_assets.dart';
 import 'package:macroaize/constant/app_color.dart';
 
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
-import 'package:macroaize/screens/AnalyticsScreen/analytics_controller.dart';
 import 'package:macroaize/screens/AnalyticsScreen/update_weight.dart';
 import 'package:macroaize/screens/AnalyticsScreen/analytics_view.dart';
 import 'package:macroaize/screens/HomeScreen/home_view.dart';
@@ -15,6 +14,7 @@ import 'package:macroaize/screens/ScanFoodView/scan_food_controller.dart';
 import 'package:macroaize/screens/SettingScreen/setting_view.dart';
 import 'package:macroaize/screens/leadingScreen/exit_dailog.dart';
 import 'package:macroaize/screens/leadingScreen/leading_controller.dart';
+import 'package:macroaize/shared/services/weight_update_service.dart';
 import 'package:get/get.dart';
 import 'package:macroaize/routes/app_routes.dart';
 
@@ -166,14 +166,10 @@ class _LeadingViewState extends State<LeadingView>
         _controller.changeTabIndex(2);
         break;
       case 2: // Weight
-        if (!Get.isRegistered<AnalyticsController>()) {
-          Get.put(AnalyticsController());
-        }
         showUpdateWeightDialog(context, ConstantUserMaster.weight.toString(), (
           value,
-        ) {
-          final controller = Get.find<AnalyticsController>();
-          controller.updateCurrentWeight(int.parse(value));
+        ) async {
+          await WeightUpdateService.updateWeight(int.parse(value));
           // Redirect after update
           _controller.changeTabIndex(3);
         }, title: 'Update Weight'.tr);
@@ -434,10 +430,35 @@ class _LeadingViewState extends State<LeadingView>
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 36,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  const Icon(Icons.add_rounded, color: Colors.white, size: 36),
+                  Positioned(
+                    top: 2,
+                    right: 2,
+                    child: Container(
+                      width: 24,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'AI',
+                          style: TextStyle(
+                            color: AppColor.primaryOrange,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 11,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           );

@@ -5,6 +5,7 @@ import 'package:macroaize/Model/parsed_workout.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/WorkoutScreen/workout_controller.dart';
 import 'package:macroaize/widgets/modern_animations.dart';
+import 'package:macroaize/widgets/modern_button.dart';
 import 'package:macroaize/routes/app_routes.dart';
 
 class WorkoutView extends GetView<WorkoutController> {
@@ -22,9 +23,17 @@ class WorkoutView extends GetView<WorkoutController> {
           child: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_rounded,
-              color: AppColor.neutralGrey700,
+              color:
+                  context.theme.brightness == Brightness.dark
+                      ? Colors.white
+                      : AppColor.neutralGrey700,
             ),
-            onPressed: () => Get.back(),
+            onPressed: () async {
+              final popped = await Navigator.of(context).maybePop();
+              if (!popped && context.mounted) {
+                Get.offAllNamed(Routes.leadingView);
+              }
+            },
           ),
         ),
         title: Text(
@@ -192,36 +201,18 @@ class WorkoutView extends GetView<WorkoutController> {
               ),
             ),
             const SizedBox(height: 12),
-            SizedBox(
+            ModernButton(
+              text: isProcessing ? 'analyzing'.tr : 'analyze_with_ai'.tr,
+              onPressed: controller.parseWorkoutWithAI,
+              loading: isProcessing,
               width: double.infinity,
-              height: 44,
-              child: ElevatedButton(
-                onPressed:
-                    isProcessing ? null : () => controller.parseWorkoutWithAI(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.primaryOrange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child:
-                    isProcessing
-                        ? Text(
-                          'analyzing'.tr,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                        : Text(
-                          'analyze_with_ai'.tr,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+              height: 52,
+              size: ModernButtonSize.medium,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              style: ModernButtonStyle.primary,
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
             ),
             if (aiError.isNotEmpty) ...[
