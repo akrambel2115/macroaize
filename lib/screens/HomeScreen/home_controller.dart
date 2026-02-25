@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:macroaize/Model/sql_calorie_model.dart';
+import 'package:macroaize/Model/calorie_history_model.dart';
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
 import 'package:macroaize/SharePrefHelper/share_pref.dart';
 import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
@@ -11,6 +12,10 @@ import 'package:intl/intl.dart';
 import 'package:macroaize/routes/app_routes.dart';
 import 'package:macroaize/shared/services/widget_service.dart';
 import 'package:macroaize/shared/services/streak_service.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:macroaize/screens/AdjustGoals/updateDailog/show_update_goal_dialog.dart';
+import 'package:macroaize/screens/AnalyticsScreen/update_weight.dart';
 
 class HomeController extends GetxController {
   RxInt streakCount = 0.obs;
@@ -21,6 +26,27 @@ class HomeController extends GetxController {
   int consumedCarbs = 0;
   int consumedFats = 0;
   int caloriesBurned = 0; // Calories burned from workouts
+  int workoutCount = 0;
+  int workoutDuration = 0; // minutes
+
+  // pedometer
+  int currentSteps = 0;
+  Stream<StepCount>? _stepCountStream;
+  bool isStepTrackingAvailable = false;
+
+  // carousel page state
+  final PageController trackingPageController = PageController();
+  int trackingPageIndex = 0;
+
+  void onTrackingPageChanged(int index) {
+    trackingPageIndex = index;
+    update();
+  }
+
+  // water tracking
+  static const int maxGlasses = 8;
+  static const int glassVolumeMl = 250;
+  int waterGlasses = 0;
 
   final GlobalKey addFoodButtonKey = GlobalKey();
 
@@ -32,11 +58,17 @@ class HomeController extends GetxController {
   final dbHelper = DatabaseHelper();
   bool isLoading = true;
 
+  CalorieHistoryModel? lastLoggedMeal;
+
   @override
   Future<void> onInit() async {
     super.onInit();
     await getAllData();
     await getSqlCalorie();
+    await getRecentHistory();
+    await loadWaterData();
+    await loadStepData();
+    initPedometer();
     dates = getPreviousDays();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scrollToTodayCentered();
@@ -72,6 +104,7 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
+    trackingPageController.dispose();
     if (Get.isDialogOpen == true) {
       Get.back();
     }
@@ -86,6 +119,36 @@ class HomeController extends GetxController {
       fats: consumedFats,
       goal: ConstantUserMaster.calorieGoal,
     );
+  }
+
+  // water tracking helpers
+  String get _waterKey =>
+      'water_glasses_${DateFormat('yyyy-MM-dd').format(DateTime.now())}';
+
+  Future<void> loadWaterData() async {
+    final saved = await SharedPref.readInt(_waterKey);
+    waterGlasses = saved ?? 0;
+    update();
+  }
+
+  Future<void> _saveWaterData() async {
+    await SharedPref.saveInt(_waterKey, waterGlasses);
+  }
+
+  void addWaterGlass() {
+    if (waterGlasses < maxGlasses) {
+      waterGlasses++;
+      _saveWaterData();
+      update();
+    }
+  }
+
+  void removeWaterGlass() {
+    if (waterGlasses > 0) {
+      waterGlasses--;
+      _saveWaterData();
+      update();
+    }
   }
 
   Future<void> _showAppTipsIfNeeded() async {
@@ -158,6 +221,78 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<void> loadStepData() async {
+    final savedGoal = await SharedPref.readInt(SharePrefKey.stepGoal);
+    if (savedGoal != null && savedGoal is int) {
+      ConstantUserMaster.stepGoal = savedGoal;
+    } else {
+      ConstantUserMaster.stepGoal = 10000;
+    }
+  }
+
+  void initPedometer() async {
+    // For iOS, NSMotionUsageDescription is automatically used by the system when requesting.
+    // For Android, we request the activity recognition permission explicitly.
+    PermissionStatus status = await Permission.activityRecognition.request();
+
+    // Note: on some older Androids, PermissionStatus might return as restricted or denied
+    // but the sensor still works if declared in Manifest, handle carefully.
+    if (status.isGranted || status.isRestricted || status.isLimited) {
+      try {
+        isStepTrackingAvailable = true;
+        _stepCountStream = Pedometer.stepCountStream;
+        _stepCountStream!
+            .listen((StepCount event) {
+              currentSteps = event.steps;
+              update();
+            })
+            .onError((error) {
+              isStepTrackingAvailable = false;
+              update();
+            });
+      } catch (e) {
+        isStepTrackingAvailable = false;
+      }
+    } else {
+      isStepTrackingAvailable = false;
+      update();
+    }
+  }
+
+  void editStepGoal() {
+    showUpdateGoalDialog(
+      ConstantUserMaster.stepGoal,
+      (newGoal) async {
+        if (newGoal > 0) {
+          ConstantUserMaster.stepGoal = newGoal;
+          await SharedPref.saveInt(
+            SharePrefKey.stepGoal,
+            ConstantUserMaster.stepGoal,
+          );
+          update();
+        }
+      },
+      Get.context!,
+      'Update Step Goal'.tr,
+    );
+  }
+
+  void editWeight() {
+    showUpdateWeightDialog(Get.context!, ConstantUserMaster.weight.toString(), (
+      newWeightString,
+    ) async {
+      int newWeight = int.tryParse(newWeightString) ?? 0;
+      if (newWeight > 0) {
+        ConstantUserMaster.weight = newWeight;
+        await SharedPref.saveInt(
+          "weight", // Note: share_pref_key usually stores keys as strings
+          ConstantUserMaster.weight,
+        );
+        update();
+      }
+    }, title: 'Update Weight'.tr);
+  }
+
   dateFilter(int index) async {
     today = dates[index];
     List<SqlCalorieModel> matchingData =
@@ -167,10 +302,12 @@ class HomeController extends GetxController {
                   element.date == DateFormat('dd-MM-yyyy').format(today),
             )
             .toList();
-    
-    // Get calories burned from workouts for this date
+
+    // Get workout data for this date
     caloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(today);
-    
+    workoutCount = await dbHelper.getWorkoutCountForDate(today);
+    workoutDuration = await dbHelper.getTotalWorkoutDurationForDate(today);
+
     if (matchingData.isNotEmpty &&
         matchingData.first.date == DateFormat('dd-MM-yyyy').format(today)) {
       consumedKcal = matchingData.first.calorie;
@@ -178,7 +315,8 @@ class HomeController extends GetxController {
       consumedCarbs = matchingData.first.carbs;
       consumedFats = matchingData.first.fats;
       // Subtract calories burned from consumed calories
-      remainingKcal = ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
+      remainingKcal =
+          ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
       if (remainingKcal < 0) {
         remainingKcal = 0;
       }
@@ -195,10 +333,16 @@ class HomeController extends GetxController {
 
   getSqlCalorie() async {
     sqlCalorie = await dbHelper.getCalorieData();
-    
-    // Get calories burned from workouts for today
-    caloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(DateTime.now());
-    
+
+    // Get workout data for today
+    caloriesBurned = await dbHelper.getTotalCaloriesBurnedForDate(
+      DateTime.now(),
+    );
+    workoutCount = await dbHelper.getWorkoutCountForDate(DateTime.now());
+    workoutDuration = await dbHelper.getTotalWorkoutDurationForDate(
+      DateTime.now(),
+    );
+
     if (sqlCalorie.isNotEmpty &&
         sqlCalorie.last.date ==
             DateFormat('dd-MM-yyyy').format(DateTime.now())) {
@@ -207,7 +351,8 @@ class HomeController extends GetxController {
       consumedCarbs = sqlCalorie.last.carbs;
       consumedFats = sqlCalorie.last.fats;
       // Subtract calories burned from consumed calories
-      remainingKcal = ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
+      remainingKcal =
+          ConstantUserMaster.calorieGoal - (consumedKcal - caloriesBurned);
       if (remainingKcal < 0) {
         remainingKcal = 0;
       }
@@ -219,6 +364,19 @@ class HomeController extends GetxController {
       remainingKcal = ConstantUserMaster.calorieGoal + caloriesBurned;
     }
     _updateWidgets();
+  }
+
+  getRecentHistory() async {
+    List<CalorieHistoryModel> sqlHistory = await dbHelper.getCalorieHistory(
+      "All",
+    );
+    if (sqlHistory.isNotEmpty) {
+      sqlHistory.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
+      lastLoggedMeal = sqlHistory.first;
+    } else {
+      lastLoggedMeal = null;
+    }
+    update();
   }
 
   List<DateTime> getPreviousDays() {

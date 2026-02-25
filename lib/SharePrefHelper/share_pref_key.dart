@@ -33,6 +33,8 @@ class SharePrefKey {
   static String hasSeenAppTips = 'hasSeenAppTips';
   static String hasCompletedTutorial = 'hasCompletedTutorial';
 
+  static String stepGoal = 'stepGoal';
+
   // Streak
   static String streakCount = 'streakCount';
   static String lastActiveDate = 'lastActiveDate';

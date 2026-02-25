@@ -8,6 +8,7 @@ import 'package:macroaize/widgets/scanner_overlay.dart';
 import 'package:macroaize/widgets/bottom_mode_picker.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../constant/app_assets.dart';
 
 import 'package:macroaize/screens/leadingScreen/leading_controller.dart';
@@ -22,6 +23,8 @@ class ScanFoodView extends GetView<ScanFoodController> {
       body: GetBuilder<ScanFoodController>(
         builder: (controller) {
           final meals = ['BreakFast', 'Lunch', 'snack(s)', 'Dinner'];
+          final isSignedIn = FirebaseAuth.instance.currentUser != null;
+          final showRemaining = isSignedIn && !controller.isPremiumUser;
 
           return Stack(
             children: [
@@ -53,6 +56,14 @@ class ScanFoodView extends GetView<ScanFoodController> {
                           hintText:
                               controller.isBarcodeOnly
                                   ? 'scan_barcode_hint'.tr
+                                  : null,
+                          remainingScans:
+                              showRemaining ? controller.remainingScans : null,
+                          scanLimit:
+                              showRemaining ? controller.totalScanLimit : null,
+                          onUpgradeTap:
+                              showRemaining
+                                  ? controller.navigateToPremium
                                   : null,
                         ),
                         if (controller.cameraController?.value.isInitialized !=

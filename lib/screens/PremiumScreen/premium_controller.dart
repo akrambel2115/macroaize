@@ -73,7 +73,7 @@ class PremiumController extends GetxController {
       if (offerings == null ||
           offerings!.current == null ||
           offerings!.current!.availablePackages.isEmpty) {
-        errorMessage = 'No offers available at the moment.';
+        errorMessage = 'no_offers_moment'.tr;
       } else {
         int trialIndex = _findTrialPlanIndex();
         if (trialIndex >= 0) {
@@ -86,7 +86,7 @@ class PremiumController extends GetxController {
         }
       }
     } catch (e) {
-      errorMessage = 'Failed to load offers. Please try again.';
+      errorMessage = 'failed_load_offers'.tr;
       if (kDebugMode) {
         print('Error fetching offerings: $e');
       }
@@ -297,7 +297,7 @@ class PremiumController extends GetxController {
 
                     // Title
                     Text(
-                      'Redeem Code',
+                      'redeem_code'.tr,
                       style: context.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -543,27 +543,36 @@ class PremiumController extends GetxController {
 
   Future<void> buy() async {
     if (isPremium) {
-      NotificationService.showInfo('You are already Premium');
+      NotificationService.showInfo('already_premium'.tr);
       return;
     }
 
     if (offerings?.current == null ||
         offerings!.current!.availablePackages.isEmpty) {
-      NotificationService.showError('No offers available');
+      NotificationService.showError('no_offers_available'.tr);
       return;
+    }
+
+    // Guard: check if subscriptions are enabled via remote config
+    if (Get.isRegistered<AppConfigService>()) {
+      final cfg = Get.find<AppConfigService>();
+      if (!cfg.subscriptionsEnabled) {
+        NotificationService.showError('subscriptions_disabled'.tr);
+        return;
+      }
     }
 
     var user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       final ok = await AuthModal.show();
       if (!ok) {
-        NotificationService.showError('Please login to continue');
+        NotificationService.showError('login_to_continue'.tr);
         return;
       }
       Get.offAllNamed(Routes.leadingView);
       user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        NotificationService.showError('Authentication failed');
+        NotificationService.showError('auth_failed'.tr);
         return;
       }
     }
@@ -613,7 +622,7 @@ class PremiumController extends GetxController {
             isPremium = true;
             update();
             NotificationService.showInfo(
-              'You already have an active Premium subscription',
+              'already_premium_subscription'.tr,
             );
             return;
           }
@@ -622,13 +631,13 @@ class PremiumController extends GetxController {
     } catch (e) {
       if (kDebugMode) print('Error checking subscription status: $e');
       NotificationService.showError(
-        'Unable to verify subscription status. Please try again.',
+        'unable_verify_subscription'.tr,
       );
       return;
     }
 
     if (isPremium) {
-      NotificationService.showInfo('You are already Premium');
+      NotificationService.showInfo('already_premium'.tr);
       return;
     }
 
@@ -647,8 +656,10 @@ class PremiumController extends GetxController {
       final result = await Purchases.purchasePackage(package);
 
       if (result.entitlements.active.isNotEmpty) {
-        NotificationService.showSuccess('Purchase successful. Verifying...');
+        NotificationService.showSuccess('purchase_successful_verifying'.tr);
         try {
+          // Wait briefly for RevenueCat to propagate the purchase before syncing
+          await Future.delayed(const Duration(seconds: 3));
           // Force sync immediately after successful purchase
           await RevenueCatService().refreshSubscription();
           await _appUserService.isPremiumUser();
@@ -659,10 +670,10 @@ class PremiumController extends GetxController {
         } catch (e) {
           if (kDebugMode) print('Post-purchase sync error: $e');
         }
-        NotificationService.showSuccess('Subscription active!');
+        NotificationService.showSuccess('subscription_active'.tr);
         return;
       } else {
-        NotificationService.showInfo('Purchase cancelled');
+        NotificationService.showInfo('purchase_cancelled'.tr);
         return;
       }
     } catch (e) {
@@ -679,7 +690,7 @@ class PremiumController extends GetxController {
         return;
       }
 
-      String errorMsg = 'Purchase failed. Please try again.';
+      String errorMsg = 'purchase_failed'.tr;
       if (e is PlatformException) {
         // Error Code 6: ProductAlreadyPurchasedError
         if (e.code == '6' || e.message?.contains('already active') == true) {
@@ -687,7 +698,7 @@ class PremiumController extends GetxController {
             print('RevenueCat: Product already owned on this Play account.');
           }
           NotificationService.showError(
-            'This subscription is already active on this Play account. Please sign in with the original app account that purchased it.',
+            'subscription_already_active_play'.tr,
           );
           // Do NOT restore here to avoid transferring entitlements between app accounts
           return;
@@ -702,7 +713,7 @@ class PremiumController extends GetxController {
             );
           }
           NotificationService.showError(
-            'This subscription is temporarily unavailable. Please try again later or contact support.',
+            'subscription_temporarily_unavailable'.tr,
           );
           return;
         }
@@ -710,7 +721,7 @@ class PremiumController extends GetxController {
         errorMsg =
             e.message?.isNotEmpty == true
                 ? 'Error: ${e.message}'
-                : 'Purchase failed. Please try again.';
+                : 'purchase_failed'.tr;
       }
 
       NotificationService.showError(errorMsg);
@@ -720,34 +731,28 @@ class PremiumController extends GetxController {
 
   Future<void> restorePurchases() async {
     try {
-      await RevenueCatService().restorePurchases();
-    } catch (_) {}
-  }
-
-  // promo validation removed
-  /*
-  Future<void> _validatePromoCodeForDialog(String code) async {
-    if (code.isEmpty) {
-      throw Exception('Please enter a promo code');
-    }
-
-    try {
-      final result = await _influencerService.validatePromoCode(code);
-
-      if (result.valid) {
-        promoCode = code;
-        isPromoValid = true;
-        discountRate = result.discountRate;
-        promoError = null;
-        update();
+      NotificationService.showSuccess('restore_in_progress'.tr);
+      final restored = await RevenueCatService().restorePurchases();
+      if (restored) {
+        // sync Firestore subscription state after successful restore
+        try {
+          await RevenueCatService().refreshSubscription();
+          await _appUserService.isPremiumUser();
+          if (Get.isRegistered<UsageService>()) {
+            await Get.find<UsageService>().getUsage();
+          }
+        } catch (e) {
+          if (kDebugMode) print('Post-restore sync error: $e');
+        }
+        NotificationService.showSuccess('restore_success'.tr);
       } else {
-        throw Exception('Invalid promo code');
+        NotificationService.showError('restore_no_purchases'.tr);
       }
     } catch (e) {
-      throw Exception('Invalid promo code');
+      if (kDebugMode) print('Restore error: $e');
+      NotificationService.showError('restore_failed'.tr);
     }
   }
-  */
 
   onChangeSelectedIndex(int index) {
     selected = index;
@@ -793,7 +798,7 @@ class PremiumController extends GetxController {
 
   Future<void> validatePromoCode() async {
     if (promoCode.isEmpty) {
-      promoError = 'Please enter a promo code';
+      promoError = 'enter_promo_code'.tr;
       update();
       return;
     }
@@ -810,12 +815,12 @@ class PremiumController extends GetxController {
         discountRate = result.discountRate;
         promoError = null;
         NotificationService.showSuccess(
-          'Promo code applied! ${(discountRate * 100).round()}% discount',
+          'promo_code_linked_success'.tr,
         );
       } else {
         isPromoValid = false;
         discountRate = 0.0;
-        promoError = 'Invalid promo code';
+        promoError = 'invalid_promo_code'.tr;
       }
     } catch (e) {
       isPromoValid = false;
@@ -827,30 +832,14 @@ class PremiumController extends GetxController {
     }
   }
 
-  String getDiscountedPrice(String originalPrice) {
-    if (!isPromoValid || discountRate == 0.0) return originalPrice;
-
-    final match = RegExp(r'[\d.,]+').stringMatch(originalPrice);
-    if (match == null) return originalPrice;
-
-    final numericPrice = double.tryParse(match.replaceAll(',', ''));
-    if (numericPrice == null) return originalPrice;
-
-    final discountedPrice = (numericPrice * (1 - discountRate)).round();
-    return originalPrice.replaceAll(match, discountedPrice.toString());
-  }
-
-  String getOriginalPrice(String currentPrice) {
-    if (!isPromoValid || discountRate == 0.0) return '';
-
-    final match = RegExp(r'[\d.,]+').stringMatch(currentPrice);
-    if (match == null) return '';
-
-    final numericPrice = double.tryParse(match.replaceAll(',', ''));
-    if (numericPrice == null) return '';
-
-    final originalPrice = (numericPrice / (1 - discountRate)).round();
-    return currentPrice.replaceAll(match, originalPrice.toString());
+  /// Returns the bonus days text for the currently selected package.
+  /// Promo codes grant bonus subscription days, not a price discount.
+  String? getBonusDaysText() {
+    if (!promoEligible) return null;
+    final package = offerings?.current?.availablePackages.elementAtOrNull(selected);
+    if (package == null) return null;
+    final isYearly = package.packageType == PackageType.annual;
+    return isYearly ? 'bonus_1_month'.tr : 'bonus_3_days'.tr;
   }
 
   @override

@@ -20,9 +20,9 @@ void main() {
         expect(service.identifyWithFirebaseUser, isA<Function>());
       });
 
-      test('purchasePlan method exists', () {
-        // Test that service has the required purchase method
-        expect(service.purchasePlan, isA<Function>());
+      test('presentCodeRedemptionSheet method exists', () {
+        // Test that service has the iOS code redemption method
+        expect(service.presentCodeRedemptionSheet, isA<Function>());
       });
 
       test('restorePurchases method exists', () {

@@ -365,7 +365,10 @@ class SettingView extends GetView<SettingController> {
 
             if (sub != null && sub.isActive) {
               return ModernFadeSlideTransition(
-                child: SubscriptionStatusCard(subscription: sub),
+                child: GestureDetector(
+                  onTap: () => Get.toNamed(Routes.premiumView),
+                  child: SubscriptionStatusCard(subscription: sub),
+                ),
               );
             }
             // fallback premium card

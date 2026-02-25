@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/shared/models/subscription.dart';
-import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:macroaize/shared/services/app_config_service.dart';
 
 class SubscriptionStatusCard extends StatelessWidget {
   const SubscriptionStatusCard({super.key, required this.subscription});
@@ -129,7 +127,6 @@ class SubscriptionStatusCard extends StatelessWidget {
   }
 
   List<Widget> _buildManageButtons(BuildContext context) {
-    final cfg = Get.find<AppConfigService>();
     final List<Widget> actions = [];
 
     final provider = (subscription.provider ?? '').toLowerCase();
@@ -137,7 +134,9 @@ class SubscriptionStatusCard extends StatelessWidget {
 
     if (isMobile && provider == 'revenuecat') {
       final storeName = Platform.isIOS ? 'App Store' : 'Google Play';
-      final url = Platform.isIOS ? cfg.appStoreUrl : cfg.playStoreUrl;
+      final url = Platform.isIOS
+          ? 'https://apps.apple.com/account/subscriptions'
+          : 'https://play.google.com/store/account/subscriptions';
       actions.add(
         OutlinedButton.icon(
           onPressed: () async {

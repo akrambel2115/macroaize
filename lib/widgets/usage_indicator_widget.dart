@@ -5,6 +5,7 @@ import 'package:macroaize/shared/models/user_usage.dart';
 import 'package:macroaize/shared/models/subscription.dart';
 import 'package:macroaize/shared/services/usage_service.dart';
 import 'package:macroaize/shared/services/subscription_service.dart';
+import 'package:macroaize/routes/app_routes.dart';
 
 class UsageIndicatorWidget extends StatelessWidget {
   final bool showOnlyWhenLimited;
@@ -92,7 +93,7 @@ class UsageIndicatorWidget extends StatelessWidget {
               Icon(Icons.info_outline, color: AppColor.primaryOrange, size: 16),
               const SizedBox(width: 8),
               Text(
-                'Daily Usage',
+                'daily_usage'.tr,
                 style: context.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -100,9 +101,9 @@ class UsageIndicatorWidget extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                 onTap:
-                    () => Get.toNamed('/premiumView'), // Adjust route as needed
+                    () => Get.toNamed(Routes.premiumView),
                 child: Text(
-                  'Go Premium',
+                  'go_premium'.tr,
                   style: context.textTheme.labelSmall?.copyWith(
                     color: AppColor.primaryOrange,
                     fontWeight: FontWeight.w600,

@@ -60,6 +60,11 @@ const Map<String, String> french = {
   "goal_label": "Objectif",
   "daily_macros": "Macros du jour",
   "daily_macros_reached": "Macros du jour atteintes",
+  "track_activity": "Suivre l'activité",
+  "workouts_logged": "Entraînements enregistrés",
+  "total_duration": "Durée totale",
+  "calories_burned": "Calories brûlées",
+  "no_workouts_today": "Aucun entraînement enregistré aujourd'hui",
 
   // ==============================================================================
   // 3. Meals & Portions
@@ -105,6 +110,7 @@ const Map<String, String> french = {
   "Unlock Food Calorie": "Débloquer les calories des aliments",
   "Unlimited Food Scanner To Calorie":
       "Scanner d'aliments illimité pour les calories",
+  "scans_remaining": "scans restants",
 
   // ==============================================================================
   // 5. Food Search & Custom Foods
@@ -573,6 +579,37 @@ const Map<String, String> french = {
   "promo_dialog_benefit": "Obtenez @days en plus sur votre abonnement !",
   "bonus_3_days": "+3 jours",
   "bonus_1_month": "+1 mois",
+  "restore_in_progress": "Restauration des achats...",
+  "restore_success": "Achats restaurés avec succès !",
+  "restore_no_purchases": "Aucun achat précédent trouvé.",
+  "restore_failed": "Échec de la restauration des achats. Veuillez réessayer.",
+  "redeem_code": "Utiliser un code",
+  "already_premium": "Vous êtes déjà Premium",
+  "already_premium_subscription": "Vous avez déjà un abonnement Premium actif",
+  "continue_for_free": "Continuer gratuitement",
+  "restore_purchases": "Restaurer les achats",
+  "restore_purchases_info":
+      "Restaurer vos achats si vous avez déjà acheté Premium sur un autre appareil ou compte.",
+  "no_offers_available": "Aucune offre disponible",
+  "no_offers_moment": "Aucune offre disponible pour le moment.",
+  "failed_load_offers": "Impossible de charger les offres. Veuillez réessayer.",
+  "purchase_successful_verifying": "Achat réussi. Vérification...",
+  "subscription_active": "Abonnement actif !",
+  "purchase_cancelled": "Achat annulé",
+  "purchase_failed": "L'achat a échoué. Veuillez réessayer.",
+  "login_to_continue": "Veuillez vous connecter pour continuer",
+  "auth_failed": "Échec de l'authentification",
+  "unable_verify_subscription":
+      "Impossible de vérifier l'état de l'abonnement. Veuillez réessayer.",
+  "subscription_already_active_play":
+      "Cet abonnement est déjà actif sur ce compte Play. Veuillez vous connecter avec le compte d'application original.",
+  "subscription_temporarily_unavailable":
+      "Cet abonnement est temporairement indisponible. Veuillez réessayer plus tard ou contacter le support.",
+  "subscriptions_disabled":
+      "Les abonnements sont actuellement indisponibles. Veuillez réessayer plus tard.",
+  "manage_on_store": "Gérer sur @store",
+  "per_month_label": "Par mois",
+  "daily_usage": "Utilisation quotidienne",
   "Please enter a promo code": "Veuillez entrer un code promo",
   "Invalid promo code": "Code promo invalide",
   "Login Required": "Connexion requise",
@@ -1099,4 +1136,11 @@ const Map<String, String> french = {
       "Envoyer une notification dans 10 secondes",
   "test_scheduled_sent": "Programmé !",
   "test_scheduled_sent_desc": "Vous recevrez une notification dans 10 secondes",
+
+  // ==============================================================================
+  // 20. Water Tracker
+  // ==============================================================================
+  "water_title": "Eau",
+  "water_ml_label": "ml",
+  "water_goal_reached": "Objectif atteint !",
 };

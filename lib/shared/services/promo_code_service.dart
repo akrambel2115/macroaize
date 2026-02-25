@@ -68,33 +68,42 @@ class PromoCodeService {
     await _validateAndActivatePendingPromo(pending);
   }
 
-  /// Validate pending promo code with Firebase and activate if valid
+  /// Validate pending promo code with Firebase and activate if valid.
   Future<void> _validateAndActivatePendingPromo(String code) async {
-    try {
-      // First validate the promo code
-      final validateResult = await _functions
-          .httpsCallable('validatePromoCode')
-          .call({'promoCode': code});
+    const maxRetries = 3;
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // First validate the promo code
+        final validateResult = await _functions
+            .httpsCallable('validatePromoCode')
+            .call({'promoCode': code});
 
-      final data = validateResult.data as Map<String, dynamic>;
-      final isValid = data['valid'] == true;
+        final data = validateResult.data as Map<String, dynamic>;
+        final isValid = data['valid'] == true;
 
-      if (isValid) {
-        // Promo is valid - store it for the user
-        await _functions.httpsCallable('storePromoCodeForPurchase').call({
-          'promoCode': code,
-        });
+        if (isValid) {
+          // Promo is valid - store it for the user
+          await _functions.httpsCallable('storePromoCodeForPurchase').call({
+            'promoCode': code,
+          });
 
-        // Mark as activated
-        await SharedPref.saveBool(SharePrefKey.promoCodeActivated, true);
-        await SharedPref.saveString(SharePrefKey.activatedPromoCode, code);
+          // Mark as activated
+          await SharedPref.saveBool(SharePrefKey.promoCodeActivated, true);
+          await SharedPref.saveString(SharePrefKey.activatedPromoCode, code);
+        }
+
+        // Clear pending promo on definitive result (valid or invalid)
+        await clearPendingPromoCode();
+        return;
+      } catch (_) {
+        // On last attempt, keep the pending code so it can be retried on next login
+        if (attempt >= maxRetries) {
+          // Don't clear — leave pending so next auth state change retries
+          return;
+        }
+        // Exponential backoff before retry
+        await Future.delayed(Duration(seconds: attempt * 2));
       }
-
-      // Clear pending promo regardless of result (don't re-check)
-      await clearPendingPromoCode();
-    } catch (_) {
-      // Validation failed - clear pending and ignore
-      await clearPendingPromoCode();
     }
   }
 }

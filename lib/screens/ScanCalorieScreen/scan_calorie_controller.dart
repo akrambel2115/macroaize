@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -49,6 +50,8 @@ class ScanCalorieController extends GetxController {
   String mealName = "";
   String mealNameEnglish = "";
   bool isLoading = true;
+  double scanProgress = 0.0;
+  Timer? _progressTimer;
   int calorie = 0;
   int calorieQuantity = 0;
   double protein = 0.0;
@@ -279,6 +282,7 @@ class ScanCalorieController extends GetxController {
     }
 
     if (image != null) {
+      _startProgressTimer();
       final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image!);
 
       if (_isNotFoodResponse(itemsJsonStr)) {
@@ -382,8 +386,33 @@ class ScanCalorieController extends GetxController {
         }
       }
     }
+    _stopProgressTimer();
     isLoading = false;
     update();
+  }
+
+  void _startProgressTimer() {
+    scanProgress = 0.0;
+    const tick = Duration(milliseconds: 100);
+    _progressTimer = Timer.periodic(tick, (timer) {
+      if (scanProgress < 0.95) {
+        // Slow down as it gets closer to 95%
+        final increment = (0.95 - scanProgress) * 0.05;
+        scanProgress += increment;
+        update();
+      }
+    });
+  }
+
+  void _stopProgressTimer() {
+    _progressTimer?.cancel();
+    scanProgress = 1.0;
+  }
+
+  @override
+  void onClose() {
+    _progressTimer?.cancel();
+    super.onClose();
   }
 
   bool _isNotFoodResponse(String text) {
@@ -555,9 +584,10 @@ class ScanCalorieController extends GetxController {
         it.englishName,
         it.grams,
       );
-      if (aiNutrition != null &&
-          (aiNutrition['kcalPer100g'] ?? 0) > 0) {
-        log('AI_FALLBACK => estimated nutrition for ${it.englishName}: $aiNutrition');
+      if (aiNutrition != null && (aiNutrition['kcalPer100g'] ?? 0) > 0) {
+        log(
+          'AI_FALLBACK => estimated nutrition for ${it.englishName}: $aiNutrition',
+        );
         return it
             .copyWith(
               usdaVerified: false,
@@ -582,7 +612,7 @@ class ScanCalorieController extends GetxController {
     if (index < 0 || index >= items.length) return;
     final it = items[index];
     double grams = it.grams;
-    switch (unit) { 
+    switch (unit) {
       case 'piece':
       case 'pieces':
         grams = newAmount * 50;
@@ -619,9 +649,7 @@ class ScanCalorieController extends GetxController {
   void incrementQuantity() {
     if (quantity >= kMaxQuantity) {
       try {
-        NotificationService.showInfo(
-          "Maximum quantity reached",
-        );
+        NotificationService.showInfo("Maximum quantity reached");
       } catch (_) {}
       return;
     }
@@ -871,6 +899,7 @@ class ScanCalorieController extends GetxController {
       if (Get.isRegistered<HomeController>()) {
         final hc = Get.find<HomeController>();
         await hc.getSqlCalorie();
+        await hc.getRecentHistory();
         hc.update();
       }
     } catch (_) {}

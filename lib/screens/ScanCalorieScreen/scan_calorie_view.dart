@@ -1,6 +1,7 @@
+import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:macroaize/constant/app_assets.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/routes/app_routes.dart';
@@ -11,7 +12,6 @@ import 'package:macroaize/widgets/modern_button.dart';
 import 'package:macroaize/widgets/primary_cta.dart';
 import 'package:macroaize/widgets/modern_card.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 import 'package:macroaize/widgets/capsule_macro_grid.dart';
 import 'package:macroaize/widgets/usda_badge.dart';
 
@@ -120,118 +120,167 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    return Stack(
+    return Column(
       children: [
-        Center(
-          child: SizedBox(
-            height: 300,
-            width: 300,
-            child: Stack(
-              alignment: Alignment.center,
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                    child: Container(
-                      width: 250,
-                      height: 250,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Opacity(
-                              opacity: 0.7,
-                              child:
-                                  controller.image != null
-                                      ? Image.file(
-                                        controller.image!,
-                                        fit: BoxFit.cover,
-                                      )
-                                      : Container(
-                                        color: Colors.grey[900],
-                                        child: const Icon(
-                                          Icons.fastfood,
-                                          color: Colors.white24,
-                                          size: 64,
-                                        ),
-                                      ),
-                            ),
-                          ),
-                          Positioned.fill(
-                            child: ColorFiltered(
-                              colorFilter: ColorFilter.mode(
-                                AppColor.primaryOrange.withValues(alpha: 0.9),
-                                BlendMode.srcIn,
-                              ),
-                              child: Lottie.asset(
-                                AppAssets.scanFood,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  child: ModernFadeSlideTransition(
-                    beginOffset: const Offset(0, 0.5),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const ModernLoadingIndicator(
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Analyzing nutrition...'.tr,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 28),
+                  onPressed: () => Get.back(),
+                  color: context.theme.iconTheme.color,
                 ),
               ],
             ),
           ),
         ),
-        // back button when app bar is hidden
-        Positioned(
-          top: 8,
-          left: 8,
-          child: AppWidgets.backButton(context, () => Get.back()),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 1. The original Lottie Box Scanner
+                SizedBox(
+                  height: 250,
+                  width: 250,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Opacity(
+                                    opacity: 0.7,
+                                    child:
+                                        controller.image != null
+                                            ? Image.file(
+                                              controller.image!,
+                                              fit: BoxFit.cover,
+                                            )
+                                            : Container(
+                                              color: Colors.grey[900],
+                                              child: const Icon(
+                                                Icons.fastfood,
+                                                color: Colors.white24,
+                                                size: 64,
+                                              ),
+                                            ),
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: ColorFiltered(
+                                    colorFilter: ColorFilter.mode(
+                                      AppColor.primaryOrange.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                      BlendMode.srcIn,
+                                    ),
+                                    child: Lottie.asset(
+                                      AppAssets.scanFood,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Image.asset(
+                        AppAssets.macroaizeIcon,
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Macroaize".tr,
+                      style: context.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.theme.textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // 2. The new circular percentage progress underneath
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(
+                            begin: 0.0,
+                            end: controller.scanProgress,
+                          ),
+                          duration: const Duration(milliseconds: 200),
+                          builder: (context, value, _) {
+                            return CircularProgressIndicator(
+                              value: value,
+                              strokeWidth: 8,
+                              backgroundColor: AppColor.neutralGrey200,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                AppColor.primaryOrange,
+                              ),
+                              strokeCap: StrokeCap.round,
+                            );
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColor.primaryOrange.withValues(alpha: 0.15),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "${(controller.scanProgress * 100).toInt()}%",
+                            style: context.textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: context.theme.textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );

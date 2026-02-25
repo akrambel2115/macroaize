@@ -27,32 +27,50 @@ const extendSubscriptionForPromoCode = async (
 
     try {
 
-        const promoUseDoc = await db.collection('promoUses').doc(uid).get();
+        const promoUseRef = db.collection('promoUses').doc(uid);
         
-        logger.info('Checking promoUses for subscription extension', { 
-            uid, 
-            docExists: promoUseDoc.exists,
-            docPath: `promoUses/${uid}`
+        const promoResult = await db.runTransaction(async (tx) => {
+            const promoUseDoc = await tx.get(promoUseRef);
+            
+            logger.info('Checking promoUses for subscription extension', { 
+                uid, 
+                docExists: promoUseDoc.exists,
+                docPath: `promoUses/${uid}`
+            });
+            
+            if (!promoUseDoc.exists) {
+                logger.info('No promo code linked for user', { uid });
+                return null;
+            }
+            
+            const promoData = promoUseDoc.data();
+            if (!promoData) return null;
+            
+            if (promoData.extensionApplied === true) {
+                logger.info('Promo extension already applied for this user', { uid, promoCode: promoData.promoCode });
+                return null;
+            }
+            
+            const promoCode = promoData.promoCode;
+            if (!promoCode) {
+                logger.warn('Missing promoCode in promoUses doc', { uid, promoData });
+                return null;
+            }
+
+            // mark as applied to prevent double-extension
+            tx.update(promoUseRef, {
+                extensionApplied: true,
+                extensionAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+
+            return { promoCode };
         });
-        
-        if (!promoUseDoc.exists) {
-            logger.info('No promo code linked for user', { uid });
+
+        if (!promoResult) {
             return;
         }
-        
-        const promoData = promoUseDoc.data();
-        if (!promoData) return;
-        
-        if (promoData.extensionApplied === true) {
-            logger.info('Promo extension already applied for this user', { uid, promoCode: promoData.promoCode });
-            return;
-        }
-        
-        const promoCode = promoData.promoCode;
-        if (!promoCode) {
-            logger.warn('Missing promoCode in promoUses doc', { uid, promoData });
-            return;
-        }
+
+        const promoCode = promoResult.promoCode;
 
 
         const isYearly = isYearlyProduct(productId);
@@ -209,10 +227,8 @@ const extendSubscriptionForPromoCode = async (
             }
         }
 
-        // prevent retry loops
+        // Update with extension result details (extensionApplied already set in transaction)
         await db.collection('promoUses').doc(uid).update({
-            extensionApplied: true,
-            extensionAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
             extensionDays: extensionDays,
             extensionSuccess: extensionSuccess,
             extensionSkippedReason: extensionSkippedReason,
@@ -590,6 +606,22 @@ export const refreshSubscription = onCall(
 
             if (!targetSub) {
                 logger.info('No active subscriptions found for user in RevenueCat', { uid });
+
+                // Before overwriting, check if Firestore already has a valid active subscription
+                const existingDoc = await db.collection('subscriptions').doc(uid).get();
+                if (existingDoc.exists) {
+                    const existing = existingDoc.data();
+                    const existingEnd = existing?.endDate ? new Date(existing.endDate).getTime() : 0;
+                    if (existing?.isPremium === true && existingEnd > Date.now()) {
+                        logger.info('Skipping MANUAL_REFRESH_NO_SUB: Firestore already has active subscription', {
+                            uid,
+                            existingEndDate: existing.endDate,
+                            existingStatus: existing.status,
+                        });
+                        return { success: true, isPremium: true };
+                    }
+                }
+
                 await db.collection('subscriptions').doc(uid).set({
                     userId: uid,
                     isPremium: false,
@@ -729,20 +761,25 @@ export const revenuecatWebhook = onRequest(
 
         try {
             const processedRef = db.collection('webhook_events').doc(`rc_${eventId}`);
-            const processedSnap = await processedRef.get();
-            if (processedSnap.exists) {
-                res.status(200).send('duplicate');
-                return;
-            }
             
-            await processedRef.set(
-                {
+            // Use a transaction for atomic deduplication check
+            const isDuplicate = await db.runTransaction(async (tx) => {
+                const processedSnap = await tx.get(processedRef);
+                if (processedSnap.exists) {
+                    return true;
+                }
+                tx.set(processedRef, {
                     receivedAt: admin.firestore.FieldValue.serverTimestamp(),
                     provider: 'revenuecat',
                     type: (event?.event?.type || event?.type || 'unknown').toString(),
-                },
-                { merge: true }
-            );
+                });
+                return false;
+            });
+
+            if (isDuplicate) {
+                res.status(200).send('duplicate');
+                return;
+            }
         } catch (e) {
             logger.error('Failed to store RevenueCat event', e as any);
             res.status(500).send('error');
@@ -927,6 +964,11 @@ export const storePromoCodeForPurchase = onCall(
         const uid = request.auth?.uid;
         if (!uid) {
             throw new HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        // Require email verification to match Firestore read rules on promoUses
+        if (!request.auth?.token?.email_verified) {
+            throw new HttpsError('permission-denied', 'Email verification is required to use promo codes');
         }
 
         const { promoCode } = request.data;

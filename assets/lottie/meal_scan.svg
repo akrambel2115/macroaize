@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+    <defs>
+        <!-- Filters for glowing effects -->
+        <filter id="orangeGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+        
+        <filter id="imgShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#000000" flood-opacity="0.4"/>
+        </filter>
+
+        <!-- Gradients -->
+        <linearGradient id="scanFade" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ff7b00" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#ff7b00" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#ff7b00" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- Mask gradient for revealing AI points -->
+        <linearGradient id="maskGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#000000" />
+            <stop offset="45%" stop-color="#ffffff" />
+            <stop offset="55%" stop-color="#ffffff" />
+            <stop offset="100%" stop-color="#000000" />
+        </linearGradient>
+
+        <!-- Clip path to keep elements inside the circular plate -->
+        <clipPath id="food-clip">
+            <circle cx="400" cy="300" r="220" />
+        </clipPath>
+
+        <!-- Moving mask that hides/shows AI tracking points -->
+        <mask id="scan-mask">
+            <!-- Default hide everything -->
+            <rect x="0" y="0" width="800" height="600" fill="#000000" />
+            <!-- Moving window that reveals points as scanner passes -->
+            <g>
+                <animateTransform attributeName="transform" type="translate" values="0,60; 0,540; 0,60" dur="3s" repeatCount="indefinite" />
+                <rect x="0" y="-120" width="800" height="240" fill="url(#maskGrad)" />
+            </g>
+        </mask>
+    </defs>
+
+    <!-- 1. REAL MEAL IMAGE -->
+    <g filter="url(#imgShadow)">
+        <!-- Outer orange ring -->
+        <circle cx="400" cy="300" r="223" fill="none" stroke="#ff7b00" stroke-width="4" opacity="0.8"/>
+        
+        <!-- The Unsplash food image -->
+        <image href="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" 
+               x="180" y="80" width="440" height="440" 
+               preserveAspectRatio="xMidYMid slice" 
+               clip-path="url(#food-clip)" />
+    </g>
+
+    <!-- 2. AI TRACKING POINTS (Masked to only appear under the scanner) -->
+    <g mask="url(#scan-mask)" clip-path="url(#food-clip)">
+        
+        <!-- Mesh Connection Lines (Added fill="none" here to fix the black rectangles issue) -->
+        <g fill="none" stroke="#ff7b00" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.8">
+            <path d="M 250 260 L 220 330 L 280 380 L 310 320 Z" />
+            <path d="M 390 190 L 480 170 L 510 240 L 430 260 Z" />
+            <path d="M 440 420 L 510 370 L 550 440 L 470 470 Z" />
+            
+            <!-- Bridges -->
+            <line x1="310" y1="320" x2="430" y2="260" stroke-dasharray="2 6" opacity="0.5"/>
+            <line x1="430" y1="260" x2="510" y2="370" stroke-dasharray="2 6" opacity="0.5"/>
+        </g>
+
+        <!-- Glowing Intersection Nodes -->
+        <g fill="#ffb700">
+            <circle cx="250" cy="260" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="220" cy="330" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="280" cy="380" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="310" cy="320" r="4" filter="url(#orangeGlow)"/>
+            
+            <circle cx="390" cy="190" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="480" cy="170" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="510" cy="240" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="430" cy="260" r="4" filter="url(#orangeGlow)"/>
+            
+            <circle cx="440" cy="420" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="510" cy="370" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="550" cy="440" r="4" filter="url(#orangeGlow)"/>
+            <circle cx="470" cy="470" r="4" filter="url(#orangeGlow)"/>
+        </g>
+    </g>
+
+    <!-- 3. SCANNER GLOW SWEEP (Clipped to stay purely inside the food circle) -->
+    <g clip-path="url(#food-clip)">
+        <g>
+            <!-- Native SVG Animation for bulletproof up-and-down movement -->
+            <animateTransform attributeName="transform" type="translate" values="0,60; 0,540; 0,60" dur="3s" repeatCount="indefinite" />
+            <rect x="150" y="-40" width="500" height="80" fill="url(#scanFade)" />
+        </g>
+    </g>
+
+    <!-- 4. MAIN LASER LINE (Clean line only, moves up and down) -->
+    <g>
+        <animateTransform attributeName="transform" type="translate" values="0,60; 0,540; 0,60" dur="3s" repeatCount="indefinite" />
+        
+        <!-- Glowing Core -->
+        <line x1="140" y1="0" x2="660" y2="0" stroke="#ff7b00" stroke-width="4" filter="url(#orangeGlow)"/>
+        <line x1="140" y1="0" x2="660" y2="0" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+        <line x1="320" y1="0" x2="480" y2="0" stroke="#ffffff" stroke-width="6" filter="url(#orangeGlow)"/>
+    </g>
+
+</svg>

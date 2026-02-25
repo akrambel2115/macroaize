@@ -17,6 +17,7 @@ class ConstantUserMaster {
   static int age = 0;
   static String bornDay = "";
   static String stoppedGoal = "";
+  static int stepGoal = 10000;
 }
 
 Map<String, int> calculateMacrosFromTDEE(double tdee, int weightKg) {

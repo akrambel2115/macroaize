@@ -504,16 +504,61 @@ class DatabaseHelper {
     if (kIsWeb) return 0;
     final db = await database;
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
-    
-    final result = await db.rawQuery('''
+
+    final result = await db.rawQuery(
+      '''
       SELECT SUM(calories_burned) as total_calories
       FROM $workoutHistory
       WHERE date = ?
-    ''', [dateStr]);
-    
+    ''',
+      [dateStr],
+    );
+
     if (result.isEmpty || result.first['total_calories'] == null) {
       return 0;
     }
     return (result.first['total_calories'] as num).toInt();
+  }
+
+  /// Get total workout count for a specific date
+  Future<int> getWorkoutCountForDate(DateTime date) async {
+    if (kIsWeb) return 0;
+    final db = await database;
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+    final result = await db.rawQuery(
+      '''
+      SELECT COUNT(*) as total
+      FROM $workoutHistory
+      WHERE date = ?
+    ''',
+      [dateStr],
+    );
+
+    if (result.isEmpty || result.first['total'] == null) {
+      return 0;
+    }
+    return (result.first['total'] as num).toInt();
+  }
+
+  /// Get total workout duration (minutes) for a specific date
+  Future<int> getTotalWorkoutDurationForDate(DateTime date) async {
+    if (kIsWeb) return 0;
+    final db = await database;
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+    final result = await db.rawQuery(
+      '''
+      SELECT SUM(duration) as total_duration
+      FROM $workoutHistory
+      WHERE date = ?
+    ''',
+      [dateStr],
+    );
+
+    if (result.isEmpty || result.first['total_duration'] == null) {
+      return 0;
+    }
+    return (result.first['total_duration'] as num).toInt();
   }
 }

@@ -385,7 +385,7 @@ export function getChatLimitCfg(): number {
 }
 
 export function getSubscriptionsEnabled(): boolean {
-  const val = getRcString('subscriptions_enabled', process.env.SUBSCRIPTIONS_ENABLED || 'false');
+  const val = getRcString('subscriptions_enabled', process.env.SUBSCRIPTIONS_ENABLED || 'true');
   return String(val).toLowerCase() === 'true';
 }
 

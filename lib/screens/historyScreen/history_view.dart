@@ -244,18 +244,19 @@ class HistoryView extends GetView<HistoryController> {
         chipColor = AppColor.info;
         chipIconAsset = AppAssets.dinner;
         break;
+      case 'snack(s)':
+      case 'snacks':
+      case 'snack':
+        chipColor = AppColor.accent;
+        chipIconAsset = AppAssets.snacks;
+        break;
       default:
         chipColor = AppColor.accent;
         chipIconAsset = AppAssets.moreIcon;
     }
 
-    return Container(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: chipColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: chipColor.withValues(alpha: 0.3), width: 1),
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -285,7 +286,9 @@ class HistoryView extends GetView<HistoryController> {
       decoration: BoxDecoration(
         color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColor.neutralGrey300.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColor.neutralGrey300.withValues(alpha: 0.5),
+        ),
       ),
       child: Text(
         display,

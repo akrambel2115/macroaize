@@ -58,6 +58,11 @@ const Map<String, String> arabic = {
   "Goal label": "الهدف",
   "Daily macros": "المغذيات اليومية",
   "Daily macros reached": "تم تحقيق أهداف المغذيات اليومية",
+  "track_activity": "تتبع النشاط",
+  "workouts_logged": "تمارين مسجلة",
+  "total_duration": "المدة الإجمالية",
+  "calories_burned": "سعرات محروقة",
+  "no_workouts_today": "لا توجد تمارين مسجلة اليوم",
 
   // ==============================================================================
   // 3. Meals & Portions
@@ -100,6 +105,7 @@ const Map<String, String> arabic = {
   "Unlock Food Scanner": "فتح ماسح الطعام",
   "Unlock Food Calorie": "فتح سعرات الطعام",
   "Unlimited Food Scanner To Calorie": "ماسح طعام غير محدود للسعرات",
+  "scans_remaining": "مسح متبقي",
 
   // ==============================================================================
   // 5. Food Search & Custom Foods
@@ -523,6 +529,38 @@ const Map<String, String> arabic = {
   "promo_dialog_benefit": "احصل على @days إضافية على اشتراكك!",
   "bonus_3_days": "+3 أيام",
   "bonus_1_month": "+1 شهر",
+  "restore_in_progress": "جاري استعادة المشتريات...",
+  "restore_success": "تم استعادة المشتريات بنجاح!",
+  "restore_no_purchases": "لم يتم العثور على مشتريات سابقة.",
+  "restore_failed": "فشل في استعادة المشتريات. يرجى المحاولة مرة أخرى.",
+  "redeem_code": "استخدام رمز",
+  "already_premium": "أنت بالفعل مشترك Premium",
+  "already_premium_subscription": "لديك بالفعل اشتراك Premium نشط",
+  "continue_for_free": "متابعة مجاناً",
+  "restore_purchases": "استعادة المشتريات",
+  "restore_purchases_info":
+      "استعد مشترياتك إذا اشتركت في Premium من جهاز أو حساب آخر.",
+  "no_offers_available": "لا توجد عروض متاحة",
+  "no_offers_moment": "لا توجد عروض متاحة في الوقت الحالي.",
+  "failed_load_offers": "فشل في تحميل العروض. يرجى المحاولة مرة أخرى.",
+  "purchase_successful_verifying": "تم الشراء بنجاح. جاري التحقق...",
+  "subscription_active": "الاشتراك نشط!",
+  "purchase_cancelled": "تم إلغاء الشراء",
+  "purchase_failed": "فشل الشراء. يرجى المحاولة مرة أخرى.",
+  "login_to_continue": "يرجى تسجيل الدخول للمتابعة",
+  "auth_failed": "فشل المصادقة",
+  "unable_verify_subscription":
+      "تعذر التحقق من حالة الاشتراك. يرجى المحاولة مرة أخرى.",
+  "subscription_already_active_play":
+      "هذا الاشتراك نشط بالفعل على حساب Play هذا. يرجى تسجيل الدخول بحساب التطبيق الأصلي.",
+  "subscription_temporarily_unavailable":
+      "هذا الاشتراك غير متاح مؤقتاً. يرجى المحاولة لاحقاً أو الاتصال بالدعم.",
+  "subscriptions_disabled":
+      "الاشتراكات غير متاحة حالياً. يرجى المحاولة لاحقاً.",
+  "manage_on_store": "إدارة على @store",
+  "per_month_label": "شهرياً",
+  "daily_usage": "الاستخدام اليومي",
+  "go_premium": "اشترك Premium",
   "apply": "تطبيق",
   "invalid_promo_code": "رمز الخصم غير صالح",
   "Please enter a promo code": "الرجاء إدخال رمز الخصم",
@@ -1023,4 +1061,11 @@ const Map<String, String> arabic = {
   "test_scheduled_notification_desc": "إرسال إشعار بعد 10 ثوانٍ",
   "test_scheduled_sent": "تم الجدولة!",
   "test_scheduled_sent_desc": "ستستلم إشعاراً بعد 10 ثوانٍ",
+
+  // ==============================================================================
+  // 20. Water Tracker
+  // ==============================================================================
+  "water_title": "ماء",
+  "water_ml_label": "مل",
+  "water_goal_reached": "تم الوصول للهدف!",
 };

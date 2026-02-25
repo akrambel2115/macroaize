@@ -10,8 +10,7 @@ import 'package:macroaize/shared/services/app_config_service.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:macroaize/shared/services/subscription_service.dart';
-import 'package:macroaize/shared/models/subscription.dart'
-    as sub_model;
+import 'package:macroaize/shared/models/subscription.dart' as sub_model;
 import 'package:macroaize/shared/services/revenuecat_service.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -180,14 +179,29 @@ class _PremiumViewState extends State<PremiumView> {
                                 final packages =
                                     c.offerings?.current?.availablePackages ??
                                     [];
-                                if (packages.isEmpty) {
+                                final sortedPackages = List<Package>.from(
+                                  packages,
+                                )..sort((a, b) {
+                                  if (a.packageType == PackageType.annual &&
+                                      b.packageType != PackageType.annual) {
+                                    return -1;
+                                  }
+                                  if (a.packageType != PackageType.annual &&
+                                      b.packageType == PackageType.annual) {
+                                    return 1;
+                                  }
+                                  return 0;
+                                });
+                                if (sortedPackages.isEmpty) {
                                   return Center(
                                     child: Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: Text(
                                         'No offers available',
                                         style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.7),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -203,11 +217,45 @@ class _PremiumViewState extends State<PremiumView> {
 
                                 final monthlyPrice = getMonthlyPrice(packages);
 
+                                int getSortedSelectedIndex() {
+                                  final selectedPkg =
+                                      c.selected < packages.length
+                                          ? packages[c.selected]
+                                          : null;
+                                  if (selectedPkg != null) {
+                                    final idx = sortedPackages.indexOf(
+                                      selectedPkg,
+                                    );
+                                    if (idx >= 0) return idx;
+                                  }
+                                  return sortedPackages.indexWhere(
+                                    (p) => p.packageType == PackageType.annual,
+                                  );
+                                }
+
+                                final sortedSelectedIndex =
+                                    getSortedSelectedIndex();
+                                if (sortedSelectedIndex >= 0 &&
+                                    c.selected >= packages.length) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    final originalIdx = packages.indexOf(
+                                      sortedPackages[sortedSelectedIndex],
+                                    );
+                                    if (originalIdx >= 0) {
+                                      c.onChangeSelectedIndex(originalIdx);
+                                    }
+                                  });
+                                }
+
                                 return Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children:
-                                      packages.asMap().entries.map((entry) {
+                                      sortedPackages.asMap().entries.map((
+                                        entry,
+                                      ) {
                                         final index = entry.key;
                                         final package = entry.value;
                                         final product = package.storeProduct;
@@ -332,7 +380,8 @@ class _PremiumViewState extends State<PremiumView> {
                                                         : product.description),
                                             priceText: product.priceString,
                                             perMonthText: 'per_month'.tr,
-                                            isSelected: c.selected == index,
+                                            isSelected:
+                                                sortedSelectedIndex == index,
                                             highlighted: isAnnual,
                                             chipText:
                                                 isAnnual
@@ -341,18 +390,17 @@ class _PremiumViewState extends State<PremiumView> {
                                             saveText: saveText,
                                             originalPrice:
                                                 originalPriceFormatted,
-                                            discountedPrice:
-                                                isAnnual
-                                                    ? c.getDiscountedPrice(
-                                                      product.priceString,
-                                                    )
-                                                    : null,
+                                            discountedPrice: null,
                                             monthlyBreakdownText:
                                                 monthlyBreakdown,
                                             freeTrialText: trialText,
                                             bonusDaysText: bonusDaysText,
                                             onTap: () {
-                                              c.onChangeSelectedIndex(index);
+                                              final originalIndex = packages
+                                                  .indexOf(package);
+                                              c.onChangeSelectedIndex(
+                                                originalIndex,
+                                              );
                                             },
                                           ),
                                         );
@@ -376,7 +424,7 @@ class _PremiumViewState extends State<PremiumView> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'You are already Premium',
+                                        'already_premium'.tr,
                                         textAlign: TextAlign.center,
                                         style: Theme.of(context)
                                             .textTheme
@@ -403,8 +451,8 @@ class _PremiumViewState extends State<PremiumView> {
                                                     : 'Google Play';
                                             final url =
                                                 Platform.isIOS
-                                                    ? cfg.appStoreUrl
-                                                    : cfg.playStoreUrl;
+                                                    ? 'https://apps.apple.com/account/subscriptions'
+                                                    : 'https://play.google.com/store/account/subscriptions';
                                             return Wrap(
                                               spacing: 8,
                                               runSpacing: 8,
@@ -429,7 +477,9 @@ class _PremiumViewState extends State<PremiumView> {
                                                     color: Colors.white,
                                                   ),
                                                   label: Text(
-                                                    'Manage on $storeName',
+                                                    'manage_on_store'.trParams({
+                                                      'store': storeName,
+                                                    }),
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                     ),
@@ -443,25 +493,76 @@ class _PremiumViewState extends State<PremiumView> {
                                                 ),
                                                 OutlinedButton.icon(
                                                   onPressed: () async {
-                                                    await RevenueCatService()
+                                                    await controller
                                                         .restorePurchases();
                                                   },
-                                                  icon: const Icon(
+                                                  icon: Icon(
                                                     Icons.restore,
-                                                    color: Colors.white,
+                                                    color:
+                                                        AppColor.neutralGrey600,
+                                                    size: 18,
                                                   ),
-                                                  label: const Text(
-                                                    'Restore',
+                                                  label: Text(
+                                                    'restore_purchases'.tr,
                                                     style: TextStyle(
-                                                      color: Colors.white,
+                                                      color:
+                                                          AppColor
+                                                              .neutralGrey600,
+                                                      fontSize: 12,
                                                     ),
                                                   ),
                                                   style:
                                                       OutlinedButton.styleFrom(
-                                                        side: const BorderSide(
-                                                          color: Colors.white24,
+                                                        side: BorderSide(
+                                                          color: AppColor
+                                                              .neutralGrey600
+                                                              .withValues(
+                                                                alpha: 0.5,
+                                                              ),
                                                         ),
+                                                        textStyle:
+                                                            const TextStyle(
+                                                              fontSize: 12,
+                                                            ),
                                                       ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'restore_purchases_info'
+                                                              .tr,
+                                                        ),
+                                                        backgroundColor:
+                                                            AppColor
+                                                                .neutralGrey600,
+                                                        behavior:
+                                                            SnackBarBehavior
+                                                                .floating,
+                                                        duration:
+                                                            const Duration(
+                                                              seconds: 3,
+                                                            ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 8,
+                                                        ),
+                                                    child: Icon(
+                                                      Icons.info_outline,
+                                                      size: 18,
+                                                      color:
+                                                          AppColor
+                                                              .neutralGrey600,
+                                                    ),
+                                                  ),
                                                 ),
                                               ],
                                             );
@@ -499,19 +600,80 @@ class _PremiumViewState extends State<PremiumView> {
                                       onTap: () => controller.buy(),
                                       text:
                                           hasTrial
-                                              ? 'Continue for Free'
-                                              : 'Continue',
+                                              ? 'continue_for_free'.tr
+                                              : 'continue'.tr,
                                       icon: null,
                                     ),
                                     if (rcEnabled &&
                                         (Platform.isAndroid ||
                                             Platform.isIOS)) ...[
                                       const SizedBox(height: 8),
-                                      TextButton(
-                                        onPressed:
-                                            () => controller.restorePurchases(),
-                                        child: Text('Restore purchases'.tr),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          TextButton(
+                                            onPressed:
+                                                () =>
+                                                    controller
+                                                        .restorePurchases(),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  AppColor.neutralGrey600,
+                                              textStyle: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'restore_purchases'.tr,
+                                              style: TextStyle(
+                                                color: AppColor.neutralGrey600,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'restore_purchases_info'.tr,
+                                                  ),
+                                                  backgroundColor:
+                                                      AppColor.neutralGrey600,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  duration: const Duration(
+                                                    seconds: 3,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 4,
+                                              ),
+                                              child: Icon(
+                                                Icons.info_outline,
+                                                size: 16,
+                                                color: AppColor.neutralGrey600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                      if (Platform.isIOS) ...[
+                                        const SizedBox(height: 4),
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  RevenueCatService()
+                                                      .presentCodeRedemptionSheet(),
+                                          child: Text('redeem_code'.tr),
+                                        ),
+                                      ],
                                     ],
                                   ],
                                 );
@@ -870,19 +1032,44 @@ class _PlanCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1E),
+            gradient:
+                highlighted
+                    ? LinearGradient(
+                      colors: [
+                        const Color(0xFF2A2520),
+                        const Color(0xFF1C1C1E),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                    : null,
+            color: highlighted ? null : const Color(0xFF1C1C1E),
             borderRadius: BorderRadius.circular(12),
             border:
                 isSelected
                     ? Border.all(color: AppColor.primaryOrange, width: 2)
                     : Border.all(color: const Color(0xFF2C2C2E), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow:
+                (isSelected && highlighted)
+                    ? [
+                      BoxShadow(
+                        color: AppColor.primaryOrange.withValues(alpha: 0.25),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: AppColor.primaryOrange.withValues(alpha: 0.12),
+                        blurRadius: 32,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                    : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -916,7 +1103,9 @@ class _PlanCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFF9500).withValues(alpha: 0.3),
+                                color: const Color(
+                                  0xFFFF9500,
+                                ).withValues(alpha: 0.3),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -1006,7 +1195,9 @@ class _PlanCard extends StatelessWidget {
                             style: textTheme.titleMedium?.copyWith(
                               color: Colors.white.withValues(alpha: 0.6),
                               decoration: TextDecoration.lineThrough,
-                              decorationColor: Colors.white.withValues(alpha: 0.6),
+                              decorationColor: Colors.white.withValues(
+                                alpha: 0.6,
+                              ),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -1045,12 +1236,16 @@ class _PlanCard extends StatelessWidget {
                   if (highlighted)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+                        horizontal: 14,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          width: 1,
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -1082,7 +1277,7 @@ class _PlanCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Per month',
+                            'per_month_label'.tr,
                             style: textTheme.bodySmall?.copyWith(
                               color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 11,
@@ -1100,10 +1295,21 @@ class _PlanCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColor.primaryOrange,
-                    borderRadius: BorderRadius.circular(8),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF9500), Color(0xFFFF5E3A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF9500).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Builder(
                     builder: (_) {
@@ -1134,9 +1340,9 @@ class _PlanCard extends StatelessWidget {
                       return Text(
                         display,
                         textAlign: TextAlign.center,
-                        style: textTheme.labelMedium?.copyWith(
+                        style: textTheme.titleMedium?.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                         ),
                       );
                     },

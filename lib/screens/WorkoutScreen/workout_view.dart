@@ -5,6 +5,7 @@ import 'package:macroaize/Model/parsed_workout.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/WorkoutScreen/workout_controller.dart';
 import 'package:macroaize/widgets/modern_animations.dart';
+import 'package:macroaize/routes/app_routes.dart';
 
 class WorkoutView extends GetView<WorkoutController> {
   const WorkoutView({super.key});
@@ -154,7 +155,7 @@ class WorkoutView extends GetView<WorkoutController> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Get.toNamed('/premium'),
+                  onPressed: () => Get.toNamed(Routes.premiumView),
                   child: Text(
                     'upgrade'.tr,
                     style: TextStyle(

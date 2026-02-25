@@ -10,6 +10,7 @@ class AppAssets {
   static String widgetPreview = "${basePathImages}widget_preview.png";
 
   ///App Icon
+  static String macroaizeIcon = "${basePathIcons}macroaize_ps.png";
   static String scanIcon = "${basePathIcons}scanning.png";
   static String ai = "${basePathIcons}ai.png";
   static String aiIcon = "${basePathIcons}ai.png";

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_usage.dart';
+import '../../SharePrefHelper/share_pref.dart';
+import '../../SharePrefHelper/share_pref_key.dart';
 
 class UsageService {
   UsageService({FirebaseFunctions? functions})
@@ -53,6 +55,11 @@ class UsageService {
           return;
         }
         try {
+          final cachedLimit = await SharedPref.readInt(SharePrefKey.scanLimit);
+          if (cachedLimit != null) {
+            _scanLimit = cachedLimit;
+            _emitUsageSnapshot();
+          }
           await getUsage();
         } catch (_) {
           _startHydrationRetries();
@@ -86,14 +93,20 @@ class UsageService {
         _chatCount = (data['chatCount'] as num?)?.toInt() ?? 0;
         final sl = data['scanLimit'];
         final cl = data['chatLimit'];
-        if (sl != null) _scanLimit = (sl as num).toInt();
+        if (sl != null) {
+          _scanLimit = (sl as num).toInt();
+          SharedPref.saveInt(SharePrefKey.scanLimit, _scanLimit);
+        }
         if (cl != null) _chatLimit = (cl as num).toInt();
       } else {
         final usage = Map<String, dynamic>.from(data['usage'] ?? {});
         final limits = Map<String, dynamic>.from(data['limits'] ?? {});
         _scanCount = (usage['scanCount'] as num?)?.toInt() ?? 0;
         _chatCount = (usage['chatCount'] as num?)?.toInt() ?? 0;
-        _scanLimit = (limits['scanLimit'] as num?)?.toInt() ?? _scanLimit;
+        if (limits['scanLimit'] != null) {
+          _scanLimit = (limits['scanLimit'] as num).toInt();
+          SharedPref.saveInt(SharePrefKey.scanLimit, _scanLimit);
+        }
         _chatLimit = (limits['chatLimit'] as num?)?.toInt() ?? _chatLimit;
       }
 

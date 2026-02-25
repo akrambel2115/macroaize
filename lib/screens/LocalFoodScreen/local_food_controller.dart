@@ -481,6 +481,7 @@ class LocalFoodController extends GetxController {
       if (Get.isRegistered<HomeController>()) {
         final hc = Get.find<HomeController>();
         await hc.getSqlCalorie();
+        await hc.getRecentHistory();
         hc.update();
       }
     } catch (_) {}

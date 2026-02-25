@@ -49,36 +49,36 @@ struct SmallWidgetView: View {
             
             VStack {
                 Text("Daily Progress")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
                 
+                Spacer()
+                
                 ZStack {
-                    // Background Ring (Horseshoe)
+                    // Background Ring
                     Circle()
-                        .trim(from: 0.0, to: 0.75)
                         .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
                         .opacity(0.3)
                         .foregroundColor(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
-                        .rotationEffect(Angle(degrees: 135.0))
+                        .rotationEffect(Angle(degrees: -90.0))
                     
-                    // Progress Ring (Horseshoe)
+                    // Progress Ring
                     Circle()
-                        .trim(from: 0.0, to: CGFloat(min(Double(entry.progress) / 100.0, 1.0)) * 0.75)
+                        .trim(from: 0.0, to: CGFloat(min(Double(entry.progress) / 100.0, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
                         .foregroundColor(Color(red: 251/255, green: 116/255, blue: 20/255)) // primaryOrange
-                        .rotationEffect(Angle(degrees: 135.0))
+                        .rotationEffect(Angle(degrees: -90.0))
                     
                     VStack(spacing: 0) {
                         Text("\(max(0, entry.goal - entry.calories))")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
                         Text("Left")
-                            .font(.system(size: 8))
+                            .font(.system(size: 10))
                             .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255)) // neutralGrey600
                     }
                 }
-                .frame(width: 85, height: 85)
-                .padding(.vertical, 4)
+                .frame(width: 90, height: 90)
                 
                 Spacer()
                 
@@ -86,11 +86,11 @@ struct SmallWidgetView: View {
                     ZStack {
                         Circle()
                             .fill(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
-                            .frame(width: 28, height: 28)
+                            .frame(width: 40, height: 40)
                         
                         Image(systemName: "plus")
                             .foregroundColor(.white)
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                     }
                 }
             }
@@ -113,21 +113,22 @@ struct LargeWidgetView: View {
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white)
                     
+                    Spacer()
+                    
                     ZStack {
-                        // Background Ring (Horseshoe)
+                        // Background Ring
                         Circle()
-                            .trim(from: 0.0, to: 0.75)
                             .stroke(style: StrokeStyle(lineWidth: 8.0, lineCap: .round, lineJoin: .round))
                             .opacity(0.3)
                             .foregroundColor(Color(red: 60/255, green: 64/255, blue: 67/255))
-                            .rotationEffect(Angle(degrees: 135.0))
+                            .rotationEffect(Angle(degrees: -90.0))
                         
-                        // Progress Ring (Horseshoe)
+                        // Progress Ring
                         Circle()
-                            .trim(from: 0.0, to: CGFloat(min(Double(entry.progress) / 100.0, 1.0)) * 0.75)
+                            .trim(from: 0.0, to: CGFloat(min(Double(entry.progress) / 100.0, 1.0)))
                             .stroke(style: StrokeStyle(lineWidth: 8.0, lineCap: .round, lineJoin: .round))
                             .foregroundColor(Color(red: 251/255, green: 116/255, blue: 20/255))
-                            .rotationEffect(Angle(degrees: 135.0))
+                            .rotationEffect(Angle(degrees: -90.0))
                         
                         VStack(spacing: 0) {
                             Text("\(max(0, entry.goal - entry.calories))")
@@ -139,19 +140,21 @@ struct LargeWidgetView: View {
                         }
                     }
                     .frame(width: 80, height: 80)
+                    
+                    Spacer()
                 }
                 
                 // Right: Macros
                 VStack(alignment: .leading, spacing: 6) {
-                    MacroRow(label: "Protein", value: entry.protein, color: Color(red: 255/255, green: 107/255, blue: 107/255), max: 150, icon: "circle.grid.cross.fill")
-                    MacroRow(label: "Carbs", value: entry.carbs, color: Color(red: 78/255, green: 205/255, blue: 196/255), max: 250, icon: "leaf.fill")
-                    MacroRow(label: "Fats", value: entry.fats, color: Color(red: 255/255, green: 230/255, blue: 109/255), max: 80, icon: "drop.fill")
+                    MacroRow(label: "Protein", value: entry.protein, color: Color(red: 255/255, green: 107/255, blue: 107/255), max: 150, icon: "protein")
+                    MacroRow(label: "Carbs", value: entry.carbs, color: Color(red: 78/255, green: 205/255, blue: 196/255), max: 250, icon: "carb")
+                    MacroRow(label: "Fats", value: entry.fats, color: Color(red: 255/255, green: 230/255, blue: 109/255), max: 80, icon: "fat")
                     
                     Link(destination: URL(string: "macroaize://log")!) {
                         ZStack {
                             Circle()
                                 .fill(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
-                                .frame(width: 32, height: 32)
+                                .frame(width: 40, height: 40)
                             
                             Image(systemName: "plus")
                                 .foregroundColor(.white)
@@ -175,11 +178,10 @@ struct MacroRow: View {
     
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: icon)
+            Image(icon)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 12, height: 12)
-                .foregroundColor(color)
+                .frame(width: 16, height: 16)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(label): \(value)g")
@@ -243,34 +245,20 @@ struct StreakWidgetView: View {
         ZStack {
             Color(red: 33/255, green: 38/255, blue: 45/255) // AppColor.darkCard
             
-            VStack {
-                HStack {
-                    Image("fire")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 28, height: 28)
-                    
-                    Spacer()
-                    
-                    Text("STREAK")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255))
-                }
+            VStack(alignment: .center, spacing: 0) {
+                Image("fire")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 40, height: 40)
+                    .padding(.bottom, 8)
                 
-                Spacer()
+                Text("\(entry.streakCount)")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
                 
-                HStack(alignment: .bottom) {
-                    Text("\(entry.streakCount)")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text("Days")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255))
-                        .padding(.bottom, 6)
-                    
-                    Spacer()
-                }
+                Text("Day Streak")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(Color(red: 176/255, green: 179/255, blue: 184/255)) // #B0B3B8
             }
             .padding(16)
         }

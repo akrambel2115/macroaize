@@ -35,10 +35,32 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   final _openFoodFactsService = OpenFoodFactsService();
   bool _isProcessingBarcode = false;
 
+  // usage getters
+  int get remainingScans => (_usageService.scanLimit - _usageService.scanCount)
+      .clamp(0, _usageService.scanLimit);
+  int get totalScanLimit => _usageService.scanLimit;
+  bool get isPremiumUser => _usageService.isPremium;
+
+  void navigateToPremium() {
+    Get.toNamed(Routes.premiumView);
+  }
+
   @override
   Future<void> onInit() async {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+
+    // hydrate usage data
+    try {
+      await _usageService.getUsage();
+    } catch (_) {}
+    update();
+
+    // listen for usage changes
+    _usageService.usageStream.listen((_) {
+      if (!isClosed) update();
+    });
+
     await _ensureCameraReady();
   }
 

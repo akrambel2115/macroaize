@@ -12,6 +12,10 @@ export const validatePromoCode = onCall({ region: 'europe-west1' }, async (reque
         throw new HttpsError('unauthenticated', 'Authentication required.');
     }
 
+    if (!request.auth?.token?.email_verified) {
+        throw new HttpsError('permission-denied', 'Email verification is required to use promo codes.');
+    }
+
     const promoCode = (request.data?.promoCode as string || '').toUpperCase().trim();
     const clientIP = request.rawRequest.ip || 'unknown';
 

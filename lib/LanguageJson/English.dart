@@ -62,6 +62,10 @@ const Map<String, String> english = {
   "goal_label": "Goal",
   "daily_macros": "Daily Macros",
   "daily_macros_reached": "Daily Macros Reached",
+  "track_activity": "Track Activity",
+  "workouts_logged": "Workouts logged",
+  "total_duration": "Total duration",
+  "no_workouts_today": "No workouts logged today",
 
   // ==============================================================================
   // 3. Meals & Portions
@@ -105,6 +109,7 @@ const Map<String, String> english = {
   "Unlock Food Scanner": "Unlock Food Scanner",
   "Unlock Food Calorie": "Unlock Food Calorie",
   "Unlimited Food Scanner To Calorie": "Unlimited Food Scanner To Calorie",
+  "scans_remaining": "scans remaining",
 
   // ==============================================================================
   // 5. Food Search & Custom Foods
@@ -560,6 +565,38 @@ const Map<String, String> english = {
   "promo_dialog_benefit": "Get @days extra on your subscription!",
   "bonus_3_days": "+3 days",
   "bonus_1_month": "+1 month",
+  "restore_in_progress": "Restoring purchases...",
+  "restore_success": "Purchases restored successfully!",
+  "restore_no_purchases": "No previous purchases found.",
+  "restore_failed": "Failed to restore purchases. Please try again.",
+  "redeem_code": "Redeem Code",
+  "already_premium": "You are already Premium",
+  "already_premium_subscription":
+      "You already have an active Premium subscription",
+  "continue_for_free": "Continue for Free",
+  "restore_purchases": "Restore purchases",
+  "restore_purchases_info":
+      "Restore purchases if you've previously bought Premium on another device or account.",
+  "no_offers_available": "No offers available",
+  "no_offers_moment": "No offers available at the moment.",
+  "failed_load_offers": "Failed to load offers. Please try again.",
+  "purchase_successful_verifying": "Purchase successful. Verifying...",
+  "subscription_active": "Subscription active!",
+  "purchase_cancelled": "Purchase cancelled",
+  "purchase_failed": "Purchase failed. Please try again.",
+  "login_to_continue": "Please login to continue",
+  "auth_failed": "Authentication failed",
+  "unable_verify_subscription":
+      "Unable to verify subscription status. Please try again.",
+  "subscription_already_active_play":
+      "This subscription is already active on this Play account. Please sign in with the original app account that purchased it.",
+  "subscription_temporarily_unavailable":
+      "This subscription is temporarily unavailable. Please try again later or contact support.",
+  "subscriptions_disabled":
+      "Subscriptions are currently unavailable. Please try again later.",
+  "manage_on_store": "Manage on @store",
+  "per_month_label": "Per month",
+  "daily_usage": "Daily Usage",
   "Please enter a promo code": "Please enter a promo code",
   "Invalid promo code": "Invalid promo code",
   "Login Required": "Login Required",
@@ -1142,4 +1179,11 @@ const Map<String, String> english = {
   "test_scheduled_notification_desc": "Send a notification in 10 seconds",
   "test_scheduled_sent": "Scheduled!",
   "test_scheduled_sent_desc": "You'll receive a notification in 10 seconds",
+
+  // ==============================================================================
+  // 20. Water Tracker
+  // ==============================================================================
+  "water_title": "Water",
+  "water_ml_label": "ml",
+  "water_goal_reached": "Goal reached!",
 };
