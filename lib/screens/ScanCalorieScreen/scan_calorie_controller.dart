@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:macroaize/Model/calorie_history_model.dart';
 import 'package:macroaize/Model/sql_calorie_model.dart';
 import 'package:macroaize/NetworkHelp/open_ai_calling.dart';
@@ -17,9 +18,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../Model/sql_daily_calorie_model.dart';
 import '../../shared/services/usda_api_service.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
-import 'package:macroaize/widgets/meal_share_card.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:macroaize/shared/services/meal_share_service.dart';
 import '../../Model/meal_breakdown_item.dart';
 import '../../shared/services/rate_us_service.dart';
 import '../../shared/services/widget_promotion_service.dart';
@@ -65,9 +64,6 @@ class ScanCalorieController extends GetxController {
   int? usdaFdcId;
   bool usdaVerified = false;
   final UsdaApiService _usda = UsdaApiService();
-  ScreenshotController screenshotController = ScreenshotController();
-
-  MealShareCard? shareCard;
   List<UsdaFood> usdaOptions = const [];
 
   final List<MealBreakdownItem> items = [];
@@ -807,7 +803,8 @@ class ScanCalorieController extends GetxController {
   onAddButton(BuildContext context) async {
     List<SqlCalorieModel> calorieData = await dbHelper.getCalorieData();
     if (!context.mounted) return;
-    addSqlData(type);
+    await addSqlData(type);
+    if (!context.mounted) return;
     if (calorieData.isEmpty) {
       int id = await dbHelper.insertCalorie(
         SqlCalorieModel(
@@ -1025,9 +1022,9 @@ class ScanCalorieController extends GetxController {
     return {'food_name': '', 'food_name_english': '', ...vals};
   }
 
-  addSqlData(String type) async {
+  Future<void> addSqlData(String type) async {
     var imageData = image != null ? await saveImageToFile(image!.path) : null;
-    dbHelper.insertCalorieHistory(
+    await dbHelper.insertCalorieHistory(
       CalorieHistoryModel(
         calorie: calorieQuantity,
         date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
@@ -1060,7 +1057,20 @@ class ScanCalorieController extends GetxController {
       return null;
     }
 
-    await file.writeAsBytes(imageData);
+    Uint8List bytesToWrite = imageData;
+    try {
+      final decoded = img.decodeImage(imageData);
+      if (decoded != null) {
+        final resized =
+            decoded.width > 360 ? img.copyResize(decoded, width: 360) : decoded;
+        bytesToWrite = Uint8List.fromList(img.encodeJpg(resized, quality: 65));
+      }
+    } catch (_) {
+      // Fallback to original bytes
+      bytesToWrite = imageData;
+    }
+
+    await file.writeAsBytes(bytesToWrite);
     return filePath; // Store this path in the database
   }
 
@@ -1158,35 +1168,14 @@ class ScanCalorieController extends GetxController {
   }
 
   Future<void> shareMealResult({Rect? sharePositionOrigin}) async {
-    try {
-      final imageUint8List = await screenshotController.captureFromWidget(
-        MealShareCard(
-          mealImage: image,
-          calories: calorieQuantity,
-          protein: proteinQuantity,
-          carbs: carbsQuantity,
-          fats: fatsQuantity,
-        ),
-        delay: const Duration(milliseconds: 100),
-      );
-
-      final directory = await getTemporaryDirectory();
-      final imagePath =
-          '${directory.path}/meal_share_${DateTime.now().millisecondsSinceEpoch}.png';
-      final imageFile = File(imagePath);
-      await imageFile.writeAsBytes(imageUint8List);
-
-      await Share.shareXFiles(
-        [XFile(imagePath)],
-        text: 'Check out my meal on Macroaize!',
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    } catch (e) {
-      log('SHARE_MEAL_ERROR => $e');
-      try {
-        NotificationService.showError("Error sharing meal result");
-      } catch (_) {}
-    }
+    await MealShareService.shareMealSnapshot(
+      mealImage: image,
+      calories: calorieQuantity,
+      protein: proteinQuantity,
+      carbs: carbsQuantity,
+      fats: fatsQuantity,
+      sharePositionOrigin: sharePositionOrigin,
+    );
   }
 
   /// Show goal progress notification (50% and 100% milestones)

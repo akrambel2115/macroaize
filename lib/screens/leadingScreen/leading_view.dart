@@ -169,9 +169,9 @@ class _LeadingViewState extends State<LeadingView>
         showUpdateWeightDialog(context, ConstantUserMaster.weight.toString(), (
           value,
         ) async {
-          await WeightUpdateService.updateWeight(int.parse(value));
-          // Redirect after update
-          _controller.changeTabIndex(3);
+          await WeightUpdateService.updateWeightAndOpenOverview(
+            int.parse(value),
+          );
         }, title: 'Update Weight'.tr);
         break;
       case 3: // Workout

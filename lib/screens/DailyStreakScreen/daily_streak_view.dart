@@ -53,7 +53,7 @@ class DailyStreakView extends GetView<DailyStreakController> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDisciplineCard(context),
+                    _buildStreakCard(context),
                     const SizedBox(height: 24),
                     Text(
                       "Activity History",
@@ -75,7 +75,7 @@ class DailyStreakView extends GetView<DailyStreakController> {
     );
   }
 
-  Widget _buildDisciplineCard(BuildContext context) {
+  Widget _buildStreakCard(BuildContext context) {
     bool hasStreak = controller.currentStreak.value > 0;
 
     return Container(
@@ -85,7 +85,6 @@ class DailyStreakView extends GetView<DailyStreakController> {
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: Column(
@@ -138,49 +137,6 @@ class DailyStreakView extends GetView<DailyStreakController> {
                 ),
               ],
             ),
-          ),
-
-          Column(
-            children: [
-              SizedBox(
-                width: 70,
-                height: 70,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CircularProgressIndicator(
-                      value: controller.disciplineScore.value / 100,
-                      strokeWidth: 8,
-                      backgroundColor:
-                          context.isDarkMode
-                              ? AppColor.neutralGrey800
-                              : AppColor.neutralGrey100,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColor.primaryOrange,
-                      ),
-                      strokeCap: StrokeCap.round,
-                    ),
-                    Center(
-                      child: Text(
-                        "${controller.disciplineScore.value.toStringAsFixed(0)}%",
-                        style: context.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColor.primaryOrange,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Discipline",
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: AppColor.neutralGrey600,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
           ),
         ],
       ),

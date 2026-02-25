@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:macroaize/constant/database_helper.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/AnalyticsScreen/analytics_controller.dart';
+import 'package:macroaize/screens/HomeScreen/home_controller.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:macroaize/shared/services/usage_service.dart';
 import 'package:macroaize/Model/parsed_workout.dart';
@@ -28,12 +29,19 @@ class WorkoutController extends GetxController {
   final RxBool _isPremium = false.obs;
   bool get isPremium => _isPremium.value;
 
+  DateTime? targetDate;
+
   final RxBool isPoppingBack = false.obs;
   bool _isClosed = false;
 
   @override
   void onInit() {
     super.onInit();
+
+    final args = Get.arguments;
+    if (args is Map && args['targetDate'] is String) {
+      targetDate = DateTime.tryParse(args['targetDate'] as String);
+    }
 
     _isPremium.value = _usageService.isPremium;
     _usageService.usageStream.listen((_) {
@@ -168,12 +176,12 @@ class WorkoutController extends GetxController {
       return;
     }
 
-    final now = DateTime.now();
+    final saveDate = targetDate ?? DateTime.now();
 
     for (final exercise in workout.exercises) {
       try {
         await dbHelper.insertWorkoutEntry(
-          date: now,
+          date: saveDate,
           duration: exercise.duration ?? _estimateDuration(exercise),
           type: exercise.type,
           caloriesBurned: exercise.caloriesBurned,
@@ -241,6 +249,16 @@ class WorkoutController extends GetxController {
     try {
       final analyticsController = Get.find<AnalyticsController>();
       await analyticsController.loadWorkoutHistory();
+    } catch (_) {
+      // controller missing
+    }
+
+    try {
+      if (Get.isRegistered<HomeController>()) {
+        final homeController = Get.find<HomeController>();
+        await homeController.getSqlCalorie();
+        homeController.update();
+      }
     } catch (_) {
       // controller missing
     }

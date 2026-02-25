@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
 import 'package:macroaize/constant/app_assets.dart';
 import 'package:macroaize/constant/app_color.dart';
@@ -13,6 +14,7 @@ import 'package:macroaize/widgets/modern_card.dart';
 import 'package:macroaize/widgets/energy_orbs.dart';
 import 'package:macroaize/widgets/calorie_ring.dart';
 import 'package:macroaize/widgets/nutrition_badge.dart';
+import 'package:macroaize/shared/services/meal_share_service.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:macroaize/screens/leadingScreen/leading_view.dart';
@@ -333,7 +335,7 @@ class HomeView extends GetView<HomeController> {
                             child: Icon(
                               Icons.local_fire_department,
                               color: AppColor.primaryOrange,
-                              size: 20,
+                              size: 28,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -663,10 +665,7 @@ class HomeView extends GetView<HomeController> {
                         shape: const CircleBorder(),
                         child: InkWell(
                           customBorder: const CircleBorder(),
-                          onTap:
-                              controller.isSelectedDateToday
-                                  ? () => controller.addWaterGlass()
-                                  : null,
+                          onTap: () => controller.addWaterGlass(),
                           child: const SizedBox(
                             width: 44,
                             height: 44,
@@ -843,7 +842,14 @@ class HomeView extends GetView<HomeController> {
                                     child: InkWell(
                                       customBorder: const CircleBorder(),
                                       onTap:
-                                          () => Get.toNamed(Routes.workoutView),
+                                          () => Get.toNamed(
+                                            Routes.workoutView,
+                                            arguments: {
+                                              'targetDate':
+                                                  controller.today
+                                                      .toIso8601String(),
+                                            },
+                                          ),
                                       child: const SizedBox(
                                         width: 32,
                                         height: 32,
@@ -1044,7 +1050,6 @@ class HomeView extends GetView<HomeController> {
 
         return GestureDetector(
           onTap: () {
-            if (!ctrl.isSelectedDateToday) return;
             if (isFilled) {
               ctrl.removeWaterGlass();
             } else if (isNextEmpty) {
@@ -1331,7 +1336,6 @@ class HomeView extends GetView<HomeController> {
                     vertical: 6,
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       chipIconAsset.isNotEmpty
                           ? Image.asset(chipIconAsset, width: 24, height: 24)
@@ -1348,31 +1352,37 @@ class HomeView extends GetView<HomeController> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      const Spacer(),
+                      Builder(
+                        builder: (ctx) {
+                          return IconButton(
+                            icon: const Icon(Icons.share_outlined),
+                            tooltip: 'Share Meal'.tr,
+                            onPressed: () {
+                              final box = ctx.findRenderObject() as RenderBox?;
+                              final rect =
+                                  box != null
+                                      ? box.localToGlobal(Offset.zero) &
+                                          box.size
+                                      : null;
+                              MealShareService.shareHistoryMeal(
+                                meal,
+                                sharePositionOrigin: rect,
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.theme.cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColor.neutralGrey300.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Text(
-                      displayTitle,
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: context.theme.colorScheme.onSurface,
-                      ),
-                    ),
+                  child: _buildHistoryMealPreview(
+                    context,
+                    title: displayTitle,
+                    imagePath:
+                        meal.image is String ? meal.image as String : null,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -1483,6 +1493,53 @@ class HomeView extends GetView<HomeController> {
             fit: BoxFit.contain,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryMealPreview(
+    BuildContext context, {
+    required String title,
+    String? imagePath,
+  }) {
+    final hasImage = imagePath != null && imagePath.trim().isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.theme.colorScheme.onSurface,
+            ),
+          ),
+          if (hasImage) const SizedBox(height: 10),
+          if (hasImage)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                File(imagePath),
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                cacheWidth: 160,
+                errorBuilder:
+                    (_, __, ___) => Container(
+                      width: 64,
+                      height: 64,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColor.neutralGrey100,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.fastfood_rounded, size: 24),
+                    ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1738,19 +1795,19 @@ class _InlineEditIconState extends State<_InlineEditIcon> {
             child: IconTheme(
               data: IconThemeData(color: iconColor),
               child: SizedBox(
-                width: 40,
-                height: 40,
+                width: 50,
+                height: 50,
                 child: Center(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 120),
                     curve: Curves.easeOut,
-                    width: 34,
-                    height: 34,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: bgColor,
                       shape: BoxShape.circle,
                     ),
-                    child: const Center(child: _EditIcon()),
+                    child: const Center(child: _EditIcon(size: 24)),
                   ),
                 ),
               ),
@@ -1763,12 +1820,13 @@ class _InlineEditIconState extends State<_InlineEditIcon> {
 }
 
 class _EditIcon extends StatelessWidget {
-  const _EditIcon();
+  final double size;
+  const _EditIcon({this.size = 18});
   @override
   Widget build(BuildContext context) {
     return Icon(
       Icons.edit_outlined,
-      size: 18,
+      size: size,
       color: IconTheme.of(context).color ?? AppColor.neutralGrey500,
     );
   }

@@ -151,7 +151,6 @@ class HomeController extends GetxController {
   }
 
   void addWaterGlass() {
-    if (!isSelectedDateToday) return;
     if (waterGlasses < maxGlasses) {
       waterGlasses++;
       _saveWaterData();
@@ -160,7 +159,6 @@ class HomeController extends GetxController {
   }
 
   void removeWaterGlass() {
-    if (!isSelectedDateToday) return;
     if (waterGlasses > 0) {
       waterGlasses--;
       _saveWaterData();
@@ -309,10 +307,7 @@ class HomeController extends GetxController {
     ) async {
       int newWeight = int.tryParse(newWeightString) ?? 0;
       if (newWeight > 0) {
-        await WeightUpdateService.updateWeight(newWeight);
-        await getAllData();
-        displayedWeight = ConstantUserMaster.weight;
-        update();
+        await WeightUpdateService.updateWeightAndOpenOverview(newWeight);
       }
     }, title: 'Update Weight'.tr);
   }

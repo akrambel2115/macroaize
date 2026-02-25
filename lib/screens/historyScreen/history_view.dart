@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:macroaize/constant/app_assets.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/shared/widgets/delete_dialog.dart';
@@ -9,6 +10,7 @@ import 'package:macroaize/widgets/modern_card.dart';
 import 'package:macroaize/widgets/nutrition_badge.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
+import 'package:macroaize/shared/services/meal_share_service.dart';
 
 class HistoryView extends GetView<HistoryController> {
   const HistoryView({super.key});
@@ -125,30 +127,48 @@ class HistoryView extends GetView<HistoryController> {
             children: [
               _buildMealTypeChip(context, historyItem.type.toString()),
               ModernScaleTransition(
-                child: GestureDetector(
-                  onTap: () {
-                    showDeleteDialog(
-                      onDelete: () {
-                        controller.dbHelper.deleteCalorieHistory(
-                          historyItem.id!,
+                child: Row(
+                  children: [
+                    Builder(
+                      builder: (ctx) {
+                        return _buildCardActionIcon(
+                          icon: Icons.share_outlined,
+                          color: AppColor.primaryOrange,
+                          background: AppColor.primaryOrange.withValues(
+                            alpha: 0.1,
+                          ),
+                          onTap: () {
+                            final box = ctx.findRenderObject() as RenderBox?;
+                            final rect =
+                                box != null
+                                    ? box.localToGlobal(Offset.zero) & box.size
+                                    : null;
+                            MealShareService.shareHistoryMeal(
+                              historyItem,
+                              sharePositionOrigin: rect,
+                            );
+                          },
                         );
-                        controller.getHistory();
                       },
-                      context: context,
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColor.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
-                      Icons.delete_outline_rounded,
+                    const SizedBox(width: 8),
+                    _buildCardActionIcon(
+                      icon: Icons.delete_outline_rounded,
                       color: AppColor.error,
-                      size: 20,
+                      background: AppColor.error.withValues(alpha: 0.1),
+                      onTap: () {
+                        showDeleteDialog(
+                          onDelete: () {
+                            controller.dbHelper.deleteCalorieHistory(
+                              historyItem.id!,
+                            );
+                            controller.getHistory();
+                          },
+                          context: context,
+                        );
+                      },
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
@@ -156,8 +176,16 @@ class HistoryView extends GetView<HistoryController> {
 
           const SizedBox(height: 20),
 
-          // show title instead of image
-          Center(child: _buildHistoryTitle(context, historyItem.title)),
+          Center(
+            child: _buildHistoryTitle(
+              context,
+              historyItem.title,
+              imagePath:
+                  historyItem.image is String
+                      ? historyItem.image as String
+                      : null,
+            ),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -271,27 +299,72 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildHistoryTitle(BuildContext context, String? title) {
+  Widget _buildCardActionIcon({
+    required IconData icon,
+    required Color color,
+    required Color background,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
+
+  Widget _buildHistoryTitle(
+    BuildContext context,
+    String? title, {
+    String? imagePath,
+  }) {
     final String display =
         (title == null || title.trim().isEmpty)
             ? 'unknown_meal'.tr
             : title.trim();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColor.neutralGrey300.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Text(
-        display,
-        textAlign: TextAlign.center,
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: context.theme.colorScheme.onSurface,
-        ),
+    final hasImage = imagePath != null && imagePath.trim().isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            display,
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.theme.colorScheme.onSurface,
+            ),
+          ),
+          if (hasImage) const SizedBox(height: 10),
+          if (hasImage)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                File(imagePath),
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                cacheWidth: 160,
+                errorBuilder:
+                    (_, __, ___) => Container(
+                      width: 64,
+                      height: 64,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColor.neutralGrey100,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.fastfood_rounded, size: 24),
+                    ),
+              ),
+            ),
+        ],
       ),
     );
   }
