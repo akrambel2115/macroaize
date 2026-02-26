@@ -42,12 +42,15 @@ class WidgetPromotionService {
   }
 
   void _showAndroidInstructionDialog() {
+    final isDark = Get.isDarkMode;
     Get.dialog(
       AlertDialog(
-        backgroundColor: AppColor.darkBackground,
+        backgroundColor: isDark ? AppColor.darkBackground : Colors.white,
         title: Text(
           'widget_promo_title'.tr,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : AppColor.neutralGrey900,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -62,7 +65,9 @@ class WidgetPromotionService {
             ),
             Text(
               'widget_promo_android_instructions'.tr,
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(
+                color: isDark ? Colors.white70 : AppColor.neutralGrey600,
+              ),
             ),
           ],
         ),
@@ -74,14 +79,15 @@ class WidgetPromotionService {
   }
 
   void _showIOSBottomSheet() {
+    final isDark = Get.isDarkMode;
     Get.bottomSheet(
       SafeArea(
         top: false,
         child: Container(
           padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: AppColor.darkBackground,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: isDark ? AppColor.darkBackground : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -94,15 +100,20 @@ class WidgetPromotionService {
                     Expanded(
                       child: Text(
                         'widget_promo_title'.tr,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color:
+                              isDark ? Colors.white : AppColor.neutralGrey900,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white54),
+                      icon: Icon(
+                        Icons.close,
+                        color:
+                            isDark ? Colors.white54 : AppColor.neutralGrey600,
+                      ),
                       onPressed: () => _dismiss(),
                     ),
                   ],
@@ -151,6 +162,7 @@ class WidgetPromotionService {
   }
 
   Widget _buildStep(int number, String text) {
+    final isDark = Get.isDarkMode;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -177,8 +189,8 @@ class WidgetPromotionService {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: Colors.white70,
+              style: TextStyle(
+                color: isDark ? Colors.white70 : AppColor.neutralGrey600,
                 fontSize: 16,
                 height: 1.4,
               ),
