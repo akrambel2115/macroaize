@@ -27,8 +27,8 @@ class _SignUpViewState extends State<SignUpView> {
         ),
         child: GetBuilder<SignUpController>(
           builder: (controller) {
-            // map to 6 steps
-            final int stepIndex = controller.selectedView.clamp(0, 5);
+            // map to 7 steps (theme choice prepended)
+            final int stepIndex = controller.selectedView.clamp(0, 6);
             final bool forward = stepIndex >= _prevStep;
 
             // update prev step
@@ -42,12 +42,12 @@ class _SignUpViewState extends State<SignUpView> {
                   padding: const EdgeInsets.symmetric(vertical: 6.0),
                   child: _StepProgressIndicator(
                     currentStep: stepIndex,
-                    total: 6,
+                    total: 7,
                     activeColor: AppColor.primaryOrange,
                   ),
                 ),
                 // back button
-                if (controller.selectedView < 7) // hide on setup/review
+                if (controller.selectedView < 8) // hide on setup/review
                   AppWidgets.backButton(context, () {
                     if (controller.selectedView > 0) {
                       controller.selectedView = controller.selectedView - 1;
@@ -130,64 +130,34 @@ class _StepProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = activeColor ?? context.theme.primaryColor;
-    final inactive = Colors.grey.shade300;
-    const duration = Duration(milliseconds: 420);
-    const curve = Curves.easeInOut;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(total * 2 - 1, (i) {
-        if (i.isEven) {
-          final idx = i ~/ 2;
-          final active = idx <= currentStep;
-          final double size = active ? 34 : 28;
-          return AnimatedContainer(
-            duration: duration,
-            curve: curve,
-            width: size,
-            height: size,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              color: active ? primary : Colors.white,
-              border: Border.all(
-                color: active ? primary : Colors.grey.shade400,
-                width: 2,
+    final track = context.isDarkMode
+        ? Colors.white.withValues(alpha: 0.14)
+        : AppColor.neutralGrey200;
+    final progress = ((currentStep + 1) / total).clamp(0.0, 1.0);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(99),
+        child: Container(
+          height: 10,
+          color: track,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: AnimatedFractionallySizedBox(
+              duration: const Duration(milliseconds: 420),
+              curve: Curves.easeInOut,
+              widthFactor: progress,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: primary,
+                  borderRadius: BorderRadius.circular(99),
+                ),
               ),
-              shape: BoxShape.circle,
-              boxShadow:
-                  active
-                      ? [
-                        BoxShadow(
-                          color: (primary).withValues(alpha: 0.18),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                      : null,
             ),
-            alignment: Alignment.center,
-            child: AnimatedDefaultTextStyle(
-              duration: duration,
-              style: TextStyle(
-                color: active ? Colors.white : Colors.grey.shade600,
-                fontWeight: FontWeight.w600,
-              ),
-              child: Text('${idx + 1}'),
-            ),
-          );
-        } else {
-          final leftIdx = (i - 1) ~/ 2;
-          final active = leftIdx < currentStep;
-          return Expanded(
-            child: AnimatedContainer(
-              duration: duration,
-              curve: curve,
-              height: 4,
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              color: active ? primary : inactive,
-            ),
-          );
-        }
-      }),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../SharePrefHelper/share_pref.dart';
@@ -20,8 +19,9 @@ class ThemeController extends GetxController {
   getThemeMode() async {
     final bool? stored = await SharedPref.readBool(SharePrefKey.isDarkMode);
     if (stored == null) {
-      final Brightness platformBrightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
-      isDarkMode = platformBrightness == Brightness.dark;
+      // First launch: default to light mode regardless of device preference.
+      // The user can change this on the theme-choice onboarding screen.
+      isDarkMode = false;
       await SharedPref.saveBool(SharePrefKey.isDarkMode, isDarkMode);
     } else {
       isDarkMode = stored;

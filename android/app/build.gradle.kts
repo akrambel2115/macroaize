@@ -67,3 +67,11 @@ dependencies {
     // Core library desugaring for Java 8+ APIs on older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
+
+// Workaround for intermittent duplicate entries in compress*Assets on Windows.
+// Force non-incremental mode instead of deleting outputs (which breaks AssetManifest.bin).
+tasks.configureEach {
+    if (name.startsWith("compress") && name.endsWith("Assets")) {
+        outputs.upToDateWhen { false }
+    }
+}

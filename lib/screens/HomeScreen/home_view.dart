@@ -722,7 +722,7 @@ class HomeView extends GetView<HomeController> {
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
-                                        Icons.nordic_walking_rounded,
+                                        Icons.directions_run_rounded,
                                         color: Colors.lightGreen,
                                         size: 32,
                                       ),
@@ -796,7 +796,7 @@ class HomeView extends GetView<HomeController> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
-                                      Icons.directions_run_rounded,
+                                      Icons.show_chart,
                                       color: Colors.green,
                                       size: 32,
                                     ),

@@ -8,6 +8,7 @@ import 'package:macroaize/screens/AnalyticsScreen/analytics_controller.dart';
 import 'package:macroaize/screens/HomeScreen/home_controller.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:macroaize/shared/services/usage_service.dart';
+import 'package:macroaize/shared/services/wellness_sync_service.dart';
 import 'package:macroaize/Model/parsed_workout.dart';
 import 'package:macroaize/routes/app_routes.dart';
 
@@ -180,13 +181,24 @@ class WorkoutController extends GetxController {
 
     for (final exercise in workout.exercises) {
       try {
-        await dbHelper.insertWorkoutEntry(
+        final workoutId = await dbHelper.insertWorkoutEntry(
           date: saveDate,
           duration: exercise.duration ?? _estimateDuration(exercise),
           type: exercise.type,
           caloriesBurned: exercise.caloriesBurned,
           description: _buildExerciseDescription(exercise),
         );
+
+        if (Get.isRegistered<WellnessSyncService>()) {
+          final wellness = Get.find<WellnessSyncService>();
+          await wellness.syncWorkout(
+            workoutId: workoutId,
+            date: saveDate,
+            durationMinutes: exercise.duration ?? _estimateDuration(exercise),
+            caloriesBurned: exercise.caloriesBurned,
+            workoutType: exercise.type,
+          );
+        }
       } catch (e) {
         rethrow;
       }

@@ -6,6 +6,7 @@ import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
 import 'package:macroaize/routes/app_routes.dart';
 import 'package:macroaize/screens/SignUpScreens/SignUpViews/born_view.dart';
 import 'package:macroaize/screens/SignUpScreens/SignUpViews/gender_view.dart';
+import 'package:macroaize/screens/SignUpScreens/SignUpViews/theme_choice_view.dart';
 import 'package:macroaize/screens/SignUpScreens/SignUpViews/goal_screen.dart';
 import 'package:macroaize/screens/SignUpScreens/SignUpViews/height_width_view.dart';
 import 'package:macroaize/screens/SignUpScreens/SignUpViews/plan_review_view.dart';
@@ -62,6 +63,7 @@ class SignUpController extends GetxController {
   RxInt calculatedFat = 0.obs;
 
   List<Widget> screens = [
+    const ThemeChoiceView(),
     GenderView(),
     WorkoutView(),
     HeightWidth(),
@@ -112,31 +114,20 @@ class SignUpController extends GetxController {
   }
 
   onChangeView() {
-    if (selectedView == 0) {
-      selectedView = 1;
-    } else if (selectedView == 1) {
-      selectedView = 2;
-    } else if (selectedView == 2) {
-      selectedView = 3;
-    } else if (selectedView == 3) {
-      selectedView = 4;
-    } else if (selectedView == 4) {
-      selectedView = 5;
-    } else if (selectedView == 5) {
-      selectedView = 6; // Go to AuthRequiredView
-    } else if (selectedView == 6) {
-      selectedView = 7; // Go to PromoCodeView
-    } else if (selectedView == 7) {
+    if (selectedView < 8) {
+      // Regular step-by-step flow up to PromoCodeView.
+      selectedView = selectedView + 1;
+    } else if (selectedView == 8) {
       // PromoCodeView -> SetupView (loading) -> PlanReviewView
-      selectedView = 8; // Show SetupView loading
+      selectedView = 9; // Show SetupView loading
       saveOnSql();
       Future.delayed(const Duration(seconds: 3)).then((value) {
         SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
         // go to plan review
-        selectedView = 9;
+        selectedView = 10;
         update();
       });
-    } else if (selectedView == 9) {
+    } else if (selectedView == 10) {
       // go to premium
       navigateToPremium();
     }
@@ -145,12 +136,12 @@ class SignUpController extends GetxController {
 
   // Skip auth and promo code - go directly to setup
   void skipToSetup() {
-    selectedView = 8; // Go to SetupView loading
+    selectedView = 9; // Go to SetupView loading
     saveOnSql();
     Future.delayed(const Duration(seconds: 3)).then((value) {
       SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
       // go to plan review
-      selectedView = 9;
+      selectedView = 10;
       update();
     });
     update();
@@ -158,7 +149,7 @@ class SignUpController extends GetxController {
 
   // Skip auth but show promo code page
   void skipToPromoCode() {
-    selectedView = 7; // Go to PromoCodeView
+    selectedView = 8; // Go to PromoCodeView
     update();
   }
 

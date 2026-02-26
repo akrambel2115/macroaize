@@ -4,6 +4,7 @@ import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/AnalyticsScreen/analytics_controller.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:macroaize/widgets/chart_share_button.dart';
 
 class WeightChart extends StatefulWidget {
   const WeightChart({super.key});
@@ -31,6 +32,7 @@ class _WeightChartState extends State<WeightChart>
 
   @override
   Widget build(BuildContext context) {
+    final chartBoundaryKey = GlobalKey();
     return GetBuilder<AnalyticsController>(
       builder: (controller) {
         final goalWeight = ConstantUserMaster.desiredGoal.toDouble();
@@ -123,97 +125,111 @@ class _WeightChartState extends State<WeightChart>
             const SizedBox(height: 20),
 
             // Chart card (like calorie chart)
-            Container(
-              height: 300,
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: context.theme.cardColor,
-              ),
-              child: Column(
-                children: [
-                  // Title row (like calorie chart)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        title,
-                        style: context.theme.textTheme.titleMedium?.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+            RepaintBoundary(
+              key: chartBoundaryKey,
+              child: Container(
+                height: 300,
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: context.theme.cardColor,
+                ),
+                child: Column(
+                  children: [
+                    // Title row (like calorie chart)
+                    Row(
+                      children: [
+                        const SizedBox(width: 40),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                title,
+                                style: context.theme.textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ).paddingOnly(bottom: 15, right: 5),
+                              Text(
+                                '${currentWeight.toInt()}${'kg'.tr}',
+                                style: context.theme.textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color:
+                                          Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.grey[300]
+                                              : null,
+                                    ),
+                              ).paddingOnly(bottom: 15),
+                            ],
+                          ),
                         ),
-                      ).paddingOnly(bottom: 15, right: 5),
-                      Text(
-                        '${currentWeight.toInt()}${'kg'.tr}',
-                        style: context.theme.textTheme.titleMedium?.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.grey[300]
-                                  : null,
+                        ChartShareButton(boundaryKey: chartBoundaryKey),
+                      ],
+                    ),
+                    // Chart
+                    Expanded(
+                      child: SfCartesianChart(
+                        key: ValueKey('${data.length}_$currentWeight'),
+                        primaryXAxis: CategoryAxis(
+                          majorGridLines: const MajorGridLines(width: 0),
+                          labelStyle: context.theme.textTheme.labelSmall
+                              ?.copyWith(fontSize: 9),
+                          interval: 1,
+                          labelRotation: _tabController.index == 1 ? -45 : 0,
                         ),
-                      ).paddingOnly(bottom: 15),
-                    ],
-                  ),
-                  // Chart
-                  Expanded(
-                    child: SfCartesianChart(
-                      key: ValueKey('${data.length}_$currentWeight'),
-                      primaryXAxis: CategoryAxis(
-                        majorGridLines: const MajorGridLines(width: 0),
-                        labelStyle: context.theme.textTheme.labelSmall
-                            ?.copyWith(fontSize: 9),
-                        interval: 1,
-                        labelRotation: _tabController.index == 1 ? -45 : 0,
-                      ),
-                      primaryYAxis: NumericAxis(
-                        majorGridLines: const MajorGridLines(width: 1),
-                        labelStyle: context.theme.textTheme.labelSmall
-                            ?.copyWith(fontSize: 11),
-                        plotBands: [
-                          PlotBand(
-                            start: goalWeight,
-                            end: goalWeight,
-                            borderColor: AppColor.success,
-                            borderWidth: 2,
-                            dashArray: const [8, 4],
+                        primaryYAxis: NumericAxis(
+                          majorGridLines: const MajorGridLines(width: 1),
+                          labelStyle: context.theme.textTheme.labelSmall
+                              ?.copyWith(fontSize: 11),
+                          plotBands: [
+                            PlotBand(
+                              start: goalWeight,
+                              end: goalWeight,
+                              borderColor: AppColor.success,
+                              borderWidth: 2,
+                              dashArray: const [8, 4],
+                            ),
+                          ],
+                        ),
+                        series: [
+                          LineSeries<WeightData, String>(
+                            dataSource: data,
+                            xValueMapper: (d, _) => d.label.tr,
+                            yValueMapper: (d, _) => d.weight,
+                            color: AppColor.primaryOrange,
+                            width: 3,
+                            markerSettings: const MarkerSettings(
+                              isVisible: true,
+                              shape: DataMarkerType.circle,
+                              width: 8,
+                              height: 8,
+                              color: AppColor.primaryOrange,
+                              borderColor: Colors.white,
+                              borderWidth: 2,
+                            ),
+                            dataLabelSettings: DataLabelSettings(
+                              isVisible: _tabController.index == 0,
+                              textStyle: context.theme.textTheme.bodySmall
+                                  ?.copyWith(
+                                    fontSize: 11,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.grey[300]
+                                            : null,
+                                  ),
+                            ),
                           ),
                         ],
                       ),
-                      series: [
-                        LineSeries<WeightData, String>(
-                          dataSource: data,
-                          xValueMapper: (d, _) => d.label.tr,
-                          yValueMapper: (d, _) => d.weight,
-                          color: AppColor.primaryOrange,
-                          width: 3,
-                          markerSettings: const MarkerSettings(
-                            isVisible: true,
-                            shape: DataMarkerType.circle,
-                            width: 8,
-                            height: 8,
-                            color: AppColor.primaryOrange,
-                            borderColor: Colors.white,
-                            borderWidth: 2,
-                          ),
-                          dataLabelSettings: DataLabelSettings(
-                            isVisible: _tabController.index == 0,
-                            textStyle: context.theme.textTheme.bodySmall
-                                ?.copyWith(
-                                  fontSize: 11,
-                                  color:
-                                      Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.grey[300]
-                                          : null,
-                                ),
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

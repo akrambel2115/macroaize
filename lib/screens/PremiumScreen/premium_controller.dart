@@ -621,18 +621,14 @@ class PremiumController extends GetxController {
           if (isPremiumActive) {
             isPremium = true;
             update();
-            NotificationService.showInfo(
-              'already_premium_subscription'.tr,
-            );
+            NotificationService.showInfo('already_premium_subscription'.tr);
             return;
           }
         }
       }
     } catch (e) {
       if (kDebugMode) print('Error checking subscription status: $e');
-      NotificationService.showError(
-        'unable_verify_subscription'.tr,
-      );
+      NotificationService.showError('unable_verify_subscription'.tr);
       return;
     }
 
@@ -697,9 +693,7 @@ class PremiumController extends GetxController {
           if (kDebugMode) {
             print('RevenueCat: Product already owned on this Play account.');
           }
-          NotificationService.showError(
-            'subscription_already_active_play'.tr,
-          );
+          NotificationService.showError('subscription_already_active_play'.tr);
           // Do NOT restore here to avoid transferring entitlements between app accounts
           return;
         }
@@ -731,7 +725,7 @@ class PremiumController extends GetxController {
 
   Future<void> restorePurchases() async {
     try {
-      NotificationService.showSuccess('restore_in_progress'.tr);
+      NotificationService.showInfo('restore_in_progress'.tr);
       final restored = await RevenueCatService().restorePurchases();
       if (restored) {
         // sync Firestore subscription state after successful restore
@@ -814,9 +808,7 @@ class PremiumController extends GetxController {
         isPromoValid = true;
         discountRate = result.discountRate;
         promoError = null;
-        NotificationService.showSuccess(
-          'promo_code_linked_success'.tr,
-        );
+        NotificationService.showSuccess('promo_code_linked_success'.tr);
       } else {
         isPromoValid = false;
         discountRate = 0.0;
@@ -836,7 +828,9 @@ class PremiumController extends GetxController {
   /// Promo codes grant bonus subscription days, not a price discount.
   String? getBonusDaysText() {
     if (!promoEligible) return null;
-    final package = offerings?.current?.availablePackages.elementAtOrNull(selected);
+    final package = offerings?.current?.availablePackages.elementAtOrNull(
+      selected,
+    );
     if (package == null) return null;
     final isYearly = package.packageType == PackageType.annual;
     return isYearly ? 'bonus_1_month'.tr : 'bonus_3_days'.tr;

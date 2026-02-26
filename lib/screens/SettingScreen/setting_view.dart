@@ -28,7 +28,9 @@ import '../../ThemeService/theme_controller.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:macroaize/shared/services/widget_promotion_service.dart';
+import 'package:macroaize/shared/services/wellness_sync_service.dart';
 import 'package:macroaize/widgets/widget_preview_cards.dart';
+import 'package:lottie/lottie.dart';
 
 // settings menu config
 class SettingConfig {
@@ -133,6 +135,10 @@ class SettingView extends GetView<SettingController> {
             _buildInfluencerSection(context),
 
             _buildProfileSection(context),
+
+            const SizedBox(height: 24),
+
+            _buildWellnessSection(context),
 
             const SizedBox(height: 24),
 
@@ -634,6 +640,193 @@ class SettingView extends GetView<SettingController> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildWellnessSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, 'Wellness', Icons.favorite_outline),
+        const SizedBox(height: 12),
+        ModernFadeSlideTransition(
+          beginOffset: const Offset(0, 0.25),
+          child: ModernCard(
+            child: Builder(
+              builder: (_) {
+                final service = controller.wellnessOrNull;
+                if (service == null) {
+                  return _buildSettingRow(
+                    context,
+                    'Wellness',
+                    'Unavailable',
+                    Icons.health_and_safety_outlined,
+                    AppColor.neutralGrey600,
+                  );
+                }
+
+                return Obx(() {
+                  final isConnected = service.isConnected.value;
+                  final isBusy = service.isBusy.value;
+                  final isAvailable = service.isAvailable.value;
+
+                  String subtitle;
+                  if (!isAvailable) {
+                    subtitle = service.statusMessage.value;
+                  } else if (isConnected) {
+                    subtitle = 'Syncing workouts and steps';
+                  } else {
+                    subtitle = 'Connect for better accuracy when app is closed';
+                  }
+
+                  return _buildSettingRow(
+                    context,
+                    service.providerDisplayName,
+                    subtitle,
+                    Icons.health_and_safety_outlined,
+                    isConnected ? AppColor.success : AppColor.primaryOrange,
+                    onTap:
+                        isBusy
+                            ? null
+                            : () => _showWellnessConnectSheet(context, service),
+                    trailing:
+                        isBusy
+                            ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : null,
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showWellnessConnectSheet(
+    BuildContext context,
+    WellnessSyncService service,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return FractionallySizedBox(
+          heightFactor: 0.92,
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.theme.scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColor.neutralGrey400,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildWellnessIllustration(context),
+                  const SizedBox(height: 28),
+                  Text(
+                    'Sync with ${service.providerDisplayName}',
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Connect ${service.providerDisplayName} to automatically sync workouts and steps. This is optional, but improves accuracy when the app is closed.',
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      color: AppColor.neutralGrey600,
+                      height: 1.4,
+                    ),
+                  ),
+                  const Spacer(),
+                  Obx(() {
+                    final isConnected = service.isConnected.value;
+                    final isBusy = service.isBusy.value;
+                    if (!isConnected) {
+                      return ModernButton(
+                        text: 'Continue',
+                        onPressed: () async {
+                          await controller.connectWellness();
+                          if (service.isConnected.value &&
+                              sheetContext.mounted) {
+                            Navigator.of(sheetContext).pop();
+                          }
+                        },
+                        loading: isBusy,
+                        width: double.infinity,
+                        height: 54,
+                        style: ModernButtonStyle.primary,
+                      );
+                    }
+
+                    return Column(
+                      children: [
+                        TextButton(
+                          onPressed:
+                              isBusy
+                                  ? null
+                                  : () async {
+                                    await controller.disconnectWellness();
+                                    if (sheetContext.mounted) {
+                                      Navigator.of(sheetContext).pop();
+                                    }
+                                  },
+                          child: Text(
+                            'Disconnect',
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: AppColor.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildWellnessIllustration(BuildContext context) {
+    return Container(
+      height: 280,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColor.neutralGrey100.withValues(alpha: 0.25),
+            AppColor.neutralGrey100.withValues(alpha: 0.08),
+          ],
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      child: Lottie.asset('assets/lottie/health.json', fit: BoxFit.contain),
     );
   }
 
@@ -1789,7 +1982,9 @@ class SettingView extends GetView<SettingController> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColor.primaryOrange.withValues(alpha: 0.1),
+                            color: AppColor.primaryOrange.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -1820,7 +2015,9 @@ class SettingView extends GetView<SettingController> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Divider(
                         height: 1,
-                        color: context.theme.dividerColor.withValues(alpha: 0.1),
+                        color: context.theme.dividerColor.withValues(
+                          alpha: 0.1,
+                        ),
                       ),
                     ),
                     // Reference ID Row (Secondary Info)
@@ -1829,7 +2026,9 @@ class SettingView extends GetView<SettingController> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColor.primaryOrange.withValues(alpha: 0.1),
+                            color: AppColor.primaryOrange.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(

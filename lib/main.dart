@@ -18,6 +18,7 @@ import 'shared/services/local_notification_service.dart';
 import 'shared/services/notification_preferences_service.dart';
 import 'shared/services/promo_code_service.dart';
 import 'shared/services/step_tracking_service.dart';
+import 'shared/services/wellness_sync_service.dart';
 import 'ThemeService/app_theme.dart';
 import 'ThemeService/theme_controller.dart';
 import 'constant/database_helper.dart';
@@ -225,6 +226,19 @@ Future<void> main() async {
     }
   } catch (e) {
     if (kDebugMode) print('StepTrackingService init failed: $e');
+  }
+
+  // Initialize wellness sync service (Apple Health / Health Connect)
+  try {
+    if (!Get.isRegistered<WellnessSyncService>()) {
+      await Get.putAsync<WellnessSyncService>(
+        () => WellnessSyncService().init(),
+        permanent: true,
+      );
+      if (kDebugMode) print('WellnessSyncService initialized');
+    }
+  } catch (e) {
+    if (kDebugMode) print('WellnessSyncService init failed: $e');
   }
 
   if (!kIsWeb) {

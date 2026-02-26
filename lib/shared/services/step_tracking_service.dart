@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
 import 'package:macroaize/SharePrefHelper/share_pref.dart';
+import 'package:macroaize/shared/services/wellness_sync_service.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -23,6 +24,9 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
   int _resetOffsetSteps = 0;
 
   bool _started = false;
+  DateTime? _lastWellnessReconcileAt;
+
+  static const Duration _wellnessReconcileInterval = Duration(minutes: 2);
 
   static const double _caloriesPerKgPerKm = 0.9;
 
@@ -30,6 +34,7 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     await _loadPersistedStateForDate(_activeDate);
     await _ensureTracking();
+    await _reconcileFromWellness(force: true);
     return this;
   }
 
@@ -50,6 +55,7 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
   Future<void> _onResumeSync() async {
     await _rolloverIfNeeded();
     await _ensureTracking();
+    await _reconcileFromWellness(force: true);
   }
 
   Future<void> _ensureTracking() async {
@@ -115,6 +121,8 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
       dailySteps.value = computedSteps;
       stepCaloriesBurned.value = computedCalories;
       await _persistActiveDateState();
+
+      unawaited(_reconcileFromWellness());
     }
   }
 
@@ -134,6 +142,7 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
     stepCaloriesBurned.value = 0;
 
     await _loadPersistedStateForDate(_activeDate);
+    await _reconcileFromWellness(force: true);
   }
 
   Future<void> _loadPersistedStateForDate(DateTime date) async {
@@ -163,16 +172,94 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
     await SharedPref.saveInt(_offsetKey(_activeDate), _resetOffsetSteps);
   }
 
+  Future<void> _persistDateTotals(
+    DateTime date, {
+    required int steps,
+    required int calories,
+  }) async {
+    await SharedPref.saveInt(_stepsKey(date), steps);
+    await SharedPref.saveInt(_stepCaloriesKey(date), calories);
+  }
+
+  Future<void> _reconcileFromWellness({bool force = false}) async {
+    if (!Get.isRegistered<WellnessSyncService>()) return;
+
+    final now = DateTime.now();
+    if (!force && _lastWellnessReconcileAt != null) {
+      final elapsed = now.difference(_lastWellnessReconcileAt!);
+      if (elapsed < _wellnessReconcileInterval) {
+        return;
+      }
+    }
+
+    final wellness = Get.find<WellnessSyncService>();
+    if (!wellness.isConnected.value) return;
+
+    final syncedSteps = await wellness.getTotalStepsForDate(_activeDate);
+    _lastWellnessReconcileAt = DateTime.now();
+    if (syncedSteps == null || syncedSteps < 0) return;
+
+    final syncedCalories = _estimateStepCalories(syncedSteps);
+    final changed =
+        syncedSteps != dailySteps.value ||
+        syncedCalories != stepCaloriesBurned.value;
+
+    if (!changed && !force) return;
+
+    dailySteps.value = syncedSteps;
+    stepCaloriesBurned.value = syncedCalories;
+
+    if (_latestRawSteps > 0 && _isSameDate(_activeDate, DateTime.now())) {
+      final adjustedRaw = _latestRawSteps + _resetOffsetSteps;
+      _baselineRawSteps = math.max(0, adjustedRaw - syncedSteps);
+    }
+
+    await _persistActiveDateState();
+  }
+
   Future<int> getDailyStepsForDate(DateTime date) async {
     if (_isSameDate(date, _activeDate)) {
       return dailySteps.value;
     }
+
+    if (Get.isRegistered<WellnessSyncService>()) {
+      final wellness = Get.find<WellnessSyncService>();
+      if (wellness.isConnected.value) {
+        final syncedSteps = await wellness.getTotalStepsForDate(date);
+        if (syncedSteps != null && syncedSteps >= 0) {
+          final calories = _estimateStepCalories(syncedSteps);
+          await _persistDateTotals(
+            date,
+            steps: syncedSteps,
+            calories: calories,
+          );
+          return syncedSteps;
+        }
+      }
+    }
+
     return await SharedPref.readInt(_stepsKey(date)) ?? 0;
   }
 
   Future<int> getStepCaloriesForDate(DateTime date) async {
     if (_isSameDate(date, _activeDate)) {
       return stepCaloriesBurned.value;
+    }
+
+    if (Get.isRegistered<WellnessSyncService>()) {
+      final wellness = Get.find<WellnessSyncService>();
+      if (wellness.isConnected.value) {
+        final syncedSteps = await wellness.getTotalStepsForDate(date);
+        if (syncedSteps != null && syncedSteps >= 0) {
+          final calories = _estimateStepCalories(syncedSteps);
+          await _persistDateTotals(
+            date,
+            steps: syncedSteps,
+            calories: calories,
+          );
+          return calories;
+        }
+      }
     }
 
     final storedCalories = await SharedPref.readInt(_stepCaloriesKey(date));

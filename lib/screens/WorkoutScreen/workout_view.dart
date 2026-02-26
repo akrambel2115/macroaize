@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:macroaize/Model/parsed_workout.dart';
@@ -13,122 +14,130 @@ class WorkoutView extends GetView<WorkoutController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios_rounded,
+    final isDark = context.theme.brightness == Brightness.dark;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: Padding(
+            padding: const EdgeInsets.all(8),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_rounded,
+                color:
+                    context.theme.brightness == Brightness.dark
+                        ? Colors.white
+                        : AppColor.neutralGrey700,
+              ),
+              onPressed: () async {
+                final popped = await Navigator.of(context).maybePop();
+                if (!popped && context.mounted) {
+                  Get.offAllNamed(Routes.leadingView);
+                }
+              },
+            ),
+          ),
+          title: Text(
+            'log_workout'.tr,
+            style: context.textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.bold,
               color:
                   context.theme.brightness == Brightness.dark
-                      ? Colors.white
-                      : AppColor.neutralGrey700,
+                      ? AppColor.darkText
+                      : AppColor.neutralGrey900,
             ),
-            onPressed: () async {
-              final popped = await Navigator.of(context).maybePop();
-              if (!popped && context.mounted) {
-                Get.offAllNamed(Routes.leadingView);
-              }
-            },
           ),
+          actions: [],
         ),
-        title: Text(
-          'log_workout'.tr,
-          style: context.textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color:
-                context.theme.brightness == Brightness.dark
-                    ? AppColor.darkText
-                    : AppColor.neutralGrey900,
-          ),
-        ),
-        actions: [],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionTitle(context, 'describe_workout_ai'.tr),
-            const SizedBox(height: 10),
-            ModernFadeSlideTransition(child: _buildAICard(context)),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: Obx(
-                () => ElevatedButton(
-                  onPressed:
-                      controller.isSaving.value ||
-                              controller.parsedWorkout.value == null
-                          ? null
-                          : () => controller.saveWorkout(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColor.primaryOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child:
-                      controller.isSaving.value
-                          ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                          : Text(
-                            'save_workout'.tr,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                ),
-              ),
-            ),
-            Obx(() {
-              final msg = controller.saveError.value;
-              if (msg.isEmpty) return const SizedBox.shrink();
-              return Container(
-                margin: const EdgeInsets.only(top: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  border: Border.all(color: Colors.red.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Colors.red.shade600,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        msg,
-                        style: TextStyle(
-                          color: Colors.red.shade700,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle(context, 'describe_workout_ai'.tr),
+              const SizedBox(height: 10),
+              ModernFadeSlideTransition(child: _buildAICard(context)),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: Obx(
+                  () => ElevatedButton(
+                    onPressed:
+                        controller.isSaving.value ||
+                                controller.parsedWorkout.value == null
+                            ? null
+                            : () => controller.saveWorkout(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.primaryOrange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                  ],
+                    child:
+                        controller.isSaving.value
+                            ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : Text(
+                              'save_workout'.tr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                  ),
                 ),
-              );
-            }),
-            const SizedBox(height: 32),
-          ],
+              ),
+              Obx(() {
+                final msg = controller.saveError.value;
+                if (msg.isEmpty) return const SizedBox.shrink();
+                return Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    border: Border.all(color: Colors.red.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red.shade600,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          msg,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );

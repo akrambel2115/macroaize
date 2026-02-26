@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -51,7 +50,7 @@ class ScanCalorieController extends GetxController {
   String mealNameEnglish = "";
   bool isLoading = true;
   double scanProgress = 0.0;
-  Timer? _progressTimer;
+  String scanPhaseLabel = 'Preparing...';
   int calorie = 0;
   int calorieQuantity = 0;
   double protein = 0.0;
@@ -273,24 +272,28 @@ class ScanCalorieController extends GetxController {
       customAmount = 1.0;
 
       _recalculateTotals();
-      isLoading = false;
-      update();
+      await _finishLoadingWithProgress();
       return;
     }
 
     if (image != null) {
-      _startProgressTimer();
+      _setScanProgress(0.05, phase: 'Preparing scan...');
+      _setScanProgress(0.12, phase: 'Analyzing image...');
       final itemsJsonStr = await OpenAiCalling.analyzeMealItems(image!);
+      _setScanProgress(0.22, phase: 'AI response received...');
+      _setScanProgress(0.30, phase: 'Parsing meal items...');
 
       if (_isNotFoodResponse(itemsJsonStr)) {
-        isLoading = false;
+        _setScanProgress(1.0, phase: 'Done');
         calorie = 0;
-        update();
+        await _finishLoadingWithProgress();
         return;
       }
 
       final parsedItems = _parseMealItems(itemsJsonStr);
       if (parsedItems.isNotEmpty) {
+        _setScanProgress(0.38, phase: 'Meal items parsed...');
+        _setScanProgress(0.45, phase: 'Matching food database...');
         await _enrichItemsWithUsda(parsedItems);
         items
           ..clear()
@@ -304,7 +307,10 @@ class ScanCalorieController extends GetxController {
         mealName = _buildCompositeName(parsedItems);
         mealNameEnglish = mealName;
         usdaVerified = items.every((it) => it.usdaVerified);
+        _setScanProgress(0.9, phase: 'Finalizing nutrition...');
       } else {
+        _setScanProgress(0.40, phase: 'Estimating nutrition...');
+        _setScanProgress(0.52, phase: 'Running AI nutrition model...');
         await OpenAiCalling.sentImageApi(image!).then((value) async {
           response = value;
           log('RAW_AI_RESPONSE => $response');
@@ -313,6 +319,8 @@ class ScanCalorieController extends GetxController {
             calorie = 0;
             return;
           }
+
+          _setScanProgress(0.64, phase: 'Parsing nutrition response...');
 
           Map<String, dynamic> parsed = parseNutritionWithName(response);
           Map<String, int> nutrition = {
@@ -337,6 +345,7 @@ class ScanCalorieController extends GetxController {
         });
 
         try {
+          _setScanProgress(0.72, phase: 'Cross-checking food database...');
           String searchName =
               mealNameEnglish.trim().isNotEmpty
                   ? mealNameEnglish.trim()
@@ -381,11 +390,20 @@ class ScanCalorieController extends GetxController {
             );
           } catch (_) {}
         }
+
+        _setScanProgress(0.88, phase: 'Finalizing nutrition...');
       }
 
+      _setScanProgress(0.95, phase: 'Checking consistency...');
       await _applyLastLoggedIfSameMeal();
     }
-    _stopProgressTimer();
+    await _finishLoadingWithProgress();
+  }
+
+  Future<void> _finishLoadingWithProgress() async {
+    _setScanProgress(1.0, phase: 'Done');
+    // Keep this tiny so UX sees completion without slowing scan results.
+    await Future.delayed(const Duration(milliseconds: 120));
     isLoading = false;
     update();
   }
@@ -432,28 +450,19 @@ class ScanCalorieController extends GetxController {
         .replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  void _startProgressTimer() {
-    scanProgress = 0.0;
-    const tick = Duration(milliseconds: 100);
-    _progressTimer = Timer.periodic(tick, (timer) {
-      if (scanProgress < 0.95) {
-        // Slow down as it gets closer to 95%
-        final increment = (0.95 - scanProgress) * 0.05;
-        scanProgress += increment;
-        update();
-      }
-    });
-  }
+  void _setScanProgress(double value, {String? phase}) {
+    final clamped = value.clamp(0.0, 1.0);
+    if (clamped > scanProgress) {
+      scanProgress = clamped;
+    } else if (clamped == 0.0) {
+      scanProgress = 0.0;
+    }
 
-  void _stopProgressTimer() {
-    _progressTimer?.cancel();
-    scanProgress = 1.0;
-  }
+    if (phase != null && phase.isNotEmpty) {
+      scanPhaseLabel = phase;
+    }
 
-  @override
-  void onClose() {
-    _progressTimer?.cancel();
-    super.onClose();
+    update();
   }
 
   bool _isNotFoodResponse(String text) {
@@ -562,6 +571,12 @@ class ScanCalorieController extends GetxController {
   }
 
   Future<void> _enrichItemsWithUsda(List<MealBreakdownItem> list) async {
+    if (list.isEmpty) return;
+
+    const double start = 0.45;
+    const double end = 0.85;
+    final total = list.length;
+
     for (var i = 0; i < list.length; i++) {
       var it = list[i];
       // Ensure grams > 0 before any nutrition calc
@@ -594,6 +609,9 @@ class ScanCalorieController extends GetxController {
         // USDA call failed — try AI estimation fallback
         list[i] = await _applyAiFallback(it);
       }
+
+      final progress = start + (((i + 1) / total) * (end - start));
+      _setScanProgress(progress, phase: 'Enriching item ${i + 1}/$total...');
     }
   }
 

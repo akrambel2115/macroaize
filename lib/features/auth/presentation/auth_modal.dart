@@ -11,6 +11,7 @@ import '../data/auth_service.dart';
 import 'auth_controller.dart';
 import 'auth_theme.dart';
 import '../../../shared/services/notification_service.dart';
+import '../../../widgets/app_widgets.dart';
 import 'package:macroaize/shared/services/app_config_service.dart';
 
 class AuthModal extends StatelessWidget {
@@ -110,7 +111,8 @@ class AuthModal extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           title: Text('auth_modal_title'.tr),
-          automaticallyImplyLeading: true,
+          leading: AppWidgets.backButton(context, () => Get.back()),
+          automaticallyImplyLeading: false,
         ),
         body: SafeArea(
           child: LayoutBuilder(

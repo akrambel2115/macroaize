@@ -48,4 +48,8 @@ class SharePrefKey {
       'promoCodeActivated'; // Whether promo was validated
   static String activatedPromoCode =
       'activatedPromoCode'; // The actual activated code
+
+  // Theme onboarding
+  static String hasSeenThemeChoice =
+      'hasSeenThemeChoice'; // User has picked theme during onboarding
 }

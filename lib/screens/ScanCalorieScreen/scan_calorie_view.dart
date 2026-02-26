@@ -233,49 +233,23 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                 SizedBox(
                   width: 120,
                   height: 120,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(
-                            begin: 0.0,
-                            end: controller.scanProgress,
-                          ),
-                          duration: const Duration(milliseconds: 200),
-                          builder: (context, value, _) {
-                            return CircularProgressIndicator(
-                              value: value,
-                              strokeWidth: 8,
-                              backgroundColor: AppColor.neutralGrey200,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                AppColor.primaryOrange,
-                              ),
-                              strokeCap: StrokeCap.round,
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColor.primaryOrange.withValues(alpha: 0.15),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "${(controller.scanProgress * 100).toInt()}%",
-                            style: context.textTheme.headlineLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: context.theme.textTheme.bodyLarge?.color,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: _SmoothCircularScanProgress(
+                    progress: controller.scanProgress,
+                    textStyle: context.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: context.theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  controller.scanPhaseLabel,
+                  textAlign: TextAlign.center,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.theme.textTheme.bodyLarge?.color?.withValues(
+                      alpha: 0.8,
+                    ),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -1505,5 +1479,100 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
   double itemsHeight(int count) {
     final per = 100.0;
     return count * per + 20.0;
+  }
+}
+
+class _SmoothCircularScanProgress extends StatefulWidget {
+  final double progress;
+  final TextStyle? textStyle;
+
+  const _SmoothCircularScanProgress({
+    required this.progress,
+    required this.textStyle,
+  });
+
+  @override
+  State<_SmoothCircularScanProgress> createState() =>
+      _SmoothCircularScanProgressState();
+}
+
+class _SmoothCircularScanProgressState
+    extends State<_SmoothCircularScanProgress>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late Animation<double> _animation;
+  double _currentProgress = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _currentProgress = widget.progress.clamp(0.0, 1.0);
+    _animation = AlwaysStoppedAnimation<double>(_currentProgress);
+  }
+
+  @override
+  void didUpdateWidget(covariant _SmoothCircularScanProgress oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = widget.progress.clamp(0.0, 1.0);
+    if ((next - _currentProgress).abs() < 0.0001) return;
+
+    _animation = Tween<double>(
+      begin: _currentProgress,
+      end: next,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _currentProgress = next;
+    _controller.forward(from: 0.0);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, _) {
+        final value = _animation.value.clamp(0.0, 1.0);
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: CircularProgressIndicator(
+                value: value,
+                strokeWidth: 8,
+                backgroundColor: AppColor.neutralGrey200,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColor.primaryOrange,
+                ),
+                strokeCap: StrokeCap.round,
+              ),
+            ),
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColor.primaryOrange.withValues(alpha: 0.15),
+              ),
+              child: Center(
+                child: Text(
+                  "${(value * 100).toInt()}%",
+                  style: widget.textStyle,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
