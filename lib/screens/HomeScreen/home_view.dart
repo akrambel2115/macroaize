@@ -678,6 +678,7 @@ class HomeView extends GetView<HomeController> {
                     ],
                   ),
                 ),
+                ),
 
                 const SizedBox(height: 16),
 
@@ -1018,6 +1019,7 @@ class HomeView extends GetView<HomeController> {
                         ),
                       ),
                     ],
+                  ),
                   ),
                   const SizedBox(height: 16),
                   // glass grid – dynamic based on water goal
