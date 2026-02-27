@@ -60,3 +60,6 @@ key.properties
 emulator-data/
 
 coverage
+
+
+*.csv
