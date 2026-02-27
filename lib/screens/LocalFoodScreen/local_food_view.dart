@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/LocalFoodScreen/local_food_controller.dart';
 import 'package:macroaize/widgets/modern_animations.dart';
@@ -167,15 +168,22 @@ class LocalFoodView extends GetView<LocalFoodController> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final isDark = context.theme.brightness == Brightness.dark;
+    final systemOverlayStyle =
+        isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
+
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      systemOverlayStyle: systemOverlayStyle.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
       leading: Padding(
         padding: const EdgeInsets.all(8),
         child: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_rounded,
-            color: AppColor.neutralGrey700,
+            color: isDark ? AppColor.darkText : AppColor.neutralGrey700,
           ),
           onPressed: () => Get.back(),
         ),
@@ -334,7 +342,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              "${controller.filteredItems.length}${"food items found".tr}",
+              "${controller.filteredItems.length} ${"popular food items".tr}",
               style: context.textTheme.bodyMedium?.copyWith(
                 color: AppColor.neutralGrey600,
                 fontWeight: FontWeight.w500,
@@ -404,7 +412,13 @@ class LocalFoodView extends GetView<LocalFoodController> {
   ) {
     final food = controller.filteredItems[index];
     return GestureDetector(
-      onTap: () => _showNutritionDetails(context, controller, food),
+      onTap: () {
+        if (controller.isEditing) {
+          if (food.isCustom) controller.toggleSelect(index);
+        } else {
+          _showNutritionDetails(context, controller, food);
+        }
+      },
       onLongPress: () => controller.selectAndEnterEdit(index),
       child: ModernCard(
         margin: const EdgeInsets.only(bottom: 12),
@@ -474,25 +488,32 @@ class LocalFoodView extends GetView<LocalFoodController> {
               builder: (controller) {
                 if (!controller.isEditing) return SizedBox.shrink();
                 final idx = index;
+                final canEdit = food.isCustom;
                 final selected = controller.selectedIndices.contains(idx);
                 return Row(
                   children: [
                     Checkbox(
-                      value: selected,
-                      onChanged: (_) => controller.toggleSelect(idx),
+                      value: canEdit ? selected : false,
+                      onChanged:
+                          canEdit ? (_) => controller.toggleSelect(idx) : null,
                     ),
                     IconButton(
                       icon: Icon(
                         Icons.edit_rounded,
                         size: 18,
-                        color: AppColor.neutralGrey700,
+                        color:
+                            canEdit
+                                ? AppColor.neutralGrey700
+                                : AppColor.neutralGrey500,
                       ),
                       onPressed:
-                          () => _showAddEditDialog(
-                            context,
-                            controller,
-                            editIndex: idx,
-                          ),
+                          canEdit
+                              ? () => _showAddEditDialog(
+                                context,
+                                controller,
+                                editIndex: idx,
+                              )
+                              : null,
                     ),
                   ],
                 );
