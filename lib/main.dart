@@ -365,7 +365,9 @@ class _MyAppState extends State<MyApp> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    Get.put(PremiumController());
+    if (!Get.isRegistered<PremiumController>()) {
+      Get.put(PremiumController(), permanent: true);
+    }
 
     return GetBuilder<MainController>(
       builder: (mc) {

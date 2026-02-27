@@ -156,9 +156,13 @@ class FirebaseAuthRepository implements AuthRepository {
       }
 
       // create OAuth credential for Firebase including the raw nonce
-      final oauth = OAuthProvider(
-        'apple.com',
-      ).credential(idToken: idToken, rawNonce: rawNonce);
+      // The authorizationCode must be passed as accessToken for Firebase
+      // to validate the Apple credential correctly on iOS.
+      final oauth = OAuthProvider('apple.com').credential(
+        idToken: idToken,
+        rawNonce: rawNonce,
+        accessToken: credential.authorizationCode,
+      );
 
   // sign-in with Firebase
       final res = await _auth.signInWithCredential(oauth);
@@ -198,9 +202,10 @@ class FirebaseAuthRepository implements AuthRepository {
             'message: ${e.message}');
       }
       return (null, CredentialFailure(e.code, e.message ?? ''));
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        print('[AppleSignIn] Unknown error: $e');
+        print('[AppleSignIn] Unknown error (${e.runtimeType}): $e');
+        print('[AppleSignIn] Stack trace: $st');
       }
       return (null, UnknownFailure(e.toString()));
     }
@@ -291,7 +296,11 @@ class FirebaseAuthRepository implements AuthRepository {
       }
       final oauth = OAuthProvider(
         'apple.com',
-      ).credential(idToken: linkIdToken, rawNonce: rawNonce);
+      ).credential(
+        idToken: linkIdToken,
+        rawNonce: rawNonce,
+        accessToken: credential.authorizationCode,
+      );
       await user.linkWithCredential(oauth);
       return null;
     } on FirebaseAuthException catch (e) {
@@ -314,9 +323,10 @@ class FirebaseAuthRepository implements AuthRepository {
             'message: ${e.message}');
       }
       return CredentialFailure(code, e.message);
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        print('[AppleLink] Unknown error: $e');
+        print('[AppleLink] Unknown error (${e.runtimeType}): $e');
+        print('[AppleLink] Stack trace: $st');
       }
       return UnknownFailure(e.toString());
     }

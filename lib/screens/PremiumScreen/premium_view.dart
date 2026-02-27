@@ -13,6 +13,7 @@ import 'package:macroaize/shared/services/subscription_service.dart';
 import 'package:macroaize/shared/models/subscription.dart' as sub_model;
 import 'package:macroaize/shared/services/revenuecat_service.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PremiumView extends StatefulWidget {
   const PremiumView({super.key});
@@ -527,6 +528,8 @@ class _PremiumViewState extends State<PremiumView> {
                                       icon: null,
                                     ),
                                     if (rcEnabled &&
+                                        FirebaseAuth.instance.currentUser !=
+                                            null &&
                                         (Platform.isAndroid ||
                                             Platform.isIOS)) ...[
                                       const SizedBox(height: 8),
@@ -729,15 +732,18 @@ class _PremiumHeader extends StatelessWidget {
             child: Semantics(
               label: 'cook icon',
               image: true,
-              child: SizedBox(
-                width: 96,
-                height: 96,
-                child: Opacity(
-                  opacity: 0.55,
-                  child: Lottie.asset(
-                    'assets/lottie/recipes.json',
-                    fit: BoxFit.contain,
-                    repeat: true,
+              child: RepaintBoundary(
+                child: SizedBox(
+                  width: 96,
+                  height: 96,
+                  child: Opacity(
+                    opacity: 0.55,
+                    child: Lottie.asset(
+                      'assets/lottie/recipes.json',
+                      fit: BoxFit.contain,
+                      repeat: true,
+                      frameRate: FrameRate(30),
+                    ),
                   ),
                 ),
               ),
@@ -749,15 +755,18 @@ class _PremiumHeader extends StatelessWidget {
             child: Semantics(
               label: 'scan icon',
               image: true,
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: Opacity(
-                  opacity: 0.55,
-                  child: Lottie.asset(
-                    'assets/lottie/scan.json',
-                    fit: BoxFit.contain,
-                    repeat: true,
+              child: RepaintBoundary(
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Opacity(
+                    opacity: 0.55,
+                    child: Lottie.asset(
+                      'assets/lottie/scan.json',
+                      fit: BoxFit.contain,
+                      repeat: true,
+                      frameRate: FrameRate(30),
+                    ),
                   ),
                 ),
               ),
@@ -769,15 +778,18 @@ class _PremiumHeader extends StatelessWidget {
             child: Semantics(
               label: 'chatbot icon',
               image: true,
-              child: SizedBox(
-                width: 140,
-                height: 140,
-                child: Opacity(
-                  opacity: 0.55,
-                  child: Lottie.asset(
-                    'assets/lottie/chatbot.json',
-                    fit: BoxFit.contain,
-                    repeat: true,
+              child: RepaintBoundary(
+                child: SizedBox(
+                  width: 140,
+                  height: 140,
+                  child: Opacity(
+                    opacity: 0.55,
+                    child: Lottie.asset(
+                      'assets/lottie/chatbot.json',
+                      fit: BoxFit.contain,
+                      repeat: true,
+                      frameRate: FrameRate(30),
+                    ),
                   ),
                 ),
               ),

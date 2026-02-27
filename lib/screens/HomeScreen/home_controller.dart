@@ -43,8 +43,9 @@ class HomeController extends GetxController {
   /// Directly exposes the service's reactive step counter for zero-latency UI binding.
   RxInt get liveSteps => _stepTrackingService.dailySteps;
 
-  // carousel page state
-  final PageController trackingPageController = PageController();
+  // carousel page state – the PageController is now owned by _HomeViewState
+  // and injected here so it survives controller re-creation.
+  PageController trackingPageController = PageController();
   int trackingPageIndex = 0;
 
   void onTrackingPageChanged(int index) {
@@ -95,18 +96,10 @@ class HomeController extends GetxController {
       // Check if tutorial is needed
       TutorialCoachService().hasCompletedTutorial().then((hasCompleted) {
         if (!hasCompleted) {
-          Get.dialog(
-            const PopScope(
-              canPop: false,
-              child: Center(child: SizedBox()), // Transparent blocking overlay
-            ),
-            barrierDismissible: false,
-            barrierColor: Colors.transparent,
-          );
-
-          if (Get.isDialogOpen == true) {
-            Get.back();
-          }
+          // Previously this opened a transparent blocking dialog and
+          // immediately tried to close it, but the timing was unreliable
+          // on iOS – the dialog could stay open and block all interaction.
+          // Now we just show the tutorial directly.
           _showAppTipsIfNeeded();
         } else {
           StreakService().checkAndShowNotification();
@@ -123,10 +116,10 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     _stepMetricsWorker?.dispose();
-    trackingPageController.dispose();
-    if (Get.isDialogOpen == true) {
-      Get.back();
-    }
+    // NOTE: trackingPageController is NOT disposed here – it is owned by
+    // _HomeViewState and disposed there.  Disposing it here caused the
+    // gray-box bug because the widget tree still referenced the old
+    // disposed controller after Get.delete<HomeController>().
     super.onClose();
   }
 

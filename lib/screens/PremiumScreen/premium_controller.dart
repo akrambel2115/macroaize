@@ -724,8 +724,19 @@ class PremiumController extends GetxController {
   }
 
   Future<void> restorePurchases() async {
+    // Guard: user must be logged in to restore purchases
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      NotificationService.showError('login_to_continue'.tr);
+      return;
+    }
+
     try {
       NotificationService.showInfo('restore_in_progress'.tr);
+
+      // Identify RevenueCat with the Firebase user first
+      await RevenueCatService().identifyWithFirebaseUser();
+
       final restored = await RevenueCatService().restorePurchases();
       if (restored) {
         // sync Firestore subscription state after successful restore

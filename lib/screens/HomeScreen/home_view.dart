@@ -23,14 +23,51 @@ import '../../widgets/verify_email_button.dart';
 import 'package:lottie/lottie.dart';
 import 'package:macroaize/screens/ScanFoodView/scan_food_controller.dart';
 
-class HomeView extends GetView<HomeController> {
-  static const double _kMealCardSpacing = 8.0;
+const double _kMealCardSpacing = 8.0;
 
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  /// Owned by the State so it survives HomeController being deleted/re-created
+  /// (e.g. when LeadingController re-initialises tabs).  Without this the
+  /// PageView keeps a reference to a disposed PageController ➜ gray box.
+  late final PageController _trackingPageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _trackingPageController = PageController();
+    // Ensure the controller exists before using it.
+    _ensureHomeController();
+  }
+
+  void _ensureHomeController() {
+    if (!Get.isRegistered<HomeController>()) {
+      Get.lazyPut(() => HomeController());
+    }
+    // Inject the State-owned PageController into the GetX controller so
+    // existing references (onTrackingPageChanged etc.) keep working.
+    Get.find<HomeController>().trackingPageController = _trackingPageController;
+  }
+
+  @override
+  void dispose() {
+    _trackingPageController.dispose();
+    super.dispose();
+  }
+
+  HomeController get controller {
+    _ensureHomeController();
+    return Get.find<HomeController>();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Get.lazyPut(() => HomeController());
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: _buildModernAppBar(context),

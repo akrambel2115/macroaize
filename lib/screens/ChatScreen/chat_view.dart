@@ -26,6 +26,18 @@ class _ChatViewState extends State<ChatView> {
   static const double _kActionGap = 6.0;
   static const double _kActionButtonSize = 44.0;
   static const double _kGallerySize = _kActionButtonSize + (_kActionGap * 2);
+  bool _chatNoticeFired = false;
+
+  @override
+  void dispose() {
+    // Remove any lingering overlay entry to prevent it from blocking
+    // touches on other pages after navigation.
+    if (_chatNoticeEntry != null) {
+      AppWidgets.hideTopNotification(_chatNoticeEntry);
+      _chatNoticeEntry = null;
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,31 +94,37 @@ class _ChatViewState extends State<ChatView> {
       ),
       body: GetBuilder<ChatController>(
         builder: (_) {
-          Future.microtask(() async {
-            final seen =
-                await SharedPref.readBool(
-                  SharePrefKey.hasSeenChatHistoryNotice,
-                ) ??
-                false;
-            if (!seen) {
-              SharedPref.saveBool(SharePrefKey.hasSeenChatHistoryNotice, true);
-              if (!mounted) return;
-              // show and keep a reference so the lamp can toggle it
-              _chatNoticeEntry = AppWidgets.showTopNotification(
-                this.context,
-                'The coach does not memorize chat history. Each interaction is independent.'
-                    .tr,
-                duration: const Duration(seconds: 3),
-                autoDismissAfter: const Duration(seconds: 3),
-                persistent: true,
-                onDismissed: () {
-                  _chatNoticeEntry = null;
-                  if (mounted) setState(() {});
-                },
-              );
-              setState(() {});
-            }
-          });
+          // Show the chat-history notice only once per page lifecycle.
+          // Previously this used Future.microtask inside the builder, which
+          // re-fired on every rebuild and could stack up overlay entries
+          // that block touch input – especially visible on iOS.
+          if (!_chatNoticeFired) {
+            _chatNoticeFired = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              final seen =
+                  await SharedPref.readBool(
+                    SharePrefKey.hasSeenChatHistoryNotice,
+                  ) ??
+                  false;
+              if (!seen) {
+                SharedPref.saveBool(SharePrefKey.hasSeenChatHistoryNotice, true);
+                if (!mounted) return;
+                _chatNoticeEntry = AppWidgets.showTopNotification(
+                  this.context,
+                  'The coach does not memorize chat history. Each interaction is independent.'
+                      .tr,
+                  duration: const Duration(seconds: 3),
+                  autoDismissAfter: const Duration(seconds: 3),
+                  persistent: true,
+                  onDismissed: () {
+                    _chatNoticeEntry = null;
+                    if (mounted) setState(() {});
+                  },
+                );
+                if (mounted) setState(() {});
+              }
+            });
+          }
           return Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).padding.bottom,

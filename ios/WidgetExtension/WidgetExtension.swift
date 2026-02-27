@@ -44,11 +44,66 @@ struct SmallWidgetView: View {
     var entry: Provider.Entry
     
     var body: some View {
-        ZStack {
-            Color(red: 33/255, green: 38/255, blue: 45/255) // AppColor.darkCard
+        VStack {
+            Text("Daily Progress")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.white)
             
+            Spacer()
+            
+            ZStack {
+                // Background Ring
+                Circle()
+                    .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
+                    .opacity(0.3)
+                    .foregroundColor(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
+                    .rotationEffect(Angle(degrees: -90.0))
+                
+                // Progress Ring
+                Circle()
+                    .trim(from: 0.0, to: CGFloat(min(Double(entry.progress) / 100.0, 1.0)))
+                    .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
+                    .foregroundColor(Color(red: 251/255, green: 116/255, blue: 20/255)) // primaryOrange
+                    .rotationEffect(Angle(degrees: -90.0))
+                
+                VStack(spacing: 0) {
+                    Text("\(max(0, entry.goal - entry.calories))")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Left")
+                        .font(.system(size: 10))
+                        .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255)) // neutralGrey600
+                }
+            }
+            .frame(width: 90, height: 90)
+            
+            Spacer()
+            
+            Link(destination: URL(string: "macroaize://log")!) {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
+                        .frame(width: 40, height: 40)
+                    
+                    Image(systemName: "plus")
+                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .bold))
+                }
+            }
+        }
+        .padding(8)
+        .containerBackground(.clear, for: .widget)
+    }
+}
+
+struct LargeWidgetView: View {
+    var entry: Provider.Entry
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Left: Progress
             VStack {
-                Text("Daily Progress")
+                Text("Calories")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
                 
@@ -57,16 +112,16 @@ struct SmallWidgetView: View {
                 ZStack {
                     // Background Ring
                     Circle()
-                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
+                        .stroke(style: StrokeStyle(lineWidth: 8.0, lineCap: .round, lineJoin: .round))
                         .opacity(0.3)
-                        .foregroundColor(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
+                        .foregroundColor(Color(red: 60/255, green: 64/255, blue: 67/255))
                         .rotationEffect(Angle(degrees: -90.0))
                     
                     // Progress Ring
                     Circle()
                         .trim(from: 0.0, to: CGFloat(min(Double(entry.progress) / 100.0, 1.0)))
-                        .stroke(style: StrokeStyle(lineWidth: 6.0, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(Color(red: 251/255, green: 116/255, blue: 20/255)) // primaryOrange
+                        .stroke(style: StrokeStyle(lineWidth: 8.0, lineCap: .round, lineJoin: .round))
+                        .foregroundColor(Color(red: 251/255, green: 116/255, blue: 20/255))
                         .rotationEffect(Angle(degrees: -90.0))
                     
                     VStack(spacing: 0) {
@@ -75,12 +130,19 @@ struct SmallWidgetView: View {
                             .foregroundColor(.white)
                         Text("Left")
                             .font(.system(size: 10))
-                            .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255)) // neutralGrey600
+                            .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255))
                     }
                 }
-                .frame(width: 90, height: 90)
+                .frame(width: 80, height: 80)
                 
                 Spacer()
+            }
+            
+            // Right: Macros
+            VStack(alignment: .leading, spacing: 6) {
+                MacroRow(label: "Protein", value: entry.protein, color: Color(red: 255/255, green: 107/255, blue: 107/255), max: 150, icon: "protein")
+                MacroRow(label: "Carbs", value: entry.carbs, color: Color(red: 78/255, green: 205/255, blue: 196/255), max: 250, icon: "carb")
+                MacroRow(label: "Fats", value: entry.fats, color: Color(red: 255/255, green: 230/255, blue: 109/255), max: 80, icon: "fat")
                 
                 Link(destination: URL(string: "macroaize://log")!) {
                     ZStack {
@@ -92,80 +154,12 @@ struct SmallWidgetView: View {
                             .foregroundColor(.white)
                             .font(.system(size: 16, weight: .bold))
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
-            .padding(8)
         }
-    }
-}
-
-struct LargeWidgetView: View {
-    var entry: Provider.Entry
-    
-    var body: some View {
-        ZStack {
-            Color(red: 33/255, green: 38/255, blue: 45/255) // AppColor.darkCard
-            
-            HStack(spacing: 16) {
-                // Left: Progress
-                VStack {
-                    Text("Calories")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Spacer()
-                    
-                    ZStack {
-                        // Background Ring
-                        Circle()
-                            .stroke(style: StrokeStyle(lineWidth: 8.0, lineCap: .round, lineJoin: .round))
-                            .opacity(0.3)
-                            .foregroundColor(Color(red: 60/255, green: 64/255, blue: 67/255))
-                            .rotationEffect(Angle(degrees: -90.0))
-                        
-                        // Progress Ring
-                        Circle()
-                            .trim(from: 0.0, to: CGFloat(min(Double(entry.progress) / 100.0, 1.0)))
-                            .stroke(style: StrokeStyle(lineWidth: 8.0, lineCap: .round, lineJoin: .round))
-                            .foregroundColor(Color(red: 251/255, green: 116/255, blue: 20/255))
-                            .rotationEffect(Angle(degrees: -90.0))
-                        
-                        VStack(spacing: 0) {
-                            Text("\(max(0, entry.goal - entry.calories))")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                            Text("Left")
-                                .font(.system(size: 10))
-                                .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255))
-                        }
-                    }
-                    .frame(width: 80, height: 80)
-                    
-                    Spacer()
-                }
-                
-                // Right: Macros
-                VStack(alignment: .leading, spacing: 6) {
-                    MacroRow(label: "Protein", value: entry.protein, color: Color(red: 255/255, green: 107/255, blue: 107/255), max: 150, icon: "protein")
-                    MacroRow(label: "Carbs", value: entry.carbs, color: Color(red: 78/255, green: 205/255, blue: 196/255), max: 250, icon: "carb")
-                    MacroRow(label: "Fats", value: entry.fats, color: Color(red: 255/255, green: 230/255, blue: 109/255), max: 80, icon: "fat")
-                    
-                    Link(destination: URL(string: "macroaize://log")!) {
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 60/255, green: 64/255, blue: 67/255)) // neutralGrey800
-                                .frame(width: 40, height: 40)
-                            
-                            Image(systemName: "plus")
-                                .foregroundColor(.white)
-                                .font(.system(size: 16, weight: .bold))
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-            .padding(12)
-        }
+        .padding(12)
+        .containerBackground(.clear, for: .widget)
     }
 }
 
@@ -242,26 +236,23 @@ struct StreakWidgetView: View {
     var entry: StreakWidgetProvider.Entry
     
     var body: some View {
-        ZStack {
-            Color(red: 33/255, green: 38/255, blue: 45/255) // AppColor.darkCard
+        VStack(alignment: .center, spacing: 0) {
+            Image("fire")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 40, height: 40)
+                .padding(.bottom, 8)
             
-            VStack(alignment: .center, spacing: 0) {
-                Image("fire")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 40, height: 40)
-                    .padding(.bottom, 8)
-                
-                Text("\(entry.streakCount)")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-                
-                Text("Day Streak")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Color(red: 176/255, green: 179/255, blue: 184/255)) // #B0B3B8
-            }
-            .padding(16)
+            Text("\(entry.streakCount)")
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(.white)
+            
+            Text("Day Streak")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(red: 176/255, green: 179/255, blue: 184/255)) // #B0B3B8
         }
+        .padding(16)
+        .containerBackground(.clear, for: .widget)
     }
 }
 
