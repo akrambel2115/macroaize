@@ -34,6 +34,7 @@ class SharePrefKey {
   static String hasCompletedTutorial = 'hasCompletedTutorial';
 
   static String stepGoal = 'stepGoal';
+  static String waterGoal = 'waterGoal';
 
   // Streak
   static String streakCount = 'streakCount';
