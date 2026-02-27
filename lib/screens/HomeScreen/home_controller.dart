@@ -14,6 +14,7 @@ import 'package:macroaize/shared/services/step_tracking_service.dart';
 import 'package:macroaize/shared/services/widget_service.dart';
 import 'package:macroaize/shared/services/streak_service.dart';
 import 'package:macroaize/screens/AdjustGoals/updateDailog/show_update_goal_dialog.dart';
+import 'package:macroaize/screens/AdjustGoals/updateDailog/show_water_goal_dialog.dart';
 import 'package:macroaize/screens/AnalyticsScreen/update_weight.dart';
 import 'package:macroaize/shared/services/weight_update_service.dart';
 
@@ -49,8 +50,8 @@ class HomeController extends GetxController {
   }
 
   // water tracking
-  static const int maxGlasses = 8;
   static const int glassVolumeMl = 250;
+  static int get maxGlasses => ConstantUserMaster.waterGoalMl ~/ glassVolumeMl;
   int waterGlasses = 0;
   int displayedWeight = 0;
 
@@ -75,6 +76,7 @@ class HomeController extends GetxController {
     await getSqlCalorie();
     await getRecentHistory();
     await loadStepData();
+    await loadWaterGoal();
     await _syncStepsFromService();
     _stepMetricsWorker = everAll([
       _stepTrackingService.dailySteps,
@@ -245,6 +247,11 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<void> loadWaterGoal() async {
+    final saved = await SharedPref.readInt(SharePrefKey.waterGoal);
+    ConstantUserMaster.waterGoalMl = (saved != null) ? saved : 2000;
+  }
+
   Future<void> _syncStepsFromService() async {
     isStepTrackingAvailable = _stepTrackingService.isTrackingAvailable.value;
 
@@ -297,6 +304,22 @@ class HomeController extends GetxController {
       },
       Get.context!,
       'Update Step Goal'.tr,
+    );
+  }
+
+  void editWaterGoal(BuildContext context) {
+    showWaterGoalDialog(
+      ConstantUserMaster.waterGoalMl,
+      (newGoalMl) async {
+        ConstantUserMaster.waterGoalMl = newGoalMl;
+        await SharedPref.saveInt(SharePrefKey.waterGoal, newGoalMl);
+        if (waterGlasses > maxGlasses) {
+          waterGlasses = maxGlasses;
+          await _saveWaterData();
+        }
+        update();
+      },
+      context,
     );
   }
 
