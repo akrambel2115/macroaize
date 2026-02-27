@@ -121,6 +121,7 @@ const Map<String, String> english = {
       "Try searching with different keywords or browse our local food database",
   "Search by Food Name/Dish": "Search by Food Name/Dish",
   "popular food items": "popular food items",
+  "food items found": "food items found",
   "add_custom_food": "Add Custom Food",
   "edit_food": "Edit Food",
   "name": "Name",

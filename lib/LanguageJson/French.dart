@@ -122,6 +122,7 @@ const Map<String, String> french = {
       "Essayez de rechercher avec d'autres mots-clés ou parcourez notre base de données d'aliments locaux",
   "Search by Food Name/Dish": "Rechercher par nom d'aliment/plat",
   "popular food items": "aliments populaires",
+  "food items found": "résultats trouvés",
   "add_custom_food": "Ajouter un aliment personnalisé",
   "edit_food": "Modifier l'aliment",
   "name": "Nom",

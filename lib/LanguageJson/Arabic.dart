@@ -116,7 +116,8 @@ const Map<String, String> arabic = {
   "Try searching with different keywords or browse our local food database":
       "جرّب البحث بكلمات مختلفة أو تصفح قاعدة بياناتنا للطعام المحلي",
   "Search by Food Name/Dish": "ابحث باسم الطعام/الطبق",
-  "random food items": "عناصر غذائية عشوائية",
+  "popular food items": "عناصر غذائية شائعة",
+  "food items found": "نتيجة موجودة",
   "Add custom food": "إضافة طعام مخصص",
   "Edit food": "تعديل الطعام",
   "Name": "الاسم",
