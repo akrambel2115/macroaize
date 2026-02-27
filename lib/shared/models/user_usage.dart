@@ -13,8 +13,8 @@ class UserUsage {
     required this.scanCount,
     required this.chatCount,
     this.lastUsageDate,
-    this.scanLimit = 2,
-    this.chatLimit = 5,
+    this.scanLimit = 1,
+    this.chatLimit = 2,
   });
 
   factory UserUsage.fromFirestore(Map<String, dynamic> data) {
@@ -45,11 +45,11 @@ class UserUsage {
       scanLimit:
           toInt(data['scanLimit']) != 0
               ? toInt(data['scanLimit'])
-              : (cfg?.freeScanLimit ?? 2),
+              : (cfg?.freeScanLimit ?? 1),
       chatLimit:
           toInt(data['chatLimit']) != 0
               ? toInt(data['chatLimit'])
-              : (cfg?.freeChatLimit ?? 5),
+              : (cfg?.freeChatLimit ?? 2),
     );
   }
 
