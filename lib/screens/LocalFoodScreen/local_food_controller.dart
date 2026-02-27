@@ -14,6 +14,7 @@ import '../../constant/font_family.dart';
 import '../../routes/app_routes.dart';
 import '../../shared/services/notification_service.dart';
 import '../../shared/widgets/premium_required_dialog.dart';
+import '../../shared/widgets/delete_dialog.dart';
 import '../../shared/services/rate_us_service.dart';
 import '../../shared/services/widget_promotion_service.dart';
 import '../../shared/services/meal_sync_service.dart';
@@ -151,44 +152,20 @@ class LocalFoodController extends GetxController {
       return;
     }
 
-    final confirm = await showDialog<bool>(
+    showDeleteDialog(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            backgroundColor: ctx.theme.cardColor,
-            title: Text('delete_items_title'.tr),
-            content: Text(
-              'delete_items_message'.trParams({
-                'count': deletableIds.length.toString(),
-              }),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: Text('cancel'.tr),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: Text(
-                  'delete'.tr,
-                  style: TextStyle(color: Theme.of(ctx).colorScheme.error),
-                ),
-              ),
-            ],
-          ),
+      onDelete: () async {
+        await localFoodDb.deleteUserFoodsByIds(deletableIds);
+        await _refreshFoods(query: textController.text);
+        selectedIndices.clear();
+        isEditing = false;
+        update();
+        NotificationService.showSuccess(
+          'food_deleted_success',
+          params: {'count': deletableIds.length.toString()},
+        );
+      },
     );
-
-    if (confirm == true) {
-      await localFoodDb.deleteUserFoodsByIds(deletableIds);
-      await _refreshFoods(query: textController.text);
-      selectedIndices.clear();
-      isEditing = false;
-      update();
-      NotificationService.showSuccess(
-        'food_deleted_success',
-        params: {'count': deletableIds.length.toString()},
-      );
-    }
   }
 
   Future<void> _refreshFoods({String query = ''}) async {
