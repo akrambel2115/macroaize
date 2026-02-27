@@ -342,7 +342,9 @@ class LocalFoodView extends GetView<LocalFoodController> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              "${controller.filteredItems.length} ${"popular food items".tr}",
+              controller.textController.text.trim().isEmpty
+                  ? "100 ${"popular food items".tr}"
+                  : "${controller.filteredItems.length} ${"food items found".tr}",
               style: context.textTheme.bodyMedium?.copyWith(
                 color: AppColor.neutralGrey600,
                 fontWeight: FontWeight.w500,
@@ -413,9 +415,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
     final food = controller.filteredItems[index];
     return GestureDetector(
       onTap: () {
-        if (controller.isEditing) {
-          if (food.isCustom) controller.toggleSelect(index);
-        } else {
+        if (!controller.isEditing) {
           _showNutritionDetails(context, controller, food);
         }
       },
