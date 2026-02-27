@@ -25,13 +25,6 @@ void showWaterGoalDialog(
         final bool canIncrease = tempGoal < _maxWaterGoalMl;
         final int cups = tempGoal ~/ 250;
 
-        String errorText = '';
-        if (tempGoal <= _minWaterGoalMl) {
-          errorText = 'water_goal_min_error'.tr;
-        } else if (tempGoal >= _maxWaterGoalMl) {
-          errorText = 'water_goal_max_error'.tr;
-        }
-
         return AlertDialog(
           backgroundColor: ctx.theme.cardColor,
           title: Text(
@@ -102,27 +95,6 @@ void showWaterGoalDialog(
                     ),
                   ),
                 ],
-              ),
-
-              // Error / boundary hint
-              if (errorText.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  errorText,
-                  textAlign: TextAlign.center,
-                  style: ctx.textTheme.bodySmall?.copyWith(
-                    color: Colors.orange,
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 10),
-              Text(
-                '2000 ml – 4000 ml  ·  ±250 ml',
-                textAlign: TextAlign.center,
-                style: ctx.textTheme.bodySmall?.copyWith(
-                  color: AppColor.neutralGrey500,
-                ),
               ),
             ],
           ),
