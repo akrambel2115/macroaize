@@ -486,65 +486,6 @@ class _PremiumViewState extends State<PremiumView> {
                                                         ),
                                                       ),
                                                 ),
-                                                TextButton(
-                                                  onPressed:
-                                                      () => controller
-                                                          .restorePurchases(),
-                                                  style: TextButton.styleFrom(
-                                                    foregroundColor:
-                                                        AppColor.neutralGrey600,
-                                                    textStyle:
-                                                        const TextStyle(
-                                                          fontSize: 12,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    'restore_purchases'.tr,
-                                                    style: TextStyle(
-                                                      color:
-                                                          AppColor
-                                                              .neutralGrey600,
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          'restore_purchases_info'
-                                                              .tr,
-                                                        ),
-                                                        backgroundColor:
-                                                            AppColor
-                                                                .neutralGrey600,
-                                                        behavior:
-                                                            SnackBarBehavior
-                                                                .floating,
-                                                        duration:
-                                                            const Duration(
-                                                              seconds: 3,
-                                                            ),
-                                                      ),
-                                                    );
-                                                  },
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          left: 4,
-                                                        ),
-                                                    child: Icon(
-                                                      Icons.info_outline,
-                                                      size: 16,
-                                                      color:
-                                                          AppColor
-                                                              .neutralGrey600,
-                                                    ),
-                                                  ),
-                                                ),
                                               ],
                                             );
                                           },
