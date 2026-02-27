@@ -16,8 +16,8 @@ class AppConfigService extends GetxService {
 
   String get appName => (_config['app']?['name'] as String?) ?? 'macroAize';
   String get aiModel => (_config['aiModel'] as String?) ?? 'google/gemini-2.5-flash-image-preview:free';
-  int get freeScanLimit => (_config['limits']?['scan'] as num?)?.toInt() ?? 2;
-  int get freeChatLimit => (_config['limits']?['chat'] as num?)?.toInt() ?? 5;
+  int get freeScanLimit => (_config['limits']?['scan'] as num?)?.toInt() ?? 1;
+  int get freeChatLimit => (_config['limits']?['chat'] as num?)?.toInt() ?? 2;
 
   String get termsLink => (_config['links']?['terms'] as String?) ?? '';
   String get privacyLink => (_config['links']?['privacy'] as String?) ?? '';
