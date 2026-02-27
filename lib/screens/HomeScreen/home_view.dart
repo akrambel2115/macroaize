@@ -733,19 +733,19 @@ class HomeView extends GetView<HomeController> {
                                   ],
                                 ),
                                 const Spacer(),
-                                _buildAnimatedCount(
-                                  context,
-                                  value: controller.currentSteps,
-                                  durationMs: 700,
-                                  useGrouping: true,
-                                  style: context.textTheme.displayMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color:
-                                            context.isDarkMode
-                                                ? AppColor.neutralGrey300
-                                                : AppColor.neutralGrey800,
-                                      ),
+                                Obx(
+                                  () => Text(
+                                    NumberFormat.decimalPattern()
+                                        .format(controller.liveSteps.value),
+                                    style: context.textTheme.displayMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color:
+                                              context.isDarkMode
+                                                  ? AppColor.neutralGrey300
+                                                  : AppColor.neutralGrey800,
+                                        ),
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
