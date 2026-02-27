@@ -51,7 +51,8 @@ class HomeController extends GetxController {
 
   // water tracking
   static const int glassVolumeMl = 250;
-  static int get maxGlasses => ConstantUserMaster.waterGoalMl ~/ glassVolumeMl;
+  int waterGoalMl = 2000;
+  int get maxGlasses => waterGoalMl ~/ glassVolumeMl;
   int waterGlasses = 0;
   int displayedWeight = 0;
 
@@ -249,8 +250,7 @@ class HomeController extends GetxController {
 
   Future<void> loadWaterGoal() async {
     final saved = await SharedPref.readInt(SharePrefKey.waterGoal);
-    ConstantUserMaster.waterGoalMl = (saved != null) ? saved : 2000;
-  }
+    ConstantUserMaster.waterGoalMl = (saved != null) ? saved : 2000;    waterGoalMl = ConstantUserMaster.waterGoalMl;  }
 
   Future<void> _syncStepsFromService() async {
     isStepTrackingAvailable = _stepTrackingService.isTrackingAvailable.value;
@@ -312,6 +312,7 @@ class HomeController extends GetxController {
       ConstantUserMaster.waterGoalMl,
       (newGoalMl) async {
         ConstantUserMaster.waterGoalMl = newGoalMl;
+        waterGoalMl = newGoalMl;
         await SharedPref.saveInt(SharePrefKey.waterGoal, newGoalMl);
         if (waterGlasses > maxGlasses) {
           waterGlasses = maxGlasses;
