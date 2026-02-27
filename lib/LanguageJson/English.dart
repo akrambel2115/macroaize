@@ -120,7 +120,7 @@ const Map<String, String> english = {
   "Try searching with different keywords or browse our local food database":
       "Try searching with different keywords or browse our local food database",
   "Search by Food Name/Dish": "Search by Food Name/Dish",
-  "food items found": "food items found",
+  "popular food items": "popular food items",
   "add_custom_food": "Add Custom Food",
   "edit_food": "Edit Food",
   "name": "Name",
@@ -1185,5 +1185,9 @@ const Map<String, String> english = {
   // ==============================================================================
   "water_title": "Water",
   "water_ml_label": "ml",
+  "water_cups_label": "cups",
+  "water_goal_label": "Update Water Goal",
+  "water_goal_min_error": "Minimum: 2000 ml (8 cups)",
+  "water_goal_max_error": "Maximum: 4000 ml (16 cups)",
   "water_goal_reached": "Goal reached!",
 };

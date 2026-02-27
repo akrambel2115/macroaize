@@ -116,7 +116,7 @@ const Map<String, String> arabic = {
   "Try searching with different keywords or browse our local food database":
       "جرّب البحث بكلمات مختلفة أو تصفح قاعدة بياناتنا للطعام المحلي",
   "Search by Food Name/Dish": "ابحث باسم الطعام/الطبق",
-  "Food items found": "عناصر طعام موجودة",
+  "random food items": "عناصر غذائية عشوائية",
   "Add custom food": "إضافة طعام مخصص",
   "Edit food": "تعديل الطعام",
   "Name": "الاسم",
@@ -1067,5 +1067,9 @@ const Map<String, String> arabic = {
   // ==============================================================================
   "water_title": "ماء",
   "water_ml_label": "مل",
+  "water_cups_label": "أكواب",
+  "water_goal_label": "تعديل هدف شرب الماء",
+  "water_goal_min_error": "الحد الأدنى: 2000 مل (8 أكواب)",
+  "water_goal_max_error": "الحد الأقصى: 4000 مل (16 كوبًا)",
   "water_goal_reached": "تم الوصول للهدف!",
 };

@@ -121,7 +121,7 @@ const Map<String, String> french = {
   "Try searching with different keywords or browse our local food database":
       "Essayez de rechercher avec d'autres mots-clés ou parcourez notre base de données d'aliments locaux",
   "Search by Food Name/Dish": "Rechercher par nom d'aliment/plat",
-  "food items found": "aliments trouvés",
+  "popular food items": "aliments populaires",
   "add_custom_food": "Ajouter un aliment personnalisé",
   "edit_food": "Modifier l'aliment",
   "name": "Nom",
@@ -1142,5 +1142,9 @@ const Map<String, String> french = {
   // ==============================================================================
   "water_title": "Eau",
   "water_ml_label": "ml",
+  "water_cups_label": "verres",
+  "water_goal_label": "Modifier l'objectif d'eau",
+  "water_goal_min_error": "Minimum : 2000 ml (8 verres)",
+  "water_goal_max_error": "Maximum : 4000 ml (16 verres)",
   "water_goal_reached": "Objectif atteint !",
 };
