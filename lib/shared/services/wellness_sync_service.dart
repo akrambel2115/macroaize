@@ -22,7 +22,7 @@ class WellnessSyncService extends GetxService {
   String get providerDisplayName {
     if (kIsWeb) return 'Wellness';
     if (Platform.isIOS) return 'Apple Health';
-    return 'Google Fit (Health Connect)';
+    return 'Health Connect';
   }
 
   Future<WellnessSyncService> init() async {
