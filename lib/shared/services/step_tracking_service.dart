@@ -20,15 +20,23 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
 
   DateTime _activeDate = _dateOnly(DateTime.now());
   int _baselineRawSteps = 0;
+  bool _baselineInitialized = false;
   int _latestRawSteps = 0;
   int _resetOffsetSteps = 0;
 
   bool _started = false;
   DateTime? _lastWellnessReconcileAt;
 
+  /// Debounce timer so we don't write to SharedPreferences on every single
+  /// step event (can be hundreds per minute while actively walking).
+  Timer? _persistDebounce;
+  static const Duration _persistDelay = Duration(seconds: 3);
+
   static const Duration _wellnessReconcileInterval = Duration(minutes: 2);
 
-  static const double _caloriesPerKgPerKm = 0.9;
+  /// ~0.7 kcal/kg/km is the accepted average for walking.
+  /// Running is ~1.0; 0.7 avoids over-estimating for typical step tracking.
+  static const double _caloriesPerKgPerKm = 0.7;
 
   Future<StepTrackingService> init() async {
     WidgetsBinding.instance.addObserver(this);
@@ -42,6 +50,7 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _stepSub?.cancel();
+    _persistDebounce?.cancel();
     super.onClose();
   }
 
@@ -71,8 +80,9 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
       permission = await Permission.activityRecognition.request();
     }
 
-    final granted =
-        permission.isGranted || permission.isLimited || permission.isRestricted;
+    // isRestricted on iOS means parental controls block the permission;
+    // the user cannot grant it, so it must NOT be treated as "granted".
+    final granted = permission.isGranted || permission.isLimited;
     isTrackingAvailable.value = granted;
 
     if (!granted) {
@@ -109,8 +119,9 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
     _latestRawSteps = rawSteps;
     final adjustedRaw = rawSteps + _resetOffsetSteps;
 
-    if (_baselineRawSteps == 0) {
+    if (!_baselineInitialized) {
       _baselineRawSteps = adjustedRaw;
+      _baselineInitialized = true;
     }
 
     final computedSteps = math.max(0, adjustedRaw - _baselineRawSteps);
@@ -120,7 +131,7 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
         computedCalories != stepCaloriesBurned.value) {
       dailySteps.value = computedSteps;
       stepCaloriesBurned.value = computedCalories;
-      await _persistActiveDateState();
+      _schedulePersist();
 
       unawaited(_reconcileFromWellness());
     }
@@ -136,6 +147,7 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
 
     _activeDate = nowDate;
     _baselineRawSteps = 0;
+    _baselineInitialized = false;
     _latestRawSteps = 0;
     _resetOffsetSteps = 0;
     dailySteps.value = 0;
@@ -157,6 +169,7 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
         storedStepCalories ?? _estimateStepCalories(storedSteps);
 
     _baselineRawSteps = storedBaseline;
+    _baselineInitialized = storedBaseline != 0 || storedSteps > 0;
     _latestRawSteps = storedLatest;
     _resetOffsetSteps = storedOffset;
   }
@@ -199,19 +212,24 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
     _lastWellnessReconcileAt = DateTime.now();
     if (syncedSteps == null || syncedSteps < 0) return;
 
-    final syncedCalories = _estimateStepCalories(syncedSteps);
+    // Never let wellness decrease the visible step count — wellness data
+    // can lag behind the real-time pedometer.
+    final bestSteps = math.max(dailySteps.value, syncedSteps);
+    final bestCalories = _estimateStepCalories(bestSteps);
     final changed =
-        syncedSteps != dailySteps.value ||
-        syncedCalories != stepCaloriesBurned.value;
+        bestSteps != dailySteps.value ||
+        bestCalories != stepCaloriesBurned.value;
 
     if (!changed && !force) return;
 
-    dailySteps.value = syncedSteps;
-    stepCaloriesBurned.value = syncedCalories;
+    dailySteps.value = bestSteps;
+    stepCaloriesBurned.value = bestCalories;
 
     if (_latestRawSteps > 0 && _isSameDate(_activeDate, DateTime.now())) {
       final adjustedRaw = _latestRawSteps + _resetOffsetSteps;
-      _baselineRawSteps = math.max(0, adjustedRaw - syncedSteps);
+      final newBaseline = math.max(0, adjustedRaw - bestSteps);
+      _baselineRawSteps = newBaseline;
+      _baselineInitialized = true;
     }
 
     await _persistActiveDateState();
@@ -282,6 +300,14 @@ class StepTrackingService extends GetxService with WidgetsBindingObserver {
     final distanceKm = (steps * strideMeters) / 1000.0;
     final calories = distanceKm * weightKg * _caloriesPerKgPerKm;
     return calories.round();
+  }
+
+  /// Schedules a debounced write so rapid step events don't thrash storage.
+  void _schedulePersist() {
+    _persistDebounce?.cancel();
+    _persistDebounce = Timer(_persistDelay, () {
+      _persistActiveDateState();
+    });
   }
 
   static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
