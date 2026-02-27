@@ -584,7 +584,7 @@ class HomeView extends GetView<HomeController> {
         final totalWaterMl =
             controller.waterGlasses * HomeController.glassVolumeMl;
         final waterGoalMl =
-            HomeController.maxGlasses * HomeController.glassVolumeMl;
+            controller.maxGlasses * HomeController.glassVolumeMl;
 
         return ModernFadeSlideTransition(
           beginOffset: const Offset(0, 0.2),
@@ -593,7 +593,9 @@ class HomeView extends GetView<HomeController> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 // 1. Water Intake Card (Full Width)
-                ModernCard(
+                GestureDetector(
+                  onTap: () => controller.editWaterGoal(context),
+                  child: ModernCard(
                   enableGradient: false,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -989,8 +991,10 @@ class HomeView extends GetView<HomeController> {
               width: double.infinity,
               child: Column(
                 children: [
-                  // header row
-                  Row(
+                  // header row – tap to edit goal
+                  GestureDetector(
+                    onTap: () => ctrl.editWaterGoal(context),
+                    child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -1008,7 +1012,7 @@ class HomeView extends GetView<HomeController> {
                         style: context.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color:
-                              ctrl.waterGlasses >= HomeController.maxGlasses
+                              ctrl.waterGlasses >= ctrl.maxGlasses
                                   ? AppColor.info
                                   : context.theme.textTheme.bodyLarge?.color,
                         ),
@@ -1016,13 +1020,68 @@ class HomeView extends GetView<HomeController> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // glass grid – 2 rows of 4
-                  Column(
-                    children: [
-                      _buildGlassRow(context, 0, 4, ctrl),
-                      const SizedBox(height: 12),
-                      _buildGlassRow(context, 4, 8, ctrl),
-                    ],
+                  // glass grid – dynamic based on water goal
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: List.generate(ctrl.maxGlasses, (index) {
+                      final isFilled = index < ctrl.waterGlasses;
+                      final isNextEmpty =
+                          index == ctrl.waterGlasses &&
+                          ctrl.waterGlasses < ctrl.maxGlasses;
+                      return GestureDetector(
+                        onTap: () {
+                          if (isFilled) {
+                            ctrl.removeWaterGlass();
+                          } else if (isNextEmpty) {
+                            ctrl.addWaterGlass();
+                          }
+                        },
+                        child: SizedBox(
+                          width: 52,
+                          height: 60,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              CustomPaint(
+                                size: const Size(40, 48),
+                                painter: _WaterGlassPainter(
+                                  isFilled: isFilled,
+                                  filledColor: AppColor.info,
+                                  emptyColor:
+                                      context.isDarkMode
+                                          ? Colors.grey[700]!
+                                          : Colors.grey[300]!,
+                                ),
+                              ),
+                              if (isNextEmpty)
+                                Positioned(
+                                  left: 0,
+                                  bottom: 4,
+                                  child: Container(
+                                    width: 22,
+                                    height: 22,
+                                    decoration: BoxDecoration(
+                                      color: AppColor.primaryOrange,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: context.theme.cardColor,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.add,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -1030,78 +1089,6 @@ class HomeView extends GetView<HomeController> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildGlassRow(
-    BuildContext context,
-    int start,
-    int end,
-    HomeController ctrl,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(end - start, (i) {
-        final index = start + i;
-        final isFilled = index < ctrl.waterGlasses;
-        final isNextEmpty =
-            index == ctrl.waterGlasses &&
-            ctrl.waterGlasses < HomeController.maxGlasses;
-
-        return GestureDetector(
-          onTap: () {
-            if (isFilled) {
-              ctrl.removeWaterGlass();
-            } else if (isNextEmpty) {
-              ctrl.addWaterGlass();
-            }
-          },
-          child: SizedBox(
-            width: 52,
-            height: 60,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // water glass icon
-                CustomPaint(
-                  size: const Size(40, 48),
-                  painter: _WaterGlassPainter(
-                    isFilled: isFilled,
-                    filledColor: AppColor.info,
-                    emptyColor:
-                        context.isDarkMode
-                            ? Colors.grey[700]!
-                            : Colors.grey[300]!,
-                  ),
-                ),
-                // "+" badge on the next empty glass
-                if (isNextEmpty)
-                  Positioned(
-                    left: 0,
-                    bottom: 4,
-                    child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: AppColor.primaryOrange,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: context.theme.cardColor,
-                          width: 2,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      }),
     );
   }
 
