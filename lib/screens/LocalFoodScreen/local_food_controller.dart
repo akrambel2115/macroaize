@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:macroaize/constant/database_helper.dart';
+import 'package:macroaize/data/local_food/local_food_db.dart';
 import 'package:macroaize/shared/services/app_user_service.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../Model/calorie_history_model.dart';
 import '../../Model/sql_calorie_model.dart';
@@ -27,102 +24,13 @@ class LocalFoodController extends GetxController {
   Map<String, dynamic> argument = Get.arguments;
   TextEditingController textController = TextEditingController();
   List<FoodItem> filteredItems = [];
+  List<FoodItem> _allItems = [];
   Timer? _searchDebounce;
   static const Duration _debounceDuration = Duration(milliseconds: 300);
   bool isFiltering = false;
   final dbHelper = DatabaseHelper();
+  final localFoodDb = LocalFoodDb.instance;
   final _appUserService = AppUserService();
-  List<FoodItem> breakfastFoods = [];
-
-  List<FoodItem> lunchFoods = [];
-
-  List<FoodItem> snackFoods = [];
-
-  List<FoodItem> dinnerFoods = [];
-
-  // load food library
-  Future<void> _loadFoodLibrary() async {
-    try {
-      final foodLibraryUrl = dotenv.env['FOOD_LIBRARY'] ?? '';
-      String jsonStr;
-
-      if (foodLibraryUrl.isNotEmpty) {
-        // Fetch from remote URL
-        final response = await http.get(Uri.parse(foodLibraryUrl));
-        if (response.statusCode == 200) {
-          jsonStr = response.body;
-        } else {
-          // Fallback to local file if remote fails
-          jsonStr = await rootBundle.loadString(
-            'lib/constant/foodLibrary.json',
-          );
-        }
-      } else {
-        // Fallback to local file if URL not set
-        jsonStr = await rootBundle.loadString('lib/constant/foodLibrary.json');
-      }
-
-      final List<dynamic> data = json.decode(jsonStr) as List<dynamic>;
-      final locale = Get.locale?.languageCode ?? 'en';
-
-      final mapped =
-          data.map((e) {
-            final m = e as Map<String, dynamic>;
-            String name = _pickByLocale(m, 'name', locale);
-            String quantity = _pickByLocale(m, 'quantity', locale);
-            int calories = _toInt(m['calories']);
-            int carbs = _toInt(m['carbs']);
-            int protein = _toInt(m['protein']);
-            int fats = _toInt(m['fats']);
-            return FoodItem(
-              name: name,
-              calories: calories,
-              carbs: carbs,
-              protein: protein,
-              fats: fats,
-              quantity: quantity,
-            );
-          }).toList();
-
-      final List<FoodItem> all = mapped;
-      breakfastFoods = all;
-      lunchFoods = all;
-      snackFoods = all;
-      dinnerFoods = all;
-      if (type == "Breakfast" || type == "BreakFast") {
-        filteredItems = breakfastFoods;
-      } else if (type == "Lunch") {
-        filteredItems = lunchFoods;
-      } else if (type == "snack(s)") {
-        filteredItems = snackFoods;
-      } else {
-        filteredItems = dinnerFoods;
-      }
-      update();
-    } catch (_) {}
-  }
-
-  String _pickByLocale(Map<String, dynamic> m, String key, String locale) {
-    final en = m['${key}_en']?.toString() ?? '';
-    final fr = m['${key}_fr']?.toString() ?? en;
-    final ar = m['${key}_ar']?.toString() ?? en;
-    switch (locale) {
-      case 'fr':
-        return fr;
-      case 'ar':
-        return ar;
-      default:
-        return en;
-    }
-  }
-
-  int _toInt(dynamic v) {
-    if (v == null) return 0;
-    if (v is int) return v;
-    if (v is double) return v.round();
-    final s = v.toString();
-    return double.tryParse(s)?.round() ?? 0;
-  }
 
   String type = "";
   bool isEditing = false;
@@ -132,18 +40,8 @@ class LocalFoodController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    type = argument['value'];
-    if (type == "Breakfast" || type == "BreakFast") {
-      filteredItems = breakfastFoods;
-    } else if (type == "Lunch") {
-      filteredItems = lunchFoods;
-    } else if (type == "snack(s)") {
-      filteredItems = snackFoods;
-    } else {
-      filteredItems = dinnerFoods;
-    }
-    await _loadFoodLibrary();
-    await _loadPersistedFoodsFromDb();
+    type = argument['value'] ?? 'Dinner';
+    await _refreshFoods();
   }
 
   void toggleEditMode() {
@@ -163,6 +61,11 @@ class LocalFoodController extends GetxController {
 
   /// enter edit mode
   void selectAndEnterEdit(int index) {
+    if (index < 0 || index >= filteredItems.length) return;
+    if (!filteredItems[index].isCustom) {
+      NotificationService.showInfo('Only custom foods can be edited');
+      return;
+    }
     if (!isEditing) isEditing = true;
     selectedIndices.clear();
     selectedIndices.add(index);
@@ -176,10 +79,21 @@ class LocalFoodController extends GetxController {
       return;
     }
 
-    filteredItems.insert(0, item);
-    update();
+    await localFoodDb.insertUserFood(
+      mealType: type,
+      entry: LocalFoodUserEntry(
+        id: 0,
+        mealType: type,
+        name: item.name,
+        quantity: item.quantity,
+        calories: item.calories,
+        carbs: item.carbs,
+        protein: item.protein,
+        fats: item.fats,
+      ),
+    );
+    await _refreshFoods(query: textController.text);
     NotificationService.showSuccess('food_added_success');
-    _saveCurrentFoodsToDb();
   }
 
   void editFoodAt(int index, FoodItem item) async {
@@ -189,12 +103,29 @@ class LocalFoodController extends GetxController {
       return;
     }
 
-    if (index >= 0 && index < filteredItems.length) {
-      filteredItems[index] = item;
-      update();
-      NotificationService.showSuccess('food_updated_success');
-      _saveCurrentFoodsToDb();
+    if (index < 0 || index >= filteredItems.length) return;
+
+    final existing = filteredItems[index];
+    if (!existing.isCustom || existing.id == null) {
+      NotificationService.showInfo('Only custom foods can be edited');
+      return;
     }
+
+    await localFoodDb.updateUserFood(
+      id: existing.id!,
+      entry: LocalFoodUserEntry(
+        id: existing.id!,
+        mealType: type,
+        name: item.name,
+        quantity: item.quantity,
+        calories: item.calories,
+        carbs: item.carbs,
+        protein: item.protein,
+        fats: item.fats,
+      ),
+    );
+    await _refreshFoods(query: textController.text);
+    NotificationService.showSuccess('food_updated_success');
   }
 
   void deleteSelected(BuildContext context) async {
@@ -207,6 +138,19 @@ class LocalFoodController extends GetxController {
     if (selectedIndices.isEmpty) return;
     if (!context.mounted) return;
 
+    final deletableIds =
+        selectedIndices
+            .where((i) => i >= 0 && i < filteredItems.length)
+            .map((i) => filteredItems[i])
+            .where((item) => item.isCustom && item.id != null)
+            .map((item) => item.id!)
+            .toList();
+
+    if (deletableIds.isEmpty) {
+      NotificationService.showInfo('Select custom foods to delete');
+      return;
+    }
+
     final confirm = await showDialog<bool>(
       context: context,
       builder:
@@ -215,7 +159,7 @@ class LocalFoodController extends GetxController {
             title: Text('delete_items_title'.tr),
             content: Text(
               'delete_items_message'.trParams({
-                'count': selectedIndices.length.toString(),
+                'count': deletableIds.length.toString(),
               }),
             ),
             actions: [
@@ -235,101 +179,84 @@ class LocalFoodController extends GetxController {
     );
 
     if (confirm == true) {
-      final indices = selectedIndices.toList()..sort((a, b) => b.compareTo(a));
-      for (final i in indices) {
-        filteredItems.removeAt(i);
-      }
+      await localFoodDb.deleteUserFoodsByIds(deletableIds);
+      await _refreshFoods(query: textController.text);
       selectedIndices.clear();
       isEditing = false;
       update();
       NotificationService.showSuccess(
         'food_deleted_success',
-        params: {'count': indices.length.toString()},
+        params: {'count': deletableIds.length.toString()},
       );
-      _saveCurrentFoodsToDb();
     }
   }
 
-  Future<void> _saveCurrentFoodsToDb() async {
-    try {
-      final t = type;
-      await dbHelper.deleteLocalFoodsByType(t);
-      for (final f in filteredItems) {
-        await dbHelper.insertLocalFood({
-          'name': f.name,
-          'quantity': f.quantity,
-          'calories': f.calories,
-          'carbs': f.carbs,
-          'protein': f.protein,
-          'fats': f.fats,
-          'type': t,
-        });
-      }
-    } catch (_) {}
-  }
+  Future<void> _refreshFoods({String query = ''}) async {
+    final locale = Get.locale?.languageCode ?? 'en';
+    final trimmed = query.trim();
 
-  Future<void> _loadPersistedFoodsFromDb() async {
     try {
-      final t = type;
-      final rows = await dbHelper.getLocalFoods(t);
-      if (rows.isEmpty) return;
-      final items = rows.map((r) => FoodItem.fromJson(r)).toList();
-      if (type == "Breakfast" || type == "BreakFast") {
-        breakfastFoods = items;
-      } else if (type == "Lunch") {
-        lunchFoods = items;
-      } else if (type == "snack(s)") {
-        snackFoods = items;
-      } else {
-        dinnerFoods = items;
-      }
-      filteredItems = items;
+      final customItems =
+          trimmed.isEmpty
+              ? await localFoodDb.getUserFoodsByMealType(type)
+              : await localFoodDb.searchUserFoodsByMealType(type, trimmed);
+      final catalogItems = await localFoodDb.searchCatalog(
+        query: trimmed,
+        locale: locale,
+        limit: 100,
+      );
+
+      _allItems = [
+        ...customItems.map(
+          (item) => FoodItem(
+            id: item.id,
+            name: item.name,
+            calories: item.calories,
+            carbs: item.carbs,
+            protein: item.protein,
+            quantity: item.quantity,
+            fats: item.fats,
+            source: FoodSource.custom,
+          ),
+        ),
+        ...catalogItems.map(
+          (item) => FoodItem(
+            id: item.id,
+            name: item.name,
+            calories: item.calories,
+            carbs: item.carbs,
+            protein: item.protein,
+            quantity: item.quantity,
+            fats: item.fats,
+            source: FoodSource.catalog,
+          ),
+        ),
+      ];
+
+      final seen = <String>{};
+      _allItems =
+          _allItems.where((item) {
+            final key =
+                '${item.source.name}:${item.id ?? item.name.toLowerCase()}';
+            return seen.add(key);
+          }).toList();
+
+      filteredItems = _allItems;
+      isFiltering = false;
+      selectedIndices.clear();
       update();
-    } catch (_) {}
+    } catch (_) {
+      isFiltering = false;
+      update();
+    }
   }
 
   /// filter with debounce
   void searchFilter(String query, {bool immediate = false}) {
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
 
-    void runFilter() {
-      final q = query.trim().toLowerCase();
-      if (q.isEmpty) {
-        if (type == "Breakfast" || type == "BreakFast") {
-          filteredItems = breakfastFoods;
-        } else if (type == "Lunch") {
-          filteredItems = lunchFoods;
-        } else if (type == "snack(s)") {
-          filteredItems = snackFoods;
-        } else {
-          filteredItems = dinnerFoods;
-        }
-      } else {
-        if (type == "Breakfast" || type == "BreakFast") {
-          filteredItems =
-              breakfastFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
-        } else if (type == "Lunch") {
-          filteredItems =
-              lunchFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
-        } else if (type == "snack(s)") {
-          filteredItems =
-              snackFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
-        } else {
-          filteredItems =
-              dinnerFoods
-                  .where((item) => item.name.toLowerCase().contains(q))
-                  .toList();
-        }
-      }
-
-      isFiltering = false;
-      update();
+    Future<void> runFilter() async {
+      await _refreshFoods(query: query);
     }
 
     if (immediate) {
@@ -341,7 +268,9 @@ class LocalFoodController extends GetxController {
 
     isFiltering = true;
     update();
-    _searchDebounce = Timer(_debounceDuration, runFilter);
+    _searchDebounce = Timer(_debounceDuration, () {
+      runFilter();
+    });
   }
 
   addSqlData(String type, FoodItem item) async {
@@ -590,6 +519,8 @@ class LocalFoodController extends GetxController {
 }
 
 class FoodItem {
+  final int? id;
+  final FoodSource source;
   final String name;
   final String quantity;
   final int calories;
@@ -598,6 +529,8 @@ class FoodItem {
   final int fats;
 
   FoodItem({
+    this.id,
+    this.source = FoodSource.catalog,
     required this.name,
     required this.calories,
     required this.carbs,
@@ -606,25 +539,36 @@ class FoodItem {
     required this.fats,
   });
 
+  bool get isCustom => source == FoodSource.custom;
+
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'quantity': quantity,
       'calories': calories,
       'carbs': carbs,
       'protein': protein,
       'fats': fats,
+      'source': source.name,
     };
   }
 
   factory FoodItem.fromJson(Map<String, dynamic> json) {
     return FoodItem(
+      id: json['id'] as int?,
       name: json['name'] ?? '',
       calories: (json['calories'] ?? 0) as int,
       carbs: (json['carbs'] ?? 0) as int,
       protein: (json['protein'] ?? 0) as int,
       quantity: json['quantity'] ?? '',
       fats: (json['fats'] ?? 0) as int,
+      source:
+          (json['source'] as String?) == FoodSource.custom.name
+              ? FoodSource.custom
+              : FoodSource.catalog,
     );
   }
 }
+
+enum FoodSource { catalog, custom }
