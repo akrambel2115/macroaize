@@ -486,18 +486,19 @@ class _PremiumViewState extends State<PremiumView> {
                                                         ),
                                                       ),
                                                 ),
-                                                OutlinedButton.icon(
-                                                  onPressed: () async {
-                                                    await controller
-                                                        .restorePurchases();
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.restore,
-                                                    color:
+                                                TextButton(
+                                                  onPressed:
+                                                      () => controller
+                                                          .restorePurchases(),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor:
                                                         AppColor.neutralGrey600,
-                                                    size: 18,
+                                                    textStyle:
+                                                        const TextStyle(
+                                                          fontSize: 12,
+                                                        ),
                                                   ),
-                                                  label: Text(
+                                                  child: Text(
                                                     'restore_purchases'.tr,
                                                     style: TextStyle(
                                                       color:
@@ -506,22 +507,7 @@ class _PremiumViewState extends State<PremiumView> {
                                                       fontSize: 12,
                                                     ),
                                                   ),
-                                                  style:
-                                                      OutlinedButton.styleFrom(
-                                                        side: BorderSide(
-                                                          color: AppColor
-                                                              .neutralGrey600
-                                                              .withValues(
-                                                                alpha: 0.5,
-                                                              ),
-                                                        ),
-                                                        textStyle:
-                                                            const TextStyle(
-                                                              fontSize: 12,
-                                                            ),
-                                                      ),
                                                 ),
-                                                const SizedBox(width: 8),
                                                 GestureDetector(
                                                   onTap: () {
                                                     ScaffoldMessenger.of(
@@ -547,12 +533,12 @@ class _PremiumViewState extends State<PremiumView> {
                                                   },
                                                   child: Padding(
                                                     padding:
-                                                        const EdgeInsets.symmetric(
-                                                          vertical: 8,
+                                                        const EdgeInsets.only(
+                                                          left: 4,
                                                         ),
                                                     child: Icon(
                                                       Icons.info_outline,
-                                                      size: 18,
+                                                      size: 16,
                                                       color:
                                                           AppColor
                                                               .neutralGrey600,
