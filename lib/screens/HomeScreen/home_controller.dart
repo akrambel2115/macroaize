@@ -40,6 +40,9 @@ class HomeController extends GetxController {
   final StepTrackingService _stepTrackingService =
       Get.find<StepTrackingService>();
 
+  /// Directly exposes the service's reactive step counter for zero-latency UI binding.
+  RxInt get liveSteps => _stepTrackingService.dailySteps;
+
   // carousel page state
   final PageController trackingPageController = PageController();
   int trackingPageIndex = 0;
