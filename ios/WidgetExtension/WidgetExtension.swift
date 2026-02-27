@@ -3,6 +3,18 @@ import SwiftUI
 
 private let widgetGroupId = "group.com.macroaize.app"
 
+// MARK: - iOS 17 container background helper
+extension View {
+    @ViewBuilder
+    func if_ios17ClearBackground() -> some View {
+        if #available(iOS 17.0, *) {
+            self.containerBackground(.clear, for: .widget)
+        } else {
+            self
+        }
+    }
+}
+
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), calories: 0, carbs: 0, protein: 0, fats: 0, goal: 2000, progress: 0)
@@ -92,7 +104,7 @@ struct SmallWidgetView: View {
             }
         }
         .padding(8)
-        .containerBackground(.clear, for: .widget)
+        .if_ios17ClearBackground()
     }
 }
 
@@ -159,7 +171,7 @@ struct LargeWidgetView: View {
             }
         }
         .padding(12)
-        .containerBackground(.clear, for: .widget)
+        .if_ios17ClearBackground()
     }
 }
 
@@ -252,7 +264,7 @@ struct StreakWidgetView: View {
                 .foregroundColor(Color(red: 176/255, green: 179/255, blue: 184/255)) // #B0B3B8
         }
         .padding(16)
-        .containerBackground(.clear, for: .widget)
+        .if_ios17ClearBackground()
     }
 }
 
