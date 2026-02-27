@@ -15,6 +15,8 @@ class WorkoutView extends GetView<WorkoutController> {
   @override
   Widget build(BuildContext context) {
     final isDark = context.theme.brightness == Brightness.dark;
+    final systemOverlayStyle =
+        isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -26,6 +28,9 @@ class WorkoutView extends GetView<WorkoutController> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          systemOverlayStyle: systemOverlayStyle.copyWith(
+            statusBarColor: Colors.transparent,
+          ),
           leading: Padding(
             padding: const EdgeInsets.all(8),
             child: IconButton(
