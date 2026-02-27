@@ -22,8 +22,8 @@ class UsageService {
 
   bool _hydrated = false;
   bool _isPremium = false;
-  int _scanLimit = 2;
-  int _chatLimit = 5;
+  int _scanLimit = 1;
+  int _chatLimit = 2;
   int _scanCount = 0;
   int _chatCount = 0;
 
@@ -306,8 +306,8 @@ class UsageService {
   void _resetLocal() {
     _hydrated = false;
     _isPremium = false;
-    _scanLimit = 2;
-    _chatLimit = 5;
+    _scanLimit = 1;
+    _chatLimit = 2;
     _scanCount = 0;
     _chatCount = 0;
   }
@@ -346,8 +346,8 @@ class UsageData {
     return UsageData(
       scanCount: (map['scanCount'] as num?)?.toInt() ?? 0,
       chatCount: (map['chatCount'] as num?)?.toInt() ?? 0,
-      scanLimit: (map['scanLimit'] as num?)?.toInt() ?? 2,
-      chatLimit: (map['chatLimit'] as num?)?.toInt() ?? 5,
+      scanLimit: (map['scanLimit'] as num?)?.toInt() ?? 1,
+      chatLimit: (map['chatLimit'] as num?)?.toInt() ?? 2,
     );
   }
 
