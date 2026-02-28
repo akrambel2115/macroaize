@@ -158,11 +158,10 @@ class HistoryView extends GetView<HistoryController> {
                       background: AppColor.error.withValues(alpha: 0.1),
                       onTap: () {
                         showDeleteDialog(
+                          title: 'delete_meal_title'.tr,
+                          message: 'delete_meal_message'.tr,
                           onDelete: () {
-                            controller.dbHelper.deleteCalorieHistory(
-                              historyItem.id!,
-                            );
-                            controller.getHistory();
+                            controller.deleteMealAndUpdateStats(historyItem);
                           },
                           context: context,
                         );

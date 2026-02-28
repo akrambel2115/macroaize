@@ -23,7 +23,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../main_controller.dart';
 import '../../Model/chat_model.dart';
 import '../../Model/ai_model.dart';
-import 'package:macroaize/NetworkHelp/open_ai_calling.dart';
+import 'package:macroaize/NetworkHelp/ai_calling.dart';
 import 'package:macroaize/shared/services/app_config_service.dart';
 import '../../constant/font_family.dart';
 import '../../widgets/cropper_ui_settings.dart';

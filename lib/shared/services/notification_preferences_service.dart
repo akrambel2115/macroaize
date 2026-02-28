@@ -16,6 +16,7 @@ class NotificationPreferencesService extends GetxService {
   static const String _keyWeeklyRemindersEnabled = 'notif_pref_weekly_enabled';
   static const String _keyWeightRemindersEnabled = 'notif_pref_weight_enabled';
   static const String _keyGoalRemindersEnabled = 'notif_pref_goal_enabled';
+  static const String _keyWaterRemindersEnabled = 'notif_pref_water_enabled';
 
   static const String _keyBreakfastTime = 'notif_pref_breakfast_time';
   static const String _keyLunchTime = 'notif_pref_lunch_time';
@@ -29,6 +30,7 @@ class NotificationPreferencesService extends GetxService {
   final RxBool weeklyRemindersEnabled = true.obs;
   final RxBool weightRemindersEnabled = true.obs;
   final RxBool goalRemindersEnabled = true.obs;
+  final RxBool waterRemindersEnabled = true.obs;
 
   final RxString breakfastTime = '08:00'.obs;
   final RxString lunchTime = '12:00'.obs;
@@ -52,6 +54,8 @@ class NotificationPreferencesService extends GetxService {
           prefs.getBool(_keyWeightRemindersEnabled) ?? true;
       goalRemindersEnabled.value =
           prefs.getBool(_keyGoalRemindersEnabled) ?? true;
+      waterRemindersEnabled.value =
+          prefs.getBool(_keyWaterRemindersEnabled) ?? true;
 
       breakfastTime.value = prefs.getString(_keyBreakfastTime) ?? '08:00';
       lunchTime.value = prefs.getString(_keyLunchTime) ?? '12:00';
@@ -112,6 +116,13 @@ class NotificationPreferencesService extends GetxService {
     await _syncToFirestore();
   }
 
+  Future<void> setWaterRemindersEnabled(bool value) async {
+    waterRemindersEnabled.value = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyWaterRemindersEnabled, value);
+    await _syncToFirestore();
+  }
+
   Future<void> setBreakfastTime(String time) async {
     breakfastTime.value = time;
     final prefs = await SharedPreferences.getInstance();
@@ -156,6 +167,7 @@ class NotificationPreferencesService extends GetxService {
         'weeklyReminders': weeklyRemindersEnabled.value,
         'weightReminders': weightRemindersEnabled.value,
         'goalReminders': goalRemindersEnabled.value,
+        'waterReminders': waterRemindersEnabled.value,
         'breakfastHour': breakfast.hour,
         'lunchHour': lunch.hour,
         'dinnerHour': dinner.hour,

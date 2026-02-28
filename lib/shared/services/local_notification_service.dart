@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:macroaize/routes/app_routes.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'remote_config_service.dart';
 import 'notification_preferences_service.dart';
 
@@ -13,10 +15,17 @@ class LocalNotificationService extends GetxService {
   final RxBool _isInitialized = false.obs;
   static const int _idGoalProgress = 6001;
 
+  /// Water reminder IDs: 7001–7008 (one per time‑slot).
+  static const int _idWaterBase = 7001;
+  static const int _waterSlotCount = 8; // 8am,10am,12pm,2pm,4pm,6pm,8pm,10pm
+
   bool get isInitialized => _isInitialized.value;
 
   Future<LocalNotificationService> init() async {
     try {
+      // Initialize timezone data for scheduled notifications
+      tz.initializeTimeZones();
+
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher',
       );
@@ -129,5 +138,92 @@ class LocalNotificationService extends GetxService {
       ),
       payload: 'goal_progress',
     );
+  }
+
+  // ─── Water drink reminders ───────────────────────────────────────────
+
+  /// Schedules daily water reminders every [intervalHours] hours
+  /// from 8 AM to 10 PM (local time).
+  /// Previously scheduled water notifications are cancelled first.
+  Future<void> scheduleWaterReminders() async {
+    if (!_isInitialized.value) return;
+
+    final prefsService =
+        Get.isRegistered<NotificationPreferencesService>()
+            ? Get.find<NotificationPreferencesService>()
+            : null;
+
+    if (prefsService != null && !prefsService.waterRemindersEnabled.value) {
+      await cancelWaterReminders();
+      return;
+    }
+
+    final configService =
+        Get.isRegistered<RemoteConfigService>()
+            ? Get.find<RemoteConfigService>()
+            : null;
+
+    final int intervalHours = configService?.waterIntervalHours ?? 2;
+    final String message =
+        configService?.waterMsg ?? '💧 Stay hydrated! Drink a glass of water.';
+
+    // Cancel any existing water reminders before rescheduling
+    await cancelWaterReminders();
+
+    final now = tz.TZDateTime.now(tz.local);
+    const int startHour = 8;
+    const int endHour = 22; // 10 PM
+
+    int slot = 0;
+    for (int hour = startHour;
+        hour <= endHour && slot < _waterSlotCount;
+        hour += intervalHours) {
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+      );
+
+      // If the time has already passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      try {
+        await _notifications.zonedSchedule(
+          id: _idWaterBase + slot,
+          title: 'Water Reminder 💧',
+          body: message,
+          scheduledDate: scheduledDate,
+          notificationDetails: _getNotificationDetails(
+            channelId: 'calai_water',
+            channelName: 'Water Reminders',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time,
+          payload: 'water_reminder',
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Failed to schedule water reminder slot $slot: $e');
+        }
+      }
+      slot++;
+    }
+
+    if (kDebugMode) {
+      debugPrint('Scheduled $slot water reminders every ${intervalHours}h');
+    }
+  }
+
+  /// Cancels all scheduled water reminder notifications.
+  Future<void> cancelWaterReminders() async {
+    for (int i = 0; i < _waterSlotCount; i++) {
+      await _notifications.cancel(id: _idWaterBase + i);
+    }
   }
 }

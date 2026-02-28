@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/widgets/modern_card.dart';
 import 'package:macroaize/shared/services/notification_preferences_service.dart';
+import 'package:macroaize/shared/services/local_notification_service.dart';
 
 class NotificationSettingsView extends StatefulWidget {
   const NotificationSettingsView({super.key});
@@ -183,6 +184,29 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
                   value: _prefsService.weightRemindersEnabled.value,
                   onChanged:
                       (value) => _prefsService.setWeightRemindersEnabled(value),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Obx(
+                () => _buildSwitchTile(
+                  context,
+                  title: 'water_reminders'.tr,
+                  subtitle: 'water_reminders_desc'.tr,
+                  icon: Icons.water_drop_outlined,
+                  iconColor: Colors.lightBlue,
+                  value: _prefsService.waterRemindersEnabled.value,
+                  onChanged: (value) async {
+                    await _prefsService.setWaterRemindersEnabled(value);
+                    if (Get.isRegistered<LocalNotificationService>()) {
+                      final notifService =
+                          Get.find<LocalNotificationService>();
+                      if (value) {
+                        await notifService.scheduleWaterReminders();
+                      } else {
+                        await notifService.cancelWaterReminders();
+                      }
+                    }
+                  },
                 ),
               ),
             ],

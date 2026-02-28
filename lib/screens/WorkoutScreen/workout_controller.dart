@@ -276,135 +276,163 @@ class WorkoutController extends GetxController {
     }
   }
 
+  /// Post-navigation refresh so the home screen shows updated calories burned.
+  Future<void> _refreshHomeCaloriesBurned() async {
+    try {
+      if (Get.isRegistered<HomeController>()) {
+        final homeController = Get.find<HomeController>();
+        await homeController.getSqlCalorie();
+        homeController.update();
+      }
+    } catch (_) {
+      // controller missing
+    }
+  }
+
   Future<bool> _showCaloriesConfirmationDialog(int caloriesBurned) async {
     return await Get.dialog<bool>(
-          AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            backgroundColor: Get.theme.cardColor,
-            contentPadding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
-            actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            title: Text(
-              'confirm_workout'.tr,
-              style: Get.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'calories_burned_label'.tr,
-                  style: Get.textTheme.bodyMedium?.copyWith(
-                    color: AppColor.neutralGrey600,
-                    fontSize: 13,
+          Builder(
+            builder: (dialogContext) {
+              final isDark =
+                  Theme.of(dialogContext).brightness == Brightness.dark;
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                backgroundColor: Get.theme.cardColor,
+                contentPadding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
+                actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                title: Text(
+                  'confirm_workout'.tr,
+                  style: Get.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/icons/calorie.png',
-                        width: 40,
-                        height: 40,
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'calories_burned_label'.tr,
+                      style: Get.textTheme.bodyMedium?.copyWith(
+                        color: AppColor.neutralGrey600,
+                        fontSize: 13,
                       ),
-                      const SizedBox(width: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
+                    ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            '$caloriesBurned',
-                            style: Get.textTheme.displayMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 48,
-                              letterSpacing: -1,
-                            ),
+                          Image.asset(
+                            'assets/icons/calorie.png',
+                            width: 40,
+                            height: 40,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'cal',
-                            style: Get.textTheme.titleLarge?.copyWith(
-                              color: AppColor.neutralGrey500,
-                              fontWeight: FontWeight.w400,
-                            ),
+                          const SizedBox(width: 8),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '$caloriesBurned',
+                                style: Get.textTheme.displayMedium?.copyWith(
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColor.neutralGrey900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 48,
+                                  letterSpacing: -1,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'cal',
+                                style: Get.textTheme.titleLarge?.copyWith(
+                                  color: AppColor.neutralGrey500,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.trending_up, color: AppColor.success, size: 16),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        '+$caloriesBurned cal added to your daily allowance',
-                        style: Get.textTheme.bodyMedium?.copyWith(
-                          color: AppColor.success,
-                          fontSize: 14,
-                          height: 1.4,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.local_fire_department,
+                          color: AppColor.primaryOrange,
+                          size: 16,
                         ),
-                      ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'workout_cal_burned_msg'
+                                .trParams({'cal': '$caloriesBurned'}),
+                            style: Get.textTheme.bodyMedium?.copyWith(
+                              color: AppColor.primaryOrange,
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(result: false),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                actions: [
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.of(dialogContext).pop(false),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'cancel'.tr,
+                      style: Get.textTheme.bodyLarge?.copyWith(
+                        color: AppColor.neutralGrey500,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'cancel'.tr,
-                  style: Get.textTheme.bodyLarge?.copyWith(
-                    color: AppColor.neutralGrey500,
-                    fontWeight: FontWeight.w500,
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () =>
+                        Navigator.of(dialogContext).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.primaryOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'confirm_save'.tr,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () => Get.back(result: true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'confirm_save'.tr,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
           barrierDismissible: false,
         ) ??
@@ -439,6 +467,8 @@ class WorkoutController extends GetxController {
       if (!_isClosed) {
         await safeBack();
       }
+      // Refresh home after navigating back so the UI is visible
+      _refreshHomeCaloriesBurned();
     } catch (_) {
       NotificationService.showError('failed_to_save_workout');
       saveError.value = 'failed_to_save_workout'.tr;

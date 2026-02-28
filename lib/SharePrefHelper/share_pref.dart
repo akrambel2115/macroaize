@@ -20,7 +20,7 @@ class SharedPref {
 
   static saveString(String key, value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(key, (value));
+    await prefs.setString(key, (value));
   }
 
   static readString(String key) async {
@@ -30,7 +30,7 @@ class SharedPref {
 
   static saveInt(String key, value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setInt(key, value);
+    await prefs.setInt(key, value);
   }
 
   static readInt(String key) async {
@@ -45,12 +45,12 @@ class SharedPref {
 
   static save(String key, value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(key, json.encode(value));
+    await prefs.setString(key, json.encode(value));
   }
 
   static saveList(String key, value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(key, (value));
+    await prefs.setStringList(key, (value));
   }
 
   static readList(String key) async {
@@ -69,7 +69,7 @@ class SharedPref {
 
   static saveBool(String key, value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool(key, value);
+    await prefs.setBool(key, value);
   }
 
   static remove(String key) async {

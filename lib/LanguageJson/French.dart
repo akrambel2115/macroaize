@@ -18,6 +18,9 @@ const Map<String, String> french = {
   "delete_item": "Supprimer l'élément",
   "delete_item_confirmation":
       "Êtes-vous sûr de vouloir supprimer cet élément ?",
+  "delete_meal_title": "Supprimer le repas",
+  "delete_meal_message": "Supprimer ce repas déduira ses calories, protéines, glucides et lipides de vos totaux quotidiens. Êtes-vous sûr ?",
+  "delete_meal_success": "Repas supprimé et statistiques mises à jour",
   "Delete Item": "Supprimer l'élément",
   "Are you sure you want to delete this item?":
       "Êtes-vous sûr de vouloir supprimer cet élément ?",
@@ -1058,6 +1061,7 @@ const Map<String, String> french = {
       "Cet entraînement brûlera des calories et augmentera votre quota calorique quotidien.",
   "remaining_calories_increase": "Vos calories restantes augmenteront",
   "confirm_save": "Confirmer et enregistrer",
+  "workout_cal_burned_msg": "+@cal cal ajoutées aux calories brûlées",
   "description_too_short":
       "Description trop courte. Veuillez fournir plus de détails.",
   "workout_saved": "Entraînement enregistré avec succès !",
@@ -1117,6 +1121,9 @@ const Map<String, String> french = {
   "dinner_time": "Dîner",
   "water_reminders": "Rappels d'hydratation",
   "water_reminders_desc": "Restez hydraté tout au long de la journée",
+  "enter_valid_number": "Veuillez entrer un nombre valide",
+  "minimum_value": "Minimum :",
+  "maximum_value": "Maximum :",
   "water_interval": "Intervalle de rappel",
   "water_interval_desc": "Fréquence des rappels pour boire de l'eau",
   "other_notifications": "Autres notifications",

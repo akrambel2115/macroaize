@@ -3,6 +3,19 @@ import SwiftUI
 
 private let widgetGroupId = "group.com.macroaize.app"
 
+// MARK: - Adaptive text colors for light/dark mode
+/// Primary text: white in dark mode, medium gray in light mode.
+private func adaptiveTextColor(_ colorScheme: ColorScheme) -> Color {
+    colorScheme == .dark ? .white : Color(red: 99/255, green: 99/255, blue: 102/255)
+}
+
+/// Secondary text: muted gray in both modes.
+private func adaptiveSecondaryColor(_ colorScheme: ColorScheme) -> Color {
+    colorScheme == .dark
+        ? Color(red: 128/255, green: 134/255, blue: 139/255)
+        : Color(red: 142/255, green: 142/255, blue: 147/255)
+}
+
 // MARK: - iOS 17 container background helper
 extension View {
     @ViewBuilder
@@ -54,12 +67,13 @@ struct SimpleEntry: TimelineEntry {
 
 struct SmallWidgetView: View {
     var entry: Provider.Entry
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack {
             Text("Daily Progress")
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(adaptiveTextColor(colorScheme))
             
             Spacer()
             
@@ -81,10 +95,10 @@ struct SmallWidgetView: View {
                 VStack(spacing: 0) {
                     Text("\(max(0, entry.goal - entry.calories))")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(adaptiveTextColor(colorScheme))
                     Text("Left")
                         .font(.system(size: 10))
-                        .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255)) // neutralGrey600
+                        .foregroundColor(adaptiveSecondaryColor(colorScheme))
                 }
             }
             .frame(width: 90, height: 90)
@@ -110,6 +124,7 @@ struct SmallWidgetView: View {
 
 struct LargeWidgetView: View {
     var entry: Provider.Entry
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack(spacing: 16) {
@@ -117,7 +132,7 @@ struct LargeWidgetView: View {
             VStack {
                 Text("Calories")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(adaptiveTextColor(colorScheme))
                 
                 Spacer()
                 
@@ -139,10 +154,10 @@ struct LargeWidgetView: View {
                     VStack(spacing: 0) {
                         Text("\(max(0, entry.goal - entry.calories))")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(adaptiveTextColor(colorScheme))
                         Text("Left")
                             .font(.system(size: 10))
-                            .foregroundColor(Color(red: 128/255, green: 134/255, blue: 139/255))
+                            .foregroundColor(adaptiveSecondaryColor(colorScheme))
                     }
                 }
                 .frame(width: 80, height: 80)
@@ -152,9 +167,9 @@ struct LargeWidgetView: View {
             
             // Right: Macros
             VStack(alignment: .leading, spacing: 6) {
-                MacroRow(label: "Protein", value: entry.protein, color: Color(red: 255/255, green: 107/255, blue: 107/255), max: 150, icon: "protein")
-                MacroRow(label: "Carbs", value: entry.carbs, color: Color(red: 78/255, green: 205/255, blue: 196/255), max: 250, icon: "carb")
-                MacroRow(label: "Fats", value: entry.fats, color: Color(red: 255/255, green: 230/255, blue: 109/255), max: 80, icon: "fat")
+                MacroRow(label: "Protein", value: entry.protein, color: Color(red: 255/255, green: 107/255, blue: 107/255), max: 150, icon: "protein", colorScheme: colorScheme)
+                MacroRow(label: "Carbs", value: entry.carbs, color: Color(red: 78/255, green: 205/255, blue: 196/255), max: 250, icon: "carb", colorScheme: colorScheme)
+                MacroRow(label: "Fats", value: entry.fats, color: Color(red: 255/255, green: 230/255, blue: 109/255), max: 80, icon: "fat", colorScheme: colorScheme)
                 
                 Link(destination: URL(string: "macroaize://log")!) {
                     ZStack {
@@ -181,6 +196,7 @@ struct MacroRow: View {
     let color: Color
     let max: Int
     let icon: String
+    let colorScheme: ColorScheme
     
     var body: some View {
         HStack(spacing: 8) {
@@ -192,7 +208,7 @@ struct MacroRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(label): \(value)g")
                     .font(.system(size: 10))
-                    .foregroundColor(.white)
+                    .foregroundColor(adaptiveTextColor(colorScheme))
                 
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
@@ -246,6 +262,7 @@ struct StreakWidgetProvider: TimelineProvider {
 
 struct StreakWidgetView: View {
     var entry: StreakWidgetProvider.Entry
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
@@ -257,11 +274,11 @@ struct StreakWidgetView: View {
             
             Text("\(entry.streakCount)")
                 .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(adaptiveTextColor(colorScheme))
             
             Text("Day Streak")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(red: 176/255, green: 179/255, blue: 184/255)) // #B0B3B8
+                .foregroundColor(adaptiveSecondaryColor(colorScheme))
         }
         .padding(16)
         .if_ios17ClearBackground()

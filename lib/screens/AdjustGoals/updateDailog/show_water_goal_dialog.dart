@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/constant/font_family.dart';
-import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 const int _minWaterGoalMl = 2000;
 const int _maxWaterGoalMl = 4000;
@@ -101,7 +100,7 @@ void showWaterGoalDialog(
           ),
           actions: [
             TextButton(
-              onPressed: () => safeBack(),
+              onPressed: () => Navigator.of(ctx).pop(),
               child: Text(
                 'Cancel'.tr,
                 style: TextStyle(
@@ -114,7 +113,7 @@ void showWaterGoalDialog(
             TextButton(
               onPressed: () {
                 onSave(tempGoal);
-                safeBack();
+                Navigator.of(ctx).pop();
               },
               child: Text(
                 'Save'.tr,

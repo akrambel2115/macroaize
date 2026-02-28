@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:macroaize/Model/calorie_history_model.dart';
 import 'package:macroaize/Model/sql_calorie_model.dart';
-import 'package:macroaize/NetworkHelp/open_ai_calling.dart';
+import 'package:macroaize/NetworkHelp/ai_calling.dart';
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
 import 'package:macroaize/constant/database_helper.dart';
 import 'package:macroaize/routes/app_routes.dart';
@@ -529,7 +529,8 @@ class ScanCalorieController extends GetxController {
           list.map<MealBreakdownItem>((it) {
             final name = (it['name'] ?? '').toString();
             final en = (it['english_name'] ?? '').toString();
-            final portionType = (it['portionType'] ?? '').toString();
+            final bool isLiquid = it['isLiquid'] == true;
+            var portionType = (it['portionType'] ?? '').toString();
             final count = (it['count'] ?? 1);
             final doubleCount =
                 (count is num)
@@ -540,6 +541,11 @@ class ScanCalorieController extends GetxController {
                 (ew is num)
                     ? ew.toDouble()
                     : double.tryParse(ew.toString()) ?? 0.0;
+
+            // If AI flagged the item as liquid, enforce ml
+            if (isLiquid && portionType != 'ml') {
+              portionType = 'ml';
+            }
 
             String estimatedAmount;
             if (portionType == 'pieces' && doubleCount > 0) {
@@ -580,6 +586,9 @@ class ScanCalorieController extends GetxController {
     const double end = 0.85;
     final total = list.length;
 
+    // Track indices that need AI fallback so we can batch them.
+    final List<int> fallbackIndices = [];
+
     for (var i = 0; i < list.length; i++) {
       var it = list[i];
       // Ensure grams > 0 before any nutrition calc
@@ -604,17 +613,21 @@ class ScanCalorieController extends GetxController {
                   .recalcFromPer100g();
           list[i] = updated;
         } else {
-          // USDA returned no results — try AI estimation fallback
-          list[i] = await _applyAiFallback(it);
+          fallbackIndices.add(i);
         }
       } catch (e) {
         log('USDA_ERROR for ${it.englishName} => $e');
-        // USDA call failed — try AI estimation fallback
-        list[i] = await _applyAiFallback(it);
+        fallbackIndices.add(i);
       }
 
       final progress = start + (((i + 1) / total) * (end - start));
       _setScanProgress(progress, phase: 'Enriching item ${i + 1}/$total...');
+    }
+
+    // Batch AI fallback for all items that missed USDA.
+    if (fallbackIndices.isNotEmpty) {
+      _setScanProgress(0.86, phase: 'AI estimating remaining items...');
+      await _applyAiFallbackBatch(list, fallbackIndices);
     }
   }
 
@@ -667,6 +680,68 @@ class ScanCalorieController extends GetxController {
     // Last resort: mark as estimated with no data
     log('NO_NUTRITION_DATA for ${it.englishName} — all zeros');
     return it.copyWith(usdaVerified: false).recalcFromPer100g();
+  }
+
+  /// Batch AI fallback: sends all missing items in one API call instead of N.
+  Future<void> _applyAiFallbackBatch(
+    List<MealBreakdownItem> list,
+    List<int> indices,
+  ) async {
+    // Separate items that have hardcoded fallbacks from those needing AI.
+    final List<int> aiIndices = [];
+    for (final idx in indices) {
+      var it = list[idx];
+      if (it.grams <= 0) {
+        it = it.copyWith(grams: 100.0);
+        list[idx] = it;
+      }
+      final nameLower = it.englishName.toLowerCase();
+      if (nameLower.contains('egg')) {
+        log('USDA_FALLBACK => applied egg fallback for ${it.englishName}');
+        list[idx] = it
+            .copyWith(
+              usdaVerified: false,
+              kcalPer100g: 146.0,
+              proteinPer100g: 12.0,
+              carbsPer100g: 1.1,
+              fatPer100g: 10.0,
+            )
+            .recalcFromPer100g();
+      } else {
+        aiIndices.add(idx);
+      }
+    }
+
+    if (aiIndices.isEmpty) return;
+
+    try {
+      final names = aiIndices.map((i) => list[i].englishName).toList();
+      final results = await OpenAiCalling.estimateNutritionBatch(names);
+      for (var j = 0; j < aiIndices.length; j++) {
+        final idx = aiIndices[j];
+        final nutrition = (j < results.length) ? results[j] : null;
+        if (nutrition != null && (nutrition['kcalPer100g'] ?? 0) > 0) {
+          log('AI_BATCH_FALLBACK => ${list[idx].englishName}: $nutrition');
+          list[idx] = list[idx]
+              .copyWith(
+                usdaVerified: false,
+                kcalPer100g: nutrition['kcalPer100g']!,
+                proteinPer100g: nutrition['proteinPer100g']!,
+                carbsPer100g: nutrition['carbsPer100g']!,
+                fatPer100g: nutrition['fatPer100g']!,
+              )
+              .recalcFromPer100g();
+        } else {
+          log('NO_NUTRITION_DATA for ${list[idx].englishName} — all zeros');
+          list[idx] = list[idx].copyWith(usdaVerified: false).recalcFromPer100g();
+        }
+      }
+    } catch (e) {
+      log('AI_BATCH_FALLBACK_ERROR => $e, falling back to per-item AI');
+      for (final idx in aiIndices) {
+        list[idx] = await _applyAiFallback(list[idx]);
+      }
+    }
   }
 
   // item editing

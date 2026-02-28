@@ -60,17 +60,17 @@ class WellnessSyncService extends GetxService {
         isConnected.value = granted ?? false;
       } else {
         // iOS: hasPermissions always returns null due to HealthKit privacy.
-        // Use a persisted flag and verify with a lightweight data read.
+        // Trust the persisted flag immediately so the UI shows "Connected"
+        // right away, then verify HealthKit access in the background.
         isAvailable.value = true;
         final savedFlag = await SharedPref.readBool(_iosConnectedKey) ?? false;
         if (savedFlag) {
-          // Verify the permission is still valid with a quick step read.
-          final stillValid = await _verifyIosPermission();
-          isConnected.value = stillValid;
-          if (!stillValid) {
-            // User revoked permission in iOS Settings – clear the flag.
-            await SharedPref.saveBool(_iosConnectedKey, false);
-          }
+          isConnected.value = true;
+          statusMessage.value = 'Connected';
+          // Verify asynchronously — if the user revoked permission in iOS
+          // Settings, this will clear the flag after a short grace period.
+          _verifyIosPermissionInBackground();
+          return; // skip the statusMessage assignment below
         } else {
           isConnected.value = false;
         }
@@ -81,6 +81,25 @@ class WellnessSyncService extends GetxService {
       isConnected.value = false;
       statusMessage.value = 'Permission unavailable';
     }
+  }
+
+  /// Verify HealthKit access in the background with retries.
+  ///
+  /// On cold start HealthKit may not be fully ready immediately after
+  /// [Health.configure], so we give it a few seconds before attempting a
+  /// lightweight step read.  Only if *all* attempts fail do we clear the
+  /// persisted flag (the user likely revoked permission in iOS Settings).
+  Future<void> _verifyIosPermissionInBackground() async {
+    const retries = 3;
+    const delays = [Duration(seconds: 2), Duration(seconds: 3), Duration(seconds: 5)];
+    for (var i = 0; i < retries; i++) {
+      await Future.delayed(delays[i]);
+      if (await _verifyIosPermission()) return; // still valid
+    }
+    // All retries exhausted — permission was likely revoked.
+    isConnected.value = false;
+    statusMessage.value = 'Not connected';
+    await SharedPref.saveBool(_iosConnectedKey, false);
   }
 
   /// Attempt a lightweight HealthKit read to verify permission is still granted.

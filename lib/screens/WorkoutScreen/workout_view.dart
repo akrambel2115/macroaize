@@ -267,52 +267,28 @@ class WorkoutView extends GetView<WorkoutController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColor.primaryOrange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.auto_awesome,
-                      size: 14,
-                      color: AppColor.primaryOrange,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'analyze_with_ai'.tr,
-                      style: TextStyle(
-                        color: AppColor.primaryOrange,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+              Expanded(
+                child: Text(
+                  workout.summary,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               TextButton(
                 onPressed: controller.clearParsedWorkout,
                 style: TextButton.styleFrom(
                   foregroundColor: AppColor.neutralGrey600,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text('edit'.tr),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            workout.summary,
-            style: context.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
           ),
           const SizedBox(height: 14),
           Wrap(
@@ -376,6 +352,7 @@ class WorkoutView extends GetView<WorkoutController> {
                             exercise.formattedDescription,
                             style: context.textTheme.bodySmall?.copyWith(
                               color: AppColor.neutralGrey500,
+                              fontSize: 11,
                             ),
                           ),
                       ],

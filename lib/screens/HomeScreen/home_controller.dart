@@ -17,6 +17,7 @@ import 'package:macroaize/screens/AdjustGoals/updateDailog/show_update_goal_dial
 import 'package:macroaize/screens/AdjustGoals/updateDailog/show_water_goal_dialog.dart';
 import 'package:macroaize/screens/AnalyticsScreen/update_weight.dart';
 import 'package:macroaize/shared/services/weight_update_service.dart';
+import 'package:macroaize/shared/services/local_notification_service.dart';
 
 class HomeController extends GetxController {
   RxInt streakCount = 0.obs;
@@ -111,6 +112,8 @@ class HomeController extends GetxController {
     _updateWidgets();
     // Sync streak widget with current app data
     StreakService().syncWidget();
+    // Schedule daily water reminders (skips if disabled or goal already met)
+    _scheduleWaterRemindersIfNeeded();
     update();
   }
 
@@ -155,7 +158,30 @@ class HomeController extends GetxController {
       waterGlasses++;
       _saveWaterData();
       update();
+
+      // Cancel water reminders when daily goal is reached
+      if (waterGlasses >= maxGlasses) {
+        _cancelWaterRemindersForToday();
+      }
     }
+  }
+
+  Future<void> _cancelWaterRemindersForToday() async {
+    if (Get.isRegistered<LocalNotificationService>()) {
+      await Get.find<LocalNotificationService>().cancelWaterReminders();
+    }
+  }
+
+  Future<void> _scheduleWaterRemindersIfNeeded() async {
+    if (!Get.isRegistered<LocalNotificationService>()) return;
+    final notifService = Get.find<LocalNotificationService>();
+
+    // If user already hit the water goal today, don't schedule
+    if (waterGlasses >= maxGlasses) {
+      await notifService.cancelWaterReminders();
+      return;
+    }
+    await notifService.scheduleWaterReminders();
   }
 
   void removeWaterGlass() {
@@ -309,17 +335,17 @@ class HomeController extends GetxController {
     showUpdateGoalDialog(
       ConstantUserMaster.stepGoal,
       (newGoal) async {
-        if (newGoal > 0) {
-          ConstantUserMaster.stepGoal = newGoal;
-          await SharedPref.saveInt(
-            SharePrefKey.stepGoal,
-            ConstantUserMaster.stepGoal,
-          );
-          update();
-        }
+        ConstantUserMaster.stepGoal = newGoal;
+        await SharedPref.saveInt(
+          SharePrefKey.stepGoal,
+          ConstantUserMaster.stepGoal,
+        );
+        update();
       },
       Get.context!,
       'Update Step Goal'.tr,
+      minValue: 1000,
+      maxValue: 100000,
     );
   }
 

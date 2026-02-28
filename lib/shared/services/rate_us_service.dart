@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,6 +46,7 @@ class RateUsService {
     if (newCount >= _kRequiredActionCount) {
       final InAppReview inAppReview = InAppReview.instance;
       final isAvailable = await inAppReview.isAvailable();
+      debugPrint('🌟 RateUs: isAvailable=$isAvailable (actionCount=$newCount)');
 
       if (isAvailable) {
         // mark shown before request
@@ -64,10 +68,25 @@ class RateUsService {
 
     final InAppReview inAppReview = InAppReview.instance;
     final isAvailable = await inAppReview.isAvailable();
+    debugPrint('🌟 RateUs onboarding: isAvailable=$isAvailable');
 
     if (isAvailable) {
-      await prefs.setBool(_kRateUsShownKey, true);
+      // Wait for any ongoing transitions to fully settle before presenting
+      // the review dialog – iOS silently drops the request when the UI is
+      // still mid-transition.
+      await Future.delayed(const Duration(seconds: 2));
+
       await inAppReview.requestReview();
+
+      // Mark as shown *after* the request so a throttled iOS prompt can
+      // be retried on the next eligible trigger.
+      await prefs.setBool(_kRateUsShownKey, true);
+
+      // Give the native review dialog time to render before the caller
+      // navigates to a new screen (which would dismiss it on iOS).
+      if (Platform.isIOS) {
+        await Future.delayed(const Duration(seconds: 1));
+      }
     }
   }
 }  

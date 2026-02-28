@@ -989,6 +989,7 @@ const Map<String, String> arabic = {
       "سيحرق هذا التمرين السعرات الحرارية ويزيد من مخصصك اليومي من السعرات الحرارية.",
   "remaining_calories_increase": "ستزيد السعرات الحرارية المتبقية لديك",
   "confirm_save": "تأكيد وحفظ",
+  "workout_cal_burned_msg": "+@cal سعرة حرارية أضيفت إلى السعرات المحروقة",
   "description_too_short": "الوصف قصير جداً. يرجى تقديم المزيد من التفاصيل.",
   "workout_saved": "تم حفظ التمرين بنجاح!",
 
@@ -1041,6 +1042,9 @@ const Map<String, String> arabic = {
   "dinner_time": "العشاء",
   "water_reminders": "تذكيرات الماء",
   "water_reminders_desc": "حافظ على ترطيب جسمك طوال اليوم",
+  "enter_valid_number": "يرجى إدخال رقم صحيح",
+  "minimum_value": "الحد الأدنى:",
+  "maximum_value": "الحد الأقصى:",
   "water_interval": "فترة التذكير",
   "water_interval_desc": "كم مرة تريد تذكيرك بشرب الماء",
   "other_notifications": "إشعارات أخرى",
