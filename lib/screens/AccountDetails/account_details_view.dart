@@ -241,7 +241,7 @@ class AccountDetailsView extends StatelessWidget {
                                     NotificationService.showSuccess(
                                       'password_changed_message'.tr,
                                     );
-                                    Get.offAllNamed('/login');
+                                    Get.offAllNamed(Routes.signUpView);
                                   }
                                 },
                                 style: TextButton.styleFrom(

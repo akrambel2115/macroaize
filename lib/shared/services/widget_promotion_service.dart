@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:macroaize/constant/app_color.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 import 'package:macroaize/widgets/widget_preview_cards.dart';
 
@@ -30,15 +31,11 @@ class WidgetPromotionService {
   }
 
   /// Dismisses the promotion popup safely on both platforms.
-  /// Uses Navigator.pop via overlayContext to bypass GetX state issues
-  /// with PopScope(canPop: false) on the underlying route.
+  /// Uses the shared [safeBack] helper which pops via the overlay
+  /// navigator, bypassing GetX state issues with
+  /// PopScope(canPop: false) on the underlying route.
   void _dismiss() {
-    final ctx = Get.overlayContext;
-    if (ctx != null) {
-      Navigator.of(ctx).pop();
-    } else {
-      Get.back();
-    }
+    safeBack();
   }
 
   void _showAndroidInstructionDialog() {

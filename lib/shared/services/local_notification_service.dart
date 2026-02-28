@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'remote_config_service.dart';
 import 'notification_preferences_service.dart';
 
@@ -54,7 +55,7 @@ class LocalNotificationService extends GetxService {
   void _onNotificationTap(NotificationResponse response) {
     final payload = response.payload;
     if (payload != null) {
-      Get.toNamed('/home');
+      Get.toNamed(Routes.leadingView);
     }
   }
 

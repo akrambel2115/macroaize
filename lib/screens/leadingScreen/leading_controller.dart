@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:macroaize/shared/widgets/premium_required_dialog.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 import 'package:macroaize/screens/AnalyticsScreen/analytics_controller.dart';
 import 'package:macroaize/screens/RecipesScreen/recipes_controller.dart';
 import 'package:macroaize/shared/services/app_user_service.dart';
@@ -77,10 +78,9 @@ class LeadingController extends GetxController {
           ),
         ),
         onUpgrade: () {
-          Get.back();
-          Get.toNamed(Routes.premiumView);
+          safeBackAndNavigate(Routes.premiumView);
         },
-        onCancel: () => Get.back(),
+        onCancel: () => safeBack(),
       ),
     );
   }

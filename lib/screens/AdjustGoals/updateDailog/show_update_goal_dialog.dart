@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:macroaize/constant/font_family.dart';
 import 'package:get/get.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 void showUpdateGoalDialog(
   int currentGoal,
@@ -48,7 +49,7 @@ void showUpdateGoalDialog(
       ),
       actions: [
         TextButton(
-          onPressed: () => Get.back(),
+          onPressed: () => safeBack(),
           child: Text(
             "Cancel".tr,
             style: TextStyle(
@@ -62,7 +63,7 @@ void showUpdateGoalDialog(
           onPressed: () {
             int newGoal = int.tryParse(controller.text) ?? currentGoal;
             onSave(newGoal);
-            Get.back(); // Close dialog
+            safeBack(); // Close dialog
           },
           child: Text(
             "Save".tr,

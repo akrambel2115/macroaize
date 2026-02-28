@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 void showExitConfirmationDialog({required BuildContext context}) {
   Get.dialog(
@@ -21,7 +22,7 @@ void showExitConfirmationDialog({required BuildContext context}) {
             "Cancel".tr,
             style: TextStyle(color: Colors.green),
           ),
-          onPressed: () => Get.back(),
+          onPressed: () => safeBack(),
         ),
         TextButton(
           child: Text(
@@ -30,7 +31,7 @@ void showExitConfirmationDialog({required BuildContext context}) {
           ),
           onPressed: () {
             // Close the dialog first
-            Get.back();
+            safeBack();
 
                   // Exit the app using SystemNavigator
                   SystemNavigator.pop();

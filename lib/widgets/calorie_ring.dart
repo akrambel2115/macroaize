@@ -88,7 +88,8 @@ class RoundedArcPainter extends CustomPainter {
           ..isAntiAlias = true;
 
     final startAngle = -math.pi / 2;
-    final sweepAngle = 2 * math.pi * progress;
+    final clampedProgress = progress.isFinite ? progress.clamp(0.0, 1.0) : 0.0;
+    final sweepAngle = 2 * math.pi * clampedProgress;
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),

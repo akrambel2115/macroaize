@@ -105,11 +105,13 @@ class AppPages {
       page: () => SignUpView(),
       binding: SignUpBinding(),
       customTransition: DirectionalTransition(),
+      popGesture: false, // iOS: child views use PopScope(canPop:false)
     ),
     GetPage(
       name: Paths.leadingView,
       page: () => LeadingView(),
       binding: LeadingBinding(),
+      popGesture: false, // iOS: PopScope(canPop:false) on this route
     ),
     GetPage(
       name: Paths.homeView,
@@ -143,6 +145,7 @@ class AppPages {
       name: Paths.personalDetailsView,
       page: () => PersonalDetailsView(),
       binding: PersonalDetailsBinding(),
+      popGesture: false, // iOS: conditional canPop based on selectedView
     ),
     GetPage(
       name: Paths.scanCalorieView,
@@ -159,6 +162,7 @@ class AppPages {
       name: Paths.premiumView,
       page: () => PremiumView(),
       binding: PremiumBinding(),
+      popGesture: false, // iOS: conditional canPop with delay
     ),
     GetPage(
       name: Paths.chatView,

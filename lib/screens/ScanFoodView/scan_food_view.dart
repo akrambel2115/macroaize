@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/screens/ScanFoodView/scan_food_controller.dart';
@@ -28,8 +29,19 @@ class ScanFoodView extends GetView<ScanFoodController> {
 
           return Stack(
             children: [
-              // camera preview
-              if (controller.cameraController?.value.isInitialized == true)
+              // camera preview — barcode mode uses MobileScanner,
+              // photo mode uses CameraPreview from the camera package.
+              if (controller.isBarcodeMode &&
+                  controller.mobileScannerController != null)
+                Positioned.fill(
+                  child: MobileScanner(
+                    controller: controller.mobileScannerController!,
+                    onDetect: controller.onBarcodeDetected,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              else if (!controller.isBarcodeMode &&
+                  controller.cameraController?.value.isInitialized == true)
                 Positioned.fill(
                   child: CameraPreview(controller.cameraController!),
                 ),
@@ -66,8 +78,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                                   ? controller.navigateToPremium
                                   : null,
                         ),
-                        if (controller.cameraController?.value.isInitialized !=
-                            true)
+                        if (_isCameraNotReady(controller))
                           Container(
                             width: 300,
                             height: 260,
@@ -107,10 +118,12 @@ class ScanFoodView extends GetView<ScanFoodController> {
                   child: GestureDetector(
                     onTap: () {
                       try {
-                        if (Get.isRegistered<LeadingController>()) {
-                          Get.find<LeadingController>().changeTabIndex(0);
-                        } else {
+                        // Always pop the route properly so the navigation
+                        // stack stays consistent on iOS.
+                        if (Get.key.currentState?.canPop() ?? false) {
                           Get.back();
+                        } else if (Get.isRegistered<LeadingController>()) {
+                          Get.find<LeadingController>().changeTabIndex(0);
                         }
                       } catch (_) {
                         Get.back();
@@ -218,6 +231,14 @@ class ScanFoodView extends GetView<ScanFoodController> {
         },
       ),
     );
+  }
+
+  /// Returns `true` when neither camera is ready for the current mode.
+  bool _isCameraNotReady(ScanFoodController controller) {
+    if (controller.isBarcodeMode) {
+      return controller.mobileScannerController == null;
+    }
+    return controller.cameraController?.value.isInitialized != true;
   }
 
   Widget _buildControlButtons(
@@ -411,7 +432,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                   const Spacer(),
 
                   // continue button
-                  ContinueButton(onTap: () => Get.back()),
+                  ContinueButton(onTap: () => Navigator.of(context).pop()),
                 ],
               ),
             ),

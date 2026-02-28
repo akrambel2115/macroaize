@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 void showDeleteDialog({
   required VoidCallback onDelete,
@@ -20,13 +21,13 @@ void showDeleteDialog({
       ),
       actions: [
         TextButton(
-          onPressed: () => Get.back(),
+          onPressed: () => safeBack(),
           child: Text('cancel'.tr, style: const TextStyle(color: Colors.green)),
         ),
         TextButton(
           onPressed: () {
             onDelete();
-            Get.back();
+            safeBack();
           },
           child: Text('delete'.tr, style: const TextStyle(color: Colors.red)),
         ),

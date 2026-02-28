@@ -1,4 +1,5 @@
 import 'package:macroaize/shared/widgets/premium_required_dialog.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -457,10 +458,9 @@ class ChatController extends GetxController {
           ),
         ),
         onUpgrade: () {
-          Get.back();
-          Get.toNamed(Routes.premiumView);
+          safeBackAndNavigate(Routes.premiumView);
         },
-        onCancel: () => Get.back(),
+        onCancel: () => safeBack(),
       ),
     );
   }

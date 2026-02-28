@@ -704,6 +704,9 @@ const Map<String, String> english = {
   "tutorial_add_food_title": "Track Your Meals",
   "tutorial_add_food_description":
       "Tap the '+' button to add food to your daily log. You can search, scan, or add custom foods.",
+  "tutorial_tracking_carousel_title": "Track Your Wellness",
+  "tutorial_tracking_carousel_description":
+      "Swipe to track water intake, steps, activity, and weight all in one place. Stay on top of your health goals!",
   "tutorial_scanner_title": "AI Food Scanner",
   "tutorial_scanner_description":
       "Use our AI-powered scanner to instantly analyze your food and get accurate nutrition information.",

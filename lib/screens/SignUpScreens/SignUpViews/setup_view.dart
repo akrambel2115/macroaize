@@ -12,6 +12,11 @@ class SetupView extends GetView<SignUpController> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false, // Block back button during plan generation
+      onPopInvokedWithResult: (didPop, result) {
+        // Intentionally empty — plan generation must complete.
+        // This handler prevents iOS from freezing the gesture
+        // recogniser when a swipe-back attempt is blocked.
+      },
       child: Scaffold(
         backgroundColor: context.theme.scaffoldBackgroundColor,
         body: SafeArea(

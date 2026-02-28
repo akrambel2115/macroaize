@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'meal_sync_service.dart';
 import 'notification_preferences_service.dart';
 
@@ -168,18 +169,16 @@ class FirebaseMessagingService extends GetxService {
 
     switch (type) {
       case 'promo_used':
-        if (Get.currentRoute != '/influencer') {
-          Get.toNamed('/influencer');
-        }
+        // Route not yet implemented — navigate to leading view instead.
+        Get.toNamed(Routes.leadingView);
         break;
       case 'goal_progress':
-        if (Get.currentRoute != '/progress') {
-          Get.toNamed('/progress');
-        }
+        // Route not yet implemented — navigate to leading view instead.
+        Get.toNamed(Routes.leadingView);
         break;
       case 'meal_reminder':
-        if (Get.currentRoute != '/food-tracker') {
-          Get.toNamed('/food-tracker');
+        if (Get.currentRoute != Routes.leadingView) {
+          Get.toNamed(Routes.leadingView);
         }
         break;
       default:

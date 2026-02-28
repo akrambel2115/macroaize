@@ -61,6 +61,7 @@ class HomeController extends GetxController {
   int displayedWeight = 0;
 
   final GlobalKey addFoodButtonKey = GlobalKey();
+  final GlobalKey trackingCarouselKey = GlobalKey();
 
   final int daysAgo = 15;
   List<DateTime> dates = [];
@@ -180,6 +181,25 @@ class HomeController extends GetxController {
           descriptionKey: 'tutorial_add_food_description',
           position: TooltipPosition.top,
           icon: Icons.add_circle_outline,
+        ),
+        TutorialStep(
+          targetKey: trackingCarouselKey,
+          titleKey: 'tutorial_tracking_carousel_title',
+          descriptionKey: 'tutorial_tracking_carousel_description',
+          position: TooltipPosition.top,
+          icon: Icons.swipe_rounded,
+          showSpotlight: false,
+          onShow: () {
+            // Animate the carousel to page 2 so the user sees
+            // water, steps & activity tracking.
+            if (trackingPageController.hasClients) {
+              trackingPageController.animateToPage(
+                1,
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeInOut,
+              );
+            }
+          },
         ),
         TutorialStep(
           targetKey: LeadingView.scannerTabKey,

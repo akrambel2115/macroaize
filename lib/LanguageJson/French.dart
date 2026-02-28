@@ -721,6 +721,9 @@ const Map<String, String> french = {
   "tutorial_add_food_title": "Suivez vos repas",
   "tutorial_add_food_description":
       "Appuyez sur le bouton '+' pour ajouter des aliments à votre journal quotidien. Vous pouvez rechercher, scanner ou ajouter des aliments personnalisés.",
+  "tutorial_tracking_carousel_title": "Suivez votre bien-être",
+  "tutorial_tracking_carousel_description":
+      "Balayez pour suivre votre consommation d'eau, vos pas, votre activité et votre poids au même endroit. Restez au top de vos objectifs santé !",
   "tutorial_scanner_title": "Scanner alimentaire IA",
   "tutorial_scanner_description":
       "Utilisez notre scanner alimentaire IA pour analyser instantanément vos aliments et obtenir des informations nutritionnelles précises.",

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 // barcode scanning service
 class BarcodeScanningService {
@@ -12,25 +12,20 @@ class BarcodeScanningService {
   DateTime? _lastScanTime;
   String? _lastScannedBarcode;
 
-  // throttle settings
-  static const Duration _scanThrottle = Duration(milliseconds: 500);
-  static const Duration _debounceAfterSuccess = Duration(seconds: 2);
+  // throttle settings – reduced for snappier detection
+  static const Duration _scanThrottle = Duration(milliseconds: 100);
+  static const Duration _debounceAfterSuccess = Duration(seconds: 1);
 
   BarcodeScanningService() {
-    _barcodeScanner = BarcodeScanner(
-      formats: [
-        BarcodeFormat.ean13,
-        BarcodeFormat.ean8,
-        BarcodeFormat.upca,
-        BarcodeFormat.upce,
-        BarcodeFormat.code128,
-        BarcodeFormat.code39,
-      ],
-    );
+    // No formats parameter → scan ALL barcode types by default.
+    _barcodeScanner = BarcodeScanner();
   }
 
   // scan from camera
-  Future<String?> scanBarcodeFromImage(CameraImage image) async {
+  Future<String?> scanBarcodeFromImage(
+    CameraImage image, {
+    required int sensorOrientation,
+  }) async {
     // throttle scanning
     if (_isProcessing) return null;
 
@@ -51,8 +46,14 @@ class BarcodeScanningService {
     _lastScanTime = now;
 
     try {
-      final inputImage = _convertCameraImage(image);
+      final inputImage = _convertCameraImage(image, sensorOrientation);
       if (inputImage == null) {
+        if (kDebugMode) {
+          print('[Barcode] _convertCameraImage returned null '
+              '(format: ${image.format.group}, '
+              'planes: ${image.planes.length}, '
+              'size: ${image.width}x${image.height})');
+        }
         _isProcessing = false;
         return null;
       }
@@ -67,14 +68,14 @@ class BarcodeScanningService {
           _lastScannedBarcode = value;
           _lastScanTime = DateTime.now();
           if (kDebugMode) {
-            print('Barcode detected: $value (${barcode.format.name})');
+            print('[Barcode] Detected: $value (${barcode.format.name})');
           }
           return value;
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error scanning barcode: $e');
+        print('[Barcode] Error scanning: $e');
       }
     } finally {
       _isProcessing = false;
@@ -84,49 +85,77 @@ class BarcodeScanningService {
   }
 
   // convert for ml kit
-  InputImage? _convertCameraImage(CameraImage image) {
+  InputImage? _convertCameraImage(CameraImage image, int sensorOrientation) {
     try {
-      // Determine the correct image format based on platform
       final InputImageFormat imageFormat;
+      final Uint8List bytes;
+
       if (Platform.isAndroid) {
-        imageFormat = InputImageFormat.nv21;
+        // On Android, prefer NV21 (single buffer). If the camera provides
+        // yuv_420_888, use only the first plane (Y plane) as NV21 when the
+        // format group matches, or fall back to nv21 if that's what we got.
+        if (image.format.group == ImageFormatGroup.nv21) {
+          imageFormat = InputImageFormat.nv21;
+        } else if (image.format.group == ImageFormatGroup.yuv420) {
+          imageFormat = InputImageFormat.yuv_420_888;
+        } else {
+          imageFormat = InputImageFormat.nv21;
+        }
+        // Concatenate all planes for NV21 / YUV420.
+        final WriteBuffer allBytes = WriteBuffer();
+        for (final Plane plane in image.planes) {
+          allBytes.putUint8List(plane.bytes);
+        }
+        bytes = allBytes.done().buffer.asUint8List();
       } else if (Platform.isIOS) {
         imageFormat = InputImageFormat.bgra8888;
+        // iOS BGRA8888 has a single plane.
+        bytes = image.planes[0].bytes;
       } else {
-        // Unsupported platform
         return null;
       }
 
-      final WriteBuffer allBytes = WriteBuffer();
-      for (final Plane plane in image.planes) {
-        allBytes.putUint8List(plane.bytes);
+      // Determine the rotation to pass to ML Kit.
+      final InputImageRotation rotation;
+      if (Platform.isIOS) {
+        // On iOS the camera plugin already delivers frames through an
+        // AVCaptureVideoDataOutput whose connection is locked to portrait,
+        // so the pixel buffer is upright.  Telling ML Kit to rotate again
+        // breaks detection.
+        rotation = InputImageRotation.rotation0deg;
+      } else {
+        rotation = _rotationFromDegrees(sensorOrientation);
       }
-      final bytes = allBytes.done().buffer.asUint8List();
 
-      final inputImageData = InputImageMetadata(
+      final metadata = InputImageMetadata(
         size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: _getImageRotation(),
+        rotation: rotation,
         format: imageFormat,
         bytesPerRow: image.planes[0].bytesPerRow,
       );
 
-      return InputImage.fromBytes(bytes: bytes, metadata: inputImageData);
+      return InputImage.fromBytes(bytes: bytes, metadata: metadata);
     } catch (e) {
       if (kDebugMode) {
-        print('Error converting camera image: $e');
+        print('[Barcode] Error converting camera image: $e');
       }
       return null;
     }
   }
 
-
-  InputImageRotation _getImageRotation() {
-    if (Platform.isIOS) {
-      // iOS camera images are pre-rotated to the correct orientation
-      return InputImageRotation.rotation0deg;
+  /// Map the camera sensor orientation (0/90/180/270) to
+  /// [InputImageRotation].
+  InputImageRotation _rotationFromDegrees(int degrees) {
+    switch (degrees) {
+      case 90:
+        return InputImageRotation.rotation90deg;
+      case 180:
+        return InputImageRotation.rotation180deg;
+      case 270:
+        return InputImageRotation.rotation270deg;
+      default:
+        return InputImageRotation.rotation0deg;
     }
-    // Android default portrait
-    return InputImageRotation.rotation0deg;
   }
 
   // reset last scan

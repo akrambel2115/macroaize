@@ -45,14 +45,7 @@ class _ChatViewState extends State<ChatView> {
       backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: AppBar(
         leading: AppWidgets.backButton(context, () {
-          final navigator = Navigator.of(context);
-          if (navigator.canPop()) {
-            navigator.pop();
-            return;
-          }
-          if (Get.key.currentState?.canPop() ?? false) {
-            Get.back();
-          }
+          Get.back();
         }),
         backgroundColor: context.theme.scaffoldBackgroundColor,
         title: Text("Ask Coach".tr, style: context.textTheme.headlineMedium),

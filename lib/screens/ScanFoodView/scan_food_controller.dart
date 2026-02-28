@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:macroaize/shared/services/usage_service.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:macroaize/shared/services/app_user_service.dart';
-import 'package:macroaize/shared/services/barcode_scanning_service.dart';
 import 'package:macroaize/shared/services/openfoodfacts_service.dart';
 import 'package:macroaize/features/auth/presentation/auth_modal.dart';
 import 'package:camera/camera.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,13 +15,20 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../widgets/cropper_ui_settings.dart';
 import '../../routes/app_routes.dart';
+import '../../shared/utils/navigation_helpers.dart';
 
 class ScanFoodController extends GetxController with WidgetsBindingObserver {
+  // ── Photo-mode camera (camera package) ──────────────────────────
   CameraController? cameraController;
+
+  // ── Barcode-mode camera (mobile_scanner) ────────────────────────
+  MobileScannerController? mobileScannerController;
+
   String isIdentify = "snack(s)";
   File? imagePath;
   bool isLoading = false;
   bool isBarcodeMode = false;
+  bool isBarcodeOnly = false;
   bool isFlashOn = false;
   final ImagePicker _picker = ImagePicker();
   bool _permissionDialogShown = false;
@@ -30,8 +37,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   final _usageService = UsageService();
   final _appUserService = AppUserService();
 
-  // barcode scanning
-  BarcodeScanningService? _barcodeScanner;
+  // barcode
   final _openFoodFactsService = OpenFoodFactsService();
   bool _isProcessingBarcode = false;
 
@@ -45,34 +51,79 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     Get.toNamed(Routes.premiumView);
   }
 
+  // ─── Lifecycle ──────────────────────────────────────────────────
+
   @override
   Future<void> onInit() async {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
 
-    // hydrate usage data
     try {
       await _usageService.getUsage();
     } catch (_) {}
     update();
 
-    // listen for usage changes
     _usageService.usageStream.listen((_) {
       if (!isClosed) update();
     });
 
-    await _ensureCameraReady();
+    // Don't init camera here — it will be started when the tab is shown
+    // via ensureCameraActive().
   }
 
-  Future<void> _ensureCameraReady() async {
+  @override
+  void onClose() {
+    _disposeMobileScanner();
+    cameraController?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      releaseCamera();
+    }
+  }
+
+  // ─── Camera activation / release ────────────────────────────────
+
+  Future<void> ensureCameraActive() async {
+    if (isBarcodeMode) {
+      // Barcode mode → use mobile_scanner
+      _disposePhotoCamera();
+      _ensureMobileScannerReady();
+    } else {
+      // Photo mode → use camera package
+      _disposeMobileScanner();
+      if (cameraController == null ||
+          !cameraController!.value.isInitialized) {
+        await _ensurePhotoCameraReady();
+      }
+    }
+    update();
+  }
+
+  void releaseCamera() {
+    _disposeMobileScanner();
+    _disposePhotoCamera();
+    if (Get.isSnackbarOpen) {
+      Get.closeCurrentSnackbar();
+    }
+    update();
+  }
+
+  // ─── Photo camera (camera package) ──────────────────────────────
+
+  Future<void> _ensurePhotoCameraReady() async {
     try {
       final cams = await availableCameras();
       if (cams.isEmpty) {
-        if (kDebugMode) print('No cameras available');
+        if (kDebugMode) print('[PhotoCam] No cameras available');
         update();
         return;
       }
-
       cameraController = CameraController(cams[0], ResolutionPreset.high);
       await cameraController!.initialize();
       await cameraController!.lockCaptureOrientation(
@@ -82,8 +133,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       if (e is CameraException) {
         if (kDebugMode) {
-          print("Camera error: ${e.description}");
-          print("Error code: ${e.code}");
+          print("[PhotoCam] error: ${e.description} (${e.code})");
         }
         if (e.code == 'CameraAccessDenied' && !_permissionDialogShown) {
           _permissionDialogShown = true;
@@ -103,7 +153,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
                   TextButton(
                     onPressed: () {
                       _permissionDialogShown = false;
-                      Get.back();
+                      safeBack();
                     },
                     child: Text('ok'.tr),
                   ),
@@ -114,70 +164,79 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           } catch (_) {}
         }
       }
-      // silent fail startup
       update();
     }
   }
 
-  // init camera visible
-  Future<void> ensureCameraActive() async {
-    if (cameraController == null ||
-        cameraController!.value.isInitialized == false) {
-      await _ensureCameraReady();
-    }
-
-    // resume barcode scan
-    if (isBarcodeMode && !_isProcessingBarcode) {
-      await _startBarcodeScanning();
-    }
-  }
-
-  // release camera resources
-  void releaseCamera() {
-    _stopBarcodeScanning();
-    isBarcodeMode = false;
-    _isProcessingBarcode = false;
-    _barcodeScanner?.dispose();
-    _barcodeScanner = null;
-    if (Get.isSnackbarOpen) {
-      Get.closeCurrentSnackbar();
-    }
+  void _disposePhotoCamera() {
     try {
       cameraController?.dispose();
     } catch (_) {}
     cameraController = null;
+  }
+
+  // ─── Barcode scanner (mobile_scanner) ───────────────────────────
+
+  void _ensureMobileScannerReady() {
+    if (mobileScannerController != null) return;
+    mobileScannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal,
+      facing: CameraFacing.back,
+      torchEnabled: false,
+      autoStart: true,
+      returnImage: false,
+      formats: const [
+        BarcodeFormat.ean13,
+        BarcodeFormat.ean8,
+        BarcodeFormat.upcA,
+        BarcodeFormat.upcE,
+        BarcodeFormat.code128,
+        BarcodeFormat.code39,
+        BarcodeFormat.code93,
+        BarcodeFormat.qrCode,
+        BarcodeFormat.dataMatrix,
+        BarcodeFormat.pdf417,
+        BarcodeFormat.itf,
+        BarcodeFormat.codabar,
+        BarcodeFormat.aztec,
+      ],
+    );
+    _isProcessingBarcode = false;
     update();
   }
 
-  void toggleFlash() async {
-    if (cameraController == null || !cameraController!.value.isInitialized) {
-      return;
-    }
-
-    isFlashOn = !isFlashOn;
+  void _disposeMobileScanner() {
     try {
-      await cameraController!.setFlashMode(
-        isFlashOn ? FlashMode.torch : FlashMode.off,
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error toggling flash: $e');
-      }
-      // revert on fail
-      isFlashOn = !isFlashOn;
-    }
-    update();
+      mobileScannerController?.dispose();
+    } catch (_) {}
+    mobileScannerController = null;
+    _isProcessingBarcode = false;
   }
 
-  bool isBarcodeOnly = false;
+  /// Called by the MobileScanner widget's onDetect callback.
+  void onBarcodeDetected(BarcodeCapture capture) {
+    if (_isProcessingBarcode || isLoading) return;
 
+    final codes = capture.barcodes;
+    if (codes.isEmpty) return;
+    final value = codes.first.rawValue;
+    if (value == null || value.isEmpty) return;
+
+    if (kDebugMode) {
+      print('[Barcode] Detected: $value (${codes.first.format.name})');
+    }
+
+    _isProcessingBarcode = true;
+    _handleBarcodeDetected(value);
+  }
+
+  // ─── Mode switching ─────────────────────────────────────────────
+
+  /// Called from [LeadingView] BEFORE the tab switches.
   void setBarcodeOnly(bool enabled) {
     isBarcodeOnly = enabled;
-    if (enabled && !isBarcodeMode) {
-      toggleBarcodeMode();
-    } else if (!enabled && isBarcodeMode) {
-      toggleBarcodeMode();
-    }
+    isBarcodeMode = enabled;
+    // Actual camera start is deferred to ensureCameraActive().
     update();
   }
 
@@ -185,134 +244,76 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     isBarcodeMode = !isBarcodeMode;
 
     if (isBarcodeMode) {
-      // init scanner
-      _barcodeScanner = BarcodeScanningService();
-
-      // start scanning
-      await _startBarcodeScanning();
-
+      _disposePhotoCamera();
+      _ensureMobileScannerReady();
       NotificationService.showInfo('barcode_activated'.tr);
     } else {
-      // stop scanning
-      await _stopBarcodeScanning();
-
-      // dispose scanner
-      _barcodeScanner?.dispose();
-      _barcodeScanner = null;
-
+      _disposeMobileScanner();
+      await _ensurePhotoCameraReady();
       NotificationService.showInfo('barcode_deactivated'.tr);
     }
-
     update();
   }
 
-  Future<void> _startBarcodeScanning() async {
-    if (cameraController == null || !cameraController!.value.isInitialized) {
-      return;
-    }
-
+  void toggleFlash() async {
+    isFlashOn = !isFlashOn;
     try {
-      await cameraController!.startImageStream((CameraImage image) async {
-        if (!isBarcodeMode || _isProcessingBarcode) return;
-
-        final barcode = await _barcodeScanner?.scanBarcodeFromImage(image);
-
-        if (barcode != null && barcode.isNotEmpty) {
-          _isProcessingBarcode = true;
-          await _handleBarcodeDetected(barcode);
-        }
-      });
+      if (isBarcodeMode && mobileScannerController != null) {
+        await mobileScannerController!.toggleTorch();
+      } else if (cameraController != null &&
+          cameraController!.value.isInitialized) {
+        await cameraController!.setFlashMode(
+          isFlashOn ? FlashMode.torch : FlashMode.off,
+        );
+      }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error starting image stream: $e');
-      }
+      if (kDebugMode) print('Error toggling flash: $e');
+      isFlashOn = !isFlashOn;
     }
+    update();
   }
 
-  Future<void> _stopBarcodeScanning() async {
-    if (cameraController != null && cameraController!.value.isStreamingImages) {
-      try {
-        await cameraController!.stopImageStream();
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error stopping image stream: $e');
-        }
-      }
-    }
-    _isProcessingBarcode = false;
-  }
+  // ─── Barcode handling ───────────────────────────────────────────
 
   Future<void> _handleBarcodeDetected(String barcode) async {
     try {
-      await _stopBarcodeScanning();
+      // Pause the scanner while we look up the product.
+      try {
+        await mobileScannerController?.stop();
+      } catch (_) {}
 
       isLoading = true;
       update();
 
-      final results = await Future.wait([
-        // picture capture
-        () async {
-          try {
-            if (cameraController != null &&
-                cameraController!.value.isInitialized &&
-                !cameraController!.value.isTakingPicture) {
-              await Future.delayed(const Duration(milliseconds: 150));
-              final XFile pic = await cameraController!.takePicture();
-              return File(pic.path);
-            }
-          } catch (_) {
-            // non-fatal – return null
-          }
-          return null;
-        }(),
-        // product lookup
-        _openFoodFactsService.fetchProductByBarcode(barcode),
-      ]);
-
-      final capturedBarcodeImage = results[0] as File?;
-      final productData = results[1] as Map<String, dynamic>?;
+      final productData =
+          await _openFoodFactsService.fetchProductByBarcode(barcode);
 
       isLoading = false;
       update();
 
       if (productData != null) {
-        // navigate results
-        await _navigateToResults(
-          productData,
-          capturedImage: capturedBarcodeImage,
-        );
+        await _navigateToResults(productData);
       } else {
-        // product not found
         NotificationService.showError('product_not_found');
-
-        // restart scanning
         _isProcessingBarcode = false;
-        if (isBarcodeMode) {
-          await _startBarcodeScanning();
-        }
+        // Resume scanning.
+        try {
+          await mobileScannerController?.start();
+        } catch (_) {}
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error handling barcode: $e');
-      }
+      if (kDebugMode) print('[Barcode] Error handling barcode: $e');
       isLoading = false;
       update();
-
       NotificationService.showError('error_fetching_product');
-
-      // restart scanning
       _isProcessingBarcode = false;
-      if (isBarcodeMode) {
-        await _startBarcodeScanning();
-      }
+      try {
+        await mobileScannerController?.start();
+      } catch (_) {}
     }
   }
 
-  Future<void> _navigateToResults(
-    Map<String, dynamic> productData, {
-    File? capturedImage,
-  }) async {
-    // format food data
+  Future<void> _navigateToResults(Map<String, dynamic> productData) async {
     final foodData = {
       'calorie': productData['calories']?.round() ?? 0,
       'protein': productData['protein'] ?? 0.0,
@@ -322,15 +323,9 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
       'quantity': productData['quantity'] ?? '100g',
     };
 
-    // stop scanning
-    await _stopBarcodeScanning();
-
-    // release camera
     releaseCamera();
-
     update();
 
-    // navigate results
     await Get.toNamed(
       Routes.scanCalorieView,
       arguments: {
@@ -344,46 +339,18 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
         'fromBarcode': true,
         'netWeight': productData['product_quantity'],
         'unit': productData['product_quantity_unit'],
-        'image': capturedImage, // captured frame shown in results
       },
     );
 
     if (isClosed) return;
-
     await Future.delayed(const Duration(milliseconds: 500));
-
     if (isClosed) return;
 
-    // reinit camera
     await ensureCameraActive();
-
-    // reset flag
     _isProcessingBarcode = false;
   }
 
-  @override
-  void onClose() {
-    _stopBarcodeScanning();
-    _barcodeScanner?.dispose();
-    cameraController?.dispose();
-    super.onClose();
-    WidgetsBinding.instance.removeObserver(this);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    cameraController?.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
-      // release on background
-      releaseCamera();
-    }
-  }
+  // ─── Photo capture (unchanged logic) ────────────────────────────
 
   takeImage(ImageSource source, BuildContext context) async {
     if (!_appUserService.checkAccountActivation('scanner')) return;
@@ -398,33 +365,22 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   }
 
   onTackImageCamera(BuildContext context) async {
-    // check activation
-    if (!_appUserService.checkAccountActivation('scanner')) {
-      return;
-    }
+    if (!_appUserService.checkAccountActivation('scanner')) return;
 
     isLoading = true;
     update();
+
     if (cameraController == null ||
-        cameraController!.value.isInitialized == false) {
-      await _ensureCameraReady();
+        !cameraController!.value.isInitialized) {
+      await _ensurePhotoCameraReady();
       if (cameraController == null ||
-          cameraController!.value.isInitialized == false) {
+          !cameraController!.value.isInitialized) {
         isLoading = false;
         update();
         return;
       }
     }
-    if (cameraController == null ||
-        cameraController!.value.isInitialized == false) {
-      await _ensureCameraReady();
-      if (cameraController == null ||
-          cameraController!.value.isInitialized == false) {
-        isLoading = false;
-        update();
-        return;
-      }
-    }
+
     XFile imageFile = await cameraController!.takePicture();
     File originalFile = File(imageFile.path);
     if (!context.mounted) return;
@@ -450,15 +406,11 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
         isLoading = true;
         update();
-        isLoading = true;
-        update();
 
         try {
-          // check usage limit
           final result = await _usageService.incrementUsage('scan');
 
           if (result.success) {
-            // proceed scan
             releaseCamera();
             await Get.toNamed(
               Routes.scanCalorieView,
@@ -466,16 +418,13 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
             );
 
             if (isClosed) return;
-
             isLoading = false;
             update();
 
             await Future.delayed(const Duration(milliseconds: 500));
             if (isClosed) return;
-
             await ensureCameraActive();
           } else {
-            // limit reached
             releaseCamera();
             NotificationService.showError(
               result.message.isNotEmpty
@@ -489,7 +438,6 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
           final user = FirebaseAuth.instance.currentUser;
           if (user == null) {
-            // prompt login
             releaseCamera();
             await _handleAuthenticationRequired();
             return;
@@ -499,13 +447,11 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
           if (el.contains('limit') ||
               el.contains('permission-denied') ||
               (el.contains('daily') && el.contains('limit'))) {
-            // limit error
             releaseCamera();
             NotificationService.showError('daily_limit_reached_try_again');
             return;
           }
 
-          // other error
           releaseCamera();
           NotificationService.showError('unable_to_process_scan_try_again');
         }
@@ -518,7 +464,6 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
   Future<void> _handleAuthenticationRequired() async {
     final success = await AuthModal.show();
-
     if (success) {
       NotificationService.showSuccess('auth_scan_success');
       Get.offAllNamed(Routes.leadingView);

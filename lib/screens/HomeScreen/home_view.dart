@@ -37,6 +37,7 @@ class _HomeViewState extends State<HomeView> {
   /// (e.g. when LeadingController re-initialises tabs).  Without this the
   /// PageView keeps a reference to a disposed PageController ➜ gray box.
   late final PageController _trackingPageController;
+  late final HomeController controller;
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _HomeViewState extends State<HomeView> {
     _trackingPageController = PageController();
     // Ensure the controller exists before using it.
     _ensureHomeController();
+    controller = Get.find<HomeController>();
   }
 
   void _ensureHomeController() {
@@ -59,11 +61,6 @@ class _HomeViewState extends State<HomeView> {
   void dispose() {
     _trackingPageController.dispose();
     super.dispose();
-  }
-
-  HomeController get controller {
-    _ensureHomeController();
-    return Get.find<HomeController>();
   }
 
   @override
@@ -342,7 +339,7 @@ class _HomeViewState extends State<HomeView> {
     return GetBuilder<HomeController>(
       builder: (controller) {
         double progress =
-            controller.isLoading
+            controller.isLoading || ConstantUserMaster.calorieGoal <= 0
                 ? 0.0
                 : (controller.consumedKcal / ConstantUserMaster.calorieGoal)
                     .clamp(0.0, 1.0);
@@ -564,6 +561,7 @@ class _HomeViewState extends State<HomeView> {
         return Column(
           children: [
             SizedBox(
+              key: controller.trackingCarouselKey,
               height: 420,
               child: PageView(
                 controller: controller.trackingPageController,

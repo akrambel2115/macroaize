@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 class PremiumRequiredDialog extends StatelessWidget {
   final String title;
@@ -66,8 +67,7 @@ class PremiumRequiredDialog extends StatelessWidget {
               onPressed:
                   onUpgrade ??
                   () {
-                    Get.back();
-                    Get.toNamed(Routes.premiumView);
+                    safeBackAndNavigate(Routes.premiumView);
                   },
               child: Text(
                 'go_premium'.tr,
@@ -79,7 +79,7 @@ class PremiumRequiredDialog extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             TextButton(
-              onPressed: onCancel ?? () => Get.back(),
+              onPressed: onCancel ?? () => safeBack(),
               style: ButtonStyle(
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 splashFactory: NoSplash.splashFactory,

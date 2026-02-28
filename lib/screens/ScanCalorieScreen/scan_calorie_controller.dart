@@ -23,6 +23,7 @@ import '../../shared/services/rate_us_service.dart';
 import '../../shared/services/widget_promotion_service.dart';
 import '../../shared/services/streak_service.dart';
 import '../../shared/services/meal_sync_service.dart';
+import '../../shared/utils/navigation_helpers.dart';
 import '../../shared/services/local_notification_service.dart';
 import '../leadingScreen/leading_controller.dart';
 import '../HomeScreen/home_controller.dart';
@@ -543,6 +544,8 @@ class ScanCalorieController extends GetxController {
             String estimatedAmount;
             if (portionType == 'pieces' && doubleCount > 0) {
               estimatedAmount = '${doubleCount.toInt()} pieces';
+            } else if (portionType == 'ml') {
+              estimatedAmount = '${estimatedWeight.toInt()}ml';
             } else {
               estimatedAmount = '${estimatedWeight.toInt()}g';
             }
@@ -675,6 +678,10 @@ class ScanCalorieController extends GetxController {
       case 'piece':
       case 'pieces':
         grams = newAmount * 50;
+        break;
+      case 'ml':
+        // 1 ml ≈ 1 g for most beverages
+        grams = newAmount;
         break;
       default:
         grams = newAmount;
@@ -955,11 +962,12 @@ class ScanCalorieController extends GetxController {
         lc.update();
       }
 
-      // show the newly logged meal.
+      // show the newly logged meal and refresh streak.
       if (Get.isRegistered<HomeController>()) {
         final hc = Get.find<HomeController>();
         await hc.getSqlCalorie();
         await hc.getRecentHistory();
+        hc.streakCount.value = await StreakService().getCurrentStreak();
         hc.update();
       }
     } catch (_) {}
@@ -1162,10 +1170,10 @@ class ScanCalorieController extends GetxController {
                   ),
                 );
 
-                // Close dialog first to prevent orphaned overlay
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
+                // Close dialog first to prevent orphaned overlay.
+                // Use safeBack so the pop goes through the overlay
+                // navigator and stays in sync with GetX's stack.
+                safeBack();
                 Get.until((route) => route.settings.name == Routes.leadingView);
                 _switchToHomeTab();
                 WidgetPromotionService().showPromotionIfNeeded();

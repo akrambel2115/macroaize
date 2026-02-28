@@ -1114,7 +1114,12 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       ),
                   itemBuilder: (ctx, idx) {
                     final it = controller.items[idx];
-                    final units = const ['piece', 'g'];
+                    // Liquids (ml) get [ml, g]; solids get [piece, g].
+                    // ml + piece is never offered together.
+                    final bool isLiquid = it.unit == 'ml';
+                    final units = isLiquid
+                        ? const ['ml', 'g']
+                        : const ['piece', 'g'];
                     String currentUnit = it.unit;
                     return Container(
                       padding: const EdgeInsets.all(16),
@@ -1270,8 +1275,8 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                               const SizedBox(width: 10),
                               StatefulBuilder(
                                 builder: (ctx2, setState) {
-                                  if (!['piece', 'g'].contains(currentUnit)) {
-                                    currentUnit = 'g';
+                                  if (!units.contains(currentUnit)) {
+                                    currentUnit = units.first;
                                   }
                                   return Container(
                                     height: 44,
@@ -1298,10 +1303,14 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                       ),
                                       items:
                                           units.map((u) {
-                                            final label =
-                                                u == 'g'
-                                                    ? 'gram_unit'.tr
-                                                    : 'unit_piece'.tr;
+                                            final String label;
+                                            if (u == 'ml') {
+                                              label = 'ml'.tr;
+                                            } else if (u == 'g') {
+                                              label = 'gram_unit'.tr;
+                                            } else {
+                                              label = 'unit_piece'.tr;
+                                            }
                                             return DropdownMenuItem(
                                               value: u,
                                               child: Text(

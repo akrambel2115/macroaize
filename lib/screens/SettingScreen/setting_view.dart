@@ -23,6 +23,7 @@ import 'package:macroaize/shared/models/user_usage.dart';
 import 'package:macroaize/shared/services/app_config_service.dart';
 import 'package:macroaize/shared/services/influencer_service.dart';
 import 'package:macroaize/shared/models/influencer.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 import 'subscription_status_card.dart';
 import '../../ThemeService/theme_controller.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
@@ -1142,7 +1143,7 @@ class SettingView extends GetView<SettingController> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: () => Get.back(),
+                      onPressed: () => safeBack(),
                       child: Text(
                         "Cancel".tr,
                         style: TextStyle(color: AppColor.error),
@@ -1156,7 +1157,7 @@ class SettingView extends GetView<SettingController> {
                       style: ModernButtonStyle.primary,
                       size: ModernButtonSize.medium,
                       onPressed: () async {
-                        Get.back();
+                        safeBack();
                         await logoutUser();
                       },
                     ),
@@ -1841,7 +1842,7 @@ class SettingView extends GetView<SettingController> {
                                     try {
                                       final result = await _influencerService
                                           .processWithdrawal(amount, cleanRip);
-                                      Get.back();
+                                      safeBack();
                                       if (result.success) {
                                         if (!context.mounted) return;
                                         _showProcessingTimeAlert(
@@ -2059,7 +2060,7 @@ class SettingView extends GetView<SettingController> {
                 style: ModernButtonStyle.primary,
                 size: ModernButtonSize.medium,
                 width: double.infinity,
-                onPressed: () => Get.back(),
+                onPressed: () => safeBack(),
               ),
             ],
           ),

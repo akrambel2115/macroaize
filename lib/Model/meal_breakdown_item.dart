@@ -100,16 +100,15 @@ class MealBreakdownItem {
     String unit = 'g';
     if (s.contains('piece') || s.contains('pcs') || s.contains('pc')) {
       unit = 'piece';
-    } else if (s.contains('g') || s.contains('gram')) {
+    } else if (s.contains('ml') || s.contains('milliliter')) {
+      unit = 'ml';
+    } else if (s.contains('cup')) {
       unit = 'g';
+      value = value * 240;
+    } else if (s.contains('slice')) {
+      unit = 'g';
+      value = value * 30;
     } else {
-      if (s.contains('ml')) {
-        value = value * 1.0;
-      } else if (s.contains('cup')) {
-        value = value * 240;
-      } else if (s.contains('slice')) {
-        value = value * 30;
-      }
       unit = 'g';
     }
 
@@ -117,6 +116,10 @@ class MealBreakdownItem {
     switch (unit) {
       case 'piece':
         grams = value * 50;
+        break;
+      case 'ml':
+        // 1 ml ≈ 1 g for most beverages
+        grams = value;
         break;
       case 'g':
       default:

@@ -18,6 +18,7 @@ import '../../shared/widgets/delete_dialog.dart';
 import '../../shared/services/rate_us_service.dart';
 import '../../shared/services/widget_promotion_service.dart';
 import '../../shared/services/meal_sync_service.dart';
+import '../../shared/utils/navigation_helpers.dart';
 import '../HomeScreen/home_controller.dart';
 import '../leadingScreen/leading_controller.dart';
 
@@ -485,10 +486,9 @@ class LocalFoodController extends GetxController {
           ),
         ),
         onUpgrade: () {
-          Get.back();
-          Get.toNamed(Routes.premiumView);
+          safeBackAndNavigate(Routes.premiumView);
         },
-        onCancel: () => Get.back(),
+        onCancel: () => safeBack(),
       ),
       barrierDismissible: false,
     );

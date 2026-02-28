@@ -11,6 +11,11 @@ class PlanReviewView extends GetView<SignUpController> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false, // Block back button on this screen
+      onPopInvokedWithResult: (didPop, result) {
+        // Intentionally empty — the user must proceed forward.
+        // This handler prevents iOS from freezing the gesture
+        // recogniser when a swipe-back attempt is blocked.
+      },
       child: Scaffold(
         backgroundColor: context.theme.scaffoldBackgroundColor,
         body: SafeArea(

@@ -19,6 +19,10 @@ class WellnessSyncService extends GetxService {
     HealthDataAccess.READ_WRITE,
   ];
 
+  /// SharedPreferences key used to persist the connection flag on iOS,
+  /// because HealthKit's hasPermissions always returns null.
+  static const String _iosConnectedKey = 'wellness_connected_ios';
+
   String get providerDisplayName {
     if (kIsWeb) return 'Wellness';
     if (Platform.isIOS) return 'Apple Health';
@@ -48,19 +52,48 @@ class WellnessSyncService extends GetxService {
           statusMessage.value = 'Health Connect not installed';
           return;
         }
+        // Android: hasPermissions works reliably
+        final granted = await _health.hasPermissions(
+          _types,
+          permissions: _permissions,
+        );
+        isConnected.value = granted ?? false;
       } else {
+        // iOS: hasPermissions always returns null due to HealthKit privacy.
+        // Use a persisted flag and verify with a lightweight data read.
         isAvailable.value = true;
+        final savedFlag = await SharedPref.readBool(_iosConnectedKey) ?? false;
+        if (savedFlag) {
+          // Verify the permission is still valid with a quick step read.
+          final stillValid = await _verifyIosPermission();
+          isConnected.value = stillValid;
+          if (!stillValid) {
+            // User revoked permission in iOS Settings – clear the flag.
+            await SharedPref.saveBool(_iosConnectedKey, false);
+          }
+        } else {
+          isConnected.value = false;
+        }
       }
 
-      final granted = await _health.hasPermissions(
-        _types,
-        permissions: _permissions,
-      );
-      isConnected.value = granted ?? false;
       statusMessage.value = isConnected.value ? 'Connected' : 'Not connected';
     } catch (_) {
       isConnected.value = false;
       statusMessage.value = 'Permission unavailable';
+    }
+  }
+
+  /// Attempt a lightweight HealthKit read to verify permission is still granted.
+  Future<bool> _verifyIosPermission() async {
+    try {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      // getTotalStepsInInterval returns null when no data, but does NOT throw
+      // when permission is granted. It throws or returns null when revoked.
+      await _health.getTotalStepsInInterval(start, now);
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -85,8 +118,14 @@ class WellnessSyncService extends GetxService {
       isConnected.value = granted;
       statusMessage.value = granted ? 'Connected' : 'Permission denied';
 
-      if (granted && !kIsWeb && Platform.isAndroid) {
-        await _requestOptionalAndroidHistoryAccess();
+      if (granted) {
+        // Persist the flag on iOS so we remember across app restarts.
+        if (!kIsWeb && Platform.isIOS) {
+          await SharedPref.saveBool(_iosConnectedKey, true);
+        }
+        if (!kIsWeb && Platform.isAndroid) {
+          await _requestOptionalAndroidHistoryAccess();
+        }
       }
 
       return granted;
@@ -105,6 +144,10 @@ class WellnessSyncService extends GetxService {
       await _health.revokePermissions();
       isConnected.value = false;
       statusMessage.value = 'Disconnected';
+      // Clear the persisted iOS flag.
+      if (!kIsWeb && Platform.isIOS) {
+        await SharedPref.saveBool(_iosConnectedKey, false);
+      }
     } catch (_) {
       statusMessage.value = 'Failed to disconnect';
     } finally {

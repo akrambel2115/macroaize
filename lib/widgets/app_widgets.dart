@@ -115,12 +115,17 @@ class _TopNotificationState extends State<_TopNotification>
 }
 
 class AppWidgets {
+  /// iOS-safe back button.
+  ///
+  /// Uses [Get.back] so the pop always goes through GetX's navigator,
+  /// keeping the internal route stack consistent on both platforms.
+  /// Falls back to [onTap] when GetX has nothing to pop.
   static Widget backButton(BuildContext context, VoidCallback onTap) {
     return IconButton(
       padding: EdgeInsets.zero,
       onPressed: () {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
+        if (Get.key.currentState?.canPop() ?? false) {
+          Get.back();
         } else {
           onTap();
         }

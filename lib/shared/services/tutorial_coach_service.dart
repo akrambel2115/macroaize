@@ -60,12 +60,23 @@ class TutorialStep {
   final TooltipPosition position;
   final IconData? icon;
 
+  /// Optional callback fired when this step becomes visible.
+  /// Useful for triggering animations (e.g. scrolling a carousel).
+  final VoidCallback? onShow;
+
+  /// Whether to draw a spotlight circle cutout around the target widget.
+  /// Defaults to `true`. Set to `false` for large targets (e.g. carousels)
+  /// where a circle doesn't make sense.
+  final bool showSpotlight;
+
   TutorialStep({
     required this.targetKey,
     required this.titleKey,
     required this.descriptionKey,
     this.position = TooltipPosition.bottom,
     this.icon,
+    this.onShow,
+    this.showSpotlight = true,
   });
 }
 
@@ -89,10 +100,17 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
     super.initState();
     // fade in after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fireOnShow();
       setState(() {
         _visible = true;
       });
     });
+  }
+
+  void _fireOnShow() {
+    if (currentStep < widget.steps.length) {
+      widget.steps[currentStep].onShow?.call();
+    }
   }
 
   void _nextStep() {
@@ -107,6 +125,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
             currentStep++;
             _visible = true;
           });
+          _fireOnShow();
         }
       });
     } else {
@@ -169,7 +188,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
           behavior: HitTestBehavior.opaque,
           child: Stack(
             children: [
-              // spotlight overlay
+              // spotlight overlay (circle cutout or plain dark)
               AnimatedOpacity(
                 opacity: _visible ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),
@@ -182,6 +201,7 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
                         targetSize.width,
                         targetSize.height,
                       ),
+                      showSpotlight: step.showSpotlight,
                     ),
                   ),
                 ),
@@ -287,8 +307,9 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
 
 class SpotlightPainter extends CustomPainter {
   final Rect targetRect;
+  final bool showSpotlight;
 
-  SpotlightPainter({required this.targetRect});
+  SpotlightPainter({required this.targetRect, this.showSpotlight = true});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -297,7 +318,14 @@ class SpotlightPainter extends CustomPainter {
           ..color = Colors.black.withValues(alpha: 0.85)
           ..style = PaintingStyle.fill;
 
-    // circular spotlight center
+    if (!showSpotlight) {
+      // Plain dark overlay — no circle cutout
+      canvas.drawRect(
+          Rect.fromLTWH(0, 0, size.width, size.height), overlayPaint);
+      return;
+    }
+
+    // Circular spotlight cutout
     final center = Offset(
       targetRect.left + targetRect.width / 2,
       targetRect.top + targetRect.height / 2,
@@ -310,10 +338,8 @@ class SpotlightPainter extends CustomPainter {
             2 +
         12;
 
-    // min radius safety
     final safeRadius = radius < 24.0 ? 24.0 : radius;
 
-    // evenodd path for cutout
     final path =
         Path()
           ..fillType = PathFillType.evenOdd
@@ -322,7 +348,7 @@ class SpotlightPainter extends CustomPainter {
 
     canvas.drawPath(path, overlayPaint);
 
-    // dashed border
+    // Dashed border around cutout
     _drawDashedCircle(
       canvas,
       center,
@@ -370,6 +396,7 @@ class SpotlightPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(SpotlightPainter oldDelegate) {
-    return oldDelegate.targetRect != targetRect;
+    return oldDelegate.targetRect != targetRect ||
+        oldDelegate.showSpotlight != showSpotlight;
   }
 }
