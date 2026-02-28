@@ -49,13 +49,24 @@ class RateUsService {
       debugPrint('🌟 RateUs: isAvailable=$isAvailable (actionCount=$newCount)');
 
       if (isAvailable) {
-        // mark shown before request
-        await prefs.setBool(_kRateUsShownKey, true);
-
         // delay for ux
         await Future.delayed(const Duration(seconds: 2));
 
         await inAppReview.requestReview();
+
+        // Mark as shown *after* the request so a throttled iOS prompt can
+        // be retried on the next eligible trigger.
+        await prefs.setBool(_kRateUsShownKey, true);
+
+        // On iOS, if Apple keeps throttling requestReview(), fall back to
+        // opening the App Store listing directly on subsequent attempts.
+      } else if (Platform.isIOS) {
+        // requestReview not available (likely throttled) – open store page
+        debugPrint('🌟 RateUs: iOS fallback → openStoreListing');
+        await inAppReview.openStoreListing(
+          appStoreId: '6752221090',
+        );
+        await prefs.setBool(_kRateUsShownKey, true);
       }
     }
   }

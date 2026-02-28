@@ -1,6 +1,7 @@
 import 'package:macroaize/widgets/primary_cta.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:macroaize/Model/recipe.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/widgets/calorie_ring.dart';
@@ -540,7 +541,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       child: PrimaryCTA(
         label: 'add_to_plan'.tr,
         onTap: () {
-          Get.snackbar('success'.tr, 'food_added_success'.tr);
+          NotificationService.showSuccess('food_added_success'.tr);
         },
       ),
     );

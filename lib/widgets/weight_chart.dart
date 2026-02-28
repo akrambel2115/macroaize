@@ -162,7 +162,7 @@ class _WeightChartState extends State<WeightChart>
                                           Theme.of(context).brightness ==
                                                   Brightness.dark
                                               ? Colors.grey[300]
-                                              : null,
+                                              : Colors.grey[800],
                                     ),
                               ).paddingOnly(bottom: 15),
                             ],
@@ -221,7 +221,7 @@ class _WeightChartState extends State<WeightChart>
                                         Theme.of(context).brightness ==
                                                 Brightness.dark
                                             ? Colors.grey[300]
-                                            : null,
+                                            : Colors.grey[800],
                                   ),
                             ),
                           ),
