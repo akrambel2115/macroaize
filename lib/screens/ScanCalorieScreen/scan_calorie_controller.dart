@@ -469,7 +469,14 @@ class ScanCalorieController extends GetxController {
   bool _isNotFoodResponse(String text) {
     final lower = text.toLowerCase();
 
-    if (lower.contains('"is_food"') && lower.contains('false')) return true;
+    if (lower.contains('"is_food"')) {
+      try {
+        final decoded = jsonDecode(text.trim());
+        if (decoded is Map && decoded['is_food'] == false) return true;
+      } catch (_) {
+        if (RegExp(r'"is_food"\s*:\s*false').hasMatch(lower)) return true;
+      }
+    }
 
     if (lower.contains('not a food') ||
         lower.contains('not food') ||
