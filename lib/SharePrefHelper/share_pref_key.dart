@@ -42,6 +42,10 @@ class SharePrefKey {
   static String streakHistory = 'streakHistory'; // List<String> of dates
   static String lastStreakShownDate = 'lastStreakShownDate'; // String date
 
+    // Goal progress notifications
+    static String goalProgress50LastDate = 'goalProgress50LastDate';
+    static String goalProgress100LastDate = 'goalProgress100LastDate';
+
   // Promo Code
   static String pendingPromoCode =
       'pendingPromoCode'; // Code entered during onboarding

@@ -8,6 +8,8 @@ import 'package:image/image.dart' as img;
 import 'package:macroaize/Model/calorie_history_model.dart';
 import 'package:macroaize/Model/sql_calorie_model.dart';
 import 'package:macroaize/NetworkHelp/ai_calling.dart';
+import 'package:macroaize/SharePrefHelper/share_pref.dart';
+import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
 import 'package:macroaize/SharePrefHelper/constant_user_master.dart';
 import 'package:macroaize/constant/database_helper.dart';
 import 'package:macroaize/routes/app_routes.dart';
@@ -50,6 +52,7 @@ class ScanCalorieController extends GetxController {
   String mealName = "";
   String mealNameEnglish = "";
   bool isLoading = true;
+  bool isSaving = false;
   double scanProgress = 0.0;
   String scanPhaseLabel = 'Preparing...';
   int calorie = 0;
@@ -67,6 +70,7 @@ class ScanCalorieController extends GetxController {
   List<UsdaFood> usdaOptions = const [];
 
   final List<MealBreakdownItem> items = [];
+  final Map<int, double> _gramsPerPieceByIndex = {};
 
   bool get hasBreakdown => items.isNotEmpty;
 
@@ -307,6 +311,7 @@ class ScanCalorieController extends GetxController {
         items
           ..clear()
           ..addAll(parsedItems);
+        _primePieceMappings(parsedItems);
 
         calorie = totalKcalFromItems;
         protein = totalProteinFromItems.toDouble();
@@ -404,9 +409,44 @@ class ScanCalorieController extends GetxController {
       }
 
       _setScanProgress(0.95, phase: 'Checking consistency...');
+      // Product behavior: keep repeated scans of the same meal stable for users
+      // by reusing the most recent logged result when we detect a strong match.
       await _applyLastLoggedIfSameMeal();
     }
     await _finishLoadingWithProgress();
+  }
+
+  void _primePieceMappings(List<MealBreakdownItem> source) {
+    _gramsPerPieceByIndex.clear();
+    for (var i = 0; i < source.length; i++) {
+      final it = source[i];
+      final unit = it.unit.toLowerCase();
+      if ((unit == 'piece' || unit == 'pieces') &&
+          it.amount > 0 &&
+          it.grams > 0) {
+        _gramsPerPieceByIndex[i] = it.grams / it.amount;
+      }
+    }
+  }
+
+  double _gramsPerPieceFor(int index, MealBreakdownItem item) {
+    final cached = _gramsPerPieceByIndex[index];
+    if (cached != null && cached > 0) return cached;
+
+    final unit = item.unit.toLowerCase();
+    if ((unit == 'piece' || unit == 'pieces') && item.grams > 0) {
+      final inferred = item.amount > 0 ? (item.grams / item.amount) : item.grams;
+      _gramsPerPieceByIndex[index] = inferred;
+      return inferred;
+    }
+
+    return 50.0;
+  }
+
+  bool supportsPieceUnit(int index, MealBreakdownItem item) {
+    final unit = item.unit.toLowerCase();
+    if (unit == 'piece' || unit == 'pieces') return true;
+    return (_gramsPerPieceByIndex[index] ?? 0) > 0;
   }
 
   Future<void> _finishLoadingWithProgress() async {
@@ -557,33 +597,45 @@ class ScanCalorieController extends GetxController {
                     ? ew.toDouble()
                     : double.tryParse(ew.toString()) ?? 0.0;
 
-            // If AI flagged the item as liquid, enforce ml
+            // If AI flagged the item as liquid, enforce ml.
             if (isLiquid && portionType != 'ml') {
               portionType = 'ml';
             }
 
-            String estimatedAmount;
-            if (portionType == 'pieces' && doubleCount > 0) {
-              estimatedAmount = '${doubleCount.toInt()} pieces';
-            } else if (portionType == 'ml') {
-              estimatedAmount = '${estimatedWeight.toInt()}ml';
+            final bool asPiece = portionType == 'pieces';
+            final bool asMl = portionType == 'ml';
+
+            final String unit = asPiece ? 'piece' : (asMl ? 'ml' : 'g');
+            double amount;
+            double grams;
+
+            if (asPiece) {
+              amount = doubleCount > 0 ? doubleCount : 1.0;
+              grams = estimatedWeight > 0 ? estimatedWeight : (amount * 50.0);
             } else {
-              estimatedAmount = '${estimatedWeight.toInt()}g';
+              amount = estimatedWeight > 0 ? estimatedWeight : 0.0;
+              grams = amount;
             }
 
-            var item = MealBreakdownItem.fromBasic(
+            // Safety: never allow grams <= 0.
+            if (grams <= 0) {
+              grams = 100.0;
+              if (amount <= 0) {
+                amount = asPiece ? 1.0 : grams;
+              }
+            }
+
+            if (amount <= 0) {
+              amount = asPiece ? 1.0 : grams;
+            }
+
+            return MealBreakdownItem(
               name: name,
               englishName: en.isNotEmpty ? en : name,
-              estimatedAmount: estimatedAmount,
+              amount: amount,
+              unit: unit,
+              grams: grams,
             );
-            if (estimatedWeight > 0) {
-              item = item.copyWith(grams: estimatedWeight);
-            }
-            // Safety: never allow grams=0 — default to 100g
-            if (item.grams <= 0) {
-              item = item.copyWith(grams: 100.0);
-            }
-            return item;
           }).toList();
 
       log('ITEMS_PARSED => ${result.length} item(s)');
@@ -760,25 +812,48 @@ class ScanCalorieController extends GetxController {
   }
 
   // item editing
+  double convertAmountToUnit(
+    int index,
+    MealBreakdownItem item,
+    String targetUnit,
+  ) {
+    switch (targetUnit) {
+      case 'piece':
+      case 'pieces':
+        final gramsPerPiece = _gramsPerPieceFor(index, item);
+        return item.grams / gramsPerPiece;
+      case 'ml':
+      case 'g':
+      default:
+        return item.grams;
+    }
+  }
+
   void updateItemAmount(int index, double newAmount, String unit) {
     if (index < 0 || index >= items.length) return;
     final it = items[index];
+    final sanitizedAmount =
+        (newAmount.isFinite ? newAmount : it.amount).clamp(0.01, 100000.0);
     double grams = it.grams;
     switch (unit) {
       case 'piece':
       case 'pieces':
-        grams = newAmount * 50;
+        final gramsPerPiece = _gramsPerPieceFor(index, it);
+        grams = sanitizedAmount * gramsPerPiece;
+        if (sanitizedAmount > 0 && grams > 0) {
+          _gramsPerPieceByIndex[index] = grams / sanitizedAmount;
+        }
         break;
       case 'ml':
         // 1 ml ≈ 1 g for most beverages
-        grams = newAmount;
+        grams = sanitizedAmount;
         break;
       default:
-        grams = newAmount;
+        grams = sanitizedAmount;
     }
     final updated =
         it
-            .copyWith(amount: newAmount, unit: unit, grams: grams)
+            .copyWith(amount: sanitizedAmount, unit: unit, grams: grams)
             .recalcFromPer100g();
     items[index] = updated;
     _recalcFromItems();
@@ -915,102 +990,24 @@ class ScanCalorieController extends GetxController {
     if (notify) update();
   }
 
-  onAddButton(BuildContext context) async {
-    List<SqlCalorieModel> calorieData = await dbHelper.getCalorieData();
-    if (!context.mounted) return;
-    await addSqlData(type);
-    if (!context.mounted) return;
-    if (calorieData.isEmpty) {
-      int id = await dbHelper.insertCalorie(
-        SqlCalorieModel(
-          date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
-          totalGoal: ConstantUserMaster.calorieGoal,
-          calorie: calorieQuantity,
-          protein: proteinQuantity.round(),
-          carbs: carbsQuantity.round(),
-          fats: fatsQuantity.round(),
-        ),
-      );
-      await dbHelper.insertDailyWater(
-        DailyCalorieModel(
-          date: DateTime.now().toString(),
-          time: DateFormat('hh:mm a').format(DateTime.now()),
-          calorie: calorieQuantity,
-          calorieId: id,
-        ),
-      );
-      await StreakService().recordActivity();
-      // Sync to Firestore for notifications
-      MealSyncService().syncMealLog(
-        mealType: type,
-        calories: calorieQuantity,
-        protein: proteinQuantity.round(),
-        carbs: carbsQuantity.round(),
-        fats: fatsQuantity.round(),
-        dailyGoal: ConstantUserMaster.calorieGoal,
-      );
-      // Check goal progress for notification
-      _showGoalNotificationIfNeeded(
-        calorieQuantity,
-        ConstantUserMaster.calorieGoal,
-      );
-      Get.until((route) => route.settings.name == Routes.leadingView);
-      _switchToHomeTab();
-      RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
-      WidgetPromotionService().showPromotionIfNeeded();
-    } else {
-      if (calorieData.last.date ==
-          DateFormat('dd-MM-yyyy').format(DateTime.now())) {
-        if (calorieData.last.calorie + calorieQuantity >
-            ConstantUserMaster.calorieGoal) {
-          showCalorieCompleteDialog(context, calorieData);
-        } else {
-          if (kDebugMode) {
-            print("Hello This Is Update Data $calorieQuantity");
-          }
-          await dbHelper.updateCalorie(
-            SqlCalorieModel(
-              id: calorieData.last.id,
-              date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
-              totalGoal: ConstantUserMaster.calorieGoal,
-              calorie: calorieData.last.calorie + calorieQuantity,
-              protein: calorieData.last.protein + proteinQuantity.round(),
-              carbs: calorieData.last.carbs + carbsQuantity.round(),
-              fats: calorieData.last.fats + fatsQuantity.round(),
-            ),
-          );
-          await dbHelper.insertDailyWater(
-            DailyCalorieModel(
-              date: DateTime.now().toString(),
-              time: DateFormat('hh:mm a').format(DateTime.now()),
-              calorie: calorieData.last.calorie + calorieQuantity,
-              calorieId: calorieData.last.id!,
-            ),
-          );
-          await StreakService().recordActivity();
-          // Sync to Firestore for notifications
-          MealSyncService().syncMealLog(
-            mealType: type,
-            calories: calorieQuantity,
-            protein: proteinQuantity.round(),
-            carbs: carbsQuantity.round(),
-            fats: fatsQuantity.round(),
-            dailyGoal: ConstantUserMaster.calorieGoal,
-          );
-          // Check goal progress for notification
-          _showGoalNotificationIfNeeded(
-            calorieData.last.calorie + calorieQuantity,
-            ConstantUserMaster.calorieGoal,
-          );
-          Get.until((route) => route.settings.name == Routes.leadingView);
-          _switchToHomeTab();
-          RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
-          WidgetPromotionService().showPromotionIfNeeded();
-        }
-      } else {
-        int id = await dbHelper.insertCalorie(
+  Future<void> onAddButton(BuildContext context) async {
+    if (isSaving) return;
+    isSaving = true;
+    update();
+
+    try {
+      final List<SqlCalorieModel> calorieData = await dbHelper.getCalorieData();
+      if (!context.mounted) return;
+
+      await addSqlData(type);
+      if (!context.mounted) return;
+
+      final String today = DateFormat('dd-MM-yyyy').format(DateTime.now());
+
+      if (calorieData.isEmpty) {
+        final int id = await dbHelper.insertCalorie(
           SqlCalorieModel(
-            date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+            date: today,
             totalGoal: ConstantUserMaster.calorieGoal,
             calorie: calorieQuantity,
             protein: proteinQuantity.round(),
@@ -1026,22 +1023,87 @@ class ScanCalorieController extends GetxController {
             calorieId: id,
           ),
         );
-        await StreakService().recordActivity();
-        // Sync to Firestore for notifications
-        MealSyncService().syncMealLog(
-          mealType: type,
-          calories: calorieQuantity,
+        await _runPostAddEffects(dayTotalCalories: calorieQuantity);
+        return;
+      }
+
+      if (calorieData.last.date == today) {
+        final int nextDayTotal = calorieData.last.calorie + calorieQuantity;
+        if (nextDayTotal > ConstantUserMaster.calorieGoal) {
+          showCalorieCompleteDialog(context, calorieData);
+          return;
+        }
+
+        await dbHelper.updateCalorie(
+          SqlCalorieModel(
+            id: calorieData.last.id,
+            date: today,
+            totalGoal: ConstantUserMaster.calorieGoal,
+            calorie: nextDayTotal,
+            protein: calorieData.last.protein + proteinQuantity.round(),
+            carbs: calorieData.last.carbs + carbsQuantity.round(),
+            fats: calorieData.last.fats + fatsQuantity.round(),
+          ),
+        );
+        await dbHelper.insertDailyWater(
+          DailyCalorieModel(
+            date: DateTime.now().toString(),
+            time: DateFormat('hh:mm a').format(DateTime.now()),
+            calorie: nextDayTotal,
+            calorieId: calorieData.last.id!,
+          ),
+        );
+        await _runPostAddEffects(dayTotalCalories: nextDayTotal);
+        return;
+      }
+
+      final int id = await dbHelper.insertCalorie(
+        SqlCalorieModel(
+          date: today,
+          totalGoal: ConstantUserMaster.calorieGoal,
+          calorie: calorieQuantity,
           protein: proteinQuantity.round(),
           carbs: carbsQuantity.round(),
           fats: fatsQuantity.round(),
-          dailyGoal: ConstantUserMaster.calorieGoal,
-        );
-        Get.until((route) => route.settings.name == Routes.leadingView);
-        _switchToHomeTab();
-        RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
-        WidgetPromotionService().showPromotionIfNeeded();
-      }
+        ),
+      );
+      await dbHelper.insertDailyWater(
+        DailyCalorieModel(
+          date: DateTime.now().toString(),
+          time: DateFormat('hh:mm a').format(DateTime.now()),
+          calorie: calorieQuantity,
+          calorieId: id,
+        ),
+      );
+      await _runPostAddEffects(dayTotalCalories: calorieQuantity);
+    } finally {
+      isSaving = false;
+      update();
     }
+  }
+
+  Future<void> _runPostAddEffects({required int dayTotalCalories}) async {
+    await StreakService().recordActivity();
+
+    // Sync to Firestore for notifications
+    MealSyncService().syncMealLog(
+      mealType: type,
+      calories: calorieQuantity,
+      protein: proteinQuantity.round(),
+      carbs: carbsQuantity.round(),
+      fats: fatsQuantity.round(),
+      dailyGoal: ConstantUserMaster.calorieGoal,
+    );
+
+    await _showGoalNotificationIfNeeded(
+      dayTotalCalories,
+      ConstantUserMaster.calorieGoal,
+    );
+
+    Get.until((route) => route.settings.name == Routes.leadingView);
+    _switchToHomeTab();
+    RateUsService.showRateUsIfEligible(RateUsService.actionFoodScan);
+    WidgetPromotionService().showPromotionIfNeeded();
   }
 
   void _switchToHomeTab() async {
@@ -1103,8 +1165,14 @@ class ScanCalorieController extends GetxController {
             if (v == null) return 0;
             if (v is int) return v;
             if (v is double) return v.round();
+            if (v is num) return v.toDouble().round();
             if (v is String) {
-              return int.tryParse(v.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+              final normalized = v.trim().replaceAll(',', '');
+              final match = RegExp(r'-?\d+(?:\.\d+)?').firstMatch(normalized);
+              if (match == null) return 0;
+              final parsed = double.tryParse(match.group(0)!);
+              if (parsed == null) return 0;
+              return parsed.round();
             }
             return 0;
           }
@@ -1240,12 +1308,13 @@ class ScanCalorieController extends GetxController {
             ),
             TextButton(
               onPressed: () async {
+                final int nextDayTotal = calorieData.last.calorie + calorieQuantity;
                 await dbHelper.updateCalorie(
                   SqlCalorieModel(
                     id: calorieData.last.id,
                     date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
                     totalGoal: ConstantUserMaster.calorieGoal,
-                    calorie: calorieData.last.calorie + calorieQuantity,
+                    calorie: nextDayTotal,
                     protein: calorieData.last.protein + proteinQuantity.round(),
                     carbs: calorieData.last.carbs + carbsQuantity.round(),
                     fats: calorieData.last.fats + fatsQuantity.round(),
@@ -1255,7 +1324,7 @@ class ScanCalorieController extends GetxController {
                   DailyCalorieModel(
                     date: DateTime.now().toString(),
                     time: DateFormat('hh:mm a').format(DateTime.now()),
-                    calorie: calorieData.last.calorie + calorieQuantity,
+                    calorie: nextDayTotal,
                     calorieId: calorieData.last.id!,
                   ),
                 );
@@ -1264,9 +1333,7 @@ class ScanCalorieController extends GetxController {
                 // Use safeBack so the pop goes through the overlay
                 // navigator and stays in sync with GetX's stack.
                 safeBack();
-                Get.until((route) => route.settings.name == Routes.leadingView);
-                _switchToHomeTab();
-                WidgetPromotionService().showPromotionIfNeeded();
+                await _runPostAddEffects(dayTotalCalories: nextDayTotal);
               },
               child: Text(
                 "Add More Calories".tr,
@@ -1306,13 +1373,26 @@ class ScanCalorieController extends GetxController {
 
       final int percent = ((totalCalories / goal) * 100).round();
       final localNotifService = Get.find<LocalNotificationService>();
+      final String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final String last50Date = await SharedPref.readString(
+        SharePrefKey.goalProgress50LastDate,
+      );
+      final String last100Date = await SharedPref.readString(
+        SharePrefKey.goalProgress100LastDate,
+      );
 
-      // Show notification for 50% or 100% milestones
       if (percent >= 100) {
+        if (last100Date == today) return;
         await localNotifService.showGoalProgress(100);
+        await SharedPref.saveString(SharePrefKey.goalProgress100LastDate, today);
+        if (last50Date != today) {
+          await SharedPref.saveString(SharePrefKey.goalProgress50LastDate, today);
+        }
         if (kDebugMode) print('Goal progress notification: 100%');
       } else if (percent >= 50 && percent < 100) {
+        if (last50Date == today) return;
         await localNotifService.showGoalProgress(percent);
+        await SharedPref.saveString(SharePrefKey.goalProgress50LastDate, today);
         if (kDebugMode) print('Goal progress notification: $percent%');
       }
     } catch (e) {

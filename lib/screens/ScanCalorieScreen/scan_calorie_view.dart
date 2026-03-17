@@ -106,9 +106,12 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               child: PrimaryCTA(
                 label: "Add Calorie".tr,
                 icon: Icons.add_circle_outline,
-                onTap: () {
-                  controller.onAddButton(context);
-                },
+                onTap:
+                    controller.isSaving
+                        ? null
+                        : () {
+                          controller.onAddButton(context);
+                        },
               ),
             ),
           );
@@ -764,7 +767,13 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
               children: [
                 SizedBox(
                   width: 100,
-                  child: TextField(
+                  child: TextFormField(
+                    key: ValueKey(
+                      'barcode_amount_input_${controller.selectedUnit.name}',
+                    ),
+                    initialValue: controller.customAmount
+                        .toStringAsFixed(1)
+                        .replaceAll(RegExp(r"([.]*0)(?!.*\d)"), ""),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -782,20 +791,6 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       ),
                       contentPadding: EdgeInsets.zero,
                     ),
-                    controller: TextEditingController(
-                        text: controller.customAmount
-                            .toStringAsFixed(1)
-                            .replaceAll(RegExp(r"([.]*0)(?!.*\d)"), ""),
-                      )
-                      ..selection = TextSelection.fromPosition(
-                        TextPosition(
-                          offset:
-                              controller.customAmount
-                                  .toStringAsFixed(1)
-                                  .replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "")
-                                  .length,
-                        ),
-                      ),
                     onChanged:
                         (val) => controller.updateCustomAmountFromText(val),
                   ),
@@ -1114,12 +1109,17 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                       ),
                   itemBuilder: (ctx, idx) {
                     final it = controller.items[idx];
-                    // Liquids (ml) get [ml, g]; solids get [piece, g].
-                    // ml + piece is never offered together.
+                    // Liquids always get [ml, g].
+                    // Solids only get [piece, g] if they originally support pieces;
+                    // gram-origin solids get [g] only.
                     final bool isLiquid = it.unit == 'ml';
-                    final units = isLiquid
-                        ? const ['ml', 'g']
-                        : const ['piece', 'g'];
+                    final bool keepsPieceFallback =
+                      controller.supportsPieceUnit(idx, it);
+                    final List<String> units = isLiquid
+                      ? const ['ml', 'g']
+                      : (keepsPieceFallback
+                        ? const ['piece', 'g']
+                        : const ['g']);
                     String currentUnit = it.unit;
                     return Container(
                       padding: const EdgeInsets.all(16),
@@ -1242,10 +1242,19 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                   ),
                                 ),
                                 child: TextFormField(
+                                  key: ValueKey(
+                                    'item_amount_${idx}_${it.unit}_${it.amount.toStringAsFixed(4)}',
+                                  ),
+                                  // Keep small piece-equivalent values visible after unit toggles.
+                                  // Using up to 2 decimals avoids turning 0.02 into 0.0.
                                   initialValue: it.amount.toStringAsFixed(
                                     it.amount == it.amount.truncateToDouble()
                                         ? 0
-                                        : 1,
+                                        : (it.amount * 10 ==
+                                                (it.amount * 10)
+                                                    .truncateToDouble()
+                                            ? 1
+                                            : 2),
                                   ),
                                   keyboardType:
                                       const TextInputType.numberWithOptions(
@@ -1328,9 +1337,11 @@ class ScanCalorieView extends GetView<ScanCalorieController> {
                                       onChanged: (u) {
                                         if (u == null) return;
                                         setState(() => currentUnit = u);
+                                        final convertedAmount = controller
+                                            .convertAmountToUnit(idx, it, u);
                                         controller.updateItemAmount(
                                           idx,
-                                          it.amount,
+                                          convertedAmount,
                                           currentUnit,
                                         );
                                       },

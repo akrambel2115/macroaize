@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class UsdaBadge extends StatelessWidget {
   final bool verified;
@@ -9,7 +10,7 @@ class UsdaBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = verified ? Colors.green : Colors.orange;
-    final text = verified ? 'Verified' : 'Not Verified';
+    final text = verified ? 'verified'.tr : 'estimated'.tr;
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,

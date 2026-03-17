@@ -584,6 +584,12 @@ const Map<String, String> english = {
   "no_offers_available": "No offers available",
   "no_offers_moment": "No offers available at the moment.",
   "failed_load_offers": "Failed to load offers. Please try again.",
+  "premium_offers_error_title": "Premium plans are unavailable",
+  "premium_offers_empty_body":
+      "We couldn't find active subscription plans right now. Please try again in a moment.",
+  "premium_offers_fetch_failed_body":
+      "We couldn't refresh plans right now. Check your connection and try again.",
+  "premium_try_again_button": "Try again",
   "purchase_successful_verifying": "Purchase successful. Verifying...",
   "subscription_active": "Subscription active!",
   "purchase_cancelled": "Purchase cancelled",

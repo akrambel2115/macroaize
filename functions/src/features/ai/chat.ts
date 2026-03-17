@@ -28,6 +28,11 @@ export const chatWithOpenRouter = onCall({
     const model = String(request.data?.model || getAiModel());
     const messages = request.data?.messages;
     const maxTokens = Number(request.data?.max_tokens || 500);
+    const requestedTemperature = Number(request.data?.temperature);
+    const context = request.data?.context; // 'scan' | 'chat'
+    const temperature = Number.isFinite(requestedTemperature)
+        ? Math.min(1, Math.max(0, requestedTemperature))
+        : (context === 'scan' ? 0 : 0.4);
 
     if (!Array.isArray(messages) || messages.length === 0) {
         throw new Error('invalid-argument');
@@ -66,8 +71,6 @@ export const chatWithOpenRouter = onCall({
         isPremium = false;
     }
 
-    const context = request.data?.context; // 'scan' | 'chat'
-
     // Usage tracking is handled by the dedicated incrementUsage Cloud Function
     // called from the client before reaching this point.
     // We only log access level here — no duplicate counter increment.
@@ -85,21 +88,46 @@ export const chatWithOpenRouter = onCall({
     }
 
     const genAI = new GoogleGenerativeAI(key);
-    const genModel = genAI.getGenerativeModel({ model: model });
+
+    // Extract explicit system instructions so they remain highest priority.
+    const systemInstructions: string[] = [];
+    for (const msg of messages) {
+        if (msg?.role !== 'system') continue;
+        if (typeof msg.content === 'string') {
+            systemInstructions.push(msg.content);
+            continue;
+        }
+        if (Array.isArray(msg.content)) {
+            for (const item of msg.content) {
+                if (item?.type === 'text' && typeof item.text === 'string') {
+                    systemInstructions.push(item.text);
+                }
+            }
+        }
+    }
+
+    const genModel = genAI.getGenerativeModel({
+        model,
+        ...(systemInstructions.length > 0
+            ? { systemInstruction: systemInstructions.join('\n\n') }
+            : {}),
+    });
 
     // Convert OpenAI messages to Gemini contents
     const contents: Content[] = [];
     for (const msg of messages) {
-        const role = msg.role === 'assistant' ? 'model' : 'user';
+        if (msg?.role === 'system') continue;
+
+        const role = msg?.role === 'assistant' ? 'model' : 'user';
         const parts: Part[] = [];
 
         if (typeof msg.content === 'string') {
             parts.push({ text: msg.content });
         } else if (Array.isArray(msg.content)) {
             for (const item of msg.content) {
-                if (item.type === 'text') {
+                if (item?.type === 'text' && typeof item.text === 'string') {
                     parts.push({ text: item.text });
-                } else if (item.type === 'image_url' && item.image_url?.url) {
+                } else if (item?.type === 'image_url' && item.image_url?.url) {
                     const url = item.image_url.url;
                     if (url.startsWith('data:image/')) {
                         const [header, data] = url.split(',');
@@ -114,7 +142,13 @@ export const chatWithOpenRouter = onCall({
                 }
             }
         }
-        contents.push({ role, parts });
+        if (parts.length > 0) {
+            contents.push({ role, parts });
+        }
+    }
+
+    if (contents.length === 0) {
+        throw createStructuredError('invalid-argument', 'No valid message content', correlationId);
     }
 
     try {
@@ -122,25 +156,35 @@ export const chatWithOpenRouter = onCall({
             contents,
             generationConfig: {
                 maxOutputTokens: maxTokens,
-                temperature: 0.4,
+                temperature,
             }
         });
 
         const response = result.response;
         const text = response.text();
 
-        // Perform validations if needed
-        if (text.includes('food_name') || text.includes('calories')) {
-            try { validateAiJsonResponse(text, 'nutrition'); } catch (_) { }
-        } else if (text.includes('mealItems')) {
-            try { validateAiJsonResponse(text, 'mealItems'); } catch (_) { }
+        // Enforce structured output for scan requests to reduce malformed JSON.
+        const lowerPrompt = JSON.stringify(messages).toLowerCase();
+        let normalizedText = text;
+
+        if (context === 'scan') {
+            if (lowerPrompt.includes('mealitems')) {
+                const validated = validateAiJsonResponse(text, 'mealItems');
+                normalizedText = JSON.stringify(validated);
+            } else if (
+                lowerPrompt.includes('food_name') ||
+                lowerPrompt.includes('calories')
+            ) {
+                const validated = validateAiJsonResponse(text, 'nutrition');
+                normalizedText = JSON.stringify(validated);
+            }
         }
 
         return {
             choices: [
                 {
                     message: {
-                        content: text
+                        content: normalizedText
                     }
                 }
             ]

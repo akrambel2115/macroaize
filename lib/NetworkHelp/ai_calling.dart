@@ -92,6 +92,10 @@ class OpenAiCalling {
     return s;
   }
 
+  static String _normalizeModelJsonText(String text) {
+    return _stripMarkdownFences(text).trim();
+  }
+
   static Future<HttpsCallableResult> _callWithRetry(
     Map<String, dynamic> parameters,
   ) async {
@@ -142,39 +146,18 @@ class OpenAiCalling {
       final parameters = <String, dynamic>{
         'model': Get.find<AppConfigService>().aiModel,
         'context': 'scan',
+        'temperature': 0,
         'messages': [
           {
             'role': 'system',
             'content':
-                "You are a nutrition analysis assistant with advanced portion estimation capabilities. "
-                "Given a photo, first determine whether the image contains food or a beverage. "
-                "If the image does NOT contain any food or drink, return ONLY: {\"is_food\": false}. "
-                "Do NOT invent nutritional values for non-food images.\n\n"
-                "If the image DOES contain food, return ONLY compact JSON listing distinct items with portion analysis. "
-                "No commentary or markdown.\n\n"
-                "JSON shape:\n"
-                "{\n"
-                "  \"is_food\": true,\n"
-                "  \"mealItems\": [\n"
-                "    {\n"
-                "      \"name\": <string in $currentLang>,\n"
-                "      \"english_name\": <string in English>,\n"
-                "      \"isLiquid\": <bool>,\n"
-                "      \"portionType\": \"pieces\" | \"grams\" | \"ml\",\n"
-                "      \"count\": <number, only if portionType is pieces>,\n"
-                "      \"estimatedWeight\": <number in grams or ml>\n"
-                "    }\n"
-                "  ]\n"
-                "}\n\n"
-                "Rules:\n"
-                "- isLiquid=true for any drinkable, pourable, or liquid-first item "
-                "(beverages, soups, broths, shakes, juices, milk, etc.). "
-                "Then set portionType=\"ml\" and estimatedWeight in milliliters.\n"
-                "- Be conservative with portion estimates.\n"
-                "- Common references: medium egg ≈ 50 g, thin bread slice ≈ 25 g, "
-                "thick bread slice ≈ 35 g, medium apple ≈ 150 g, banana ≈ 120 g.\n"
-                "- For piece-based items provide count AND realistic total weight.\n"
-                "- For weight-based items estimate total grams conservatively.",
+                "You are a nutrition analysis assistant. Return valid JSON only (no markdown, no comments). "
+                "First classify the image: if no edible food or drink is present, return exactly {\"is_food\": false}. "
+                "If food/drink is present, return exactly this shape: "
+                "{\"is_food\":true,\"mealItems\":[{\"name\":string($currentLang),\"english_name\":string(English),\"isLiquid\":bool,\"portionType\":\"pieces\"|\"grams\"|\"ml\",\"count\":number(optional, pieces only),\"estimatedWeight\":number}]}. "
+                "Rules: identify distinct edible items only, be conservative, and keep estimatedWeight realistic. "
+                "For liquids use isLiquid=true, portionType=\"ml\", estimatedWeight in ml. "
+                "For solids use grams or pieces. For pieces include both count and realistic total weight.",
           },
           {
             'role': 'user',
@@ -196,14 +179,14 @@ class OpenAiCalling {
             ],
           },
         ],
-        'temperature': 0,
-        'max_tokens': 600,
+        'max_tokens': 450,
       };
       final result = await _callWithRetry(parameters);
-      return _extractContent(result);
+      return _normalizeModelJsonText(_extractContent(result));
     } catch (e) {
       if (kDebugMode) print("error analyzeMealItems====> $e");
-      return "Something Went Wrong";
+      // Allow caller to continue to fallback nutrition analysis path.
+      return '{"is_food":null,"mealItems":[]}';
     }
   }
 
@@ -215,26 +198,17 @@ class OpenAiCalling {
       final parameters = <String, dynamic>{
         'model': Get.find<AppConfigService>().aiModel,
         'context': 'scan',
+        'temperature': 0,
         'messages': [
           {
             'role': 'system',
             'content':
-                "You are a nutrition analysis assistant. "
-                "Given a photo, first determine if it contains food or a beverage. "
-                "If it does NOT, return ONLY: {\"is_food\": false}. "
-                "Do NOT invent nutritional values for non-food images.\n\n"
-                "If it DOES contain food, return ONLY compact JSON with integer kcal/gram values. "
-                "No commentary or markdown. If multiple foods are present, estimate TOTAL combined values.\n\n"
-                "JSON shape:\n"
-                "{\n"
-                "  \"is_food\": true,\n"
-                "  \"food_name\": <string in $currentLang>,\n"
-                "  \"food_name_english\": <string in English>,\n"
-                "  \"calories\": <int>,\n"
-                "  \"protein_g\": <int>,\n"
-                "  \"carbohydrates_g\": <int>,\n"
-                "  \"fats_g\": <int>\n"
-                "}",
+                "You are a nutrition analysis assistant. Return valid JSON only (no markdown, no comments). "
+                "If image has no edible food/drink, return exactly {\"is_food\": false}. "
+                "If food exists, return exactly: "
+                "{\"is_food\":true,\"food_name\":string($currentLang),\"food_name_english\":string(English),\"calories\":int,\"protein_g\":int,\"carbohydrates_g\":int,\"fats_g\":int,\"estimated\":true}. "
+                "If multiple foods exist, estimate totals for the full visible meal. "
+                "Use conservative but realistic values.",
           },
           {
             'role': 'user',
@@ -255,14 +229,13 @@ class OpenAiCalling {
             ],
           },
         ],
-        'temperature': 0,
-        'max_tokens': 300,
+        'max_tokens': 220,
       };
       final result = await _callWithRetry(parameters);
-      return _extractContent(result);
+      return _normalizeModelJsonText(_extractContent(result));
     } catch (e) {
       if (kDebugMode) print("error sentImageApi====> $e");
-      return "Something Went Wrong";
+      return '{"is_food":null,"food_name":"","food_name_english":"","calories":0,"protein_g":0,"carbohydrates_g":0,"fats_g":0,"estimated":true}';
     }
   }
 
@@ -274,6 +247,7 @@ class OpenAiCalling {
       final parameters = <String, dynamic>{
         'model': Get.find<AppConfigService>().aiModel,
         'context': 'scan',
+        'temperature': 0,
         'messages': [
           {
             'role': 'system',
@@ -282,7 +256,7 @@ class OpenAiCalling {
                 'with numeric per-100 g nutritional values. No commentary or markdown.\n'
                 'JSON shape: {"kcalPer100g":<number>,"proteinPer100g":<number>,'
                 '"carbsPer100g":<number>,"fatPer100g":<number>}\n'
-                'Use realistic values. Never return all zeros.',
+                'If exact data is unavailable, return a conservative realistic estimate based on similar foods.',
           },
           {
             'role': 'user',
@@ -291,12 +265,11 @@ class OpenAiCalling {
                 '(estimated portion ${grams.toInt()} g). Return ONLY the JSON.',
           },
         ],
-        'temperature': 0,
-        'max_tokens': 100,
+        'max_tokens': 80,
       };
       final result = await _callWithRetry(parameters);
       final raw = _extractContent(result);
-      final cleaned = _stripMarkdownFences(raw);
+      final cleaned = _normalizeModelJsonText(raw);
       final parsed = jsonDecode(cleaned) as Map<String, dynamic>;
       return {
         'kcalPer100g': (parsed['kcalPer100g'] as num?)?.toDouble() ?? 0.0,
@@ -328,6 +301,7 @@ class OpenAiCalling {
       final parameters = <String, dynamic>{
         'model': Get.find<AppConfigService>().aiModel,
         'context': 'scan',
+        'temperature': 0,
         'messages': [
           {
             'role': 'system',
@@ -337,7 +311,7 @@ class OpenAiCalling {
                 'No commentary or markdown.\n'
                 'Each object shape: {"kcalPer100g":<number>,"proteinPer100g":<number>,'
                 '"carbsPer100g":<number>,"fatPer100g":<number>}\n'
-                'Use realistic values. Never return all zeros.',
+                'If exact data is unavailable, return conservative realistic estimates.',
           },
           {
             'role': 'user',
@@ -346,12 +320,11 @@ class OpenAiCalling {
                 'Return ONLY the JSON array.',
           },
         ],
-        'temperature': 0,
-        'max_tokens': foodNames.length * 60,
+        'max_tokens': foodNames.length * 45,
       };
       final result = await _callWithRetry(parameters);
       final raw = _extractContent(result);
-      final cleaned = _stripMarkdownFences(raw);
+      final cleaned = _normalizeModelJsonText(raw);
       final decoded = jsonDecode(cleaned);
       final List list = decoded is List ? decoded : [];
       return List.generate(foodNames.length, (i) {

@@ -597,6 +597,12 @@ const Map<String, String> french = {
   "no_offers_available": "Aucune offre disponible",
   "no_offers_moment": "Aucune offre disponible pour le moment.",
   "failed_load_offers": "Impossible de charger les offres. Veuillez réessayer.",
+  "premium_offers_error_title": "Les offres Premium sont indisponibles",
+  "premium_offers_empty_body":
+      "Aucun plan d'abonnement actif n'est disponible pour le moment. Veuillez réessayer dans un instant.",
+  "premium_offers_fetch_failed_body":
+      "Impossible d'actualiser les offres pour le moment. Vérifiez votre connexion puis réessayez.",
+  "premium_try_again_button": "Réessayer",
   "purchase_successful_verifying": "Achat réussi. Vérification...",
   "subscription_active": "Abonnement actif !",
   "purchase_cancelled": "Achat annulé",

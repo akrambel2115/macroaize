@@ -77,6 +77,8 @@ const Map<String, String> arabic = {
   "Items": "عناصر",
   "Verified": "مؤكد",
   "Estimated": "تقديري",
+    "verified": "مؤكد",
+    "estimated": "تقديري",
   "Meal contains": "هذه الوجبة تحتوي على",
   "Conjunction and": "و",
   "Meal label": "الوجبة",
@@ -544,6 +546,12 @@ const Map<String, String> arabic = {
   "no_offers_available": "لا توجد عروض متاحة",
   "no_offers_moment": "لا توجد عروض متاحة في الوقت الحالي.",
   "failed_load_offers": "فشل في تحميل العروض. يرجى المحاولة مرة أخرى.",
+  "premium_offers_error_title": "خطط Premium غير متاحة حالياً",
+  "premium_offers_empty_body":
+      "لم نعثر على خطط اشتراك نشطة الآن. يرجى المحاولة مرة أخرى بعد قليل.",
+  "premium_offers_fetch_failed_body":
+      "تعذر تحديث الخطط الآن. تحقق من الاتصال ثم حاول مرة أخرى.",
+  "premium_try_again_button": "حاول مرة أخرى",
   "purchase_successful_verifying": "تم الشراء بنجاح. جاري التحقق...",
   "subscription_active": "الاشتراك نشط!",
   "purchase_cancelled": "تم إلغاء الشراء",

@@ -147,29 +147,13 @@ class _PremiumViewState extends State<PremiumView> {
                                 }
 
                                 if (c.errorMessage != null) {
-                                  return Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            c.errorMessage!,
-                                            style: const TextStyle(
-                                              color: Colors.red,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          ElevatedButton(
-                                            onPressed: c.fetchOfferings,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  AppColor.primaryOrange,
-                                            ),
-                                            child: const Text('Retry'),
-                                          ),
-                                        ],
-                                      ),
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: _PremiumOfferNotice(
+                                      title: 'premium_offers_error_title'.tr,
+                                      message: c.errorMessage!,
+                                      actionText: 'premium_try_again_button'.tr,
+                                      onActionTap: c.fetchOfferings,
                                     ),
                                   );
                                 }
@@ -191,17 +175,13 @@ class _PremiumViewState extends State<PremiumView> {
                                   return 0;
                                 });
                                 if (sortedPackages.isEmpty) {
-                                  return Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Text(
-                                        'No offers available',
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.7,
-                                          ),
-                                        ),
-                                      ),
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: _PremiumOfferNotice(
+                                      title: 'premium_offers_error_title'.tr,
+                                      message: 'premium_offers_empty_body'.tr,
+                                      actionText: 'premium_try_again_button'.tr,
+                                      onActionTap: c.fetchOfferings,
                                     ),
                                   );
                                 }
@@ -502,6 +482,11 @@ class _PremiumViewState extends State<PremiumView> {
                                 final packages =
                                     c.offerings?.current?.availablePackages ??
                                     [];
+                                if (c.isLoading ||
+                                    c.errorMessage != null ||
+                                    packages.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
                                 bool hasTrial = false;
                                 if (packages.isNotEmpty &&
                                     c.selected < packages.length) {
@@ -917,6 +902,71 @@ class _FeatureRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PremiumOfferNotice extends StatelessWidget {
+  const _PremiumOfferNotice({
+    required this.title,
+    required this.message,
+    required this.actionText,
+    required this.onActionTap,
+  });
+
+  final String title;
+  final String message;
+  final String actionText;
+  final VoidCallback onActionTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.wifi_tethering_error_rounded,
+            color: AppColor.warning,
+            size: 28,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.78),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: onActionTap,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.primaryOrange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(actionText),
+          ),
+        ],
+      ),
     );
   }
 }

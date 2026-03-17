@@ -74,7 +74,7 @@ class PremiumController extends GetxController {
       if (offerings == null ||
           offerings!.current == null ||
           offerings!.current!.availablePackages.isEmpty) {
-        errorMessage = 'no_offers_moment'.tr;
+        errorMessage = 'premium_offers_empty_body'.tr;
       } else {
         int trialIndex = _findTrialPlanIndex();
         if (trialIndex >= 0) {
@@ -87,7 +87,7 @@ class PremiumController extends GetxController {
         }
       }
     } catch (e) {
-      errorMessage = 'failed_load_offers'.tr;
+      errorMessage = 'premium_offers_fetch_failed_body'.tr;
       if (kDebugMode) {
         print('Error fetching offerings: $e');
       }

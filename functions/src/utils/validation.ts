@@ -64,6 +64,7 @@ export function validateAiJsonResponse(jsonString: string, schema: 'nutrition' |
         // return safe fallback
         if (schema === 'nutrition') {
             return {
+                is_food: null,
                 food_name: 'Unknown Food',
                 food_name_english: 'Unknown Food',
                 calories: 0,
@@ -72,7 +73,7 @@ export function validateAiJsonResponse(jsonString: string, schema: 'nutrition' |
                 fats_g: 0
             };
         } else {
-            return { mealItems: [] };
+            return { is_food: null, mealItems: [] };
         }
     }
 }
@@ -80,6 +81,10 @@ export function validateAiJsonResponse(jsonString: string, schema: 'nutrition' |
 function validateNutritionSchema(data: any): any {
     if (!data || typeof data !== 'object') {
         throw new Error('Invalid nutrition data structure');
+    }
+
+    if (data.is_food === false) {
+        return { is_food: false };
     }
 
     const clampNumber = (value: any, min: number = 0, max: number = 10000): number => {
@@ -93,6 +98,7 @@ function validateNutritionSchema(data: any): any {
     };
 
     return {
+        is_food: true,
         food_name: sanitizeString(data.food_name, 200),
         food_name_english: sanitizeString(data.food_name_english, 200),
         calories: clampNumber(data.calories),
@@ -105,6 +111,10 @@ function validateNutritionSchema(data: any): any {
 function validateMealItemsSchema(data: any): any {
     if (!data || typeof data !== 'object') {
         throw new Error('Invalid meal items data structure');
+    }
+
+    if (data.is_food === false) {
+        return { is_food: false, mealItems: [] };
     }
 
     const mealItems = Array.isArray(data.mealItems) ? data.mealItems : [];
@@ -122,12 +132,14 @@ function validateMealItemsSchema(data: any): any {
         };
 
         const portionType = String(item.portionType || '').toLowerCase();
-        const validPortionTypes = ['pieces', 'grams'];
+        const validPortionTypes = ['pieces', 'grams', 'ml'];
         const safePortionType = validPortionTypes.includes(portionType) ? portionType : 'grams';
+        const isLiquid = item.isLiquid === true;
 
         return {
             name: sanitizeString(item.name, 200),
             english_name: sanitizeString(item.english_name, 200),
+            isLiquid,
             portionType: safePortionType,
             count: safePortionType === 'pieces' ? clampNumber(item.count, 1, 100) : undefined,
             estimatedWeight: clampNumber(item.estimatedWeight, 1, 5000) // Max 5kg
@@ -135,6 +147,7 @@ function validateMealItemsSchema(data: any): any {
     }).filter((item: any) => item !== null);
 
     return {
+        is_food: true,
         mealItems: validatedItems
     };
 }
