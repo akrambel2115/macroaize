@@ -23,7 +23,7 @@ import '../HomeScreen/home_controller.dart';
 import '../leadingScreen/leading_controller.dart';
 
 class LocalFoodController extends GetxController {
-  Map<String, dynamic> argument = Get.arguments;
+  late final Map<String, dynamic> argument;
   TextEditingController textController = TextEditingController();
   List<FoodItem> filteredItems = [];
   List<FoodItem> _allItems = [];
@@ -42,7 +42,11 @@ class LocalFoodController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    type = argument['value'] ?? 'Dinner';
+    argument =
+        (Get.arguments as Map<String, dynamic>?) ??
+        const <String, dynamic>{};
+    final value = argument['value'] as String?;
+    type = (value != null && value.trim().isNotEmpty) ? value : 'Dinner';
     await _refreshFoods();
   }
 
@@ -424,7 +428,7 @@ class LocalFoodController extends GetxController {
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
+                safeBack();
               },
             ),
             TextButton(
@@ -449,9 +453,7 @@ class LocalFoodController extends GetxController {
                   ),
                 );
 
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
+                safeBack();
                 Get.until((route) => route.settings.name == Routes.leadingView);
                 _switchToHomeTab();
                 RateUsService.showRateUsIfEligible(RateUsService.actionFoodLog);

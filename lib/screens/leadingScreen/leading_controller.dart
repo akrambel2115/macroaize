@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:macroaize/shared/widgets/premium_required_dialog.dart';
 import 'package:macroaize/shared/utils/navigation_helpers.dart';
-import 'package:macroaize/screens/AnalyticsScreen/analytics_controller.dart';
-import 'package:macroaize/screens/RecipesScreen/recipes_controller.dart';
 import 'package:macroaize/shared/services/app_user_service.dart';
 import 'package:macroaize/shared/services/email_verification_guard.dart';
 import 'package:macroaize/routes/app_routes.dart';
 import 'package:get/get.dart';
 
-import '../HomeScreen/home_controller.dart';
-
 class LeadingController extends GetxController {
-  Map<String, dynamic>? argument = Get.arguments;
+  late final Map<String, dynamic> argument;
   int currentIndex = 0;
   final EmailVerificationGuard _verificationGuard = EmailVerificationGuard();
 
   @override
   void onInit() {
     super.onInit();
+    final args = Get.arguments;
+    argument = args is Map<String, dynamic> ? args : <String, dynamic>{};
 
     // Check email verification
     _checkVerificationAsync();
@@ -36,11 +34,11 @@ class LeadingController extends GetxController {
       }
     }
 
-    if (argument != null) {
-      Get.delete<HomeController>();
-      Get.delete<RecipesController>();
-      Get.delete<AnalyticsController>();
-      currentIndex = argument!['index'];
+    if (argument.isNotEmpty) {
+      final argIndex = argument['index'];
+      if (argIndex is int && argIndex >= 0 && argIndex <= 4) {
+        currentIndex = argIndex;
+      }
       update();
     }
   }

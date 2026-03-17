@@ -30,9 +30,11 @@ class _PremiumViewState extends State<PremiumView> {
   @override
   void initState() {
     super.initState();
-    final args = Get.arguments as Map?;
-    final delayClose = args != null && args['delayClose'] == true;
-    controller.fromOnboarding = args != null && args['fromOnboarding'] == true;
+    final rawArgs = Get.arguments;
+    final args =
+        rawArgs is Map<String, dynamic> ? rawArgs : <String, dynamic>{};
+    final delayClose = args['delayClose'] == true;
+    controller.fromOnboarding = args['fromOnboarding'] == true;
     if (delayClose) {
       showCloseLocal = false;
       _timer = Timer(const Duration(seconds: 5), () {

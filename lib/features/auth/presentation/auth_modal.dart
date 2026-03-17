@@ -13,6 +13,7 @@ import 'auth_theme.dart';
 import '../../../shared/services/notification_service.dart';
 import '../../../widgets/app_widgets.dart';
 import 'package:macroaize/shared/services/app_config_service.dart';
+import 'package:macroaize/routes/app_routes.dart';
 
 class AuthModal extends StatelessWidget {
   final bool isFullScreen;
@@ -486,7 +487,7 @@ class _RegisterTab extends GetView<AuthController> {
                             if (user != null) {
                               Get.back(result: true);
                               // navigate to email verification screen
-                              Get.offAllNamed('/EmailVerificationView');
+                              Get.offAllNamed(Routes.emailVerificationView);
                             }
                           },
                   style: modernFilledButton(context),

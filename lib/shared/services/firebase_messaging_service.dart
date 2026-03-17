@@ -170,20 +170,23 @@ class FirebaseMessagingService extends GetxService {
     switch (type) {
       case 'promo_used':
         // Route not yet implemented — navigate to leading view instead.
-        Get.toNamed(Routes.leadingView);
+        _navigateToMainRoot();
         break;
       case 'goal_progress':
         // Route not yet implemented — navigate to leading view instead.
-        Get.toNamed(Routes.leadingView);
+        _navigateToMainRoot();
         break;
       case 'meal_reminder':
-        if (Get.currentRoute != Routes.leadingView) {
-          Get.toNamed(Routes.leadingView);
-        }
+        _navigateToMainRoot();
         break;
       default:
         break;
     }
+  }
+
+  void _navigateToMainRoot() {
+    if (Get.currentRoute == Routes.leadingView) return;
+    Get.offAllNamed(Routes.leadingView);
   }
 
   Future<void> _handleTokenManagement() async {

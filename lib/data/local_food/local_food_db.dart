@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 part 'local_food_db.g.dart';
 
 const String _localFoodAssetDbPath = 'assets/database/local_food.db';
-const int _localFoodCatalogVersion = 3;
+const int _localFoodCatalogVersion = 4;
 const String _metaCatalogVersionKey = 'catalog_version';
 
 class FoodsCatalog extends Table {

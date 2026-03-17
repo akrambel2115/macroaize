@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +17,7 @@ class WorkoutController extends GetxController {
   final dbHelper = DatabaseHelper();
   final _functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
   final _usageService = Get.find<UsageService>();
+  StreamSubscription? _usageSubscription;
 
   final RxBool isSaving = false.obs;
   final RxString saveError = ''.obs;
@@ -45,7 +47,8 @@ class WorkoutController extends GetxController {
     }
 
     _isPremium.value = _usageService.isPremium;
-    _usageService.usageStream.listen((_) {
+    _usageSubscription?.cancel();
+    _usageSubscription = _usageService.usageStream.listen((_) {
       _isPremium.value = _usageService.isPremium;
     });
 
@@ -57,6 +60,7 @@ class WorkoutController extends GetxController {
   @override
   void onClose() {
     _isClosed = true;
+    _usageSubscription?.cancel();
     descriptionController.dispose();
     super.onClose();
   }
@@ -387,8 +391,7 @@ class WorkoutController extends GetxController {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () =>
-                        Navigator.of(dialogContext).pop(false),
+                    onPressed: () => Get.back(result: false),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -407,8 +410,7 @@ class WorkoutController extends GetxController {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () =>
-                        Navigator.of(dialogContext).pop(true),
+                    onPressed: () => Get.back(result: true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColor.primaryOrange,
                       foregroundColor: Colors.white,

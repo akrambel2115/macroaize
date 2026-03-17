@@ -64,7 +64,9 @@ class LocalNotificationService extends GetxService {
   void _onNotificationTap(NotificationResponse response) {
     final payload = response.payload;
     if (payload != null) {
-      Get.toNamed(Routes.leadingView);
+      if (Get.currentRoute != Routes.leadingView) {
+        Get.offAllNamed(Routes.leadingView);
+      }
     }
   }
 

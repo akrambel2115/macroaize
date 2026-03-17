@@ -87,6 +87,12 @@ Future<void> main() async {
   }
   Get.put(UsageService());
   Get.put(MainController());
+  if (!Get.isRegistered<ThemeController>()) {
+    Get.put(ThemeController(), permanent: true);
+  }
+  if (!Get.isRegistered<PremiumController>()) {
+    Get.put(PremiumController(), permanent: true);
+  }
   try {
     await Get.putAsync<AppConfigService>(() async => AppConfigService().load());
   } catch (e) {
@@ -360,14 +366,11 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeController themeController = Get.put(ThemeController());
+    final ThemeController themeController = Get.find<ThemeController>();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    if (!Get.isRegistered<PremiumController>()) {
-      Get.put(PremiumController(), permanent: true);
-    }
 
     return GetBuilder<MainController>(
       builder: (mc) {

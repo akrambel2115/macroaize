@@ -25,11 +25,12 @@ class _AnalyticsViewState extends State<AnalyticsView>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late TabController _workoutTabController;
-  final AnalyticsController controller = Get.put(AnalyticsController());
+  late final AnalyticsController controller;
 
   @override
   void initState() {
     super.initState();
+    controller = Get.find<AnalyticsController>();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {

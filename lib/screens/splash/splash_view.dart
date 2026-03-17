@@ -11,23 +11,18 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
-  late SplashController controller;
+  late final SplashController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(SplashController());
+    controller = Get.find<SplashController>();
     // start after frame
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 80));
+      if (!mounted || controller.isClosed) return;
       controller.startAnimations();
     });
-  }
-
-  @override
-  void dispose() {
-    Get.delete<SplashController>();
-    super.dispose();
   }
 
   @override

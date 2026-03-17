@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../shared/services/notification_service.dart';
-import '../../features/auth/data/firebase_auth_repository.dart';
 import '../../features/auth/presentation/account_controller.dart';
 import '../../widgets/verify_email_button.dart';
 import 'package:macroaize/constant/app_color.dart';
 import 'package:macroaize/widgets/app_widgets.dart';
 import 'package:macroaize/routes/app_routes.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 import 'change_password_screen.dart';
 
 const Color _kAccent = Color(0xFFFF6B35);
@@ -26,9 +26,7 @@ class AccountDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final theme = Theme.of(context);
-
-    final repo = FirebaseAuthRepository();
-    final acct = Get.put(AccountController(repo), tag: 'account');
+    final acct = Get.find<AccountController>(tag: 'account');
 
     return Scaffold(
       appBar: AppBar(
@@ -365,7 +363,7 @@ class _EditDisplayNameSheetState extends State<_EditDisplayNameSheet> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => safeBack(),
                   style: TextButton.styleFrom(foregroundColor: Colors.red),
                   child: Text('cancel'.tr),
                 ),

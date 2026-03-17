@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:macroaize/shared/services/usage_service.dart';
 import 'package:macroaize/shared/services/notification_service.dart';
 import 'package:macroaize/shared/services/app_user_service.dart';
@@ -40,6 +41,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
   // barcode
   final _openFoodFactsService = OpenFoodFactsService();
   bool _isProcessingBarcode = false;
+  StreamSubscription? _usageSubscription;
 
   // usage getters
   int get remainingScans => (_usageService.scanLimit - _usageService.scanCount)
@@ -63,7 +65,8 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
     } catch (_) {}
     update();
 
-    _usageService.usageStream.listen((_) {
+    _usageSubscription?.cancel();
+    _usageSubscription = _usageService.usageStream.listen((_) {
       if (!isClosed) update();
     });
 
@@ -73,6 +76,7 @@ class ScanFoodController extends GetxController with WidgetsBindingObserver {
 
   @override
   void onClose() {
+    _usageSubscription?.cancel();
     _disposeMobileScanner();
     cameraController?.dispose();
     WidgetsBinding.instance.removeObserver(this);

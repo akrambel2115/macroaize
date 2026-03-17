@@ -52,10 +52,6 @@ class _RecipesViewState extends State<RecipesView> {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure a shared RecipesController is registered; use it without re-initializing
-    if (!Get.isRegistered<RecipesController>()) {
-      Get.put(RecipesController());
-    }
     return GetBuilder<RecipesController>(
       builder: (controller) {
         return Scaffold(

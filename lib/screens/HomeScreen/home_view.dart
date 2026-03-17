@@ -22,6 +22,7 @@ import 'package:macroaize/screens/leadingScreen/leading_controller.dart';
 import '../../widgets/verify_email_button.dart';
 import 'package:lottie/lottie.dart';
 import 'package:macroaize/screens/ScanFoodView/scan_food_controller.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 const double _kMealCardSpacing = 8.0;
 
@@ -43,18 +44,10 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _trackingPageController = PageController();
-    // Ensure the controller exists before using it.
-    _ensureHomeController();
     controller = Get.find<HomeController>();
-  }
-
-  void _ensureHomeController() {
-    if (!Get.isRegistered<HomeController>()) {
-      Get.lazyPut(() => HomeController());
-    }
     // Inject the State-owned PageController into the GetX controller so
     // existing references (onTrackingPageChanged etc.) keep working.
-    Get.find<HomeController>().trackingPageController = _trackingPageController;
+    controller.trackingPageController = _trackingPageController;
   }
 
   @override
@@ -149,7 +142,7 @@ class _HomeViewState extends State<HomeView> {
         Obx(
           () => InkWell(
             onTap: () {
-              Get.put(DailyStreakController());
+              Get.find<DailyStreakController>().loadData();
               Get.bottomSheet(
                 const DailyStreakView(),
                 isScrollControlled: true,
@@ -1239,10 +1232,7 @@ class _HomeViewState extends State<HomeView> {
                     const SizedBox(width: 12),
                     InkWell(
                       onTap: () {
-                        final scanController =
-                            Get.isRegistered<ScanFoodController>()
-                                ? Get.find<ScanFoodController>()
-                                : Get.put(ScanFoodController());
+                        final scanController = Get.find<ScanFoodController>();
                         scanController.onChangeIdentify(meal['name']);
                         if (Get.isRegistered<LeadingController>()) {
                           Get.find<LeadingController>().changeTabIndex(2);
@@ -1720,7 +1710,7 @@ class _HomeViewState extends State<HomeView> {
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ModernCard(
                       onTap: () {
-                        Navigator.pop(context);
+                        safeBack();
                         Get.toNamed(
                           Routes.localFoodView,
                           arguments: {"value": meal},

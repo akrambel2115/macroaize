@@ -4,12 +4,15 @@ import 'package:macroaize/routes/app_routes.dart';
 import 'package:macroaize/SharePrefHelper/share_pref.dart';
 import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
 import 'package:macroaize/constant/app_assets.dart';
+import 'dart:async';
 
 class TransitionController extends GetxController
     with GetTickerProviderStateMixin {
   late AnimationController fadeController;
   late Animation<double> fadeAnim;
   late AnimationController lottieController;
+  Timer? _completeTimer;
+  bool _hasCompletedFlow = false;
 
   @override
   void onInit() {
@@ -34,18 +37,26 @@ class TransitionController extends GetxController
   }
 
   void onLottieComplete() async {
-    await Future.delayed(const Duration(milliseconds: 250));
-    final onboardingCompleted =
-        await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
-    if (onboardingCompleted) {
-      Get.offAllNamed(Routes.leadingView);
-    } else {
-      Get.offAllNamed(Routes.planIntroView);
-    }
+    if (_hasCompletedFlow) return;
+    _hasCompletedFlow = true;
+
+    _completeTimer?.cancel();
+    _completeTimer = Timer(const Duration(milliseconds: 250), () async {
+      if (isClosed) return;
+      final onboardingCompleted =
+          await SharedPref.readBool(SharePrefKey.onboardingCompleted) ?? false;
+      if (isClosed) return;
+      if (onboardingCompleted) {
+        Get.offAllNamed(Routes.leadingView);
+      } else {
+        Get.offAllNamed(Routes.planIntroView);
+      }
+    });
   }
 
   @override
   void onClose() {
+    _completeTimer?.cancel();
     fadeController.dispose();
     lottieController.dispose();
     super.onClose();

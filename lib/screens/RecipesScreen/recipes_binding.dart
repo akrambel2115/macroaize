@@ -4,6 +4,8 @@ import 'package:macroaize/screens/RecipesScreen/recipes_controller.dart';
 class RecipesBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put<RecipesController>(RecipesController(), permanent: false);
+    if (!Get.isRegistered<RecipesController>()) {
+      Get.lazyPut(() => RecipesController());
+    }
   }
 }

@@ -13,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../constant/app_assets.dart';
 
 import 'package:macroaize/screens/leadingScreen/leading_controller.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 class ScanFoodView extends GetView<ScanFoodController> {
   const ScanFoodView({super.key});
@@ -432,7 +433,7 @@ class ScanFoodView extends GetView<ScanFoodController> {
                   const Spacer(),
 
                   // continue button
-                  ContinueButton(onTap: () => Navigator.of(context).pop()),
+                  ContinueButton(onTap: () => safeBack()),
                 ],
               ),
             ),

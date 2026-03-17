@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:macroaize/routes/app_routes.dart';
+import 'dart:async';
 
 class WelcomeController extends GetxController
     with GetTickerProviderStateMixin {
@@ -9,6 +10,7 @@ class WelcomeController extends GetxController
   late Animation<double> mascotAnimation;
   late Animation<double> textAnimation;
   late Animation<double> subtitleAnimation;
+  Timer? _autoNavigateTimer;
 
   @override
   void onInit() {
@@ -58,12 +60,11 @@ class WelcomeController extends GetxController
 
   void _startAnimationSequence() async {
     mainController.forward();
-
-    // Auto-transition after 5 seconds
-    await Future.delayed(const Duration(seconds: 5));
-
-    await Future.delayed(const Duration(milliseconds: 300));
-    _navigateToNext();
+    _autoNavigateTimer?.cancel();
+    _autoNavigateTimer = Timer(const Duration(milliseconds: 5300), () {
+      if (isClosed) return;
+      _navigateToNext();
+    });
   }
 
   void _navigateToNext() {
@@ -73,6 +74,7 @@ class WelcomeController extends GetxController
 
   @override
   void onClose() {
+    _autoNavigateTimer?.cancel();
     mainController.dispose();
     super.onClose();
   }

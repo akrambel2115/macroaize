@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'dart:async';
 import 'package:macroaize/SharePrefHelper/share_pref.dart';
 import 'package:macroaize/shared/services/rate_us_service.dart';
 import 'package:macroaize/SharePrefHelper/share_pref_key.dart';
@@ -31,6 +32,7 @@ class SignUpController extends GetxController {
   int selectedMinute = 40;
   String selectedPeriod = "AM";
   String? promoCode; // promo code
+  Timer? _setupTransitionTimer;
 
   final List<String> months = [
     'January',
@@ -121,12 +123,7 @@ class SignUpController extends GetxController {
       // PromoCodeView -> SetupView (loading) -> PlanReviewView
       selectedView = 9; // Show SetupView loading
       saveOnSql();
-      Future.delayed(const Duration(seconds: 3)).then((value) {
-        SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
-        // go to plan review
-        selectedView = 10;
-        update();
-      });
+      _startSetupTransition();
     } else if (selectedView == 10) {
       // go to premium
       navigateToPremium();
@@ -138,13 +135,19 @@ class SignUpController extends GetxController {
   void skipToSetup() {
     selectedView = 9; // Go to SetupView loading
     saveOnSql();
-    Future.delayed(const Duration(seconds: 3)).then((value) {
-      SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
-      // go to plan review
+    _startSetupTransition();
+    update();
+  }
+
+  void _startSetupTransition() {
+    _setupTransitionTimer?.cancel();
+    _setupTransitionTimer = Timer(const Duration(seconds: 3), () async {
+      if (isClosed) return;
+      await SharedPref.saveBool(SharePrefKey.onboardingCompleted, true);
+      if (isClosed) return;
       selectedView = 10;
       update();
     });
-    update();
   }
 
   // Skip auth but show promo code page
@@ -256,6 +259,12 @@ class SignUpController extends GetxController {
       default:
         return 1.2; // default
     }
+  }
+
+  @override
+  void onClose() {
+    _setupTransitionTimer?.cancel();
+    super.onClose();
   }
 
   // update days per month

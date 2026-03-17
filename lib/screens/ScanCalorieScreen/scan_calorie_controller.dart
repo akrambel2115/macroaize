@@ -31,7 +31,7 @@ import '../HomeScreen/home_controller.dart';
 enum ScanUnit { unit, gram, ml, cup }
 
 class ScanCalorieController extends GetxController {
-  Map<String, dynamic> argument = Get.arguments;
+  late final Map<String, dynamic> argument;
   File? image;
   static const int kMinQuantity = 1;
   static const int kMaxQuantity = 100;
@@ -244,9 +244,17 @@ class ScanCalorieController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    image = argument['image'];
-    image = argument['image'];
-    type = argument['type'] ?? argument['isIdentify'] ?? '';
+    argument =
+      (Get.arguments as Map<String, dynamic>?) ??
+      const <String, dynamic>{};
+
+    final imageArg = argument['image'];
+    image = imageArg is File ? imageArg : null;
+
+    type =
+      (argument['type'] as String?) ??
+      (argument['isIdentify'] as String?) ??
+      '';
 
     if (argument['fromBarcode'] == true || argument['calorie'] != null) {
       isBarcode = true;
@@ -1227,7 +1235,7 @@ class ScanCalorieController extends GetxController {
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                safeBack();
               },
             ),
             TextButton(

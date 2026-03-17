@@ -18,6 +18,9 @@ class SettingController extends GetxController {
   void onInit() {
     super.onInit();
     _loadAppVersion();
+    try {
+      Get.find<AppConfigService>().refresh();
+    } catch (_) {}
     if (wellnessOrNull != null) {
       wellnessOrNull!.refreshStatus();
     }

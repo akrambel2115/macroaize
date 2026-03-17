@@ -9,7 +9,6 @@ class WeekWorkoutHistory extends GetView<AnalyticsController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.lazyPut(() => AnalyticsController());
     final chartBoundaryKey = GlobalKey();
 
     return Padding(

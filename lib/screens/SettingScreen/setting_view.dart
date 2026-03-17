@@ -95,13 +95,6 @@ class SettingView extends GetView<SettingController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.lazyPut(() => SettingController());
-    // refresh config
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        Get.find<AppConfigService>().refresh();
-      } catch (_) {}
-    });
     return Scaffold(
       backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: _buildModernAppBar(context),
@@ -769,7 +762,7 @@ class SettingView extends GetView<SettingController> {
                           await controller.connectWellness();
                           if (service.isConnected.value &&
                               sheetContext.mounted) {
-                            Navigator.of(sheetContext).pop();
+                            safeBack();
                           }
                         },
                         loading: isBusy,
@@ -788,7 +781,7 @@ class SettingView extends GetView<SettingController> {
                                   : () async {
                                     await controller.disconnectWellness();
                                     if (sheetContext.mounted) {
-                                      Navigator.of(sheetContext).pop();
+                                      safeBack();
                                     }
                                   },
                           child: Text(
@@ -1200,7 +1193,7 @@ class SettingView extends GetView<SettingController> {
                   children: [
                     // promo code block
                     StatefulBuilder(
-                      builder: (context, setState) {
+                      builder: (stateCtx, setState) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1222,11 +1215,14 @@ class SettingView extends GetView<SettingController> {
                                     borderRadius: BorderRadius.circular(8),
                                     onTap: () {
                                       _copyPromoCode(influencer.promoCode);
+                                      if (!stateCtx.mounted) return;
                                       setState(() => promoCopied = true);
                                       Future.delayed(
                                         const Duration(seconds: 2),
-                                        () =>
-                                            setState(() => promoCopied = false),
+                                        () {
+                                          if (!stateCtx.mounted) return;
+                                          setState(() => promoCopied = false);
+                                        },
                                       );
                                     },
                                     child: Container(

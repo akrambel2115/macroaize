@@ -44,6 +44,7 @@ class PremiumController extends GetxController {
   StreamSubscription<Subscription?>? _firestoreSubscription;
   StreamSubscription<DocumentSnapshot>? _promoUsesSubscription;
   StreamSubscription<User?>? _authSubscription;
+  Timer? _closeButtonDelayTimer;
 
   // Promo eligibility state
   bool promoLinked = false;
@@ -153,7 +154,9 @@ class PremiumController extends GetxController {
     if (delayClose) {
       showClose = false;
       update(['close_btn']);
-      Future.delayed(const Duration(seconds: 5), () {
+      _closeButtonDelayTimer?.cancel();
+      _closeButtonDelayTimer = Timer(const Duration(seconds: 5), () {
+        if (isClosed) return;
         showClose = true;
         update(['close_btn']);
       });
@@ -454,8 +457,8 @@ class PremiumController extends GetxController {
                                       Future.delayed(
                                         const Duration(milliseconds: 1000),
                                         () {
-                                          if (Get.isBottomSheetOpen == true) {
-                                            Get.back(result: true);
+                                          if (context.mounted) {
+                                            Navigator.of(context).pop(true);
                                           }
                                         },
                                       );
@@ -759,6 +762,15 @@ class PremiumController extends GetxController {
     }
   }
 
+  @override
+  void onClose() {
+    _closeButtonDelayTimer?.cancel();
+    _firestoreSubscription?.cancel();
+    _promoUsesSubscription?.cancel();
+    _authSubscription?.cancel();
+    super.onClose();
+  }
+
   onChangeSelectedIndex(int index) {
     selected = index;
     update();
@@ -847,11 +859,4 @@ class PremiumController extends GetxController {
     return isYearly ? 'bonus_1_month'.tr : 'bonus_3_days'.tr;
   }
 
-  @override
-  void onClose() {
-    _firestoreSubscription?.cancel();
-    _promoUsesSubscription?.cancel();
-    _authSubscription?.cancel();
-    super.onClose();
-  }
 }

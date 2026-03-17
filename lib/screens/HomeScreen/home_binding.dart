@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => HomeController());
+    if (!Get.isRegistered<HomeController>()) {
+      Get.lazyPut(() => HomeController());
+    }
   }
 }

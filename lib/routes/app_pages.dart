@@ -2,6 +2,7 @@ import 'package:macroaize/screens/AdjustGoals/adjust_goals_binding.dart';
 import 'package:macroaize/screens/AdjustGoals/adjust_goals_view.dart';
 import 'package:macroaize/screens/AnalyticsScreen/analytics_binding.dart';
 import 'package:macroaize/screens/AnalyticsScreen/analytics_view.dart';
+import 'package:macroaize/screens/AccountDetails/account_details_binding.dart';
 import 'package:macroaize/screens/ChatHistoryScreen/chat_history_binding.dart';
 import 'package:macroaize/screens/ChatHistoryScreen/chat_history_view.dart';
 import 'package:macroaize/screens/ChatScreen/chat_binding.dart';
@@ -55,12 +56,15 @@ import 'package:macroaize/screens/WorkoutScreen/workout_binding.dart';
 import 'package:macroaize/screens/DailyStreakScreen/daily_streak_view.dart';
 import 'package:macroaize/screens/DailyStreakScreen/daily_streak_binding.dart';
 import 'package:macroaize/screens/SettingScreen/notification_settings_view.dart';
+import 'package:macroaize/routes/middlewares/email_verification_middleware.dart';
 
 class AppPages {
   AppPages._();
 
   static const initial = Routes.splashView;
   static const home = Routes.leadingView;
+  static final _emailVerificationMiddleware =
+      EmailVerificationMiddleware();
 
   static final routes = [
     GetPage(
@@ -87,6 +91,8 @@ class AppPages {
     GetPage(
       name: Paths.accountDetailsView,
       page: () => const AccountDetailsView(),
+      binding: AccountDetailsBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.planIntroView,
@@ -112,77 +118,91 @@ class AppPages {
       page: () => LeadingView(),
       binding: LeadingBinding(),
       popGesture: false, // iOS: PopScope(canPop:false) on this route
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.homeView,
       page: () => HomeView(),
       binding: HomeBinding(),
       customTransition: DirectionalTransition(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.scanFoodView,
       page: () => ScanFoodView(),
       binding: ScanFoodBinding(),
       customTransition: DirectionalTransition(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.analyticsView,
       page: () => AnalyticsView(),
       binding: AnalyticsBinding(),
       customTransition: DirectionalTransition(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.settingView,
       page: () => SettingView(),
       binding: SettingBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.adjustGoalsView,
       page: () => AdjustGoalsView(),
       binding: AdjustGoalsBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.personalDetailsView,
       page: () => PersonalDetailsView(),
       binding: PersonalDetailsBinding(),
       popGesture: false, // iOS: conditional canPop based on selectedView
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.scanCalorieView,
       page: () => ScanCalorieView(),
       binding: ScanCalorieBinding(),
       customTransition: DirectionalTransition(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.historyView,
       page: () => HistoryView(),
       binding: HistoryBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.premiumView,
       page: () => PremiumView(),
       binding: PremiumBinding(),
       popGesture: false, // iOS: conditional canPop with delay
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.chatView,
       page: () => ChatView(),
       binding: ChatBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.chatHistoryView,
       page: () => ChatHistoryView(),
       binding: ChatHistoryBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.withdrawalHistoryView,
       page: () => WithdrawalHistoryView(),
       binding: WithdrawalHistoryBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.localFoodView,
       page: () => LocalFoodView(),
       binding: LocalFoodBinding(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.languageView,
@@ -194,6 +214,7 @@ class AppPages {
       page: () => const RecipesView(),
       binding: RecipesBinding(),
       customTransition: DirectionalTransition(),
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.recipeDetailView,
@@ -206,6 +227,7 @@ class AppPages {
         if (recipe == null) return const RecipesView();
         return RecipeDetailScreen(recipe: recipe);
       },
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.emailVerificationView,
@@ -219,17 +241,20 @@ class AppPages {
       page: () => const WorkoutView(),
       binding: WorkoutBinding(),
       transition: Transition.rightToLeft,
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.dailyStreakView,
       page: () => const DailyStreakView(),
       binding: DailyStreakBinding(),
       transition: Transition.rightToLeft,
+      middlewares: [_emailVerificationMiddleware],
     ),
     GetPage(
       name: Paths.notificationSettingsView,
       page: () => const NotificationSettingsView(),
       transition: Transition.rightToLeft,
+      middlewares: [_emailVerificationMiddleware],
     ),
   ];
 }

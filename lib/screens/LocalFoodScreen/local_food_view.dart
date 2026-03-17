@@ -5,6 +5,7 @@ import 'package:macroaize/screens/LocalFoodScreen/local_food_controller.dart';
 import 'package:macroaize/widgets/modern_animations.dart';
 import 'package:macroaize/widgets/modern_card.dart';
 import 'package:get/get.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 class LocalFoodView extends GetView<LocalFoodController> {
   const LocalFoodView({super.key});
@@ -118,7 +119,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
+              onPressed: () => safeBack(),
               child: Text(
                 'cancel'.tr,
                 style: TextStyle(
@@ -151,7 +152,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                   controller.editFoodAt(editIndex, item);
                 }
 
-                Navigator.of(ctx).pop();
+                safeBack();
               },
               child: Text(
                 editIndex == null ? 'add'.tr : 'save'.tr,
@@ -526,15 +527,15 @@ class LocalFoodView extends GetView<LocalFoodController> {
   }
 
   void _showNutritionDetails(
-    BuildContext context,
+    BuildContext parentContext,
     LocalFoodController controller,
     FoodItem food,
   ) {
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) {
+      builder: (_) {
         double quantity = 1.0;
         return StatefulBuilder(
           builder: (context, setState) {
@@ -826,7 +827,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                     flex: 1,
                                     child: ElevatedButton.icon(
                                       onPressed: () {
-                                        Navigator.of(context).pop();
+                                        safeBack();
                                         final modifiedFood = FoodItem(
                                           name: food.name,
                                           calories:
@@ -841,7 +842,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                               '${food.quantity} × ${quantity % 1 == 0 ? quantity.toInt() : quantity}',
                                         );
                                         controller.onAddButton(
-                                          context,
+                                          parentContext,
                                           modifiedFood,
                                         );
                                       },
@@ -874,8 +875,7 @@ class LocalFoodView extends GetView<LocalFoodController> {
                                   Expanded(
                                     flex: 1,
                                     child: OutlinedButton(
-                                      onPressed:
-                                          () => Navigator.of(context).pop(),
+                                      onPressed: () => safeBack(),
                                       style: OutlinedButton.styleFrom(
                                         side: BorderSide(
                                           color:

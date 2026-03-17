@@ -6,12 +6,12 @@ import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
 const int _driftSchemaVersion = 3;
-const int _catalogVersion = 3;
+const int _catalogVersion = 4;
 const int _minimumExpectedRows = 3800;
 
 void main() {
   final repoRoot = Directory.current.path;
-  final csvPath = p.join(repoRoot, 'food_data_refactored.csv');
+  final csvPath = p.join(repoRoot, 'data', 'food_data_v3.csv');
   final outputPath = p.join(repoRoot, 'assets', 'database', 'local_food.db');
   final reportPath = p.join(repoRoot, 'tool', 'local_food_build_report.json');
 

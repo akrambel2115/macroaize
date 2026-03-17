@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 class ScanFoodBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => ScanFoodController());
+    if (!Get.isRegistered<ScanFoodController>()) {
+      Get.lazyPut(() => ScanFoodController());
+    }
   }
 }

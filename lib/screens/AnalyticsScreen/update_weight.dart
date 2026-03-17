@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:macroaize/constant/app_color.dart';
+import 'package:macroaize/shared/utils/navigation_helpers.dart';
 
 void showUpdateWeightDialog(
   BuildContext context,
@@ -76,7 +77,7 @@ void showUpdateWeightDialog(
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => safeBack(),
                 child: Text(
                   "Cancel".tr,
                   style: TextStyle(color: context.theme.primaryColor),
@@ -86,7 +87,7 @@ void showUpdateWeightDialog(
                 onPressed: () {
                   // selected is within range
                   onUpdate(selected.toString());
-                  Navigator.of(context).pop();
+                  safeBack();
                 },
                 child: Text(
                   "Update".tr,

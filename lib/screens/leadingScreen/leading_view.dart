@@ -181,10 +181,7 @@ class _LeadingViewState extends State<LeadingView>
   }
 
   ScanFoodController _getOrPutScanController() {
-    if (Get.isRegistered<ScanFoodController>()) {
-      return Get.find<ScanFoodController>();
-    }
-    return Get.put(ScanFoodController());
+    return Get.find<ScanFoodController>();
   }
 
   @override

@@ -30,7 +30,7 @@ import '../../widgets/cropper_ui_settings.dart';
 import '../../shared/services/rate_us_service.dart';
 
 class ChatController extends GetxController {
-  Map<String, dynamic>? argument = Get.arguments;
+  late final Map<String, dynamic> argument;
   bool recording = false;
   double soundLevel = 0.0;
   bool _lastResultIsFinal = false;
@@ -66,13 +66,21 @@ class ChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (argument != null) {
-      if (argument!['mainChatId'] != null) {
+    final args = Get.arguments;
+    argument = args is Map<String, dynamic> ? args : <String, dynamic>{};
+    if (argument.isNotEmpty) {
+      final mainChatArg = argument['mainChatId'];
+      if (mainChatArg != null) {
         isMainChat = false;
-        mainChatId = argument!['mainChatId'];
+        if (mainChatArg is int) {
+          mainChatId = mainChatArg;
+        } else if (mainChatArg is String) {
+          mainChatId = int.tryParse(mainChatArg) ?? 0;
+        }
         getHistory();
       } else {
-        imagePath = argument!['image'];
+        final imageArg = argument['image'];
+        imagePath = imageArg is File ? imageArg : null;
       }
     }
   }
@@ -590,7 +598,7 @@ class ChatController extends GetxController {
                       ),
                       IconButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          safeBack();
                         },
                         icon: Icon(
                           Icons.close,
@@ -647,7 +655,7 @@ class ChatController extends GetxController {
                   SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      safeBack();
                       NotificationService.showInfo('Thanks');
                       selectedReason = "Wrong answer";
                       feedController.clear();

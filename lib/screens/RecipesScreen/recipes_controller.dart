@@ -5,7 +5,7 @@ import 'package:macroaize/shared/services/notification_service.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:macroaize/Model/recipe.dart';
-import 'package:macroaize/screens/RecipesScreen/recipe_detail_screen.dart';
+import 'package:macroaize/routes/app_routes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
@@ -179,7 +179,7 @@ class RecipesController extends GetxController {
   }
 
   void openRecipeDetails(Recipe recipe) {
-    Get.to(() => RecipeDetailScreen(recipe: recipe));
+    Get.toNamed(Routes.recipeDetailView, arguments: {'recipe': recipe});
   }
 
   bool _isCacheValid() {

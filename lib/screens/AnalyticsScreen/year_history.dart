@@ -9,7 +9,6 @@ class YearHistory extends GetView<AnalyticsController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.lazyPut(() => AnalyticsController());
     final chartBoundaryKey = GlobalKey();
     return Padding(
       padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 8),

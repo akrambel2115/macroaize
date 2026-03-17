@@ -10,7 +10,7 @@ import '../HomeScreen/home_controller.dart';
 import '../leadingScreen/leading_controller.dart';
 
 class HistoryController extends GetxController {
-  Map<String, dynamic> argument = Get.arguments;
+  late final Map<String, dynamic> argument;
 
   List<CalorieHistoryModel> sqlHistory = [];
   String type = "";
@@ -19,7 +19,13 @@ class HistoryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    type = argument['type'];
+    argument =
+        (Get.arguments as Map<String, dynamic>?) ??
+        const <String, dynamic>{};
+    final routeType = argument['type'] as String?;
+    type = (routeType != null && routeType.trim().isNotEmpty)
+        ? routeType
+        : 'All';
     getHistory();
   }
 

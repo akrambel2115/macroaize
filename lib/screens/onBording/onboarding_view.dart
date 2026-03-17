@@ -11,7 +11,6 @@ class OnBoardingView extends GetView<OnBoardingController> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    OnBoardingController controller = Get.put(OnBoardingController());
     return Scaffold(
       body: Stack(
         children: [
