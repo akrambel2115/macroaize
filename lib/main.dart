@@ -30,15 +30,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'app/auth/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-  }
-}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -46,26 +37,13 @@ Future<void> main() async {
     await HomeWidget.setAppGroupId('group.com.macroaize.app');
   }
 
-  // load env files
+  // Load client configuration. Do not log environment values: even public SDK
+  // keys should not be unnecessarily exposed in logs.
   try {
-    if (kDebugMode) print('Loading .env file...');
-    await dotenv.load(fileName: ".env");
-    if (kDebugMode) {
-      print('.env loaded successfully');
-      print('Keys in .env: ${dotenv.env.keys.toList()}');
-    }
+    await dotenv.load(fileName: '.env');
   } catch (e) {
     if (kDebugMode) print('Failed to load .env: $e');
   }
-
-  try {
-    await dotenv.load(fileName: ".env.macroaize");
-    if (kDebugMode) print('.env.macroaize loaded');
-  } catch (e) {
-    if (kDebugMode) print('No .env.macroaize file found (optional): $e');
-  }
-
-  HttpOverrides.global = MyHttpOverrides();
   if (!kIsWeb) {
     try {
       await Firebase.initializeApp(
@@ -99,58 +77,9 @@ Future<void> main() async {
     if (kDebugMode) print('AppConfigService load failed: $e');
   }
   try {
-    // init revenuecat
-    if (kDebugMode) {
-      print('dotenv.env map: ${dotenv.env}');
-      print('Trying to get IOS_PUBLIC_SDK_KEY...');
-    }
+    // Initialize RevenueCat with the client SDK keys loaded from .env.
     String? iosKey = dotenv.env['IOS_PUBLIC_SDK_KEY'];
-    if (kDebugMode) print('iosKey result: $iosKey');
     String? androidKey = dotenv.env['ANDROID_PUBLIC_SDK_KEY'];
-    if (kDebugMode) print('androidKey result: $androidKey');
-
-    // fallback manual parse
-    if ((iosKey == null || iosKey.isEmpty) ||
-        (androidKey == null || androidKey.isEmpty)) {
-      if (kDebugMode) {
-        print('Dotenv returned empty keys, attempting manual .env parse...');
-      }
-      try {
-        final raw = await rootBundle.loadString('.env', cache: false);
-        final Map<String, String> parsed = {};
-        for (final line in raw.split(RegExp(r'\r?\n'))) {
-          if (line.trim().isEmpty) continue;
-          if (line.trim().startsWith('#')) continue;
-          final idx = line.indexOf('=');
-          if (idx <= 0) continue;
-          final key = line.substring(0, idx).trim();
-          final value = line.substring(idx + 1).trim();
-          parsed[key] = value;
-        }
-        if (kDebugMode) {
-          print('Manually parsed env keys: ${parsed.keys.toList()}');
-        }
-        iosKey = parsed['IOS_PUBLIC_SDK_KEY'] ?? iosKey;
-        androidKey = parsed['ANDROID_PUBLIC_SDK_KEY'] ?? androidKey;
-
-        // test store flags
-        final testKey = parsed['REVENUECAT_TEST_SDK_KEY'];
-        final useTestRaw = parsed['USE_REVENUECAT_TEST_STORE'];
-        final useTest = (useTestRaw ?? '').toLowerCase().trim();
-        final useTestStore =
-            useTest == 'true' ||
-            useTest == '1' ||
-            useTest == 'yes' ||
-            useTest == 'y';
-        if (useTestStore && testKey != null && testKey.startsWith('test_')) {
-          if (kDebugMode) print('Using RevenueCat Test Store key from .env');
-          iosKey = testKey;
-          androidKey = testKey;
-        }
-      } catch (e) {
-        if (kDebugMode) print('Manual .env parse failed: $e');
-      }
-    }
 
     // check dotenv test flags
     final testKeyEnv = dotenv.env['REVENUECAT_TEST_SDK_KEY'];
@@ -172,18 +101,6 @@ Future<void> main() async {
 
     final iosKeyFinal = iosKey ?? '';
     final androidKeyFinal = androidKey ?? '';
-    if (kDebugMode) {
-      print(
-        'Passing keys to RevenueCat: iOS=${iosKeyFinal.isNotEmpty} (${iosKeyFinal.length} chars), Android=${androidKeyFinal.isNotEmpty} (${androidKeyFinal.length} chars)',
-      );
-      if (iosKeyFinal.isNotEmpty) {
-        print('iOS key: ${iosKeyFinal.substring(0, 10)}...');
-      }
-      if (androidKeyFinal.isNotEmpty) {
-        print('Android key: ${androidKeyFinal.substring(0, 10)}...');
-      }
-    }
-
     await RevenueCatService().init(
       iosApiKey: iosKeyFinal,
       androidApiKey: androidKeyFinal,

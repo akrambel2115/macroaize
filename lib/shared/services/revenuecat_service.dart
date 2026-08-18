@@ -27,30 +27,9 @@ class RevenueCatService {
     if (iosApiKey != null) _iosKey = iosApiKey;
     if (androidApiKey != null) _androidKey = androidApiKey;
 
-    // debug: check dotenv
-    if (kDebugMode) {
-      print('RevenueCat: Checking dotenv...');
-      print('dotenv.isInitialized: ${dotenv.isInitialized}');
-      print('All keys in dotenv: ${dotenv.env.keys.toList()}');
-      print('IOS_PUBLIC_SDK_KEY value: "${dotenv.env['IOS_PUBLIC_SDK_KEY']}"');
-      print(
-        'ANDROID_PUBLIC_SDK_KEY value: "${dotenv.env['ANDROID_PUBLIC_SDK_KEY']}"',
-      );
-      print('iosPublicKey getter: "$iosPublicKey"');
-      print('androidPublicKey getter: "$androidPublicKey"');
-    }
-
-    final apiKey =
-        defaultTargetPlatform == TargetPlatform.iOS
-            ? iosPublicKey
-            : androidPublicKey;
-
-    if (kDebugMode) {
-      print('Platform: ${defaultTargetPlatform.name}');
-      print(
-        'API Key: ${apiKey.isEmpty ? "EMPTY" : "${apiKey.length > 10 ? apiKey.substring(0, 10) : apiKey}..."}',
-      );
-    }
+    final apiKey = defaultTargetPlatform == TargetPlatform.iOS
+        ? iosPublicKey
+        : androidPublicKey;
 
     if (apiKey.isEmpty) {
       if (kDebugMode) {
@@ -58,12 +37,6 @@ class RevenueCatService {
       }
       _initialized = true;
       return;
-    }
-
-    if (kDebugMode) {
-      print(
-        'RevenueCat: Initializing with API key: ${apiKey.substring(0, 10)}...',
-      );
     }
 
     try {

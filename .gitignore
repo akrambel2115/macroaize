@@ -1,4 +1,9 @@
-.env.macroaize
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+!functions/.env.example
+
 # Miscellaneous
 *.class
 *.log
@@ -18,9 +23,6 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
-.env
-.env.local
-.env.prod
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
@@ -47,7 +49,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-*.md
 .vscode/
 
 *.jks
@@ -61,5 +62,9 @@ emulator-data/
 
 coverage
 
-
+# Private planning notes, local exports, and editor instructions are not part
+# of the public source distribution.
+docs/
+functions/*.md
+.github/copilot-instructions.md
 *.csv
