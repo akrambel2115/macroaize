@@ -27,7 +27,7 @@ import 'routes/app_pages.dart';
 import 'screens/PremiumScreen/premium_controller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'app/auth/firebase_options.dart';
+import 'firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
